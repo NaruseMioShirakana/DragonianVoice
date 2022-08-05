@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="/new/bg">
+    <file>Resource Files/__sys_mw01_key00.png</file>
+    <file>Resource Files/round_jx.png</file>
+    <file>Resource Files/__sys_tm_bg01a.png</file>
+  </qresource>
+</RCC>
