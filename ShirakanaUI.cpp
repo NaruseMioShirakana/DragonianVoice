@@ -8,7 +8,7 @@
 #include <QElapsedTimer>
 #include <fstream>
 using namespace std;
-const int HEAD_LENGTH = 2 * 1024 * 1024;//2MB
+const int HEAD_LENGTH = 3 * 1024 * 1024;//2MB
 class Wav {
 public:
 	Wav() {
@@ -104,7 +104,9 @@ public:
 		}
 		memcpy(Data, &buf[StartPos], header.Subchunk2Size);
 		free(buf);
-		fclose(stream);
+		if (stream != nullptr) {
+			fclose(stream);
+		}
 	}
 	~Wav() {}
 
@@ -261,7 +263,10 @@ void ShirakanaUI::OnShirakanaStartClick() {
 		QMessageBox::warning(this, "输入为空", "请输入要转换的字符串（仅支持假名和部分标点符号）");
 		return;
 	}
-	if (inputStr[inputStr.length() - 1] != '.') {
+	if (inputStr[inputStr.length() - 1] == '~') {
+		inputStr[inputStr.length() - 1] = '.';
+	}
+	else if (inputStr[inputStr.length() - 1] != '.') {
 		inputStr += ".";
 	}
 	string tempStr = "";
@@ -285,12 +290,30 @@ void ShirakanaUI::OnShirakanaStartClick() {
 		if ((inputStr[i] == '~')) {
 			if (commandInputStr != "") {
 				commandInputStr += '.';
+				if (commandInputStr.length()>151) {
+					QMessageBox::warning(this, "转换失败", "单句超出最大长度（150Byte）");
+					ui.ProgressBar->setValue(0);
+					ui.ShirakanaOutPutLabel->setText(QString::fromStdString(""));
+					ui.ShirakanaInput->setEnabled(true);
+					//ui.DenoiseDoubleSpinBox->setEnabled(true);
+					ui.ShirakanaStartButton->setEnabled(true);
+					return;
+				}
 				commandInputVec.push_back(commandInputStr);
 				commandInputStr = "";
 			}
 		}
-		if ((inputStr[i] == '.')) {
+		else if ((inputStr[i] == '.')) {
 			commandInputStr += '.';
+			if (commandInputStr.length() > 151) {
+				QMessageBox::warning(this, "转换失败", "单句超出最大长度（150Byte）");
+				ui.ProgressBar->setValue(0);
+				ui.ShirakanaOutPutLabel->setText(QString::fromStdString(""));
+				ui.ShirakanaInput->setEnabled(true);
+				//ui.DenoiseDoubleSpinBox->setEnabled(true);
+				ui.ShirakanaStartButton->setEnabled(true);
+				return;
+			}
 			commandInputVec.push_back(commandInputStr);
 			commandInputStr = "";
 			break;
@@ -307,29 +330,59 @@ void ShirakanaUI::OnShirakanaStartClick() {
 		}
 	}
 	for (size_t i = 0; i < commandInputVec.size(); i++) {
-		ui.ShirakanaOutPutLabel->setText(QString::fromStdString("正在转换：" + commandInputVec[i]));
-		commandStr = "\"Tacotron inside.exe\" \"" + thisModFile.toStdString() + "\" \"" + commandInputVec[i] + "\" \"" + std::to_string(i)+"\"";
-		WinExec(commandStr.c_str(), SW_HIDE);
+		if (commandInputVec[i].length() > 10) {
+			ui.ShirakanaOutPutLabel->setText(QString::fromStdString("正在转换：" + commandInputVec[i].substr(0, 10) + "..."));
+		}
+		else {
+			ui.ShirakanaOutPutLabel->setText(QString::fromStdString("正在转换：" + commandInputVec[i]));
+		}
+		commandStr = "\"Tacotron inside.exe\" \"" + thisModFile.toStdString() + "\" \"" + commandInputVec[i] + "\" \"" + std::to_string(i) + "\"";
 		FILE* isEx = nullptr;
-		for (size_t j = 0; j < 600 && isEx==nullptr; j++) {
-			isEx = fopen(("tmpDir\\" + to_string(i) + ".wav").c_str(),"r");
-			QElapsedTimer t;
-			t.start();
-			while (t.elapsed() < 100) {
-				QCoreApplication::processEvents();
+		FILE* isOut = nullptr;
+		for (size_t k = 0;; k++) {
+			remove("decoder");
+			WinExec(commandStr.c_str(), SW_HIDE);
+			for (size_t j = 0; j < 600 && isEx == nullptr; j++) {
+				isEx = fopen(("tmpDir\\" + to_string(i) + ".wav").c_str(), "r");
+				QElapsedTimer t;
+				t.start();
+				while (t.elapsed() < 100) {
+					QCoreApplication::processEvents();
+				}
+				if (j == 599) {
+					QMessageBox::warning(this, "转换失败", "转换超时，可能是由于输入的单句过长且计算机配置不支持");
+					system("taskkill /f /im 'Tacotron inside.exe'");
+					ui.ProgressBar->setValue(0);
+					ui.ShirakanaOutPutLabel->setText(QString::fromStdString(""));
+					ui.ShirakanaInput->setEnabled(true);
+					//ui.DenoiseDoubleSpinBox->setEnabled(true);
+					ui.ShirakanaStartButton->setEnabled(true);
+					return;
+				}
 			}
-			if (j == 599) {
-				QMessageBox::warning(this, "转换失败", "转换超时，可能是由于输入的单句过长且计算机配置不支持");
-				ui.ProgressBar->setValue(0);
-				ui.ShirakanaOutPutLabel->setText(QString::fromStdString(""));
-				ui.ShirakanaInput->setEnabled(true);
-				//ui.DenoiseDoubleSpinBox->setEnabled(true);
-				ui.ShirakanaStartButton->setEnabled(true);
-				return;
+			isOut = fopen("decoder", "r");
+			if (isOut == nullptr) {
+				break;
+			}
+			else {
+				remove(("tmpDir\\" + to_string(i) + ".wav").c_str());
+				if (k == 4) {
+					QMessageBox::warning(this, "转换失败", QString::fromStdString("解码步数超限\n试图减少第"+to_string(i)+"句的长度"));
+					remove("decoder");
+					system("taskkill /f /im 'Tacotron inside.exe'");
+					ui.ProgressBar->setValue(0);
+					ui.ShirakanaOutPutLabel->setText(QString::fromStdString(""));
+					ui.ShirakanaInput->setEnabled(true);
+					//ui.DenoiseDoubleSpinBox->setEnabled(true);
+					ui.ShirakanaStartButton->setEnabled(true);
+					return;
+				}
 			}
 		}
 		ui.ProgressBar->setValue(100.0 * (double)(i + 1) / (double)commandInputVec.size());
-		fclose(isEx);
+		if (isEx != nullptr) {
+			fclose(isEx);
+		}
 	}
 	ui.ShirakanaOutPutLabel->setText(QString::fromStdString("合并Wav中"));
 	{
@@ -339,31 +392,36 @@ void ShirakanaUI::OnShirakanaStartClick() {
 			QCoreApplication::processEvents();
 		}
 	}
-	Wav sourceData = Wav("tmpDir\\0.wav");
-	if (!sourceData.isEmpty()) {
-		for (size_t i = 1; i < commandInputVec.size(); i++) {
-			Wav midData = Wav(("tmpDir\\" + to_string(i) + ".wav").c_str());
-			if (midData.isEmpty()) {
-				QMessageBox::warning(this, "输出失败", "Temp文件丢失，导致wav合并失败");
-				ui.ProgressBar->setValue(0);
-				ui.ShirakanaOutPutLabel->setText(QString::fromStdString(""));
-				ui.ShirakanaInput->setEnabled(true);
-				//ui.DenoiseDoubleSpinBox->setEnabled(true);
-				ui.ShirakanaStartButton->setEnabled(true);
-				return;
+	try {
+		Wav sourceData = Wav("tmpDir\\0.wav");
+		if (!sourceData.isEmpty()) {
+			for (size_t i = 1; i < commandInputVec.size(); i++) {
+				Wav midData = Wav(("tmpDir\\" + to_string(i) + ".wav").c_str());
+				if (midData.isEmpty()) {
+					QMessageBox::warning(this, "输出失败", "Temp文件丢失，导致wav合并失败");
+					ui.ProgressBar->setValue(0);
+					ui.ShirakanaOutPutLabel->setText(QString::fromStdString(""));
+					ui.ShirakanaInput->setEnabled(true);
+					//ui.DenoiseDoubleSpinBox->setEnabled(true);
+					ui.ShirakanaStartButton->setEnabled(true);
+					return;
+				}
+				sourceData.catWav(midData);
 			}
-			sourceData.catWav(midData);
+			QString wavSaveFileName = QFileDialog::getSaveFileName(
+				this,
+				tr("保存文件."),
+				"",
+				tr("wav file(*.wav)"));
+			sourceData.write(wavSaveFileName.toStdString().c_str());
+			ui.ShirakanaOutPutLabel->setText(QString::fromStdString("转换完成"));
 		}
-		QString wavSaveFileName = QFileDialog::getSaveFileName(
-			this,
-			tr("保存文件."),
-			"",
-			tr("wav file(*.wav)"));
-		sourceData.write(wavSaveFileName.toStdString().c_str());
-		ui.ShirakanaOutPutLabel->setText(QString::fromStdString("转换完成"));
+		else {
+			QMessageBox::warning(this, "输出失败", "Temp文件丢失，导致wav合并失败");
+		}
 	}
-	else {
-		QMessageBox::warning(this, "输出失败", "Temp文件丢失，导致wav合并失败");
+	catch (exception e) {
+		QMessageBox::warning(this, "输出失败", QString::fromStdString(e.what()));
 	}
 	{
 		QElapsedTimer t;
