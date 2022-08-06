@@ -47,8 +47,9 @@
         ${Mdid}_decoder_iter.onnx 
         ${Mdid}_encoder.onnx
         ${Mdid}_postnet.onnx
-    VITS:
+    VITS_LJS:
         ${Mdid}_ljs.onnx 
+    VITS_VCTK:
         ${Mdid}_vctk.onnx
     
 
