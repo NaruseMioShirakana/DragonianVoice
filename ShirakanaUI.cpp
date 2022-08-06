@@ -295,19 +295,37 @@ void ShirakanaUI::OnShirakanaStartClick() {
 			commandInputStr = "";
 			break;
 		}
-		commandInputStr += inputStr[i];
+		else {
+			commandInputStr += inputStr[i];
+		}
+	}
+	{
+		QElapsedTimer t;
+		t.start();
+		while (t.elapsed() < 1000) {
+			QCoreApplication::processEvents();
+		}
 	}
 	for (size_t i = 0; i < commandInputVec.size(); i++) {
 		ui.ShirakanaOutPutLabel->setText(QString::fromStdString("正在转换：" + commandInputVec[i]));
 		commandStr = "\"Tacotron inside.exe\" \"" + thisModFile.toStdString() + "\" \"" + commandInputVec[i] + "\" \"" + std::to_string(i)+"\"";
 		WinExec(commandStr.c_str(), SW_HIDE);
 		FILE* isEx = nullptr;
-		for (size_t j = 0; j < 15 && isEx==nullptr; j++) {
+		for (size_t j = 0; j < 600 && isEx==nullptr; j++) {
 			isEx = fopen(("tmpDir\\" + to_string(i) + ".wav").c_str(),"r");
 			QElapsedTimer t;
 			t.start();
 			while (t.elapsed() < 100) {
 				QCoreApplication::processEvents();
+			}
+			if (j == 599) {
+				QMessageBox::warning(this, "转换失败", "转换超时，可能是由于输入的单句过长且计算机配置不支持");
+				ui.ProgressBar->setValue(0);
+				ui.ShirakanaOutPutLabel->setText(QString::fromStdString(""));
+				ui.ShirakanaInput->setEnabled(true);
+				//ui.DenoiseDoubleSpinBox->setEnabled(true);
+				ui.ShirakanaStartButton->setEnabled(true);
+				return;
 			}
 		}
 		ui.ProgressBar->setValue(100.0 * (double)(i + 1) / (double)commandInputVec.size());
@@ -326,7 +344,7 @@ void ShirakanaUI::OnShirakanaStartClick() {
 		for (size_t i = 1; i < commandInputVec.size(); i++) {
 			Wav midData = Wav(("tmpDir\\" + to_string(i) + ".wav").c_str());
 			if (midData.isEmpty()) {
-				QMessageBox::warning(this, "转换失败", "由于一些未知的原因，转换失败");
+				QMessageBox::warning(this, "输出失败", "Temp文件丢失，导致wav合并失败");
 				ui.ProgressBar->setValue(0);
 				ui.ShirakanaOutPutLabel->setText(QString::fromStdString(""));
 				ui.ShirakanaInput->setEnabled(true);
@@ -345,7 +363,7 @@ void ShirakanaUI::OnShirakanaStartClick() {
 		ui.ShirakanaOutPutLabel->setText(QString::fromStdString("转换完成"));
 	}
 	else {
-		QMessageBox::warning(this, "转换失败", "由于一些未知的原因，转换失败");
+		QMessageBox::warning(this, "输出失败", "Temp文件丢失，导致wav合并失败");
 	}
 	{
 		QElapsedTimer t;
