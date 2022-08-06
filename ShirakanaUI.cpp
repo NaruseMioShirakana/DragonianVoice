@@ -271,6 +271,30 @@ void ShirakanaUI::loadMods() {
 					continue;
 				}
 			}
+			else if (modModerType[fileIndex] == "VITS_LJS") {
+				if ((fopen((modList[fileIndex] + "_ljs.onnx").c_str(), "r") != nullptr)) {
+					ui.ShirakanaModelSelectorOfficialComboBox->addItem((modModerType[fileIndex] + "::" + modNames[fileIndex]).c_str());
+					fileIndex++;
+				}
+				else {
+					modList.pop_back();
+					modNames.pop_back();
+					modModerType.pop_back();
+					continue;
+				}
+			}
+			else if (modModerType[fileIndex] == "VITS_VCTK") {
+				if ((fopen((modList[fileIndex] + "_vctk.onnx").c_str(), "r") != nullptr)) {
+					ui.ShirakanaModelSelectorOfficialComboBox->addItem((modModerType[fileIndex] + "::" + modNames[fileIndex]).c_str());
+					fileIndex++;
+				}
+				else {
+					modList.pop_back();
+					modNames.pop_back();
+					modModerType.pop_back();
+					continue;
+				}
+			}
 			else {
 				modList.pop_back();
 				modNames.pop_back();
