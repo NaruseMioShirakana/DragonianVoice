@@ -1,4 +1,4 @@
-#pragma warning(disable : 4996)
+﻿#pragma warning(disable : 4996)
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/opencv.hpp>
@@ -14,6 +14,7 @@
 #include <io.h>
 #include <direct.h>
 #include <fstream>
+#include <thread>
 using std::cout;
 using std::endl;
 
@@ -294,24 +295,40 @@ void printModelInfo(Ort::Session& session, Ort::AllocatorWithDefaultOptions& all
 
 int main(int argc, char* argv[])
 {
+    
+    /*
+
+    
+
+
+    std::string OutDir = "0";
+    std::wstring HifiganPath = to_wide_string("D:\\VisualStudioProj\\Tacotron inside\\x64\\Release\\hifigan.onnx");
+    std::wstring Path = L"D:\\VisualStudioProj\\Tacotron inside\\x64\\Release\\Mods\\Shiroha\\Shiroha";
+    std::string TextInput = "watashihanaruseshirohawatashihanaruseshirohawatashihanaruseshirohawatashihanaruseshiroha.";
+    
+    */
+
+
+
     if (argc != 4) {
         return 0;
     }
     char* buffer;
     //也可以将buffer作为输出参数
-    if ((buffer = getcwd(NULL, 0)) == NULL){
+    if ((buffer = getcwd(NULL, 0)) == NULL) {
         perror("无法获取路径");
         return 0;
     }
     std::string bufferStr = buffer;
     std::string PathTmp = argv[1];
-    std::wstring Path = to_wide_string(bufferStr+"\\"+PathTmp);
+    std::wstring Path = to_wide_string(bufferStr + "\\" + PathTmp);
     std::string TextInput = argv[2];
     std::string OutDir = argv[3];
     std::wstring HifiganPath = to_wide_string(bufferStr + "\\hifigan.onnx");
-    //std::wstring HifiganPath = to_wide_string("D:\\VisualStudioProj\\Tacotron inside\\x64\\Release\\hifigan.onnx");
-    //std::wstring Path = L"D:\\VisualStudioProj\\Tacotron inside\\x64\\Release\\Mods\\Shiroha\\Shiroha";
-    //std::string TextInput = "watashihanaruseshiroha.";
+
+
+
+
     //std::wcout << Path;
     int64* text = (int64*)malloc(sizeof(int64) * TextInput.length());
     if (text == NULL) {
@@ -329,9 +346,11 @@ int main(int argc, char* argv[])
             text[i] = (int64)((int64)TextInput[i] - (int64)'a') + (int64)38;
         }
     }
+
+
 	Ort::Env env(ORT_LOGGING_LEVEL_WARNING, "OnnxModel");
 	Ort::SessionOptions session_options;
-	session_options.SetIntraOpNumThreads(1);
+    session_options.SetIntraOpNumThreads((int)(std::thread::hardware_concurrency() / 2) + 1);
 	session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
 
 	//***************************************************************************************************
@@ -345,6 +364,7 @@ int main(int argc, char* argv[])
 
 	Ort::AllocatorWithDefaultOptions allocator;
     Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
+
     int64 textLength[] = { TextInput.length() };
     std::vector<const char*> input_node_names = { "sequences","sequence_lengths" };
     std::vector<const char*> output_node_names = { "memory","processed_memory","lens"};
@@ -392,7 +412,7 @@ int main(int argc, char* argv[])
     melGateAlig.push_back(Ort::Value::CreateTensor<float>(
         memory_info, getZero(1), 1 , input_shape_MGA.data(), input_shape_MGA.size()));
     float gate_threshold = 0.6;
-    int64 max_decoder_steps = 1000;
+    int64 max_decoder_steps = 3000;
     bool firstIter = true;
     while (true) {
         output_tensors_session_decoder_iter = session_decoder_iter.Run(Ort::RunOptions{ nullptr },
@@ -483,6 +503,7 @@ int main(int argc, char* argv[])
     for (int i = 0; i < wavOutsSharp[2]; i++) {
         *(TempVecWav+i) = (int16_t)(wavOuts[0].GetTensorData<float>()[i] * 32768.0);
     }
+    cout << "c";
     std::string filenames = "tmpDir\\" + OutDir + ".wav";
     return conArr2Wav(wavOutsSharp[2], TempVecWav, filenames.c_str());
 }
