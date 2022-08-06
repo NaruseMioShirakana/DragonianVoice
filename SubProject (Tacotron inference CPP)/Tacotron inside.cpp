@@ -412,7 +412,7 @@ int main(int argc, char* argv[])
     melGateAlig.push_back(Ort::Value::CreateTensor<float>(
         memory_info, getZero(1), 1 , input_shape_MGA.data(), input_shape_MGA.size()));
     float gate_threshold = 0.6;
-    int64 max_decoder_steps = 3000;
+    int64 max_decoder_steps = 5000;
     bool firstIter = true;
     while (true) {
         output_tensors_session_decoder_iter = session_decoder_iter.Run(Ort::RunOptions{ nullptr },
@@ -439,6 +439,9 @@ int main(int argc, char* argv[])
             break;
         }else if(melGateAlig[0].GetTensorTypeAndShapeInfo().GetShape()[2] == max_decoder_steps){
             cout << "Warning! Reached max decoder steps";
+            FILE* decoderStepsOut = nullptr;
+            decoderStepsOut = fopen("decoder", "w+");
+            fclose(decoderStepsOut);
             break;
         }
         try {
