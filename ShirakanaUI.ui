@@ -277,47 +277,7 @@
     <bool>true</bool>
    </property>
   </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>480</x>
-     <y>30</y>
-     <width>721</width>
-     <height>191</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="pixmap">
-    <pixmap resource="Resources.qrc">:/new/bg/Resource Files/round_jx.png</pixmap>
-   </property>
-   <property name="scaledContents">
-    <bool>true</bool>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_3">
-   <property name="geometry">
-    <rect>
-     <x>480</x>
-     <y>250</y>
-     <width>721</width>
-     <height>321</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string/>
-   </property>
-   <property name="pixmap">
-    <pixmap resource="Resources.qrc">:/new/bg/Resource Files/round_jx.png</pixmap>
-   </property>
-   <property name="scaledContents">
-    <bool>true</bool>
-   </property>
-  </widget>
   <zorder>BG</zorder>
-  <zorder>label_3</zorder>
-  <zorder>label_2</zorder>
   <zorder>ShirakanaModelSelectorOfficial</zorder>
   <zorder>ShirakanaExecuteBox</zorder>
   <zorder>ImageShow</zorder>

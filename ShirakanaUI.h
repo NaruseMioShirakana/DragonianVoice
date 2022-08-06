@@ -20,6 +20,7 @@ public:
 	ShirakanaUI(QWidget *parent = nullptr);
 	~ShirakanaUI();
 	void loadMods();
+	void cleanInputs();
 
 private slots:
 	void OnShirakanaModelInsertOfficialClick();
@@ -31,5 +32,7 @@ private:
 	FILE* torchModel = nullptr;
 	vector<string> modList;
 	vector<string> modNames;
+	vector<string> modModerType;
 	QString thisModFile;
+	int curModIndex;
 };
