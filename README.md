@@ -47,9 +47,9 @@
         ${Mdid}_decoder_iter.onnx 
         ${Mdid}_encoder.onnx
         ${Mdid}_postnet.onnx
-    VITS_LJS:
+    VITS_LJS:    //单角色VITS
         ${Mdid}_ljs.onnx 
-    VITS_VCTK:
+    VITS_VCTK:   //多角色VITS
         ${Mdid}_vctk.onnx
     
 
