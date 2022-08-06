@@ -34,7 +34,7 @@
    <bool>false</bool>
   </property>
   <property name="windowTitle">
-   <string>Tacotron - MoeTTS - 白叶澪</string>
+   <string>ShirakanaTTS - 白叶澪</string>
   </property>
   <property name="windowIcon">
    <iconset resource="Resources.qrc">

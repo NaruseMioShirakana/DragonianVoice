@@ -2,7 +2,7 @@
 # 项目特定的逻辑。
 #
 cmake_minimum_required(VERSION 3.16.0)
-project ("Tacotron2-MoeTTS-Cpp")
+project ("Shirakana-TTS")
 
 
 set(CMAKE_CXX_STANDARD 17)
@@ -29,10 +29,10 @@ SOURCE_GROUP("Resource Files" FILES ${QRC_SOURCE_FILES})
 set(project_ui
 	"ShirakanaUI.ui")
 set(project_headers
-	"Tacotron2-MoeTTS-Cpp.h"
+	"ShirakanaTTS-Cpp.h"
 	"ShirakanaUI.h")
 set(project_sources
-	"Tacotron2-MoeTTS-Cpp.cpp"
+	"ShirakanaTTS-Cpp.cpp"
 	"ShirakanaUI.cpp")
 
 
