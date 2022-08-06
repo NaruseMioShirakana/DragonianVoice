@@ -1,7 +1,9 @@
-# Tacotron2-CPP
-一个基于Tacotron2（Text to mel）和Hifigan（mel to wav）的TTS转换软件
+# Shirakana-TTS-CPP
+一个基于各种开源TTS项目的完全C++UI化TTS转换软件
 
-以上两个项目的原仓库：[DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
+使用到的项目的仓库：
+- [DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
+
 
 目前仅支持Windows平台。
 
@@ -15,14 +17,14 @@
 
 ## 模型导入：
     本软件标准化了模型读取模块，模型保存在Mods文件夹下的子文件夹中
-    mods.modlist文件用于声明模型路径以及其显示名称，以我的预置模型
-    为例，Shiroha:鸣濑白羽，冒号(半角)之前是路径名称(即该文件夹下的
-    Shiroha子文件夹)，冒号后面是其显示名称；子文件夹中有4个文件，分
-    别是xxx.png，xxx_decoder_iter.onnx，xxx_encoder.onnx 以及一
-    个,xxx_postnet.onnx，其中xxx为冒号之前的字符串。
+    ********.mod文件用于声明模型路径以及其显示名称，以我的预置模型
+    为例（Shiroha.mod）
+    - Mdid:Shiroha         路径名称即该文件夹下的Shiroha子文件夹
+    - Name:鸣濑白羽                                 Mod显示名称
+    - Type:Tacotron2         Mod项目名（见下文“支持的model项目”）
 
 ## 模型制作：
-    Tacotron：
+    Tacotron2：
     详见 下文
     Hifigan：
     导入你的Hifigan模型
@@ -35,7 +37,16 @@
                           dynamic_axes={"x":   {0: "batch_size", 2: "mel_seq"},
                                         "audio": {0: "batch_size", 2: "audio_seq"}})
 
-[Pytorch2Onnx](https://github.com/NVIDIA/DeepLearningExamples/tree/master/PyTorch/SpeechSynthesis/Tacotron2/)
+- [Pytorch2Onnx(Tacotron2)](https://github.com/NVIDIA/DeepLearningExamples/tree/master/PyTorch/SpeechSynthesis/Tacotron2/)
+- [演示视频](https://www.bilibili.com/video/BV1AB4y1t783)
 
+## 支持的model项目
+    ${xxx}是什么意思大家都知道吧（）里面的变量详见“模型导入”
+    Tacotron2：
+        需要在Mod文件夹中加入 
+        ${Mdid}_decoder_iter.onnx 
+        ${Mdid}_encoder.onnx
+        ${Mdid}_postnet.onnx
+    
 
 
