@@ -33,6 +33,7 @@ private:
 	vector<string> modList;
 	vector<string> modNames;
 	vector<string> modModerType;
+	vector<string> modSymbol;
 	QString thisModFile;
 	int curModIndex;
 };
