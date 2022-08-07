@@ -295,22 +295,7 @@ void printModelInfo(Ort::Session& session, Ort::AllocatorWithDefaultOptions& all
 
 int main(int argc, char* argv[])
 {
-    
-    /*
-
-    
-
-
-    std::string OutDir = "0";
-    std::wstring HifiganPath = to_wide_string("D:\\VisualStudioProj\\Tacotron inside\\x64\\Release\\hifigan.onnx");
-    std::wstring Path = L"D:\\VisualStudioProj\\Tacotron inside\\x64\\Release\\Mods\\Shiroha\\Shiroha";
-    std::string TextInput = "watashihanaruseshirohawatashihanaruseshirohawatashihanaruseshirohawatashihanaruseshiroha.";
-    
-    */
-
-
-
-    if (argc != 4) {
+    if (argc != 5) {
         return 0;
     }
     char* buffer;
@@ -325,26 +310,21 @@ int main(int argc, char* argv[])
     std::string TextInput = argv[2];
     std::string OutDir = argv[3];
     std::wstring HifiganPath = to_wide_string(bufferStr + "\\hifigan.onnx");
+    std::string SymbolStr = argv[4];
+    std::map<char, int64> Symbol;
 
+    for (size_t i = 0; i < SymbolStr.length(); i++) {
+        Symbol.insert(std::pair<char, int64>(SymbolStr[i], (int64)(i)));
+    }
 
-
-
-    //std::wcout << Path;
     int64* text = (int64*)malloc(sizeof(int64) * TextInput.length());
     if (text == NULL) {
         return 0;
     }
     for (size_t i = 0; i < TextInput.length(); i++) {
-        if (TextInput[i] <= 'Z' && TextInput[i] >= 'A') TextInput[i] += 32;
-        if (TextInput[i] == ' ') {
-            text[i] = (int64)11;
-        }
-        else if (TextInput[i] == '.') {
-            text[i] = (int64)7;
-        }
-        else {
-            text[i] = (int64)((int64)TextInput[i] - (int64)'a') + (int64)38;
-        }
+        if (TextInput[i] <= 'Z' && TextInput[i] >= 'A') TextInput[i] += 32;//转小写
+        text[i] = Symbol[TextInput[i]];
+        cout << text[i] << " ";
     }
 
 
@@ -411,7 +391,7 @@ int main(int argc, char* argv[])
         memory_info, getZero(1), 1 , input_shape_MGA.data(), input_shape_MGA.size()));
     melGateAlig.push_back(Ort::Value::CreateTensor<float>(
         memory_info, getZero(1), 1 , input_shape_MGA.data(), input_shape_MGA.size()));
-    float gate_threshold = 0.6;
+    float gate_threshold = 0.666;
     int64 max_decoder_steps = 5000;
     bool firstIter = true;
     while (true) {
@@ -442,7 +422,7 @@ int main(int argc, char* argv[])
             FILE* decoderStepsOut = nullptr;
             decoderStepsOut = fopen("decoder", "w+");
             fclose(decoderStepsOut);
-            break;
+            return 0;
         }
         try {
             std::vector<int64_t> TempSizeInfo = output_tensors_session_decoder_iter[0].GetTensorTypeAndShapeInfo().GetShape();
@@ -506,7 +486,6 @@ int main(int argc, char* argv[])
     for (int i = 0; i < wavOutsSharp[2]; i++) {
         *(TempVecWav+i) = (int16_t)(wavOuts[0].GetTensorData<float>()[i] * 32768.0);
     }
-    cout << "c";
     std::string filenames = "tmpDir\\" + OutDir + ".wav";
     return conArr2Wav(wavOutsSharp[2], TempVecWav, filenames.c_str());
 }
