@@ -22,6 +22,8 @@
     - Mdid:Shiroha         路径名称即该文件夹下的Shiroha子文件夹
     - Name:鸣濑白羽                                 Mod显示名称
     - Type:Tacotron2         Mod项目名（见下文“支持的model项目”）
+    - Symb:_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklm
+      nopqrstuvwxyz                         Symbol（设置见下文）
 
 ## 模型制作：
     Tacotron2：
@@ -52,5 +54,8 @@
     VITS_VCTK:   //多角色VITS
         ${Mdid}_vctk.onnx
     
-
-
+## Symbol的设置
+    Symb:_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
+    打开你训练模型的项目，打开text\symbol.py，如图
+![image](https://user-images.githubusercontent.com/40709280/183290732-dcb93323-1061-431b-aafa-c285a3ec5e82.png)
+    按照划线的List顺序将上面的4个字符串连接即可
