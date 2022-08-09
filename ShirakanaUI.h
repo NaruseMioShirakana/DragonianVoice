@@ -4,7 +4,8 @@
 #include <string>
 #include <vector>
 #include <cmath>
-
+#include <QMediaPlayer>
+#include <QAudioOutput>
 //using namespace cv;
 //using namespace cv::dnn;
 using std::string;
@@ -25,7 +26,12 @@ public:
 private slots:
 	void OnShirakanaModelInsertOfficialClick();
 	void OnShirakanaStartClick();
-
+	void OnWavSaveClick();
+	void onSliderVolumeValueChanged(int value);
+	void onSliderMusicTimeValueChanged(qint64 value);
+	void seekChange(int position);
+	void OnPlayerButtonClick();
+	void getDuration(qint64 time);
 
 private:
 	Ui::ShirakanaUI ui;
@@ -36,4 +42,8 @@ private:
 	vector<string> modSymbol;
 	QString thisModFile;
 	int curModIndex;
+	QMediaPlayer *player;
+	QAudioOutput *audioOutput;
+	bool isPlay = false;
+
 };

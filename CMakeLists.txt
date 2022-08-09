@@ -18,7 +18,7 @@ set(CMAKE_AUTORCC ON)
 
 find_package(OpenCV REQUIRED)
 find_package(Qt6 REQUIRED COMPONENTS Core Widgets Gui)
-
+find_package(Qt6 COMPONENTS Multimedia REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS} "D:/VisualStudioProj/onnxruntime-win-x64-gpu-1.9.0/include")
 
 set(QRC_SOURCE_FILES Resources.qrc)
@@ -47,6 +47,7 @@ target_link_libraries(${PROJECT_NAME}
 	Qt6::Core
 	Qt6::Gui
 	Qt6::Widgets
+    Qt::Multimedia
     ${OpenCV_LIBS}
     "D:/VisualStudioProj/onnxruntime-win-x64-gpu-1.9.0/lib/onnxruntime.lib"
 	)
