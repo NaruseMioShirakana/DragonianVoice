@@ -9,11 +9,15 @@
 
 ## 使用方法：
     1、在release中下载zip包，解压之
-    2、打开Tacotron2MoeTTSCpp.exe
+    2、打开ShirakanaTTS.exe
     3、在右上方Mods模块中选择模型，然后点击导入模型
-    4、在下方执行模块输入框中输入要转换的文字，仅支持  字母(大小写)  ' '
-    ','  '.'(结束符号)  '~'(分句符号)，不支持一切全角字符）
-    5、点击开始合成，即可开始合成语音，等待进度完成后，会提示保存文件
+    4、在下方执行模块输入框中输入要转换的文字，支持Symbol中的字符，
+    换行为批量转换的分句符号。
+    5、点击开始合成，即可开始合成语音，等待进度完成后，可以在右上方
+    播放器预览，也可以在右上方直接保存。
+    可以使用命令行启动：
+    Shell：& '.\Tacotron inside.exe' "ModDir" "InputText." "outputDir" "Symbol"
+    CMD："Tacotron inside.exe" "ModDir" "InputText." "outputDir" "Symbol"
 
 ## 模型导入：
     本软件标准化了模型读取模块，模型保存在Mods文件夹下的子文件夹中
