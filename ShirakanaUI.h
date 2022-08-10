@@ -36,10 +36,10 @@ private slots:
 private:
 	Ui::ShirakanaUI ui;
 	FILE* torchModel = nullptr;
-	vector<string> modList;
-	vector<string> modNames;
-	vector<string> modModerType;
-	vector<string> modSymbol;
+	vector<std::wstring> modList;
+	vector<std::wstring> modNames;
+	vector<std::wstring> modModerType;
+	vector<std::wstring> modSymbol;
 	QString thisModFile;
 	int curModIndex;
 	QMediaPlayer *player;

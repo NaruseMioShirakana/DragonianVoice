@@ -125,7 +125,7 @@
   <widget class="QPushButton" name="ShirakanaStartButton">
    <property name="geometry">
     <rect>
-     <x>225</x>
+     <x>90</x>
      <y>530</y>
      <width>191</width>
      <height>31</height>
@@ -975,6 +975,19 @@ QSlider::sub-page:horizontal{
     <bool>true</bool>
    </property>
   </widget>
+  <widget class="QComboBox" name="SpeakerSelector">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="geometry">
+    <rect>
+     <x>340</x>
+     <y>530</y>
+     <width>191</width>
+     <height>31</height>
+    </rect>
+   </property>
+  </widget>
   <zorder>BG</zorder>
   <zorder>BG_3</zorder>
   <zorder>ImageShow</zorder>
@@ -993,6 +1006,7 @@ QSlider::sub-page:horizontal{
   <zorder>SaveButton</zorder>
   <zorder>BG4</zorder>
   <zorder>ProgressBar</zorder>
+  <zorder>SpeakerSelector</zorder>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
