@@ -1,4 +1,4 @@
-﻿#pragma warning(disable : 4996)
+#pragma warning(disable : 4996)
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/opencv.hpp>
@@ -15,9 +15,9 @@
 #include <direct.h>
 #include <fstream>
 #include <thread>
+#include <D:\VisualStudioProj\ShirakanaClass\[Twilight-Dream]StringTypeConversion.hpp>
 using std::cout;
 using std::endl;
-
 
 struct WavHead {
     char RIFF[4];
@@ -50,15 +50,11 @@ int conArr2Wav(int64 size,int16_t* input,const char* filename) {
     return 0;
 }
 
-
-
-
 inline std::wstring to_wide_string(const std::string& input)
 {
-    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     return converter.from_bytes(input);
 }
-// convert wstring to string 
 inline std::string to_byte_string(const std::wstring& input)
 {
     //std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
@@ -166,7 +162,6 @@ std::vector<Ort::Value> catTens32(std::vector<Ort::Value>& inputTensA, std::vect
             memory_info, Ten2Out, Ten2A[0] * Ten2A[1] * Ten2A[2], Ten2A.data(), Ten2A.size()));
     }
     catch (Ort::Exception e) {
-        cout << e.what();
         return outTens;
     }
     return outTens;
@@ -203,7 +198,6 @@ std::vector<Ort::Value> unsqueeze(std::vector<Ort::Value>& inputTens) {
             memory_info, Ten6Vce, Ten6[0] * Ten6[1] * Ten6[2], Ten6.data(), Ten6.size()));
     }
     catch (Ort::Exception e) {
-        cout << e.what(); 
         return outTens;
     }
     return outTens;
@@ -252,7 +246,6 @@ std::vector<Ort::Value> init_decoder_inputs(std::vector<Ort::Value>& inputTens) 
             memory_info, tempBoolean, seqLen[0] * seqLen[1], seqLen.data(), seqLen.size()));
     }
     catch (Ort::Exception e) {
-        cout << "错误：" <<e.what();
     }
     return outTensorVec;
 }
@@ -290,202 +283,199 @@ void printModelInfo(Ort::Session& session, Ort::AllocatorWithDefaultOptions& all
     //input_dims_2[0] = input_dims_1[0] = output_dims[0] = 1;//batch size = 1
 }
 
-
-
-
 int main(int argc, char* argv[])
 {
-    if (argc != 5) {
-        return 0;
-    }
-    char* buffer;
-    //也可以将buffer作为输出参数
-    if ((buffer = getcwd(NULL, 0)) == NULL) {
-        perror("无法获取路径");
-        return 0;
-    }
-    std::string bufferStr = buffer;
-    std::string PathTmp = argv[1];
-    std::wstring Path = to_wide_string(bufferStr + "\\" + PathTmp);
-    std::string TextInput = argv[2];
-    std::string OutDir = argv[3];
-    std::wstring HifiganPath = to_wide_string(bufferStr + "\\hifigan.onnx");
-    std::string SymbolStr = argv[4];
-    std::map<char, int64> Symbol;
-
-    for (size_t i = 0; i < SymbolStr.length(); i++) {
-        Symbol.insert(std::pair<char, int64>(SymbolStr[i], (int64)(i)));
-    }
-
-    int64* text = (int64*)malloc(sizeof(int64) * TextInput.length());
-    if (text == NULL) {
-        return 0;
-    }
-    for (size_t i = 0; i < TextInput.length(); i++) {
-        if (TextInput[i] <= 'Z' && TextInput[i] >= 'A') TextInput[i] += 32;//转小写
-        text[i] = Symbol[TextInput[i]];
-        cout << text[i] << " ";
-    }
-
-
-	Ort::Env env(ORT_LOGGING_LEVEL_WARNING, "OnnxModel");
-	Ort::SessionOptions session_options;
-    session_options.SetIntraOpNumThreads((int)(std::thread::hardware_concurrency() / 2) + 1);
-	session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
-
-	//***************************************************************************************************
-
-	Ort::Session session(env, (Path + L"_encoder.onnx").c_str(), session_options);
-    Ort::Session session_decoder_iter(env, (Path + L"_decoder_iter.onnx").c_str(), session_options);
-    Ort::Session session_postnet(env, (Path + L"_postnet.onnx").c_str(), session_options);
-    Ort::Session session_gan(env, HifiganPath.c_str(), session_options);
-
-    //***************************************************************************************************
-
-	Ort::AllocatorWithDefaultOptions allocator;
-    Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
-
-    int64 textLength[] = { TextInput.length() };
-    std::vector<const char*> input_node_names = { "sequences","sequence_lengths" };
-    std::vector<const char*> output_node_names = { "memory","processed_memory","lens"};
-    std::vector<const char*> input_node_names_session_decoder_iter = { "decoder_input","attention_hidden","attention_cell","decoder_hidden","decoder_cell","attention_weights","attention_weights_cum","attention_context","memory","processed_memory","mask" };
-    std::vector<const char*> output_node_names_session_decoder_iter = { "decoder_output","gate_prediction","out_attention_hidden","out_attention_cell","out_decoder_hidden","out_decoder_cell","out_attention_weights","out_attention_weights_cum","out_attention_context" };
-    std::vector<const char*> input_node_names_session_postnet = { "mel_outputs" };
-    std::vector<const char*> output_node_names_session_postnet = { "mel_outputs_postnet" };
-    std::vector<Ort::Value> output_tensors;
-    std::vector<Ort::Value> output_tensors_session_decoder_iter;
-    std::vector<Ort::Value> output_tensors_session_postnet;
-    std::vector<Ort::Value> input_tensors;
-    std::array<int64_t, 2> input_shape_1{ 1,textLength[0] };
-    std::array<int64_t, 1> input_shape_2{ 1 };
     try {
-        input_tensors.push_back(Ort::Value::CreateTensor<int64>(
-            memory_info, text, textLength[0], input_shape_1.data(), input_shape_1.size()));
-        input_tensors.push_back(Ort::Value::CreateTensor<int64>(
-            memory_info, textLength, 1, input_shape_2.data(), input_shape_2.size()));
-    }
-    catch (Ort::Exception e) {
-        cout << e.what();
-        return 0;
-    }
-
-    //***************************************************************************************************
-
-    output_tensors = session.Run(Ort::RunOptions{ nullptr },
-        input_node_names.data(),
-        input_tensors.data(),
-        input_tensors.size(),
-        output_node_names.data(),
-        output_node_names.size());
-    input_tensors = init_decoder_inputs(output_tensors);
-
-    //***************************************************************************************************
-    int32_t not_finished = 1;
-    int32_t mel_lengths = 1;
-    std::array<int64_t, 1> input_shape_MGA{ 1 };
-    std::vector<Ort::Value> melGateAlig;
-    std::vector<Ort::Value> melGateAligTmp;
-    melGateAlig.push_back(Ort::Value::CreateTensor<float>(
-        memory_info, getZero(1), 1 , input_shape_MGA.data(), input_shape_MGA.size()));
-    melGateAlig.push_back(Ort::Value::CreateTensor<float>(
-        memory_info, getZero(1), 1 , input_shape_MGA.data(), input_shape_MGA.size()));
-    melGateAlig.push_back(Ort::Value::CreateTensor<float>(
-        memory_info, getZero(1), 1 , input_shape_MGA.data(), input_shape_MGA.size()));
-    float gate_threshold = 0.666;
-    int64 max_decoder_steps = 5000;
-    bool firstIter = true;
-    while (true) {
-        output_tensors_session_decoder_iter = session_decoder_iter.Run(Ort::RunOptions{ nullptr },
-            input_node_names_session_decoder_iter.data(),
-            input_tensors.data(),
-            input_tensors.size(),
-            output_node_names_session_decoder_iter.data(),
-            output_node_names_session_decoder_iter.size());
-        if (firstIter) {
-            melGateAligTmp = unsqueeze(output_tensors_session_decoder_iter);
-            melGateAlig = unsqueeze(output_tensors_session_decoder_iter);
-            firstIter = false;
-        }
-        else {
-            melGateAligTmp = unsqueeze(output_tensors_session_decoder_iter);
-            melGateAlig = catTens32(melGateAlig, melGateAligTmp);
-        }
-        std::vector<Ort::Value> decTmp = sigmoid(melGateAligTmp[1].GetTensorMutableData<float>(), melGateAligTmp[1].GetTensorTypeAndShapeInfo().GetShape());
-        std::vector<Ort::Value> dec = leCpp(decTmp[0].GetTensorMutableData<float>(), gate_threshold , decTmp[0].GetTensorTypeAndShapeInfo().GetShape());
-        int32_t dec_int = dec[0].GetTensorData<int32_t>()[0];
-        not_finished = dec_int * not_finished;
-        mel_lengths += not_finished;
-        if (not_finished == 0) {
-            break;
-        }else if(melGateAlig[0].GetTensorTypeAndShapeInfo().GetShape()[2] == max_decoder_steps){
-            cout << "Warning! Reached max decoder steps";
-            FILE* decoderStepsOut = nullptr;
-            decoderStepsOut = fopen("decoder", "w+");
-            fclose(decoderStepsOut);
+        if (argc != 5) {
             return 0;
         }
+        wchar_t* buffer;
+        //也可以将buffer作为输出参数
+        if ((buffer = _wgetcwd(NULL, 0)) == NULL) {
+            perror("无法获取路径");
+            return 0;
+        }
+        std::wstring bufferStr = buffer;
+        std::wstring PathTmp = string2wstring(argv[1]);
+        std::wstring Path = bufferStr + L"\\" + PathTmp;
+        std::wstring TextInput = string2wstring(argv[2]);
+        std::wstring OutDir = string2wstring(argv[3]);
+        std::wstring HifiganPath = bufferStr + L"\\hifigan.onnx";
+        std::wstring SymbolStr = string2wstring(argv[4]);
+        std::map<wchar_t, int64> Symbol;
+        for (size_t i = 0; i < SymbolStr.length(); i++) {
+            Symbol.insert(std::pair<wchar_t, int64>(SymbolStr[i], (int64)(i)));
+        }
+        int64* text = (int64*)malloc(sizeof(int64) * TextInput.length());
+        if (text == NULL) {
+            return 0;
+        }
+        for (size_t i = 0; i < TextInput.length(); i++) {
+            text[i] = Symbol[TextInput[i]];
+        }
+
+        //***************************************************************************************************
+
+        Ort::Env env(ORT_LOGGING_LEVEL_WARNING, "OnnxModel");
+        Ort::SessionOptions session_options;
+        session_options.SetIntraOpNumThreads((int)(std::thread::hardware_concurrency() / 2) + 1);
+        session_options.SetGraphOptimizationLevel(GraphOptimizationLevel::ORT_ENABLE_ALL);
+
+        //***************************************************************************************************
+
+        Ort::Session session(env, (Path + L"_encoder.onnx").c_str(), session_options);
+        Ort::Session session_decoder_iter(env, (Path + L"_decoder_iter.onnx").c_str(), session_options);
+        Ort::Session session_postnet(env, (Path + L"_postnet.onnx").c_str(), session_options);
+        Ort::Session session_gan(env, HifiganPath.c_str(), session_options);
+
+        //***************************************************************************************************
+
+        Ort::AllocatorWithDefaultOptions allocator;
+        Ort::MemoryInfo memory_info = Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault);
+
+        int64 textLength[] = { TextInput.length() };
+        std::vector<const char*> input_node_names = { "sequences","sequence_lengths" };
+        std::vector<const char*> output_node_names = { "memory","processed_memory","lens" };
+        std::vector<const char*> input_node_names_session_decoder_iter = { "decoder_input","attention_hidden","attention_cell","decoder_hidden","decoder_cell","attention_weights","attention_weights_cum","attention_context","memory","processed_memory","mask" };
+        std::vector<const char*> output_node_names_session_decoder_iter = { "decoder_output","gate_prediction","out_attention_hidden","out_attention_cell","out_decoder_hidden","out_decoder_cell","out_attention_weights","out_attention_weights_cum","out_attention_context" };
+        std::vector<const char*> input_node_names_session_postnet = { "mel_outputs" };
+        std::vector<const char*> output_node_names_session_postnet = { "mel_outputs_postnet" };
+        std::vector<Ort::Value> output_tensors;
+        std::vector<Ort::Value> output_tensors_session_decoder_iter;
+        std::vector<Ort::Value> output_tensors_session_postnet;
+        std::vector<Ort::Value> input_tensors;
+        std::array<int64_t, 2> input_shape_1{ 1,textLength[0] };
+        std::array<int64_t, 1> input_shape_2{ 1 };
         try {
-            std::vector<int64_t> TempSizeInfo = output_tensors_session_decoder_iter[0].GetTensorTypeAndShapeInfo().GetShape();
-            input_tensors[0] = Ort::Value::CreateTensor<float>(
-                memory_info, output_tensors_session_decoder_iter[0].GetTensorMutableData<float>(), TempSizeInfo[0] * TempSizeInfo[1], TempSizeInfo.data(), TempSizeInfo.size());
-            
-            TempSizeInfo = output_tensors_session_decoder_iter[2].GetTensorTypeAndShapeInfo().GetShape();
-            input_tensors[1] = Ort::Value::CreateTensor<float>(
-                memory_info, output_tensors_session_decoder_iter[2].GetTensorMutableData<float>(), TempSizeInfo[0] * TempSizeInfo[1], TempSizeInfo.data(), TempSizeInfo.size());
-            
-            TempSizeInfo = output_tensors_session_decoder_iter[3].GetTensorTypeAndShapeInfo().GetShape();
-            input_tensors[2] = Ort::Value::CreateTensor<float>(
-                memory_info, output_tensors_session_decoder_iter[3].GetTensorMutableData<float>(), TempSizeInfo[0] * TempSizeInfo[1], TempSizeInfo.data(), TempSizeInfo.size());
-            
-            TempSizeInfo = output_tensors_session_decoder_iter[4].GetTensorTypeAndShapeInfo().GetShape();
-            input_tensors[3] = Ort::Value::CreateTensor<float>(
-                memory_info, output_tensors_session_decoder_iter[4].GetTensorMutableData<float>(), TempSizeInfo[0] * TempSizeInfo[1], TempSizeInfo.data(), TempSizeInfo.size());
-            
-            TempSizeInfo = output_tensors_session_decoder_iter[5].GetTensorTypeAndShapeInfo().GetShape();
-            input_tensors[4] = Ort::Value::CreateTensor<float>(
-                memory_info, output_tensors_session_decoder_iter[5].GetTensorMutableData<float>(), TempSizeInfo[0] * TempSizeInfo[1], TempSizeInfo.data(), TempSizeInfo.size());
-            
-            TempSizeInfo = output_tensors_session_decoder_iter[6].GetTensorTypeAndShapeInfo().GetShape();
-            input_tensors[5] = Ort::Value::CreateTensor<float>(
-                memory_info, output_tensors_session_decoder_iter[6].GetTensorMutableData<float>(), TempSizeInfo[0] * TempSizeInfo[1], TempSizeInfo.data(), TempSizeInfo.size());
-            
-            TempSizeInfo = output_tensors_session_decoder_iter[7].GetTensorTypeAndShapeInfo().GetShape();
-            input_tensors[6] = Ort::Value::CreateTensor<float>(
-                memory_info, output_tensors_session_decoder_iter[7].GetTensorMutableData<float>(), TempSizeInfo[0] * TempSizeInfo[1], TempSizeInfo.data(), TempSizeInfo.size());
-            
-            TempSizeInfo = output_tensors_session_decoder_iter[8].GetTensorTypeAndShapeInfo().GetShape();
-            input_tensors[7] = Ort::Value::CreateTensor<float>(
-                memory_info, output_tensors_session_decoder_iter[8].GetTensorMutableData<float>(), TempSizeInfo[0] * TempSizeInfo[1], TempSizeInfo.data(), TempSizeInfo.size());
+            input_tensors.push_back(Ort::Value::CreateTensor<int64>(
+                memory_info, text, textLength[0], input_shape_1.data(), input_shape_1.size()));
+            input_tensors.push_back(Ort::Value::CreateTensor<int64>(
+                memory_info, textLength, 1, input_shape_2.data(), input_shape_2.size()));
         }
         catch (Ort::Exception e) {
-            cout << e.what();
+            return 0;
         }
+
+        //***************************************************************************************************
+
+        output_tensors = session.Run(Ort::RunOptions{ nullptr },
+            input_node_names.data(),
+            input_tensors.data(),
+            input_tensors.size(),
+            output_node_names.data(),
+            output_node_names.size());
+        input_tensors = init_decoder_inputs(output_tensors);
+
+        //***************************************************************************************************
+        int32_t not_finished = 1;
+        int32_t mel_lengths = 1;
+        std::array<int64_t, 1> input_shape_MGA{ 1 };
+        std::vector<Ort::Value> melGateAlig;
+        std::vector<Ort::Value> melGateAligTmp;
+        melGateAlig.push_back(Ort::Value::CreateTensor<float>(
+            memory_info, getZero(1), 1, input_shape_MGA.data(), input_shape_MGA.size()));
+        melGateAlig.push_back(Ort::Value::CreateTensor<float>(
+            memory_info, getZero(1), 1, input_shape_MGA.data(), input_shape_MGA.size()));
+        melGateAlig.push_back(Ort::Value::CreateTensor<float>(
+            memory_info, getZero(1), 1, input_shape_MGA.data(), input_shape_MGA.size()));
+        float gate_threshold = 0.666;
+        int64 max_decoder_steps = 5000;
+        bool firstIter = true;
+        while (true) {
+            output_tensors_session_decoder_iter = session_decoder_iter.Run(Ort::RunOptions{ nullptr },
+                input_node_names_session_decoder_iter.data(),
+                input_tensors.data(),
+                input_tensors.size(),
+                output_node_names_session_decoder_iter.data(),
+                output_node_names_session_decoder_iter.size());
+            if (firstIter) {
+                melGateAligTmp = unsqueeze(output_tensors_session_decoder_iter);
+                melGateAlig = unsqueeze(output_tensors_session_decoder_iter);
+                firstIter = false;
+            }
+            else {
+                melGateAligTmp = unsqueeze(output_tensors_session_decoder_iter);
+                melGateAlig = catTens32(melGateAlig, melGateAligTmp);
+            }
+            std::vector<Ort::Value> decTmp = sigmoid(melGateAligTmp[1].GetTensorMutableData<float>(), melGateAligTmp[1].GetTensorTypeAndShapeInfo().GetShape());
+            std::vector<Ort::Value> dec = leCpp(decTmp[0].GetTensorMutableData<float>(), gate_threshold, decTmp[0].GetTensorTypeAndShapeInfo().GetShape());
+            int32_t dec_int = dec[0].GetTensorData<int32_t>()[0];
+            not_finished = dec_int * not_finished;
+            mel_lengths += not_finished;
+            if (not_finished == 0) {
+                break;
+            }
+            else if (melGateAlig[0].GetTensorTypeAndShapeInfo().GetShape()[2] == max_decoder_steps) {
+                FILE* decoderStepsOut = nullptr;
+                decoderStepsOut = fopen("decoder", "w+");
+                fclose(decoderStepsOut);
+                return 0;
+            }
+            try {
+                std::vector<int64_t> TempSizeInfo = output_tensors_session_decoder_iter[0].GetTensorTypeAndShapeInfo().GetShape();
+                input_tensors[0] = Ort::Value::CreateTensor<float>(
+                    memory_info, output_tensors_session_decoder_iter[0].GetTensorMutableData<float>(), TempSizeInfo[0] * TempSizeInfo[1], TempSizeInfo.data(), TempSizeInfo.size());
+
+                TempSizeInfo = output_tensors_session_decoder_iter[2].GetTensorTypeAndShapeInfo().GetShape();
+                input_tensors[1] = Ort::Value::CreateTensor<float>(
+                    memory_info, output_tensors_session_decoder_iter[2].GetTensorMutableData<float>(), TempSizeInfo[0] * TempSizeInfo[1], TempSizeInfo.data(), TempSizeInfo.size());
+
+                TempSizeInfo = output_tensors_session_decoder_iter[3].GetTensorTypeAndShapeInfo().GetShape();
+                input_tensors[2] = Ort::Value::CreateTensor<float>(
+                    memory_info, output_tensors_session_decoder_iter[3].GetTensorMutableData<float>(), TempSizeInfo[0] * TempSizeInfo[1], TempSizeInfo.data(), TempSizeInfo.size());
+
+                TempSizeInfo = output_tensors_session_decoder_iter[4].GetTensorTypeAndShapeInfo().GetShape();
+                input_tensors[3] = Ort::Value::CreateTensor<float>(
+                    memory_info, output_tensors_session_decoder_iter[4].GetTensorMutableData<float>(), TempSizeInfo[0] * TempSizeInfo[1], TempSizeInfo.data(), TempSizeInfo.size());
+
+                TempSizeInfo = output_tensors_session_decoder_iter[5].GetTensorTypeAndShapeInfo().GetShape();
+                input_tensors[4] = Ort::Value::CreateTensor<float>(
+                    memory_info, output_tensors_session_decoder_iter[5].GetTensorMutableData<float>(), TempSizeInfo[0] * TempSizeInfo[1], TempSizeInfo.data(), TempSizeInfo.size());
+
+                TempSizeInfo = output_tensors_session_decoder_iter[6].GetTensorTypeAndShapeInfo().GetShape();
+                input_tensors[5] = Ort::Value::CreateTensor<float>(
+                    memory_info, output_tensors_session_decoder_iter[6].GetTensorMutableData<float>(), TempSizeInfo[0] * TempSizeInfo[1], TempSizeInfo.data(), TempSizeInfo.size());
+
+                TempSizeInfo = output_tensors_session_decoder_iter[7].GetTensorTypeAndShapeInfo().GetShape();
+                input_tensors[6] = Ort::Value::CreateTensor<float>(
+                    memory_info, output_tensors_session_decoder_iter[7].GetTensorMutableData<float>(), TempSizeInfo[0] * TempSizeInfo[1], TempSizeInfo.data(), TempSizeInfo.size());
+
+                TempSizeInfo = output_tensors_session_decoder_iter[8].GetTensorTypeAndShapeInfo().GetShape();
+                input_tensors[7] = Ort::Value::CreateTensor<float>(
+                    memory_info, output_tensors_session_decoder_iter[8].GetTensorMutableData<float>(), TempSizeInfo[0] * TempSizeInfo[1], TempSizeInfo.data(), TempSizeInfo.size());
+            }
+            catch (Ort::Exception e) {
+            }
+        }
+        std::vector<int64> melInputShape = melGateAlig[0].GetTensorTypeAndShapeInfo().GetShape();
+        std::vector<Ort::Value> melInput;
+        melInput.push_back(Ort::Value::CreateTensor<float>(
+            memory_info, melGateAlig[0].GetTensorMutableData<float>(), melInputShape[0] * melInputShape[1] * melInputShape[2], melInputShape.data(), melInputShape.size()));
+        output_tensors_session_postnet = session_postnet.Run(Ort::RunOptions{ nullptr },
+            input_node_names_session_postnet.data(),
+            melInput.data(),
+            melInput.size(),
+            output_node_names_session_postnet.data(),
+            output_node_names_session_postnet.size());
+        std::vector<const char*> gan_in = { "x" };
+        std::vector<const char*> gan_out = { "audio" };
+        std::vector<Ort::Value> wavOuts;
+        wavOuts = session_gan.Run(Ort::RunOptions{ nullptr },
+            gan_in.data(),
+            output_tensors_session_postnet.data(),
+            output_tensors_session_postnet.size(),
+            gan_out.data(),
+            gan_out.size());
+        std::vector<int64> wavOutsSharp = wavOuts[0].GetTensorTypeAndShapeInfo().GetShape();
+        std::array<int64, 1> SharpIN{ wavOutsSharp[2] };
+        int16_t* TempVecWav = (int16_t*)malloc(sizeof(int16_t) * wavOutsSharp[2]);
+        for (int i = 0; i < wavOutsSharp[2]; i++) {
+            *(TempVecWav + i) = (int16_t)(wavOuts[0].GetTensorData<float>()[i] * 32768.0);
+        }
+        std::string filenames = "tmpDir\\" + to_byte_string(OutDir) + ".wav";
+        return conArr2Wav(wavOutsSharp[2], TempVecWav, filenames.c_str());
     }
-    std::vector<int64> melInputShape = melGateAlig[0].GetTensorTypeAndShapeInfo().GetShape();
-    std::vector<Ort::Value> melInput;
-    melInput.push_back(Ort::Value::CreateTensor<float>(
-        memory_info, melGateAlig[0].GetTensorMutableData<float>(), melInputShape[0]* melInputShape[1]* melInputShape[2], melInputShape.data(), melInputShape.size()));
-    output_tensors_session_postnet = session_postnet.Run(Ort::RunOptions{ nullptr },
-        input_node_names_session_postnet.data(),
-        melInput.data(),
-        melInput.size(),
-        output_node_names_session_postnet.data(),
-        output_node_names_session_postnet.size());
-    std::vector<const char*> gan_in = { "x" };
-    std::vector<const char*> gan_out = { "audio" };
-    std::vector<Ort::Value> wavOuts;
-    wavOuts = session_gan.Run(Ort::RunOptions{ nullptr },
-        gan_in.data(),
-        output_tensors_session_postnet.data(),
-        output_tensors_session_postnet.size(),
-        gan_out.data(),
-        gan_out.size());
-    std::vector<int64> wavOutsSharp = wavOuts[0].GetTensorTypeAndShapeInfo().GetShape();
-    std::array<int64, 1> SharpIN{ wavOutsSharp[2] };
-    int16_t* TempVecWav = (int16_t*)malloc(sizeof(int16_t)* wavOutsSharp[2]);
-    for (int i = 0; i < wavOutsSharp[2]; i++) {
-        *(TempVecWav+i) = (int16_t)(wavOuts[0].GetTensorData<float>()[i] * 32768.0);
+    catch (std::exception e) {
+        cout << e.what();
     }
-    std::string filenames = "tmpDir\\" + OutDir + ".wav";
-    return conArr2Wav(wavOutsSharp[2], TempVecWav, filenames.c_str());
 }
