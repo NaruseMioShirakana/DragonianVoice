@@ -81,6 +81,7 @@
     的argv（可以使用控制台 "xxx.exe" "input_str"）这种格式执行
     执行参数只接受一个（输入的文本，可以是UTF16和UTF32字符）
     输出只有一个（标准控制台输出）也就是经过Cleaner处理后的文本。
+    在前文中需要设定的cleaner，即为此exe的文件名（不带路径拓展名）
 
 ## 已经制作好的模型
 [Github](https://github.com/FujiwaraShirakana/ShirakanaTTSMods)
