@@ -265,6 +265,11 @@ private:
 Wav curWav;
 
 void ShirakanaUI::loadMods() {
+
+	std::wstring prefix = L"Cleaners";
+	if (_waccess(prefix.c_str(), 0) == -1)
+		int returnValueMkdir = _wmkdir(prefix.c_str());
+
 	_wfinddata_t file_info;
 	wstring current_path = L"Mods\\*.mod";
 	intptr_t handle = _wfindfirst(current_path.c_str(), &file_info);
@@ -272,7 +277,7 @@ void ShirakanaUI::loadMods() {
 		QMessageBox::warning(this, "未找到Mod", "Mod文件未找到，可能是您未安装mod。");
 		return;
 	}
-	char modInfo[1024] = "";
+	string modInfo;
 	wstring TmpModFileName = L"";
 	FILE* modfile = nullptr;
 	wstring TmpModInfo = L"";
@@ -285,8 +290,8 @@ void ShirakanaUI::loadMods() {
 			}
 			else {
 				TmpModFileName = file_info.name;
-				modfile = _wfopen((L"Mods\\" + TmpModFileName).c_str(), L"r");
-				if (fscanf(modfile, "%s", modInfo) != EOF) {
+				std::ifstream modfile((L"Mods\\" + TmpModFileName).c_str());
+				if (std::getline(modfile, modInfo) && modInfo.find("Mdid:") == 0) {
 					TmpModInfo = to_wide_string(modInfo);
 					TmpModInfo = TmpModInfo.substr(5);
 					modList.push_back(L"Mods\\" + TmpModInfo + L"\\" + TmpModInfo);
@@ -294,7 +299,7 @@ void ShirakanaUI::loadMods() {
 				else {
 					continue;
 				}
-				if (fscanf(modfile, "%s", modInfo) != EOF) {
+				if (std::getline(modfile, modInfo) && modInfo.find("Name:") == 0) {
 					TmpModInfo = to_wide_string(modInfo);
 					TmpModInfo = TmpModInfo.substr(5);
 					modNames.push_back(TmpModInfo);
@@ -303,7 +308,7 @@ void ShirakanaUI::loadMods() {
 					modList.pop_back();
 					continue;
 				}
-				if (fscanf(modfile, "%s", modInfo) != EOF) {
+				if (std::getline(modfile, modInfo) && modInfo.find("Type:") == 0) {
 					TmpModInfo = to_wide_string(modInfo);
 					TmpModInfo = TmpModInfo.substr(5);
 					modModerType.push_back(TmpModInfo);
@@ -313,7 +318,7 @@ void ShirakanaUI::loadMods() {
 					modNames.pop_back();
 					continue;
 				}
-				if (fscanf(modfile, "%s", modInfo) != EOF) {
+				if (std::getline(modfile, modInfo) && modInfo.find("Symb:") == 0) {
 					TmpModInfo = to_wide_string(modInfo);
 					TmpModInfo = TmpModInfo.substr(5);
 					modSymbol.push_back(TmpModInfo);
@@ -323,15 +328,28 @@ void ShirakanaUI::loadMods() {
 					modNames.pop_back();
 					modModerType.pop_back();
 					continue;
-				}
-				if (fscanf(modfile, "%s", modInfo) != EOF) {
+				}if (std::getline(modfile, modInfo) && modInfo.find("Clen:") == 0) {
 					TmpModInfo = to_wide_string(modInfo);
-					modSymbol[fileIndex] += L" " + TmpModInfo;
+					TmpModInfo = TmpModInfo.substr(5);
+					if (TmpModInfo == L"") {
+						modCleaners.push_back(L"None");
+					}
+					else {
+						modCleaners.push_back(L"Cleaners\\" + TmpModInfo + L".exe");
+					}
+				}
+				else {
+					modList.pop_back();
+					modNames.pop_back();
+					modModerType.pop_back();
+					modSymbol.pop_back();
+					continue;
 				}
 				if (modModerType[fileIndex] == L"Tacotron2") {
 					if ((_wfopen((modList[fileIndex] + L"_decoder_iter.onnx").c_str(), L"r") != nullptr) && (_wfopen((modList[fileIndex] + L"_encoder.onnx").c_str(), L"r") != nullptr) && (_wfopen((modList[fileIndex] + L"_postnet.onnx").c_str(), L"r") != nullptr)) {
 						ui.ShirakanaModelSelectorOfficialComboBox->addItem(QString::fromStdWString(modModerType[fileIndex] + L"::" + modNames[fileIndex]));
 						fileIndex++;
+						modSpeakers.push_back(vector<wstring>());
 					}
 					else {
 						modList.pop_back();
@@ -345,6 +363,7 @@ void ShirakanaUI::loadMods() {
 					if ((_wfopen((modList[fileIndex] + L"_LJS.pt").c_str(), L"r") != nullptr)) {
 						ui.ShirakanaModelSelectorOfficialComboBox->addItem(QString::fromStdWString(modModerType[fileIndex] + L"::" + modNames[fileIndex]));
 						fileIndex++;
+						modSpeakers.push_back(vector<wstring>());
 					}
 					else {
 						modList.pop_back();
@@ -357,9 +376,11 @@ void ShirakanaUI::loadMods() {
 				else if (modModerType[fileIndex] == L"VITS_VCTK") {
 					if ((_wfopen((modList[fileIndex] + L"_VCTK.pt").c_str(), L"r") != nullptr)) {
 						ui.ShirakanaModelSelectorOfficialComboBox->addItem(QString::fromStdWString(modModerType[fileIndex] + L"::" + modNames[fileIndex]));
+						modSpeakers.push_back(vector<wstring>());
+						while (std::getline(modfile, modInfo)) {
+							modSpeakers[fileIndex].push_back(to_wide_string(modInfo));
+						}
 						fileIndex++;
-
-
 					}
 					else {
 						modList.pop_back();
@@ -380,7 +401,7 @@ void ShirakanaUI::loadMods() {
 		} while (!_wfindnext(handle, &file_info));
 	}
 	catch (std::exception e) {
-		QMessageBox::information(this, "错误", QString::fromStdString(e.what()));
+		QMessageBox::warning(this, "错误", QString::fromStdString(e.what()));
 	}
 	try {
 		_findclose(handle);
@@ -464,12 +485,22 @@ void ShirakanaUI::OnShirakanaStartClick() {
 		return;
 	}
 	std::wstring charaSets = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	isPlay = false;
+	player->pause();
+	ui.PlayerSlider->setValue(0);
+	ui.PlayerButton->setEnabled(false);
+	ui.VolSlider->setEnabled(false);
+	ui.PlayerSlider->setEnabled(false);
+	player->setSource(QUrl::fromLocalFile(""));
 	//<!InitStatus>
-
+	
 
 
 	//<InitInput>
-	while (inputStr[inputStr.length() - 1] == L'\n') {
+	if (modCleaners[curModIndex] != L"None") {
+		inputStr = getCleanerStr(inputStr);
+	}
+	while (inputStr[inputStr.length() - 1] == L'\n' || inputStr[inputStr.length() - 1] == L'\r') {
 		inputStr.pop_back();
 	}
 	inputStr += L"\n";
@@ -480,14 +511,15 @@ void ShirakanaUI::OnShirakanaStartClick() {
 	ui.ShirakanaOutPutLabel->setText(QString::fromStdString("处理输入字符串中"));
 	ui.ShirakanaInput->setEnabled(false);
 	ui.ShirakanaStartButton->setEnabled(false);
+	QCoreApplication::processEvents();
 	for (size_t i = 0; i < inputStr.length(); i++) {
 		remove(("tmpDir\\" + std::to_string(i) + ".wav").c_str());
-		if (modSymbol[curModIndex].find(inputStr[i]) == std::wstring::npos && inputStr[i] != L'\n') {
+		if (modSymbol[curModIndex].find(inputStr[i]) == std::wstring::npos && inputStr[i] != L'\n' && inputStr[i] != L'\r') {
 			QMessageBox::warning(this, "不支持的字符", QString::fromStdString("字符位置：[" + std::to_string(i + 1) + "]"));
 			cleanInputs();
 			return;
 		}
-		if ((inputStr[i] == L'\n')) {
+		if ((inputStr[i] == L'\n') || (inputStr[i] == L'\r')) {
 			if (commandInputStr != L"") {
 				if (charaSets.find(commandInputStr[commandInputStr.length() - 1]) != wstring::npos) {
 					commandInputStr += L'.';
@@ -526,7 +558,7 @@ void ShirakanaUI::OnShirakanaStartClick() {
 				+ std::to_wstring(i)
 				+ L"\" \""
 				+ modSymbol[curModIndex]
-				+ L"\"";
+				+ L"\" \"LJS\"";
 			{
 				STARTUPINFO si;
 				PROCESS_INFORMATION pi;
@@ -563,9 +595,54 @@ void ShirakanaUI::OnShirakanaStartClick() {
 
 	//<VITS_VCTK>
 	else if (modModerType[curModIndex] == L"VITS_VCTK") {
-		QMessageBox::information(this, "TODO", "TODO");
-		cleanInputs();
-		return;
+		int Speaker = ui.SpeakerSelector->currentIndex();
+		for (size_t i = 0; i < commandInputVec.size(); i++) {
+			if (commandInputVec[i].length() > 10) {
+				ui.ShirakanaOutPutLabel->setText(QString::fromStdWString(L"正在转换：" + commandInputVec[i].substr(0, 10) + L"..."));
+			}
+			else {
+				ui.ShirakanaOutPutLabel->setText(QString::fromStdWString(L"正在转换：" + commandInputVec[i]));
+			}
+			commandStr = L"\"VITS-LibTorch.exe\" \""
+				+ thisModFile.toStdWString()
+				+ L"\" \""
+				+ commandInputVec[i]
+				+ L"\" \""
+				+ std::to_wstring(i)
+				+ L"\" \""
+				+ modSymbol[curModIndex]
+				+ L"\" \"VCTK\" \""
+				+ std::to_wstring(Speaker)
+				+ L"\"";
+			{
+				STARTUPINFO si;
+				PROCESS_INFORMATION pi;
+				ZeroMemory(&si, sizeof(si));
+				ZeroMemory(&pi, sizeof(pi));
+				CreateProcess(NULL,   // No module name (use command line)
+					const_cast<LPWSTR>(commandStr.c_str()),        // Command line
+					NULL,           // Process handle not inheritable
+					NULL,           // Thread handle not inheritable
+					FALSE,          // Set handle inheritance to FALSE
+					CREATE_NO_WINDOW,              // No creation flags
+					NULL,           // Use parent's environment block
+					NULL,           // Use parent's starting directory 
+					&si,            // Pointer to STARTUPINFO structure
+					&pi);
+				//WinExec(commandStr.c_str(), SW_HIDE);
+				WaitForSingleObject(pi.hProcess, INFINITE);
+				CloseHandle(pi.hProcess);
+				CloseHandle(pi.hThread);
+			}
+			{
+				QElapsedTimer t;
+				t.start();
+				while (t.elapsed() < 2) {
+					QCoreApplication::processEvents();
+				}
+			}
+			ui.ProgressBar->setValue(100.0 * (double)(i + 1) / (double)commandInputVec.size());
+		}
 	}
 	//<!VITS_VCTK>
 
@@ -580,12 +657,12 @@ void ShirakanaUI::OnShirakanaStartClick() {
 			else {
 				ui.ShirakanaOutPutLabel->setText(QString::fromStdWString(L"正在转换：" + commandInputVec[i]));
 			}
-			commandStr = L"\"Tacotron inside.exe\" \"" 
-				+ thisModFile.toStdWString() 
-				+ L"\" \"" 
-				+ commandInputVec[i] 
-				+ L"\" \"" 
-				+ std::to_wstring(i) 
+			commandStr = L"\"Tacotron inside.exe\" \""
+				+ thisModFile.toStdWString()
+				+ L"\" \""
+				+ commandInputVec[i]
+				+ L"\" \""
+				+ std::to_wstring(i)
 				+ L"\" \""
 				+ modSymbol[curModIndex]
 				+ L"\"";
@@ -665,6 +742,8 @@ void ShirakanaUI::OnShirakanaStartClick() {
 		}
 		else {
 			QMessageBox::warning(this, "合并失败", "Temp文件丢失，导致wav合并失败");
+			cleanInputs();
+			return;
 		}
 	}
 	catch (std::exception e) {
@@ -696,7 +775,6 @@ void ShirakanaUI::OnShirakanaStartClick() {
 
 
 	//<输出临时文件>
-	player->setSource(QUrl::fromLocalFile(""));
 	remove("tmpDir\\Temp.wav");
 	curWav.write(L"tmpDir\\Temp.wav");
 	player->setSource(QUrl::fromLocalFile("tmpDir\\Temp.wav"));
@@ -720,8 +798,12 @@ void ShirakanaUI::OnShirakanaModelInsertOfficialClick() {
 	ui.CurModel->setText(QString::fromStdWString(L"当前模型：" + modNames[curModIndex]));
 	ui.ShirakanaInput->setEnabled(true);
 	ui.ShirakanaStartButton->setEnabled(true);
+	ui.SpeakerSelector->clear();
 	if (modModerType[curModIndex] == L"VITS_VCTK") {
 		ui.SpeakerSelector->setEnabled(true);
+		for (auto speaker : modSpeakers[curModIndex]) {
+			ui.SpeakerSelector->addItem(QString::fromStdWString(speaker));
+		}
 	}
 	else {
 		ui.SpeakerSelector->setEnabled(false);
@@ -745,6 +827,7 @@ void ShirakanaUI::onSliderVolumeValueChanged(int value) {
 void ShirakanaUI::onSliderMusicTimeValueChanged(qint64 value) {
 	ui.PlayerSlider->setValue(value);
 	if (value == player->duration()) {
+		ui.ShirakanaStartButton->setEnabled(true);
 		isPlay = false;
 		ui.PlayerSlider->setValue(0);
 	}
@@ -758,14 +841,71 @@ void ShirakanaUI::seekChange(int position)
 void ShirakanaUI::OnPlayerButtonClick() {
 	if (!isPlay) {
 		isPlay = true;
+		ui.ShirakanaStartButton->setEnabled(false);
 		player->play();
 	}
 	else {
 		isPlay = false;
+		ui.ShirakanaStartButton->setEnabled(true);
 		player->pause();
 	}
 }
 
 void ShirakanaUI::getDuration(qint64 time) {
 	ui.PlayerSlider->setMaximum(player->duration());
+}
+
+wstring ShirakanaUI::getCleanerStr(wstring input) {
+	wstring output =L"";
+	SECURITY_ATTRIBUTES sa;
+	HANDLE hRead, hWrite;
+	sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+	sa.lpSecurityDescriptor = NULL;
+	sa.bInheritHandle = TRUE;
+	if (!CreatePipe(&hRead, &hWrite, &sa, 0) || !SetHandleInformation(hRead, HANDLE_FLAG_INHERIT, 0))
+	{
+		QMessageBox::warning(this, "错误", "创建管道失败");
+		return input;
+	}
+	STARTUPINFO si;
+	PROCESS_INFORMATION pi;
+	ZeroMemory(&si, sizeof(STARTUPINFO));
+	ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
+	si.cb = sizeof(STARTUPINFO);
+	si.hStdError = hWrite;
+	si.hStdOutput = hWrite;
+	si.dwFlags |= STARTF_USESTDHANDLES;
+	wstring commandStr = L"\""
+		+ modCleaners[curModIndex]
+		+ L"\" \""
+		+ input
+		+ L"\"";
+	auto ProcessSta = CreateProcess(NULL,   
+		const_cast<LPWSTR>(commandStr.c_str()),        
+		NULL,           
+		NULL,           
+		TRUE,          
+		CREATE_NO_WINDOW,              
+		NULL,           
+		NULL,           
+		&si,            
+		&pi);
+	if (!ProcessSta) {
+		CloseHandle(hWrite);
+		CloseHandle(hRead);
+		return input;
+	}
+	CloseHandle(hWrite);
+	char ReadBuff[1025] = "";
+	DWORD bytesRead;
+	while (ReadFile(hRead, ReadBuff, 1024, &bytesRead, NULL))
+	{
+		ReadBuff[bytesRead] = '\0';
+		output += to_wide_string(ReadBuff);
+	}
+	WaitForSingleObject(pi.hProcess, INFINITE);
+	CloseHandle(hRead);
+	CloseHandle(pi.hProcess);
+	CloseHandle(pi.hThread);
+	return output;
 }

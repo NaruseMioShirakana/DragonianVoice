@@ -22,6 +22,7 @@ public:
 	~ShirakanaUI();
 	void loadMods();
 	void cleanInputs();
+	std::wstring getCleanerStr(std::wstring input);
 
 private slots:
 	void OnShirakanaModelInsertOfficialClick();
@@ -33,6 +34,7 @@ private slots:
 	void OnPlayerButtonClick();
 	void getDuration(qint64 time);
 
+
 private:
 	Ui::ShirakanaUI ui;
 	FILE* torchModel = nullptr;
@@ -40,6 +42,8 @@ private:
 	vector<std::wstring> modNames;
 	vector<std::wstring> modModerType;
 	vector<std::wstring> modSymbol;
+	vector<std::wstring> modCleaners;
+	vector<vector<std::wstring>> modSpeakers;
 	QString thisModFile;
 	int curModIndex;
 	QMediaPlayer *player;
