@@ -296,12 +296,12 @@ int main(int argc, char* argv[])
             return 0;
         }
         std::wstring bufferStr = buffer;
-        std::wstring PathTmp = string2wstring(argv[1]);
+        std::wstring PathTmp = to_wide_string(argv[1]);
         std::wstring Path = bufferStr + L"\\" + PathTmp;
-        std::wstring TextInput = string2wstring(argv[2]);
-        std::wstring OutDir = string2wstring(argv[3]);
+        std::wstring TextInput = to_wide_string(argv[2]);
+        std::wstring OutDir = to_wide_string(argv[3]);
         std::wstring HifiganPath = bufferStr + L"\\hifigan.onnx";
-        std::wstring SymbolStr = string2wstring(argv[4]);
+        std::wstring SymbolStr = to_wide_string(argv[4]);
         std::map<wchar_t, int64> Symbol;
         for (size_t i = 0; i < SymbolStr.length(); i++) {
             Symbol.insert(std::pair<wchar_t, int64>(SymbolStr[i], (int64)(i)));
