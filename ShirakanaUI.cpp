@@ -497,7 +497,7 @@ void ShirakanaUI::OnShirakanaStartClick() {
 
 
 	//<InitInput>
-	if (modCleaners[curModIndex] != L"None") {
+	if (modCleaners[curModIndex] != L"None" && modCleaners[curModIndex] != L"Cleaners\\japanese_g2p.exe") {
 		inputStr = getCleanerStr(inputStr);
 	}
 	while (inputStr[inputStr.length() - 1] == L'\n' || inputStr[inputStr.length() - 1] == L'\r') {
@@ -512,29 +512,54 @@ void ShirakanaUI::OnShirakanaStartClick() {
 	ui.ShirakanaInput->setEnabled(false);
 	ui.ShirakanaStartButton->setEnabled(false);
 	QCoreApplication::processEvents();
-	for (size_t i = 0; i < inputStr.length(); i++) {
-		remove(("tmpDir\\" + std::to_string(i) + ".wav").c_str());
-		if (modSymbol[curModIndex].find(inputStr[i]) == std::wstring::npos && inputStr[i] != L'\n' && inputStr[i] != L'\r') {
-			QMessageBox::warning(this, "不支持的字符", QString::fromStdString("字符位置：[" + std::to_string(i + 1) + "]"));
-			cleanInputs();
-			return;
-		}
-		if ((inputStr[i] == L'\n') || (inputStr[i] == L'\r')) {
-			if (commandInputStr != L"") {
-				if (charaSets.find(commandInputStr[commandInputStr.length() - 1]) != wstring::npos) {
-					commandInputStr += L'.';
+	if (modCleaners[curModIndex] != L"Cleaners\\japanese_g2p.exe") {
+		for (size_t i = 0; i < inputStr.length(); i++) {
+			remove(("tmpDir\\" + std::to_string(i) + ".wav").c_str());
+			if (modSymbol[curModIndex].find(inputStr[i]) == std::wstring::npos && inputStr[i] != L'\n' && inputStr[i] != L'\r') {
+				QMessageBox::warning(this, "不支持的字符", QString::fromStdString("字符位置：[" + std::to_string(i + 1) + "]"));
+				cleanInputs();
+				return;
+			}
+			if ((inputStr[i] == L'\n') || (inputStr[i] == L'\r')) {
+				if (commandInputStr != L"") {
+					if (charaSets.find(commandInputStr[commandInputStr.length() - 1]) != wstring::npos) {
+						commandInputStr += L'.';
+					}
+					if (commandInputStr.length() > 101) {
+						QMessageBox::warning(this, "转换失败", QString::fromStdString(("单句超出最大长度（100Byte）\n位于Index[" + std::to_string(commandInputVec.size()) + "]位置")));
+						cleanInputs();
+						return;
+					}
+					commandInputVec.push_back(commandInputStr);
+					commandInputStr = L"";
 				}
-				if (commandInputStr.length() > 101) {
-					QMessageBox::warning(this, "转换失败", QString::fromStdString(("单句超出最大长度（100Byte）\n位于Index[" + std::to_string(commandInputVec.size()) + "]位置")));
-					cleanInputs();
-					return;
-				}
-				commandInputVec.push_back(commandInputStr);
-				commandInputStr = L"";
+			}
+			else {
+				commandInputStr += inputStr[i];
 			}
 		}
-		else {
-			commandInputStr += inputStr[i];
+	}
+	else if (modCleaners[curModIndex] != L"None") {
+		for (size_t i = 0; i < inputStr.length(); i++) {
+			remove(("tmpDir\\" + std::to_string(i) + ".wav").c_str());
+			if ((inputStr[i] == L'\n') || (inputStr[i] == L'\r')) {
+				if (commandInputStr != L"") {
+					if (charaSets.find(commandInputStr[commandInputStr.length() - 1]) != wstring::npos) {
+						commandInputStr += L'.';
+					}
+					if (commandInputStr.length() > 101) {
+						QMessageBox::warning(this, "转换失败", QString::fromStdString(("单句超出最大长度（100Byte）\n位于Index[" + std::to_string(commandInputVec.size()) + "]位置")));
+						cleanInputs();
+						return;
+					}
+					commandInputStr = getCleanerStr(commandInputStr);
+					commandInputVec.push_back(commandInputStr);
+					commandInputStr = L"";
+				}
+			}
+			else {
+				commandInputStr += inputStr[i];
+			}
 		}
 	}
 	//<InitInput>
@@ -875,11 +900,22 @@ wstring ShirakanaUI::getCleanerStr(wstring input) {
 	si.hStdError = hWrite;
 	si.hStdOutput = hWrite;
 	si.dwFlags |= STARTF_USESTDHANDLES;
-	wstring commandStr = L"\""
-		+ modCleaners[curModIndex]
-		+ L"\" \""
-		+ input
-		+ L"\"";
+	wstring commandStr = L"";
+	if (modCleaners[curModIndex] == L"Cleaners\\japanese_g2p.exe") {
+		commandStr = L"\""
+			+ modCleaners[curModIndex]
+			+ L"\" -rsa \""
+			+ input
+			+ L"\"";
+	}
+	else {
+		commandStr = L"\""
+			+ modCleaners[curModIndex]
+			+ L"\" \""
+			+ input
+			+ L"\"";
+	}
+	
 	auto ProcessSta = CreateProcess(NULL,   
 		const_cast<LPWSTR>(commandStr.c_str()),        
 		NULL,           
