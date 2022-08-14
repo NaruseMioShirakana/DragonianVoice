@@ -64,9 +64,9 @@
         ${Mdid}_encoder.onnx
         ${Mdid}_postnet.onnx
     VITS_LJS:    //单角色VITS
-        ${Mdid}_LJS.onnx 
+        ${Mdid}_LJS.pt（Jit模型） 
     VITS_VCTK:   //多角色VITS
-        ${Mdid}_VCTK.onnx
+        ${Mdid}_VCTK.pt（Jit模型）
     
 ## Symbol的设置
     Symb:_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
