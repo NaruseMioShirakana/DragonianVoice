@@ -132,25 +132,17 @@ std::vector<Ort::Value> catTens32(std::vector<Ort::Value>& inputTensA, std::vect
     float* Ten0Out = (float*)malloc(sizeof(float) * Ten0A[0] * Ten0A[1] * Ten0A[2]);
     float* Ten1Out = (float*)malloc(sizeof(float) * Ten1A[0] * Ten1A[1] * Ten1A[2]);
     float* Ten2Out = (float*)malloc(sizeof(float) * Ten2A[0] * Ten2A[1] * Ten2A[2]);
-    for (int i = 0, k = 0; i < 80; i++) {
-        for (int j = 0; j < Ten0A[2] - 1; j++) {
-            *(Ten0Out + k) = inputTensA[0].GetTensorData<float>()[(i * (Ten0A[2] - 1)) + j];
-            k++;
-        }
-        *(Ten0Out + k) = inputTensB[0].GetTensorData<float>()[i];
-        k++;
+    for (int64 i = 0; i < 80; i++) {
+        memcpy(Ten0Out + (i * Ten0A[2]), inputTensA[0].GetTensorData<float>() + (i * (Ten0A[2]-1)), (Ten0A[2] - 1)*sizeof(float));
+        *(Ten0Out + ((i * Ten0A[2]) + Ten0A[2]-1)) = inputTensB[0].GetTensorData<float>()[i];
     }
     for (int i = 0; i < Ten1A[2] - 1; i++) {
         *(Ten1Out + i) = inputTensA[1].GetTensorData<float>()[i];
     }
     *(Ten1Out + Ten1A[2]-1) = inputTensB[1].GetTensorData<float>()[0];
-    for (int i = 0, k = 0; i < Ten2A[1]; i++) {
-        for (int j = 0; j < Ten2A[2] - 1; j++) {
-            *(Ten2Out + k) = inputTensA[2].GetTensorData<float>()[(i * (Ten2A[2]-1)) + j];
-            k++;
-        }
-        *(Ten2Out + k) = inputTensB[2].GetTensorData<float>()[i];
-        k++;
+    for (int i = 0; i < Ten2A[1]; i++) {
+        memcpy(Ten2Out + (i * Ten2A[2]), inputTensA[2].GetTensorData<float>() + (i * (Ten2A[2] - 1)), (Ten2A[2] - 1) * sizeof(float));
+        *(Ten2Out + ((i * Ten2A[2]) + Ten2A[2] - 1)) = inputTensB[2].GetTensorData<float>()[i];
     }
     std::vector<Ort::Value> outTens;
     try {
