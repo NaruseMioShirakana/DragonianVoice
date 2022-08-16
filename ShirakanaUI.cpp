@@ -13,6 +13,7 @@
 #include <codecvt>
 #include <thread>
 #include <QAudioDevice>
+#include <QInputDialog>
 using std::string;
 using std::vector;
 using std::wstring;
@@ -242,23 +243,23 @@ public:
 
 private:
 	struct WAV_HEADER {
-		char             RIFF[4];
-		unsigned long    ChunkSize;//Subchunk2Size+36Byte
-		char             WAVE[4];
-		char             fmt[4];
-		unsigned long    Subchunk1Size;
-		unsigned short   AudioFormat;//
-		unsigned short   NumOfChan;//频道数
-		unsigned long    SamplesPerSec;//采样率
-		unsigned long    bytesPerSec;//每分钟位数
-		unsigned short   blockAlign;//
-		unsigned short   bitsPerSample;//每个采样多少位（Byte*8）
-		char             Subchunk2ID[4];//数据
-		unsigned long    Subchunk2Size;//数据长度（字节数）
+		char             RIFF[4];                                       // {'R','I','F','F'}
+		unsigned long    ChunkSize;//Subchunk2Size+36Byte               // 数组长度*2+36
+		char             WAVE[4];                                       // {'W','A','V','E'}
+		char             fmt[4];                                        // {'f','m','t',' '}
+		unsigned long    Subchunk1Size;//区块大小                        // 16
+		unsigned short   AudioFormat;                                   // 1
+		unsigned short   NumOfChan;//频道数                             // 1
+		unsigned long    SamplesPerSec;//采样率                         // 22050
+		unsigned long    bytesPerSec;//每分钟比特                       // 44100
+		unsigned short   blockAlign;//对其                              // 2
+		unsigned short   bitsPerSample;//每个采样多少位（Byte*8）        // 16
+		char             Subchunk2ID[4];//数据                          // {'D','A','T','A'}
+		unsigned long    Subchunk2Size;//数据长度（字节数）              // 数组长度*2
 		~WAV_HEADER() {}
 	};//44Byte
-	WAV_HEADER header;
-	char* Data;
+	WAV_HEADER header;                                                  // int16* 强转 char* 
+	char* Data; //字节数据
 	int StartPos;
 };
 
@@ -497,9 +498,7 @@ void ShirakanaUI::OnShirakanaStartClick() {
 
 
 	//<InitInput>
-	if (modCleaners[curModIndex] != L"None" && modCleaners[curModIndex] != L"Cleaners\\japanese_g2p.exe") {
-		inputStr = getCleanerStr(inputStr);
-	}
+	inputStr = getCleanerStr(inputStr);
 	while (inputStr[inputStr.length() - 1] == L'\n' || inputStr[inputStr.length() - 1] == L'\r') {
 		inputStr.pop_back();
 	}
@@ -540,8 +539,21 @@ void ShirakanaUI::OnShirakanaStartClick() {
 		}
 	}
 	else if (modCleaners[curModIndex] != L"None") {
+		bool bRet = false;
+		wstring inputStrTmp1 = QInputDialog::getMultiLineText(this, "自定义音素","输入：",QString::fromStdWString(inputStr), &bRet).toStdWString();
+		if (bRet == true) {
+			inputStr = inputStrTmp1;
+		}
+		if (inputStr[inputStr.size() - 1] != L'\n' && inputStr[inputStr.size() - 1] != L'\r') {
+			inputStr += L'\n';
+		}
 		for (size_t i = 0; i < inputStr.length(); i++) {
 			remove(("tmpDir\\" + std::to_string(i) + ".wav").c_str());
+			if (modSymbol[curModIndex].find(inputStr[i]) == std::wstring::npos && inputStr[i] != L'\n' && inputStr[i] != L'\r') {
+				QMessageBox::warning(this, "不支持的字符", QString::fromStdString("字符位置：[" + std::to_string(i + 1) + "]"));
+				cleanInputs();
+				return;
+			}
 			if ((inputStr[i] == L'\n') || (inputStr[i] == L'\r')) {
 				if (commandInputStr != L"") {
 					if (charaSets.find(commandInputStr[commandInputStr.length() - 1]) != wstring::npos) {
@@ -552,7 +564,6 @@ void ShirakanaUI::OnShirakanaStartClick() {
 						cleanInputs();
 						return;
 					}
-					commandInputStr = getCleanerStr(commandInputStr);
 					commandInputVec.push_back(commandInputStr);
 					commandInputStr = L"";
 				}
