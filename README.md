@@ -10,6 +10,8 @@
 使用到的项目的仓库：
 - [DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
 
+使用的图像素材来源于：
+- [SummerPockets](http://key.visualarts.gr.jp/summer/)
 
 目前仅支持Windows平台。
 
