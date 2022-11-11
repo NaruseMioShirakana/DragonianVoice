@@ -18,13 +18,13 @@
 
 ## 使用方法：
     1、在release中下载zip包，解压之
-    2、打开ShirakanaTTS.exe
-    3、在右上方Mods模块中选择模型，然后点击导入模型
+    2、打开Mio-TTS.exe
+    3、在右上方Mods模块中选择模型
     4、在下方执行模块输入框中输入要转换的文字，支持Symbol中的字符，
     换行为批量转换的分句符号。
     5、点击开始合成，即可开始合成语音，等待进度完成后，可以在右上方
     播放器预览，也可以在右上方直接保存。
-    6、可以使用命令行启动：
+    6、可以使用命令行启动：（仅1.X版本）
     Shell：& '.\Tacotron inside.exe' "ModDir" "InputText." "outputDir" "Symbol"
     CMD："Tacotron inside.exe" "ModDir" "InputText." "outputDir" "Symbol"
     其中ModDir为"模型路径\\模型名" 如预置模型的"Mods\\Shiroha\\Shiroha"
@@ -37,12 +37,12 @@
     本软件标准化了模型读取模块，模型保存在Mods文件夹下的子文件夹中
     ********.mod文件用于声明模型路径以及其显示名称，以我的预置模型
     为例（Shiroha.mod）
-    - Mdid:Shiroha         路径名称即该文件夹下的Shiroha子文件夹
+    - Folder:Shiroha         路径名称即该文件夹下的Shiroha子文件夹
     - Name:鸣濑白羽                                 Mod显示名称
     - Type:Tacotron2         Mod项目名（见下文“支持的model项目”）
-    - Symb:_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklm
+    - Symbol:_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklm
       nopqrstuvwxyz                         Symbol（设置见下文）
-    - Clen:characters_cleaner                Cleaner（详见下文）
+    - Cleaner:characters_cleaner                Cleaner（详见下文）
     - 角色名1                    这里往下的只有VITS多角色需要设定
     - 角色名2
     - 角色名n
@@ -73,9 +73,9 @@
         ${Mdid}_encoder.onnx
         ${Mdid}_postnet.onnx
     VITS_LJS:    //单角色VITS
-        ${Mdid}_LJS.pt（Jit模型） 
+        ${Mdid}_solo.pt（Jit模型） 
     VITS_VCTK:   //多角色VITS
-        ${Mdid}_VCTK.pt（Jit模型）
+        ${Mdid}_mul.pt（Jit模型）
     
 ## Symbol的设置
     Symb:_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
