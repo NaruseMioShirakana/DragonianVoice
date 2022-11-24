@@ -1,0 +1,88 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\Window">
+      <UniqueIdentifier>{b72eafd1-64c3-4a9c-923b-ada0ebe9f2a7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Window">
+      <UniqueIdentifier>{af48540c-466b-4d23-85d7-0afcff98e159}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Helper">
+      <UniqueIdentifier>{8f150d94-9f66-4d0e-bddc-d461fe588f41}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Helper">
+      <UniqueIdentifier>{44904344-1a3f-4def-9ec0-77f683aa8e55}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Extend">
+      <UniqueIdentifier>{6580cdbb-b774-4e21-a808-bc999cb50150}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Extend">
+      <UniqueIdentifier>{83491527-9f52-4fe0-bcd3-ac98b5895ef2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ShirakanaTTSUI.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Window\MainWindow.h">
+      <Filter>头文件\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="Helper\Helper.h">
+      <Filter>头文件\Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Extend\IconButton.h">
+      <Filter>头文件\Extend</Filter>
+    </ClInclude>
+    <ClInclude Include="Window\MioShirakanaTensor.hpp">
+      <Filter>源文件</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="resource1.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ShirakanaTTSUI.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Window\MainWindow.cpp">
+      <Filter>源文件\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Helper\Helper.cpp">
+      <Filter>源文件\Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="Extend\IconButton.cpp">
+      <Filter>源文件\Extend</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ShirakanaTTSUI1.rc">
+      <Filter>资源文件</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="1.ico">
+      <Filter>资源文件</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
