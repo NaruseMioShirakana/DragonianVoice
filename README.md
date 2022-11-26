@@ -6,7 +6,7 @@
 - 4、禁止用于任何商业游戏、低创游戏以及Galgame制作，不反对无偿的精品游戏制作以及Mod制作。
 - 5、禁止使用该项目及该项目衍生物以及发布模型等制作各种电子垃圾（比方说AIGalgame，AI游戏制作等）
 
-# ShirakanaMio-TextToSpeech
+# Mio-TextToSpeech
 一个基于各种开源TTS项目的完全C++UI化TTS转换软件
 
 使用到的项目的仓库：
