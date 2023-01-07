@@ -11,8 +11,11 @@
 # Moe Speech Synthesis
 一个基于各种开源TTS项目的完全C++UI化Speech Synthesis软件
 
-使用到的项目的仓库：
+支持的项目的仓库：
 - [DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
+- [VITS](https://github.com/jaywalnut310/vits)
+- [SoVits](https://github.com/innnky/so-vits-svc/tree/32k)
+- [DiffSvc](https://github.com/prophesier/diff-SVC)  //TODO
 
 使用的图像素材来源于：
 - [SummerPockets](http://key.visualarts.gr.jp/summer/)
