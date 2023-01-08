@@ -1,5 +1,5 @@
 # 用户协议：
-## 本项目暂时停止新版本的开源，仅提供exe可执行文件，以后会恢复开源
+## 本项目暂时停止新版本（V2）的开源，仅提供exe可执行文件，以后会恢复开源。V1版本在另一个分支
 
 ## 使用该项目代表你同意如下几点：
 - 1、你愿意自行承担由于使用该项目而造成的一切后果。
@@ -11,8 +11,11 @@
 # Moe Speech Synthesis
 一个基于各种开源TTS项目的完全C++UI化Speech Synthesis软件
 
-使用到的项目的仓库：
+支持的项目的仓库：
 - [DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
+- [VITS](https://github.com/jaywalnut310/vits)
+- [SoVits](https://github.com/innnky/so-vits-svc/tree/32k)
+- [DiffSvc](https://github.com/prophesier/diff-SVC)  //TODO
 
 使用的图像素材来源于：
 - [SummerPockets](http://key.visualarts.gr.jp/summer/)
@@ -21,12 +24,15 @@
 
 ## 使用方法：
     1、在release中下载zip包，解压之
+
     2、打开MoeSS.exe
-    3、在右上方Mods模块中选择模型
-    4、在下方执行模块输入框中输入要转换的文字，支持Symbol中的字符，
-    换行为批量转换的分句符号。
-    5、点击开始合成，即可开始合成语音，等待进度完成后，可以在右上方
-    播放器预览，也可以在右上方直接保存。
+
+    3、在左上方Mods模块中选择模型
+
+    4、在下方输入框中输入要转换的文字，点击“清理”可以执行文本Cleaner，换行为批量转换的分句符号。（SoVits需要输入音频路径）
+
+    5、点击开始合成，即可开始合成语音，等待进度完成后，可以在右上方播放器预览，也可以在右上方直接保存。
+
     6、可以使用命令行启动：（仅1.X版本）
     Shell：& '.\Tacotron inside.exe' "ModDir" "InputText." "outputDir" "Symbol"
     CMD："Tacotron inside.exe" "ModDir" "InputText." "outputDir" "Symbol"
@@ -37,54 +43,70 @@
     输出文件默认在tmpDir中
 
 ## 模型导入：
-    本软件标准化了模型读取模块，模型保存在Mods文件夹下的子文件夹中
-    ********.mod文件用于声明模型路径以及其显示名称，以我的预置模型
-    为例（Shiroha.mod）
-    - Folder:Shiroha                                                                   路径名称，即该文件夹下的Shiroha子文件夹
-    - Name:鸣濑白羽                                                                     Mod显示名称
-    - Type:Tacotron2                                                                   Mod项目名（见下文“支持的model项目”）
-    - Symbol:_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz          Symbol（设置见下文，SoVits和DiffSvc不需要此行）
-    - Cleaner:characters_cleaner                                                       Cleaner（详见下文，SoVits和DiffSvc不需要此行）
-    - Rate:22050                                                                       采样率
-    - Hop:320                                                                          HopSize（仅SoVits或DiffSvc需要此行）
-    - 角色名1                                                                           这里往下的只有VITS多角色或需要设定
-    - 角色名2
-    - 角色名n
-
-## 模型导出：
-    Tacotron2：
-    详见issue
-
-- [演示视频](https://www.bilibili.com/video/BV1AB4y1t783)
+```json
+// 本软件标准化了模型读取模块，模型保存在Mods文件夹下的子文件夹中********.json文件用于声明模型路径以及其显示名称，以我的模型为例（SummerPockets.json）
+{
+    "Folder" : "SummerPockets",
+    "Name" : "SummerPocketsReflectionBlue",
+    "Type" : "VITS_VCTK",
+    "Symbol" : "_,.!?-~…AEINOQUabdefghijkmnoprstuvwyzʃʧʦ↓↑" ,
+    "Cleaner" : "LowerCharacters",
+    "Rate" : 22050,
+    "Hop" : 0,
+    "Hifigan": "",
+    "Characters" : ["鳴瀬しろは","空門蒼","鷹原うみ","紬ヴェンダース","神山識","水織静久","野村美希","久島鴎","岬鏡子"]
+}
+// 其中必填项目为Folder,Name,Type,Rate
+// TTS（Tacotron2，Vits）需要填写Symbol,Cleaner
+// 无自带声码器的项目（Tacotron2，DiffSvc）需要填写Hifigan
+// VC（Sovits，DiffSvc）需要填写Hop
+// 含多角色embidding的（Vits多人模型，Sovits）需要填写Characters
+```
 
 ## 支持的model项目
-    ${xxx}是什么意思大家都知道吧（）里面的变量详见“模型导入”
-    Tacotron2：
-        需要在Mod文件夹中加入 
-        ${Folder}_decoder_iter.onnx 
-        ${Folder}_encoder.onnx
-        ${Folder}_postnet.onnx
-    VITS_LJS:    //单角色VITS
-        ${Folder}_solo.pt（Jit模型） 
-    VITS_VCTK:   //多角色VITS
-        ${Folder}_mul.pt（Jit模型）
-    SoVits:      //Soft Vits
-        ${Folder}_mul.pt
-    
+```cxx 
+// ${xxx}是什么意思大家应该都知道吧，总之以下是多个不同项目需要的模型文件（需要放置在对应的模型文件夹下）。
+// Tacotron2：
+    ${Folder}_decoder_iter.onnx
+    ${Folder}_encoder.onnx
+    ${Folder}_postnet.onnx
+// VITS_LJS:    单角色VITS
+    ${Folder}_dec.onnx
+    ${Folder}_flow.onnx
+    ${Folder}_enc_p.onnx
+    ${Folder}_dp.onnx 
+// VITS_VCTK:   多角色VITS
+    ${Folder}_dec.onnx
+    ${Folder}_emb.onnx
+    ${Folder}_flow.onnx
+    ${Folder}_enc_p.onnx
+    ${Folder}_dp.onnx
+// SoVits:
+    ${Folder}_SoVits.onnx
+```
 ## Symbol的设置
-    Symb:_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
-    打开你训练模型的项目，打开text\symbol.py，如图
+    例如：_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
+    打开你训练模型的项目，打开text\symbol.py，如图按照划线的List顺序将上面的4个字符串连接即可
 ![image](https://user-images.githubusercontent.com/40709280/183290732-dcb93323-1061-431b-aafa-c285a3ec5e82.png)
-    按照划线的List顺序将上面的4个字符串连接即可
+
 
 ## Cleaner的设置
-    Cleaner请放置于根目录的Cleaners文件夹内，应该是一个可执行
-    程序（.exe）
-    Cleaner的程序编写语言不限，但执行参数必须为C++执行参数标准
-    的argv（可以使用控制台 "xxx.exe" "input_str"）这种格式执行
-    执行参数只接受一个（输入的文本，可以是UTF16和UTF32字符）
-    输出只有一个（标准控制台输出）也就是经过Cleaner处理后的文本。
-    在前文中需要设定的cleaner，即为此exe的文件名（不带路径拓展名）
+```cxx
+/*
+Cleaner请放置于根目录的Cleaners文件夹内，应该是一个按照要求定义的动态库（.dll），dll应当命名为Cleaner名，其中定义的第二个函数（Cleaner）函数的函数名也应当为Cleaner名，Cleaner名即为模型定义Json文件中Cleaner一栏填写的内容。
+Dll内部应当编写两个函数：
+*/
+void Release();                   //用于释放Dll申请的内存
+wchar_t* Cleaner(wchar_t* input); //input为输入字符串，返回值为输出字符串
+// 该接口只要求输入输出一致，并不要求功能一致，也就是说，你可以在改Dll中实现任何想要的功能，比方说ChatGpt，机器翻译等等。
+// 以ChatGpt为例，Cleaner函数传入了一个输入字符串input，将该输入传入ChatGpt，再将ChatGpt的输出传入Cleaner，最后返回输出。
+wchar_t* Cleaner(wchar_t* input){
+    wchar_t* tmpOutput = ChatGpt(input);
+    return Clean(tmpOutput);
+}
+// 注意：导出dll时请使用 extern "C" 关键字来防止C++语言的破坏性命名。
+```
 
-## 已经制作好的模型
-[Github](https://github.com/FujiwaraShirakana/ShirakanaTTSMods)
+## 杂项
+- [已经制作好的模型](https://github.com/FujiwaraShirakana/ShirakanaTTSMods)
+- [演示视频](https://www.bilibili.com/video/BV1bD4y1V7zu)
