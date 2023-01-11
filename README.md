@@ -98,8 +98,8 @@ Cleaner请放置于根目录的Cleaners文件夹内，应该是一个按照要�
 */
 const wchar_t* PluginMain(const wchar_t*);
 // 该接口只要求输入输出一致，并不要求功能一致，也就是说，你可以在改Dll中实现任何想要的功能，比方说ChatGpt，机器翻译等等。
-// 以ChatGpt为例，Cleaner函数传入了一个输入字符串input，将该输入传入ChatGpt，再将ChatGpt的输出传入Cleaner，最后返回输出。
-wchar_t* Cleaner(wchar_t* input){
+// 以ChatGpt为例，PluginMain函数传入了一个输入字符串input，将该输入传入ChatGpt，再将ChatGpt的输出传入PluginMain，最后返回输出。
+wchar_t* PluginMain(wchar_t* input){
     wchar_t* tmpOutput = ChatGpt(input);
     return Clean(tmpOutput);
 }
