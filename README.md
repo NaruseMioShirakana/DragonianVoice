@@ -93,12 +93,10 @@
 ## Cleaner的设置
 ```cxx
 /*
-Cleaner请放置于根目录的Cleaners文件夹内，应该是一个按照要求定义的动态库（.dll），dll应当命名为Cleaner名，其中定义的第二个函数（Cleaner）函数的函数名也应当为Cleaner名，Cleaner名即为模型定义Json文件中Cleaner一栏填写的内容。
-Dll内部应当编写两个函数：
+Cleaner请放置于根目录的Cleaners文件夹内，应该是一个按照要求定义的动态库（.dll），dll应当命名为Cleaner名，Cleaner名即为模型定义Json文件中Cleaner一栏填写的内容。
+所有的插件dll需要定义以下函数，函数名必须为PluginMain，Dll名必须为插件名（或Cleaner名）：
 */
-// 插件接口变化：所有的插件dll需要定义以下函数
 const wchar_t* PluginMain(const wchar_t*);
-// 函数名必须为PluginMain，Dll名必须为插件名
 // 该接口只要求输入输出一致，并不要求功能一致，也就是说，你可以在改Dll中实现任何想要的功能，比方说ChatGpt，机器翻译等等。
 // 以ChatGpt为例，Cleaner函数传入了一个输入字符串input，将该输入传入ChatGpt，再将ChatGpt的输出传入Cleaner，最后返回输出。
 wchar_t* Cleaner(wchar_t* input){
