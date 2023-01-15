@@ -7,7 +7,7 @@
 * date: 2022-9-19 Create
 */
 #include "framework.h"
-#include "ShirakanaTTSUI.h"
+#include "MoeSSUI.h"
 #define val const auto
 int __stdcall wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
