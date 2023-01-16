@@ -54,12 +54,13 @@
     "Rate" : 22050,
     "Hop" : 0,
     "Hifigan": "",
+    "Hubert": "3.0",
     "Characters" : ["鳴瀬しろは","空門蒼","鷹原うみ","紬ヴェンダース","神山識","水織静久","野村美希","久島鴎","岬鏡子"]
 }
 // 其中必填项目为Folder,Name,Type,Rate
 // TTS（Tacotron2，Vits）需要填写Symbol,Cleaner
 // 无自带声码器的项目（Tacotron2，DiffSvc）需要填写Hifigan
-// VC（Sovits，DiffSvc）需要填写Hop
+// VC（Sovits，DiffSvc）需要填写Hop和Hubert，如果你的项目为sovits3.0，则需要将Hubert设置为3.0，如果不是，则此行可以填写任意字符串
 // 含多角色embidding的（Vits多人模型，Sovits）需要填写Characters
 ```
 
