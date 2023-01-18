@@ -1,4 +1,4 @@
-﻿/*
+/*
 * file: MoeSSUI.cpp
 * info: MoeSS的UI界面实现 应用程序主类
 * 
@@ -8,7 +8,7 @@
 */
 #include "framework.h"
 #include "MoeSSUI.h"
-#define val const auto
+
 int __stdcall wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
