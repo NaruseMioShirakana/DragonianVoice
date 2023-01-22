@@ -34,8 +34,8 @@
     5、点击开始合成，即可开始合成语音，等待进度完成后，可以在右上方播放器预览，也可以在右上方直接保存。
 
     6、可以使用命令行启动：（仅1.X版本）
-    Shell：& '.\Tacotron inside.exe' "ModDir" "InputText." "outputDir" "Symbol"
-    CMD："Tacotron inside.exe" "ModDir" "InputText." "outputDir" "Symbol"
+    Shell：& '.\xxx.exe' "ModDir" "InputText." "outputDir" "Symbol"
+    CMD："xxx.exe" "ModDir" "InputText." "outputDir" "Symbol"
     其中ModDir为"模型路径\\模型名" 如预置模型的"Mods\\Shiroha\\Shiroha"
     InputText为需要转换的文字（仅支持空格逗号句号以及字母）
     outputDir为输出文件名（不是路径，是文件名，不需要加后缀）
@@ -58,8 +58,8 @@
     "Characters" : ["鳴瀬しろは","空門蒼","鷹原うみ","紬ヴェンダース","神山識","水織静久","野村美希","久島鴎","岬鏡子"]
 }
 // 其中必填项目为Folder,Name,Type,Rate
-// TTS（Tacotron2，Vits）需要填写Symbol,Cleaner
-// 无自带声码器的项目（Tacotron2，DiffSvc）需要填写Hifigan
+// TTS（Tacotron2，Vits，串联用模型）需要填写Symbol,Cleaner
+// 无自带声码器的项目（Tacotron2，DiffSvc）需要填写Hifigan（hifigan模型应该放置于hifigan，该项设置为模型文件名（不带后缀））
 // VC（Sovits，DiffSvc）需要填写Hop和Hubert，如果你的项目为sovits3.0，则需要将Hubert设置为3.0，如果不是，则此行可以填写任意字符串
 // 含多角色embidding的（Vits多人模型，Sovits）需要填写Characters
 ```
