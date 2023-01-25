@@ -15,7 +15,7 @@
 - [DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
 - [VITS](https://github.com/jaywalnut310/vits)
 - [SoVits](https://github.com/innnky/so-vits-svc/tree/32k)
-- [DiffSvc](https://github.com/prophesier/diff-SVC)  //TODO
+- [DiffSvc](https://github.com/prophesier/diff-SVC)
 
 使用的图像素材来源于：
 - [SummerPockets](http://key.visualarts.gr.jp/summer/)
@@ -53,14 +53,19 @@
     "Cleaner" : "LowerCharacters",
     "Rate" : 22050,
     "Hop" : 0,
-    "Hifigan": "",
-    "Hubert": "3.0",
+    "Hifigan": "hifigan",
+    "SoVits3": false,
+    "Hubert": "hubert",
+    "Pndm" : 100,
+    "MelBins" : 128,
     "Characters" : ["鳴瀬しろは","空門蒼","鷹原うみ","紬ヴェンダース","神山識","水織静久","野村美希","久島鴎","岬鏡子"]
 }
 // 其中必填项目为Folder,Name,Type,Rate
 // TTS（Tacotron2，Vits，串联用模型）需要填写Symbol,Cleaner
 // 无自带声码器的项目（Tacotron2，DiffSvc）需要填写Hifigan（hifigan模型应该放置于hifigan，该项设置为模型文件名（不带后缀））
-// VC（Sovits，DiffSvc）需要填写Hop和Hubert，如果你的项目为sovits3.0，则需要将Hubert设置为3.0，如果不是，则此行可以填写任意字符串
+// VC（Sovits，DiffSvc）需要填写Hop和Hubert（Hubert放到Hubert文件夹下）
+// SoVits3为Sovits3.0的标记，如果该模型基于SoVits3.0训练则需要填写为true
+// DiffSvc需要填写Pndm（就是你导出模型时的加速倍率），MelBins（在你的模型config.yaml里面的前几项有一个带mel_bins的一项）
 // 含多角色embidding的（Vits多人模型，Sovits）需要填写Characters
 ```
 
