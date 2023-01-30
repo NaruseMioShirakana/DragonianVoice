@@ -105,6 +105,8 @@ A：如果能够确定你做的不是电子垃圾，我会提供一些力所能�
     ${Folder}_dp.onnx
 // SoVits:
     ${Folder}_SoVits.onnx
+// DiffSvc:
+    ${Folder}_diffSvc.onnx
 ```
 ## Symbol的设置
     例如：_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
