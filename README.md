@@ -140,5 +140,5 @@ wchar_t* PluginMain(wchar_t* input){
 
 ## 依赖列表
 - [FFmpeg](https://ffmpeg.org/)
-- [World](https://www.bilibili.com/video/BV1bD4y1V7zu)
+- [World](https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder)
 - [rapidJson](https://github.com/Tencent/rapidjson)
