@@ -1,5 +1,6 @@
 # 强调：
-导出HuBert时inputname应该为source，outputname应该为embed；Diffusion使用的hifigan的inputname应该为c和f0，outputname应该是audio，Tacotron2使用的声码器inputname应该为x，outname应该为audio
+- 导出HuBert时inputname应该为source，outputname应该为embed；Diffusion使用的hifigan的inputname应该为c和f0，outputname应该是audio，Tacotron2使用的声码器inputname应该为x，outname应该为audio
+- 还有就是，好多问题我都在ReadMe里面写明了，所有的使用方法我都在B站视频里说清楚了，请认真观看视频和ReadMe，不要看个视频只看个标题然后直奔简介评论区找下载链接然后下载下来不会用又去四处问，Issue里面如果有问题是视频里说明的我不会回答并会直接关闭。我从3.0开始不发下载链接只发仓库链接的意思就是让认真看说明。
 
 # 一些已经做好的前置模型：
 [Vocoder & HiddenUnitBert](https://github.com/NaruseMioShirakana/RequireMent-Model-For-MoeSS)
