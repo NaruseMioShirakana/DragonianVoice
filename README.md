@@ -5,6 +5,9 @@
 # 一些已经做好的前置模型：
 [Vocoder & HiddenUnitBert](https://github.com/NaruseMioShirakana/RequireMent-Model-For-MoeSS)
 
+# 发布/获取模型：
+[Maple的主题站](https://winmoes.com/voicepak)
+
 # 用户协议：
 ## 本项目暂时停止新版本（V2）的开源，仅提供exe可执行文件，以后会恢复开源。V1版本在另一个分支。
 
