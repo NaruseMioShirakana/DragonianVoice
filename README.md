@@ -86,7 +86,7 @@
 - Type：模型类别
 - Rate：采样率（必须和你训练时候的一模一样，不明白原因建议去学计算机音频相关的知识）
 ### Tacotron2：
-```json
+```jsonc
 {
     "Folder" : "Atri",
     "Name" : "亚托莉-Tacotron2",
@@ -101,7 +101,7 @@
 //Hifigan：Hifigan模型名，必须填且必须将在前置模型中下载到的hifigan放置到hifigan文件夹
 ```
 ### Vits：
-```json
+```jsonc
 {
     "Folder" : "SummerPockets",
     "Name" : "SummerPocketsReflectionBlue",
@@ -116,7 +116,7 @@
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
 ```
 ### SoVits：
-```json
+```jsonc
 {
     "Folder" : "NyaruTaffySo",
     "Name" : "NyaruTaffy-SoVits",
@@ -135,7 +135,7 @@
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
 ```
 ### DiffSVC：
-```json
+```jsonc
 {
     "Folder" : "DiffShiroha",
     "Name" : "白羽",
@@ -160,7 +160,7 @@
 //V2：是否为V2模型，V2模型就是后来我分4个模块导出的那个
 ```
 ### DiffSinger：
-```json
+```jsonc
 {
     "Folder" : "utagoe",
     "Name" : "utagoe",
