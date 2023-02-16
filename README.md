@@ -1,17 +1,20 @@
 # 强调：
 - 导出HuBert时inputname应该为source，outputname应该为embed；Diffusion使用的hifigan的inputname应该为c和f0，outputname应该是audio，Tacotron2使用的声码器inputname应该为x，outname应该为audio
 - 还有就是，好多问题我都在ReadMe里面写明了，所有的使用方法我都在B站视频里说清楚了，请认真观看视频和ReadMe，不要看个视频只看个标题然后直奔简介评论区找下载链接然后下载下来不会用又去四处问，Issue里面如果有问题是视频里说明的我不会回答并会直接关闭。我从3.0开始不发下载链接只发仓库链接的意思就是让认真看说明。
+---
 
 # 一些已经做好的前置模型：
 [Vocoder & HiddenUnitBert](https://github.com/NaruseMioShirakana/RequireMent-Model-For-MoeSS)
 
+---
 # 发布/获取模型：
 [Maple的主题站](https://winmoes.com/voicepak)
 
+---
 # 用户协议：
-## 本项目暂时停止新版本（V2）的开源，仅提供exe可执行文件，以后会恢复开源。V1版本在另一个分支。
+- 本项目暂时停止新版本（V2）的开源，仅提供exe可执行文件，以后会恢复开源。V1版本在另一个分支。
 
-使用本项目进行二创时请标注本项目仓库地址或作者bilibili空间地址：https://space.bilibili.com/108592413
+- 使用本项目进行二创时请标注本项目仓库地址或作者bilibili空间地址：https://space.bilibili.com/108592413
 
 ## 使用该项目代表你同意如下几点：
 - 1、你愿意自行承担由于使用该项目而造成的一切后果。
@@ -19,47 +22,51 @@
 - 3、你不会使用之从事违法活动，若从事违法活动，造成的一切后果由你自己承担。
 - 4、禁止用于任何商业游戏、低创游戏以及Galgame制作，不反对无偿的精品游戏制作以及Mod制作。
 - 5、禁止使用该项目及该项目衍生物以及发布模型等制作各种电子垃圾（比方说AIGalgame，AI游戏制作等）
+---
 
 ## Q&A：
 ### Q：该项目以后会收费吗？
-A：该项目为永久免费、暂时闭源的项目，如果在其他地方存在本软件的收费版本，请立即举报且不要购买，本软件永久免费。如果想用疯狂星期四塞满白叶，可以前往爱发癫 https://afdian.net/a/NaruseMioShirakana 
+    A：该项目为永久免费、暂时闭源的项目，如果在其他地方存在本软件的收费版本，请立即举报且不要购买，本软件永久免费。如果想用疯狂星期四塞满白叶，可以前往爱发癫 https://afdian.net/a/NaruseMioShirakana 
 ### Q：是否提供有偿模型代训练？
-A：原则上不提供，训练TTS模型比较简单，没必要花冤枉钱，按照网上教程一步一步走就可以了。提供免费的Onnx转换。
+    A：原则上不提供，训练TTS模型比较简单，没必要花冤枉钱，按照网上教程一步一步走就可以了。提供免费的Onnx转换。
 ### Q：电子垃圾评判标准是什么？
-A：
-+ 1、原创度。自己的东西在整个项目中的比例（对于AI来说，使用完全由你独立训练模型的创作属于你自己；使用他人模型的创作属于别人）。涵盖的方面包括但不限于程序、美工、音频、策划等等。举个例子，套用Unity等引擎模板换皮属于电子垃圾。
-+ 2、开发者态度。作者开发的态度是不是捞一波流量和钱走人或单纯虚荣。比方说打了无数的tag，像什么“国产”“首个”“最强”“自制”这种引流宣传，结果是非常烂或是平庸的东西，且作者明显没有好好制作该项目的想法，属于电子垃圾。
-+ 3、反对一切使用未授权的数据集训练出来的AI模型商用的行为。 
-### Q：技术支持？
-A：如果能够确定你做的不是电子垃圾，我会提供一些力所能及的技术支持。 
+    A：1、原创度。自己的东西在整个项目中的比例（对于AI来说，使用完全由你独立训练模型的创作属于你自己；使用他人模型的创作属于别人）。涵盖的方面包括但不限于程序、美工、音频、策划等等。举个例子，套用Unity等引擎模板换皮属于电子垃圾。
 
-## 以上均为君子协议，要真要做我也拦不住，但还是希望大家自觉，有这个想法的也希望乘早改悔罢
+    2、开发者态度。作者开发的态度是不是捞一波流量和钱走人或单纯虚荣。比方说打了无数的tag，像什么“国产”“首个”“最强”“自制”这种引流宣传，结果是非常烂或是平庸的东西，且作者明显没有好好制作该项目的想法，属于电子垃圾。
+    
+    3、反对一切使用未授权的数据集训练出来的AI模型商用的行为。 
+### Q：技术支持？
+    A：如果能够确定你做的不是电子垃圾，我会提供一些力所能及的技术支持。 
+### 作者的吐槽
+    以上均为君子协议，要真要做我也拦不住，但还是希望大家自觉，有这个想法的也希望乘早改悔罢
 ---
 
 # Moe Speech Synthesis
-一个基于各种开源TTS项目的完全C++UI化Speech Synthesis软件
+一个基于各种开源TTS、VC以及SVS项目的完全C++Speech Synthesis UI软件
 
 支持的项目的仓库：
 - [DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
 - [VITS](https://github.com/jaywalnut310/vits)
 - [SoVits](https://github.com/innnky/so-vits-svc/tree/32k)
 - [DiffSvc](https://github.com/prophesier/diff-SVC)
+- [DiffSinger](https://github.com/openvpi/DiffSinger)
 
 使用的图像素材来源于：
 - [SummerPockets](http://key.visualarts.gr.jp/summer/)
 
 目前仅支持Windows，未来可能移植Android，并为Linux用户提供软件，暂无开发Mac与Ios的计划。
 
+---
 ## 使用方法：
-    1、在release中下载zip包，解压之
+    1、在release中下载软件压缩包，解压之
 
-    2、打开MoeSS.exe
+    2、在上文 [Vocoder & HiddenUnitBert] 仓库中下载相应的前置模型或附加模块，并放置到相应文件夹，前置模型与项目的对应关系会在下文提到
 
-    3、在左上方Mods模块中选择模型
+    3、将模型放置在Mods文件夹中，在左上方模型选择模块中选择模型，标准模型结构请查阅下文“支持的项目”
 
-    4、在下方输入框中输入要转换的文字，点击“清理”可以执行文本Cleaner，换行为批量转换的分句符号。（SoVits需要输入音频路径）
+    4、在下方输入框中输入要转换的文字，点击“启用插件”可以执行文本Cleaner，换行为批量转换的分句符号（SoVits/DiffSvc需要输入音频路径，DiffSinger需要输入ds或json项目文件的路径）
 
-    5、点击开始合成，即可开始合成语音，等待进度完成后，可以在右上方播放器预览，也可以在右上方直接保存。
+    5、点击开始合成，即可开始合成语音，等待进度完成后，可以在右上方播放器预览，也可以在右上方直接保存
 
     6、可以使用命令行启动：（仅1.X版本）
     Shell：& '.\xxx.exe' "ModDir" "InputText." "outputDir" "Symbol"
@@ -69,34 +76,110 @@ A：如果能够确定你做的不是电子垃圾，我会提供一些力所能�
     outputDir为输出文件名（不是路径，是文件名，不需要加后缀）
     Symbol见下文
     输出文件默认在tmpDir中
+---
+## 模型制作：
+- 本软件标准化了模型读取模块，模型保存在Mods文件夹下的子文件夹中********.json文件用于声明模型路径以及其显示名称，需要将模型转换为Onnx，转换的仓库在我GitHub主页Pin了出来。
 
-## 模型导入：
+### 通用参数(不管是啥模型都必须填的，不填就不识别)：
+- Folder：保存模型的文件夹名
+- Name：模型在UI中的显示名称
+- Type：模型类别
+- Rate：采样率（必须和你训练时候的一模一样，不明白原因建议去学计算机音频相关的知识）
+### Tacotron2：
 ```json
-// 本软件标准化了模型读取模块，模型保存在Mods文件夹下的子文件夹中********.json文件用于声明模型路径以及其显示名称，以我的模型为例（SummerPockets.json）
+{
+    "Folder" : "Atri",
+    "Name" : "亚托莉-Tacotron2",
+    "Type" : "Tacotron2",
+    "Rate" : 22050,
+    "Symbol" : "_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
+    "Cleaner" : "JapaneseCleaner",
+    "Hifigan": "hifigan"
+}
+//Symbol：模型的Symbol，不知道Symbol是啥的建议多看几个视频了解了解TTS的基础知识，这一项在Tacotron2中必须填。
+//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
+//Hifigan：Hifigan模型名，必须填且必须将在前置模型中下载到的hifigan放置到hifigan文件夹
+```
+### Vits：
+```json
 {
     "Folder" : "SummerPockets",
     "Name" : "SummerPocketsReflectionBlue",
-    "Type" : "VITS_VCTK",
-    "Symbol" : "_,.!?-~…AEINOQUabdefghijkmnoprstuvwyzʃʧʦ↓↑" ,
-    "Cleaner" : "LowerCharacters",
+    "Type" : "Vits",
     "Rate" : 22050,
-    "Hop" : 0,
-    "Hifigan": "hifigan",
-    "SoVits3": false,
-    "Hubert": "hubert",
-    "Pndm" : 100,
-    "MelBins" : 128,
+    "Symbol" : "_,.!?-~…AEINOQUabdefghijkmnoprstuvwyzʃʧʦ↓↑ ",
+    "Cleaner" : "JapaneseCleaner",
     "Characters" : ["鳴瀬しろは","空門蒼","鷹原うみ","紬ヴェンダース","神山識","水織静久","野村美希","久島鴎","岬鏡子"]
 }
-// 其中必填项目为Folder,Name,Type,Rate
-// TTS（Tacotron2，Vits，串联用模型）需要填写Symbol,Cleaner
-// 无自带声码器的项目（Tacotron2，DiffSvc）需要填写Hifigan（hifigan模型应该放置于hifigan，该项设置为模型文件名（不带后缀））
-// VC（Sovits，DiffSvc）需要填写Hop和Hubert（Hubert放到Hubert文件夹下）
-// SoVits3为Sovits3.0的标记，如果该模型基于SoVits3.0训练则需要填写为true
-// DiffSvc需要填写Pndm（就是你导出模型时的加速倍率），MelBins（在你的模型config.yaml里面的前几项有一个带mel_bins的一项）
-// 含多角色embidding的（Vits多人模型，Sovits）需要填写Characters
+//Symbol：模型的Symbol，不知道Symbol是啥的建议多看几个视频了解了解TTS的基础知识，这一项在Vits中必须填。
+//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
+//Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+```
+### SoVits：
+```json
+{
+    "Folder" : "NyaruTaffySo",
+    "Name" : "NyaruTaffy-SoVits",
+    "Type" : "SoVits",
+    "Rate" : 32000,
+    "Hop" : 320,
+    "Cleaner" : "",
+    "Hubert": "hubert",
+    "SoVits3": true,
+    "Characters" : ["Taffy","Nyaru"]
+}
+//Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
+//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
+//Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
+//SoVits3：是否为SoVits3.0的，如果不是SoVits3.0统一False
+//Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+```
+### DiffSVC：
+```json
+{
+    "Folder" : "DiffShiroha",
+    "Name" : "白羽",
+    "Type" : "DiffSvc",
+    "Rate" : 44100,
+    "Hop" : 512,
+    "MelBins" : 128,
+    "Cleaner" : "",
+    "Hifigan": "nsf_hifigan",
+    "Hubert": "hubert",
+    "Characters" : [],
+    "Pndm" : 100,
+    "V2" : true
+}
+//Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
+//MelBins：模型的MelBins，不知道MelBins是啥的建议多看几个视频了解了解梅尔基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
+//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
+//Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
+//Hifigan：Hifigan模型名，必须填且必须将在前置模型中下载到的nsf_hifigan放置到hifigan文件夹
+//Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+//Pndm：加速倍数，如果是V1模型则必填且必须为导出时设置的加速倍率
+//V2：是否为V2模型，V2模型就是后来我分4个模块导出的那个
+```
+### DiffSinger：
+```json
+{
+    "Folder" : "utagoe",
+    "Name" : "utagoe",
+    "Type" : "DiffSinger",
+    "Rate" : 44100,
+    "Hop" : 512,
+    "Cleaner" : "",
+    "Hifigan": "singer_nsf_hifigan",
+    "Characters" : [],
+    "MelBins" : 128
+}
+//Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
+//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
+//Hifigan：Hifigan模型名，必须填且必须将在前置模型中下载到的singer_nsf_hifigan放置到hifigan文件夹
+//Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+//MelBins：模型的MelBins，不知道MelBins是啥的建议多看几个视频了解了解梅尔基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
 ```
 
+---
 ## 支持的model项目
 ```cxx 
 // ${xxx}是什么意思大家应该都知道吧，总之以下是多个不同项目需要的模型文件（需要放置在对应的模型文件夹下）。
@@ -104,12 +187,12 @@ A：如果能够确定你做的不是电子垃圾，我会提供一些力所能�
     ${Folder}_decoder_iter.onnx
     ${Folder}_encoder.onnx
     ${Folder}_postnet.onnx
-// VITS_LJS:    单角色VITS
+// Vits:    单角色VITS
     ${Folder}_dec.onnx
     ${Folder}_flow.onnx
     ${Folder}_enc_p.onnx
     ${Folder}_dp.onnx 
-// VITS_VCTK:   多角色VITS
+// Vits:   多角色VITS
     ${Folder}_dec.onnx
     ${Folder}_emb.onnx
     ${Folder}_flow.onnx
@@ -119,13 +202,26 @@ A：如果能够确定你做的不是电子垃圾，我会提供一些力所能�
     ${Folder}_SoVits.onnx
 // DiffSvc:
     ${Folder}_diffSvc.onnx
+// DiffSvc: V2
+    ${Folder}_encoder.onnx
+    ${Folder}_denoise.onnx
+    ${Folder}_pred.onnx
+    ${Folder}_after.onnx
+// DiffSinger: OpenVpiVersion
+    ${Folder}_diffSinger.onnx
+// DiffSinger: 
+    ${Folder}_encoder.onnx
+    ${Folder}_denoise.onnx
+    ${Folder}_pred.onnx
+    ${Folder}_after.onnx
 ```
+---
 ## Symbol的设置
     例如：_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
     打开你训练模型的项目，打开text\symbol.py，如图按照划线的List顺序将上面的4个字符串连接即可
 ![image](https://user-images.githubusercontent.com/40709280/183290732-dcb93323-1061-431b-aafa-c285a3ec5e82.png)
 
-
+---
 ## Cleaner的设置
 ```cxx
 /*
