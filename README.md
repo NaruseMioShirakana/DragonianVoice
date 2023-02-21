@@ -4,8 +4,9 @@
 ---
 
 # 一些已经做好的前置模型：
-[Vocoder & HiddenUnitBert](https://github.com/NaruseMioShirakana/RequireMent-Model-For-MoeSS) //停止更新（由于下载和上传速度）
-[HuggingFace](https://huggingface.co/NaruseMioShirakana/MoeSS-SUBModel) //最新仓库地址
+停止更新（由于下载和上传速度）: [Vocoder & HiddenUnitBert](https://github.com/NaruseMioShirakana/RequireMent-Model-For-MoeSS) 
+
+最新仓库地址 : [HuggingFace](https://huggingface.co/NaruseMioShirakana/MoeSS-SUBModel) 
 
 ---
 # 发布/获取模型：
