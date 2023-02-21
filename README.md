@@ -4,7 +4,8 @@
 ---
 
 # 一些已经做好的前置模型：
-[Vocoder & HiddenUnitBert](https://github.com/NaruseMioShirakana/RequireMent-Model-For-MoeSS)
+[Vocoder & HiddenUnitBert](https://github.com/NaruseMioShirakana/RequireMent-Model-For-MoeSS) //停止更新（由于下载和上传速度）
+[HuggingFace](https://huggingface.co/NaruseMioShirakana/MoeSS-SUBModel) //最新仓库地址
 
 ---
 # 发布/获取模型：
@@ -126,12 +127,14 @@
     "Cleaner" : "",
     "Hubert": "hubert",
     "SoVits3": true,
+    "SoVits4": false,
     "Characters" : ["Taffy","Nyaru"]
 }
 //Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
 //Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
 //Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
 //SoVits3：是否为SoVits3.0的，如果不是SoVits3.0统一False
+//SoVits4：是否为SoVits4.0的，如果不是SoVits4.0统一False
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
 ```
 ### DiffSVC：
