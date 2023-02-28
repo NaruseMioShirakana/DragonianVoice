@@ -1,6 +1,6 @@
-# 强调：
-- 导出HuBert时inputname应该为source，outputname应该为embed；Diffusion使用的hifigan的inputname应该为c和f0，outputname应该是audio，Tacotron2使用的声码器inputname应该为x，outname应该为audio
-- 还有就是，好多问题我都在ReadMe里面写明了，所有的使用方法我都在B站视频里说清楚了，请认真观看视频和ReadMe，不要看个视频只看个标题然后直奔简介评论区找下载链接然后下载下来不会用又去四处问，Issue里面如果有问题是视频里说明的我不会回答并会直接关闭。我从3.0开始不发下载链接只发仓库链接的意思就是让认真看说明。
+觉得现在存档还是为时过早，至少等语音合成的几个项目停更再说（）
+Discussions我开了，如果有什么问题可以在里面提，等其他大佬的回答就可以了，issue请发布确定为BUG的反馈或对于期望加入的功能的反馈。
+
 ---
 
 # 一些已经做好的前置模型：
@@ -8,6 +8,10 @@
 
 最新仓库地址 : [HuggingFace](https://huggingface.co/NaruseMioShirakana/MoeSS-SUBModel) 
 
+自己导出前置：
+- HuBert：input_names应该为["source"]，output_names应该为["embed"]，dynamic_axes应当为{"source":[0,2],}
+- Diffusion模型使用的hifigan：input_names应该为["c","f0"]，output_names应该为["audio"]，dynamic_axes应当为{"c":[0,1],"f0":[0,1],}
+- Tacotron2使用的hifigan：input_names应该为["x"]，output_names应该为["audio"]，dynamic_axes应当为{"x":[0,1],}
 ---
 # 发布/获取模型：
 [Maple的主题站](https://winmoes.com/voicepak)
