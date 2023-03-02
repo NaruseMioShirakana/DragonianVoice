@@ -20,14 +20,12 @@ Export pre models by yourself：
 # User Agreement：
 On the basis of the open source agreement please also comply with the following rules.
 
-- Please indicate the project repository when using this project. The project cannot be compiled at the moment (due to the use of UI libraries that are not open source)
-
-- You can also indicate author's bilibili space address：https://space.bilibili.com/108592413
+- Please indicate the project repository or author's bilibili space address：https://space.bilibili.com/108592413 when using this project. The project cannot be compiled at the moment (due to the use of UI libraries that are not open source)
 
 ## By using this program you are agreeing to the following：
-- 1. You are willing to bear all the consequences caused by the use of the program.
-- 2、You promise that you will not sell the program, and that you will bear all the consequences caused by the sale.
-- 3、You will not use it to Illegal activities, and if you use it to Illegal activities, you will bear all the consequences caused by Illegal activities.
+- 1、You are willing to bear all the consequences caused by the use of the program.
+- 2、You promise that you will not sell the program, and that you will bear all the consequences.
+- 3、You promise you will not use it to Illegal activities, and if you use it to Illegal activities, you will bear all the consequences.
 - 4、Do not use it for any commercial game, low quality game and Galgame production, Excellent game production and Mod production are allowed.
 - 5、Do not produce electronic junk (such as AIGalgame, AI game production, etc.)
 ---
@@ -62,11 +60,11 @@ Windows Only
 
     2、Download the corresponding pre-models or additional modules in the [Vocoder & HiddenUnitBert] repository above and place them in the corresponding folders, the correspondence between pre-models and projects will be mentioned below.
 
-    3. Place the model in the Mods folder, and select the model from the "模型选择" Module at the top left, for the standard model structure, please refer to "Supported Projects" below.
+    1. Place the model in the Mods folder, and select the model from the "模型选择" Module at the top, for the standard model structure, please refer to "Supported Projects" below.
 
-    4, enter the text to be converted in the input box below, click "启用插件" to execute the text Cleaner, and change the behavior of the batch conversion of clause symbols (SoVits/DiffSvc need to enter the audio path, DiffSinger need to enter the path of the ds or json project file)
+    4, enter the text to be converted in the input box below, click "启用插件" to execute the text Cleaner (SoVits/DiffSvc need to enter the audio path, DiffSinger need to enter the path of the ds or json project file)
 
-    5, click "开始合成", you can start synthesizing voice, wait for the progress to complete, you can preview in the top right player, you can also save directly in the top right
+    5, click "开始合成", you can start synthesizing voice, wait for the progress to complete, you can preview in the player, you can also save directly
 ---
 ## Making models：
 - The software standardizes the model reading module, the model is placed in a subfolder under the Mods folder. ********.json file is used to declare the model path and its display name, etc. The model needs to be converted to Onnx, the repository for exporting onnx will be mentioned below
@@ -88,7 +86,7 @@ Windows Only
     "Hifigan": "hifigan"
 }
 //Symbol: Symbol of the model
-//Cleaner: the name of the plugin, optional, if this is not empty, you must place the corresponding CleanerDll in the Cleaner folder, if the Dll does not exist or there is a problem inside the Dll, it will report a plugin error when loading the model
+//Cleaner: the name of the plugin, optional, if this is not empty, you must place the CleanerDll in the Cleaner folder, if the Dll does not exist or there is a problem inside the Dll, it will report a plugin error when loading the model
 //Hifigan: Hifigan model name, must be filled in and the hifigan model downloaded from the pre-model or exported by yourself must be placed in the hifigan folder.
 ```
 ### Vits：
@@ -103,7 +101,7 @@ Windows Only
     "Characters" : ["鳴瀬しろは","空門蒼","鷹原うみ","紬ヴェンダース","神山識","水織静久","野村美希","久島鴎","岬鏡子"]
 }
 //Symbol: Symbol of the model
-//Cleaner: the name of the plugin, optional, if this is not empty, you must place the corresponding CleanerDll in the Cleaner folder, if the Dll does not exist or there is a problem inside the Dll, it will report a plugin error when loading the model
+//Cleaner: the name of the plugin, optional, if this is not empty, you must place the CleanerDll in the Cleaner folder, if the Dll does not exist or there is a problem inside the Dll, it will report a plugin error when loading the model
 //Characters: If it is a multi-role model, you must fill in the list of your role names, if it is a single-role model, you can leave it out
 ```
 ### SoVits：
@@ -121,7 +119,7 @@ Windows Only
     "Characters" : ["Taffy","Nyaru"]
 }
 //Hop：HopLength
-//Cleaner: the name of the plugin, optional, if this is not empty, you must place the corresponding CleanerDll in the Cleaner folder, if the Dll does not exist or there is a problem inside the Dll, it will report a plugin error when loading the model
+//Cleaner: the name of the plugin, optional, if this is not empty, you must place the CleanerDll in the Cleaner folder, if the Dll does not exist or there is a problem inside the Dll, it will report a plugin error when loading the model
 //Hubert: The name of the Hubert model, must be filled in and the Hubert model downloaded from the pre-model or exported by yourself must be placed in the Hubert folder.
 //SoVits3: whether it is SoVits3.0, if not SoVits3.0 fill in False
 //SoVits4: whether it is SoVits4.0, if it is not SoVits4.0, fill in False
@@ -145,7 +143,7 @@ Windows Only
 }
 //Hop：HopLength
 //MelBins：MelBins
-//Cleaner: the name of the plugin, optional, if this is not empty, you must place the corresponding CleanerDll in the Cleaner folder, if the Dll does not exist or there is a problem inside the Dll, it will report a plugin error when loading the model
+//Cleaner: the name of the plugin, optional, if this is not empty, you must place the CleanerDll in the Cleaner folder, if the Dll does not exist or there is a problem inside the Dll, it will report a plugin error when loading the model
 //Hubert: The name of the Hubert model, must be filled in and the Hubert model downloaded from the pre-model or exported by yourself must be placed in the Hubert folder.
 //Hifigan: Hifigan model name, must be filled in and the nsf_hifigan model downloaded from the pre-model or exported by yourself must be placed in the hifigan folder.
 //Characters: If it is a multi-role model, it must be filled in as a list of your role names, if it is a single-role model, you can leave it out.
@@ -166,7 +164,7 @@ Windows Only
     "MelBins" : 128
 }
 //Hop：HopLength
-//Cleaner: the name of the plugin, optional, if this is not empty, you must place the corresponding CleanerDll in the Cleaner folder, if the Dll does not exist or there is a problem inside the Dll, it will report a plugin error when loading the model
+//Cleaner: the name of the plugin, optional, if this is not empty, you must place the CleanerDll in the Cleaner folder, if the Dll does not exist or there is a problem inside the Dll, it will report a plugin error when loading the model
 //Hifigan: Hifigan model name, must be filled in and the nsf_hifigan model downloaded from the pre-model or exported by yourself must be placed in the hifigan folder.
 //Characters: If it is a multi-role model, it must be filled in as a list of your role names, if it is a single-role model, you can leave it out.
 //MelBins：MelBins
