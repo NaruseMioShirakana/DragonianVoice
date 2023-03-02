@@ -2,6 +2,7 @@
 
 Discussions我开了，如果有什么问题可以在里面提，等其他大佬的回答就可以了，issue请发布确定为BUG的反馈或对于期望加入的功能的反馈。
 
+[简体中文](README.md)    [English](README_en.md)
 ---
 
 # 一些已经做好的前置模型：
@@ -51,7 +52,7 @@ Discussions我开了，如果有什么问题可以在里面提，等其他大佬
 # Moe Speech Synthesis
 一个基于各种开源TTS、VC以及SVS项目的完全C++Speech Synthesis UI软件
 
-支持的项目的仓库：
+支持的Net：
 - [DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
 - [VITS](https://github.com/jaywalnut310/vits)
 - [SoVits](https://github.com/innnky/so-vits-svc/tree/32k)
@@ -61,7 +62,7 @@ Discussions我开了，如果有什么问题可以在里面提，等其他大佬
 使用的图像素材来源于：
 - [SummerPockets](http://key.visualarts.gr.jp/summer/)
 
-目前仅支持Windows，未来可能移植Android，并为Linux用户提供软件，暂无开发Mac与Ios的计划。
+目前仅支持Windows
 
 ---
 ## 使用方法：
