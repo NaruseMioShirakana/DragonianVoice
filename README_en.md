@@ -20,18 +20,16 @@ Export pre models by yourself：
 # User Agreement：
 On the basis of the open source agreement please also comply with the following rules.
 
-- Please indicate the project repository or author's bilibili space address：https://space.bilibili.com/108592413 when using this project. The project cannot be compiled at the moment (due to the use of UI libraries that are not open source)
-
-## By using this program you are agreeing to the following：
 - 1、You are willing to bear all the consequences caused by the use of the program.
 - 2、You promise that you will not sell the program, and you will bear all the consequences caused by sell.
 - 3、You promise you will not use it to Illegal activities, and if you use it to Illegal activities, you will bear all the consequences caused by Illegal activities.
 - 4、Do not use it for any commercial game, low quality game and Galgame production, Excellent game production and Mod production are allowed.
 - 5、Do not produce electronic junk (such as AIGalgame, AI game production, etc.)
+- 6、Please indicate the project repository or author's bilibili space address：https://space.bilibili.com/108592413 when using this project. The project cannot be compiled at the moment (due to the use of UI libraries that are not open source)
 ---
 
 ## Q&A：
-### Q：Will the program be charged in the future?？
+### Q：Will the program be charged in the future？
     A：No, and this project is permanently open source and free, if there is a paid version of this software elsewhere, please report it immediately and do not buy it, this software is permanently free. If you want to support the project，see：https://afdian.net/a/NaruseMioShirakana 
 ### Q：Paid model training services？
     A：In principle, it does not provide, training TTS model is relatively simple, there is no need to spend money, follow the online tutorial step by step on it. Free Onnx output is provided。
