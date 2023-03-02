@@ -24,8 +24,8 @@ On the basis of the open source agreement please also comply with the following 
 
 ## By using this program you are agreeing to the following：
 - 1、You are willing to bear all the consequences caused by the use of the program.
-- 2、You promise that you will not sell the program, and that you will bear all the consequences.
-- 3、You promise you will not use it to Illegal activities, and if you use it to Illegal activities, you will bear all the consequences.
+- 2、You promise that you will not sell the program, and you will bear all the consequences caused by sell.
+- 3、You promise you will not use it to Illegal activities, and if you use it to Illegal activities, you will bear all the consequences caused by Illegal activities.
 - 4、Do not use it for any commercial game, low quality game and Galgame production, Excellent game production and Mod production are allowed.
 - 5、Do not produce electronic junk (such as AIGalgame, AI game production, etc.)
 ---
