@@ -6,12 +6,12 @@ Discussions我开了，如果有什么问题可以在里面提，等其他大佬
 
 ---
 
-# Predecessor models：
+# Pre models：
 Github - Vocoder & HiddenUnitBert: [Vocoder & HiddenUnitBert](https://github.com/NaruseMioShirakana/RequireMent-Model-For-MoeSS) 
 
 HuggingFace : [HuggingFace](https://huggingface.co/NaruseMioShirakana/MoeSS-SUBModel) 
 
-Export predecessor models by yourself：
+Export pre models by yourself：
 - HuBert：input_names must be ["source"]，output_names must be ["embed"]，dynamic_axes must be {"source":[0,2],}
 - Diffusion - hifigan：input_names must be ["c","f0"]，output_names must be ["audio"]，dynamic_axes must be {"c":[0,1],"f0":[0,1],}
 - Tacotron2 - hifigan：input_names must be ["x"]，output_names must be ["audio"]，dynamic_axes must be {"x":[0,1],}
@@ -20,16 +20,16 @@ Export predecessor models by yourself：
 # User Agreement：
 On the basis of the open source agreement please also comply with the following rules.
 
-- Please indicate the project repository when citing this project. The project cannot be compiled at the moment (due to the use of UI libraries that are not open source)
+- Please indicate the project repository when using this project. The project cannot be compiled at the moment (due to the use of UI libraries that are not open source)
 
 - You can also indicate author's bilibili space address：https://space.bilibili.com/108592413
 
 ## By using this program you are agreeing to the following：
 - 1. You are willing to bear all the consequences caused by the use of the program.
-- 2、You promise that you will not sell the program and its affiliated models, and that you will bear all the consequences caused by the sale.
-- 3、You will not use it to engage in illegal activities, and if you engage in illegal activities, you will be responsible for all the consequences.
-- 4、Prohibited to use it for any commercial game, low creation game and Galgame production, not against gratuitous fine game production and Mod production.
-- 5、Prohibit the use of the project and the project derivatives and the release of models and other production of various electronic junk (such as AIGalgame, AI game production, etc.)
+- 2、You promise that you will not sell the program, and that you will bear all the consequences caused by the sale.
+- 3、You will not use it to Illegal activities, and if you use it to Illegal activities, you will bear all the consequences caused by Illegal activities.
+- 4、Do not use it for any commercial game, low quality game and Galgame production, Excellent game production and Mod production are allowed.
+- 5、Do not produce electronic junk (such as AIGalgame, AI game production, etc.)
 ---
 
 ## Q&A：
