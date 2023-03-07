@@ -6,6 +6,8 @@ Discussions我开了，如果有什么问题可以在里面提，等其他大佬
 
 ---
 
+# 强调：CUDA版本MoeSS只支持CUDA12.0以下，CUDNN 83.0以下
+
 # 一些已经做好的前置模型：
 停止更新（由于下载和上传速度）: [Vocoder & HiddenUnitBert](https://github.com/NaruseMioShirakana/RequireMent-Model-For-MoeSS) 
 
