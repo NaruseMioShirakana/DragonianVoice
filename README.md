@@ -124,6 +124,21 @@ Discussions我开了，如果有什么问题可以在里面提，等其他大佬
 //Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
 ```
+### Pits：
+```jsonc
+{
+    "Folder" : "SummerPockets",
+    "Name" : "SummerPocketsReflectionBlue",
+    "Type" : "Pits",
+    "Rate" : 22050,
+    "Symbol" : "_,.!?-~…AEINOQUabdefghijkmnoprstuvwyzʃʧʦ↓↑ ",
+    "Cleaner" : "JapaneseCleaner",
+    "Characters" : ["鳴瀬しろは","空門蒼","鷹原うみ","紬ヴェンダース","神山識","水織静久","野村美希","久島鴎","岬鏡子"]
+}
+//Symbol：模型的Symbol，不知道Symbol是啥的建议多看几个视频了解了解TTS的基础知识，这一项在Vits中必须填。
+//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
+//Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+```
 ### SoVits_3.0_32k：
 ```jsonc
 {
