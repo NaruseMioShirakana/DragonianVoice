@@ -24,9 +24,6 @@ MoeSS和工具箱之前的版本不支持中文路径是什么原因？实际上
 - HuBert：input_names应该为["source"]，output_names应该为["embed"]，dynamic_axes应当为{"source":[0,2],}
 - Diffusion模型使用的hifigan：input_names应该为["c","f0"]，output_names应该为["audio"]，dynamic_axes应当为{"c":[0,1],"f0":[0,1],}
 - Tacotron2使用的hifigan：input_names应该为["x"]，output_names应该为["audio"]，dynamic_axes应当为{"x":[0,1],}
----
-# 发布/获取模型：
-[Maple的主题站](https://winmoes.com/voicepak)
 
 ---
 # 用户协议：
