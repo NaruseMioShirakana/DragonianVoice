@@ -15,7 +15,7 @@ We recommend you to use the CPU version, which reasons faster and has no other p
 
 ---
 
-# Some sub-models exported by me
+# Sub-models
 Stopped updating (due to download and upload speed): [Vocoder & HiddenUnitBert](https://github.com/NaruseMioShirakana/RequireMent-Model-For-MoeSS) 
 
 Latest repository link : [HuggingFace](https://huggingface.co/NaruseMioShirakana/MoeSS-SUBModel) 
