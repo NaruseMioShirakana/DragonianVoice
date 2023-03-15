@@ -2,19 +2,6 @@
 
 ---
 
-# Attention
-To use the GPU (CUDA) version of MoeSS or the toolbox, please install the CUDA driver up to version 12.0, the CUDA driver up to version 11.0, and the CUDNN dynamic library up to version 83.0, and follow the online tutorials.
-
-Why there is such a requirement? That would be a question for CUDA, the company behind CUDNN, NVIDIA, and the official of OnnxRuntime. Both some features of the CUDA driver and some problems with OnnxRuntime cause this requirement.
-
-What is the reason why previous versions of MoeSS and Toolbox did not support Chinese paths? The MoeSS and Toolbox natively support Chinese paths, but the underlying OnnxRuntime does not. This is because the Windows version of OnnxRuntime uses the A-series functions of Win32Api, which do not support non-ANSI paths. While I cannot solve this problem, OnnxRuntime can fix this bug officially. Fortunately, the latest OnnxRuntime uses the W-series functions to solve this problem of Chinese paths.
-
-If you encounter a pop-up error when loading a model, it may be caused by the above problem (mainly because CUDA and CUDNN are not installed or not installed as required). If this is the case, you can go to the issue section in the official Onnx repository at https://github.com/microsoft/onnxruntime to find a solution.
-
-We recommend you to use the CPU version, which reasons faster and has no other problems.
-
----
-
 # Sub-models
 Stopped updating (due to download and upload speed): [Vocoder & HiddenUnitBert](https://github.com/NaruseMioShirakana/RequireMent-Model-For-MoeSS) 
 
