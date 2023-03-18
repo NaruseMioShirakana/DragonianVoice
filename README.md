@@ -1,5 +1,11 @@
 [简体中文](README.md)    [English](README_en.md)
 
+torch未来的版本会支持复数的导出，到时候便会支持DDSPSVC，而该项目估计会在支持DDSPSVC后正式完成并存档。
+
+~~实际上好几次有试图重构屎山的想法，但是看了一眼我写的答辩代码我自己都不想重构了，同时这也给看到这个项目的同志一个警示，写代码一定要从一开始就好好设计，要不是屎山越堆越高后期就没法重构力（大悲）~~
+
+之后我的精力将放到[AiToolKits](https://github.com/NaruseMioShirakana/ShirakanaNoAiToolKits)的开发上面。
+
 ---
 
 # 强调
