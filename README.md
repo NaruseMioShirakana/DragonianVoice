@@ -320,9 +320,9 @@ wchar_t* PluginMain(wchar_t* input){
 - [rapidJson](https://github.com/Tencent/rapidjson)
 
 ---
-## 📚 Some legal provisions for reference
+## 📚 相关法规
 
-#### Any country, region, organization, or individual using this project must comply with the following laws.
+#### 使用该项目的任何组织或个人都应当遵守包括但不限于以下的法律。
 
 #### 《民法典》
 
