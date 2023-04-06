@@ -1,7 +1,5 @@
 [简体中文](README.md)    [English](README_en.md)
 
-torch未来的版本会支持复数的导出，到时候便会支持DDSPSVC，而该项目估计会在支持DDSPSVC后正式完成并存档。
-
 ~~MoeStudio开发中~~
 
 之后我的精力将放到[AiToolKits](https://github.com/NaruseMioShirakana/ShirakanaNoAiToolKits)的开发上面。
