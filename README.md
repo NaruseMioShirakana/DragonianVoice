@@ -153,8 +153,8 @@ MoeSS和工具箱之前的版本不支持中文路径是什么原因？实际上
 ### RVC：
 ```jsonc
 {
-    "Folder" : "NyaruTaffySo",
-    "Name" : "NyaruTaffy-SoVits",
+    "Folder" : "NyaruTaffy",
+    "Name" : "NyaruTaffy",
     "Type" : "RVC",
     "Rate" : 40000,
     "Hop" : 320,
