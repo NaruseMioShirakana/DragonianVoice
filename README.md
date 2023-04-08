@@ -68,6 +68,8 @@ MoeSS和工具箱之前的版本不支持中文路径是什么原因？实际上
 - [SoVits](https://github.com/innnky/so-vits-svc/tree/32k)
 - [DiffSvc](https://github.com/prophesier/diff-SVC)
 - [DiffSinger](https://github.com/openvpi/DiffSinger)
+- [RVC](https://github.com/liujing04/Retrieval-based-Voice-Conversion-WebUI)
+- [FishDiffusion](https://github.com/fishaudio/fish-diffusion)
 
 使用的图像素材来源于：
 - [SummerPockets](http://key.visualarts.gr.jp/summer/)
@@ -146,6 +148,23 @@ MoeSS和工具箱之前的版本不支持中文路径是什么原因？实际上
 }
 //Symbol：模型的Symbol，不知道Symbol是啥的建议多看几个视频了解了解TTS的基础知识，这一项在Vits中必须填。
 //Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
+//Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+```
+### RVC：
+```jsonc
+{
+    "Folder" : "NyaruTaffySo",
+    "Name" : "NyaruTaffy-SoVits",
+    "Type" : "RVC",
+    "Rate" : 40000,
+    "Hop" : 320,
+    "Cleaner" : "",
+    "Hubert": "hubert4.0",
+    "Characters" : ["Taffy","Nyaru"]
+}
+//Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
+//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
+//Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
 ```
 ### SoVits_3.0_32k：
@@ -268,6 +287,8 @@ MoeSS和工具箱之前的版本不支持中文路径是什么原因？实际上
     ${Folder}_dp.onnx
 // SoVits:
     ${Folder}_SoVits.onnx
+// RVC:
+    ${Folder}_RVC.onnx
 // DiffSvc:
     ${Folder}_diffSvc.onnx
 // DiffSvc: V2
