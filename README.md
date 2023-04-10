@@ -1,3 +1,7 @@
+# 模型需要转换为ONNX模型，转换ONNX的程序我已经pull到每个项目的源仓库了，PTH不能直接用！！！！！！！！！！！！！
+
+---
+
 [简体中文](README.md)    [English](README_en.md)
 
 ~~MoeStudio开发中~~
@@ -7,8 +11,6 @@
 ---
 
 # 强调
-模型需要转换为ONNX模型，转换ONNX的程序我已经pull到每个项目的源仓库了，PTH不能直接用！！！！！！！！！！！！！
-
 使用GPU（CUDA）版本的MoeSS或者工具箱，请安装12.0以下，11.0版本以上的CUDA驱动程序，83.0版本以下的CUDNN动态库，并按照网上的教程安装。
 
 为什么有这样的要求？那就得问CUDA，CUDNN背后的英伟达公司以及OnnxRuntime的官方了，这两个问题都是由CUDA驱动的一些特性和OnnxRuntime的一些问题引起的。
