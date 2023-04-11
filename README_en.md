@@ -1,5 +1,9 @@
 [简体中文](README.md)    [English](README_en.md)
 
+## Warning!!!
+
+This project is an open source, offline project, and all developers and maintainers of this project (hereinafter referred to as contributors) have no control over this project.  The contributor of this project has never provided any organization or individual with any form of assistance, including but not limited to data set extraction, data set processing, computing support, training support, infering, etc.  Contributors to the project do not and cannot know what users are using the project for.  Therefore, all AI models and synthesized audio based on the training of this project have nothing to do with the contributors of this project.  All problems arising therefrom shall be borne by the user.
+
 ---
 
 # Sub-models
