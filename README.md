@@ -65,8 +65,8 @@ MoeSS和工具箱之前的版本不支持中文路径是什么原因？实际上
     A：如果能够确定你做的不是电子垃圾，同时合法合规，没有严重的政治错误，我会提供一些力所能及的技术支持。 
 ---
 
-# Moe Speech Synthesis
-一个基于各种开源TTS、VC以及SVS项目的完全C++Speech Synthesis UI软件
+# Moe Voice Studio
+本项目是专注于二次元亚文化圈，面向动漫爱好者的语音合成辅助软件。
 
 支持的Net：
 - [DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
