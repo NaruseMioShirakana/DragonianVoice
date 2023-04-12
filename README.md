@@ -330,11 +330,6 @@ wchar_t* PluginMain(wchar_t* input){
 ```
 
 ---
-## 杂项
-- [已经制作好的模型](https://github.com/FujiwaraShirakana/ShirakanaTTSMods)
-- [演示视频](https://www.bilibili.com/video/BV1bD4y1V7zu)
-
----
 ## 依赖列表
 - [FFmpeg](https://ffmpeg.org/)
 - [World](https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder)
