@@ -18,10 +18,6 @@ Notes on exporting onnx sub models:
 
 ---
 # User Agreement
-- Please indicate the project repository when citing this project. This project is temporarily uncompilable (due to the use of an interface library that is not open source)
-
-- When using this project for secondary creation, please indicate the repository of this project or the author's bilibili channel link: https://space.bilibili.com/108592413
-
 ## By using this project you must agree to these following terms:
 - 1、 You must bear all consequences arising from the use of the program at your own risk.
 - 2、 You may not sell the program and its affiliated sub-models, and you will be responsible for all consequences resulting from such sale.
@@ -35,7 +31,7 @@ Notes on exporting onnx sub models:
 ### Q: Will the project charge in the future?
     A: The project is permanently open source and free. If there is a paid version of this software elsewhere, please report it immediately to your shopping site and do not buy it, it is permanently free. If you would like to support Shirakana by making a donation, you can go to https://afdian.net/a/NaruseMioShirakana for more information.
 ### Q: Do you offer a paid model training service?
-    A: In principle we do not offer this service. Training TTS models is relatively simple and there is no need to spend money on it, just follow the online tutorials step by step. In addition we offer a free Onnx conversion service.
+    A: In principle we do not offer this service. Training TTS models is relatively simple and there is no need to spend money on it, just follow the online tutorials step by step.
 ### Q: How do we determine if a piece is "digital junk"?
     A: 1. Originality. The percentage of your own stuff in the overall project (for AI, creations using models trained entirely independently by you belong to you; work generated using someone else's model belongs to someone else). Aspects covered include, but are not limited to, programming, artwork, audio, designing, etc. For example, a game that uses a template from an engine's market such as Unity is "digital junk".
 
