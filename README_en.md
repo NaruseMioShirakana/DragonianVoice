@@ -293,10 +293,6 @@ wchar_t* PluginMain(wchar_t* input){
 // Note: Please use the extern "C" keyword when exporting the dll to prevent destructive naming in C++.
 ```
 
-## Others
-- [Models already made](https://github.com/FujiwaraShirakana/ShirakanaTTSMods)
-- [Demo Video](https://www.bilibili.com/video/BV1bD4y1V7zu)
-
 ## List of dependencies
 - [FFmpeg](https://ffmpeg.org/)
 - [World](https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder)
