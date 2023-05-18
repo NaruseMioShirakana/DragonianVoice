@@ -4,7 +4,7 @@
 
 选择语言：[简体中文](README.md)    [English](README_en.md)
 
-~~MoeVoiceStudio开发中~~
+目前该仓库的项目为MoeSS，MoeVoiceStudio会在本月或下月发布，敬请期待。
 
 作者的其他项目：[AiToolKits](https://github.com/NaruseMioShirakana/ShirakanaNoAiToolKits)
 
