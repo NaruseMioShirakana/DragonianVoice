@@ -2,9 +2,9 @@
 
 ---
 
-[简体中文](README.md)    [English](README_en.md)
+选择语言：[简体中文](README.md)    [English](README_en.md)
 
-~~MoeStudio开发中~~
+~~MoeVoiceStudio开发中~~
 
 作者的其他项目：[AiToolKits](https://github.com/NaruseMioShirakana/ShirakanaNoAiToolKits)
 
