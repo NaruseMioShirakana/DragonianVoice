@@ -1,4 +1,8 @@
-[简体中文](README.md)    [English](README_en.md)
+# MoeVoiceStudio —— Comming Soon
+
+The current project of this repository is MoeSS, and MoeVoiceStudio will be released this month or next.
+
+Change Language：[简体中文](README.md)    [English](README_en.md)
 
 ## Warning!!!
 
@@ -327,4 +331,3 @@ wchar_t* PluginMain(wchar_t* input){
 <a href="https://github.com/NaruseMioShirakana/MoeSS/graphs/contributors" target="_blank">
   <img src="https://contrib.rocks/image?repo=NaruseMioShirakana/MoeSS" />
 </a>
-
