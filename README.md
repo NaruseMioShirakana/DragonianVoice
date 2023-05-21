@@ -1,135 +1,109 @@
-# 模型需要转换为ONNX模型，转换ONNX的程序我已经pull到每个项目的源仓库了，PTH不能直接用！！！！！！！！！！！！！
+# MoeVoiceStudio —— Comming Soon
+
+The current project of this repository is MoeSS, and MoeVoiceStudio will be released this month or next.
+
+Change Language：[简体中文](README.md)    [English](README_en.md)
+
+## Warning!!!
+
+This project is an open source, offline project, and all developers and maintainers of this project (hereinafter referred to as contributors) have no control over this project.  The contributor of this project has never provided any organization or individual with any form of assistance, including but not limited to data set extraction, data set processing, computing support, training support, infering, etc.  Contributors to the project do not and cannot know what users are using the project for.  Therefore, all AI models and synthesized audio based on the training of this project have nothing to do with the contributors of this project.  All problems arising therefrom shall be borne by the user.
 
 ---
 
-[简体中文](README.md)    [English](README_en.md)
+# Sub-models
+Stopped updating (due to download and upload speed): [Vocoder & HiddenUnitBert](https://github.com/NaruseMioShirakana/RequireMent-Model-For-MoeSS) 
 
-~~MoeStudio开发中~~
+Latest repository link : [HuggingFace](https://huggingface.co/NaruseMioShirakana/MoeSS-SUBModel) 
 
-作者的其他项目：[AiToolKits](https://github.com/NaruseMioShirakana/ShirakanaNoAiToolKits)
-
----
-
-# 免责声明
-本项目为开源、离线的项目，本项目的所有开发者以及维护者（以下简称贡献者）对本项目没有控制力。本项目的贡献者从未向任何组织或个人提供包括但不限于数据集提取、数据集加工、算力支持、训练支持、推理等一切形式的帮助；本项目的贡献者不知晓也无法知晓使用者使用该项目的用途。故一切基于本项目合成的音频都与本项目贡献者无关。一切由此造成的问题由使用者自行承担。
-
-本项目本身不具备任何语音合成的功能，一切的功能均需要由使用者自行训练模型并自行将其制作为Onnx模型，且模型的训练与Onnx模型的制作均与本项目的贡献者无关，均为使用者自己的行为，本项目贡献者未参与一切使用者的模型训练与制作。
-
-本项目为完全离线状态下运行，无法采集任何用户信息，也无法获取用户的输入数据，故本项目贡献者对用户的一切输入以及模型不知情，因此不对任何用户输入负责。
-
-本项目也没有附带任何模型，任何二次发布所附带的模型以及用于此项目的模型均与此项目开发者无关。
+Notes on exporting onnx sub models:
+- HuBert: input_names should be ["source"], output_names should be ["embed"], dynamic_axes should be {"source":[0,2],}
+- hifigan for Diffusion model: input_names should be ["c", "f0"], output_names should be ["audio"], dynamic_axes should be {"c":[0,1], "f0":[0,1],}
+- hifigan for Tacotron2: input_names should be ["x"], output_names should be ["audio"], dynamic_axes should be {"x":[0,1],}
 
 ---
-# 由于OnnxRuntime引发的问题
-
-使用GPU（CUDA）版本，请安装12.0以下，11.0版本以上的CUDA驱动程序，83.0版本以下的CUDNN动态库，并按照网上的教程安装。
-
-为什么有这样的要求？那就得问CUDA，CUDNN背后的英伟达公司以及OnnxRuntime的官方了，这两个问题都是由CUDA驱动的一些特性和OnnxRuntime的一些问题引起的。
-
-之前的版本不支持中文路径是什么原因？实际上就是上述问题的体现。项目本体是支持中文路径的，不过它底层的OnnxRuntime是不支持中文路径的，因为Windows版本的OnnxRuntime使用了Win32Api的A系列函数，A系列函数都是不支持非ANSI编码的路径的。这个问题并不是我能够解决的也不是我应该解决的，只有OnnxRuntime官方修复了这个BUG才可以解决，不过好在最新的OnnxRuntime使用了W系列函数，解决了中文路径的这个问题。
-
-模型加载时候遇到弹窗报错，就是由于上述问题引起（主要是没有安装或者没有按照要求安装CUDA和CUDNN），如果引发了这些问题，可以前往https://github.com/microsoft/onnxruntime Onnx官方仓库的Issue查找解决办法。
-
-建议使用CPU版本，CPU版本推理速度也比较可观，且没有其他问题。
-
+# User Agreement
+## By using this project you must agree to these following terms:
+- 1、 You must bear all consequences arising from the use of the program at your own risk.
+- 2、 You may not sell the program and its affiliated sub-models, and you will be responsible for all consequences resulting from such sale.
+- 3、When using the program, you must consciously abide by the local laws and regulations, you must not use MoeSS to engage in illegal activities, if you engage in illegal activities, you will be responsible for all the consequences.
+- 4、It is forbidden to use it for any commercial games, low quality games and Galgame production, except free high quality game production and mod production for other games.
+- 5、It is forbidden to use the project and its derivatives as well as the released models to make “digital junk” (i.e. most of the game content like artworks are generated by ai).
+- 6、Prohibited to use for political-related purposes, the consequences caused by the generation of political-related content shall be borne by you.
 ---
 
-# 前置模型（与所支持的几个项目无关）：
-停止更新（由于下载和上传速度）: [Vocoder & HiddenUnitBert](https://github.com/NaruseMioShirakana/RequireMent-Model-For-MoeSS) 
+## Q & A.
+### Q: Will the project charge in the future?
+    A: The project is permanently open source and free. If there is a paid version of this software elsewhere, please report it immediately to your shopping site and do not buy it, it is permanently free. If you would like to support Shirakana by making a donation, you can go to https://afdian.net/a/NaruseMioShirakana for more information.
+### Q: Do you offer a paid model training service?
+    A: In principle we do not offer this service. Training TTS models is relatively simple and there is no need to spend money on it, just follow the online tutorials step by step.
+### Q: How do we determine if a piece is "digital junk"?
+    A: 1. Originality. The percentage of your own stuff in the overall project (for AI, creations using models trained entirely independently by you belong to you; work generated using someone else's model belongs to someone else). Aspects covered include, but are not limited to, programming, artwork, audio, designing, etc. For example, a game that uses a template from an engine's market such as Unity is "digital junk".
 
-最新仓库地址 : [HuggingFace](https://huggingface.co/NaruseMioShirakana/MoeSS-SUBModel) 
-
-自己导出前置：
-- HuBert：input_names应该为["source"]，output_names应该为["embed"]，dynamic_axes应当为{"source":[0,2],}
-- Diffusion模型使用的hifigan：input_names应该为["c","f0"]，output_names应该为["audio"]，dynamic_axes应当为{"c":[0,1],"f0":[0,1],}
-- Tacotron2使用的hifigan：input_names应该为["x"]，output_names应该为["audio"]，dynamic_axes应当为{"x":[0,1],}
-
----
-# 用户协议：
-## 使用该项目你必须同意以下条款，若不同意则禁止使用该项目：
-- 1、你必须自行承担由于使用该项目而造成的一切后果。
-- 2、禁止出售该程序。
-- 3、使用该项目时，你必须自觉遵守当地的法律法规，禁止使用该项目从事违法活动。
-- 4、禁止用于任何商业游戏、低创游戏以及Galgame制作，不反对无偿的精品游戏制作以及Mod制作。
-- 5、禁止使用该项目及该项目衍生物以及发布模型等制作各种电子垃圾（比方说AIGalgame，AI游戏制作等）
-- 6、禁止一切政治相关内容。
-- 7、你使用该项目生成的一切内容均与该项目开发者无关。
----
-
-## Q&A：
-### Q：该项目以后会收费吗？
-    A：该项目永久开源免费，如果在其他地方存在本项目的收费版本，请立即举报且不要购买，本项目永久免费。如果想用疯狂星期四塞满白叶，可以前往爱发癫 https://afdian.net/a/NaruseMioShirakana 
-### Q：是否提供有偿模型代训练？
-    A：不提供，训练模型比较简单，没必要花冤枉钱，按照网上教程一步一步走就可以了。
-### Q：电子垃圾评判标准是什么？
-    A：1、原创度。自己的东西在整个项目中的比例（对于AI来说，使用完全由你独立训练模型的创作属于你自己；使用他人模型的创作属于别人）。涵盖的方面包括但不限于程序、美工、音频、策划等等。举个例子，套用Unity等引擎模板换皮属于电子垃圾。
-
-    2、开发者态度。作者开发的态度是不是捞一波流量和钱走人或单纯虚荣。比方说打了无数的tag，像什么“国产”“首个”“最强”“自制”这种引流宣传，结果是非常烂或是平庸的东西，且作者明显没有好好制作该项目的想法，属于电子垃圾。
+    2. Developer attitude. The attitude of the author is whether he or she is trying to make a profit or simply to satisfy vanity. For example, if the game is promoted with exaggerated adjectives such as "the first" or "the best" to attract attention, but turns out to be very bad or mediocre, and the author clearly has no intention of making the game properly, this type of work is "digital junk".
     
-    3、反对一切使用未授权的数据集训练出来的AI模型商用的行为。 
-### Q：技术支持？
-    A：如果能够确定你做的不是电子垃圾，同时合法合规，没有严重的政治错误，我会提供一些力所能及的技术支持。 
+    3. We oppose any commercial use of AI models trained from unlicensed datasets.
+### Q: Technical support?
+    A: If it can be established that what you are doing is not “digital junk” and is also legally compliant and not heavily political, I will provide some technical support where I can.
 ---
 
-# Moe Voice Studio
-本项目是专注于二次元亚文化圈，面向动漫爱好者的语音辅助软件。
+# Moe Speech Synthesis
+A fully C++ Speech Synthesis UI based on various open source TTS, VC and SVS projects
 
-支持的Net：
+Supported projects：
 - [DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
 - [VITS](https://github.com/jaywalnut310/vits)
 - [SoVits](https://github.com/innnky/so-vits-svc/tree/32k)
 - [DiffSvc](https://github.com/prophesier/diff-SVC)
 - [DiffSinger](https://github.com/openvpi/DiffSinger)
-- [RVC](https://github.com/liujing04/Retrieval-based-Voice-Conversion-WebUI)
-- [FishDiffusion](https://github.com/fishaudio/fish-diffusion)
 
-使用的图像素材来源于：
+The image resource used is derived from：
 - [SummerPockets](http://key.visualarts.gr.jp/summer/)
 
 目前仅支持Windows
 
 ---
-## 使用方法：
-    1、在release中下载项目压缩包，解压之
+## Usage:
+    1、Download the software package in the release and unzip it.
 
-    2、在上文 [Vocoder & HiddenUnitBert] 仓库中下载相应的前置模型或附加模块，并放置到相应文件夹，前置模型与项目的对应关系会在下文提到
+    2. Download the appropriate sub-models or additional modules from the [Vocoder & HiddenUnitBert] repository above and place them in the appropriate folders, the correspondence between the sub-models and the project will be mentioned below.
 
-    3、将模型放置在Mods文件夹中，在左上方模型选择模块中选择模型，标准模型结构请查阅下文“支持的项目”
+    3. Place the model in the "Mods" folder and select the model from the model selection module at the top left, for the standard model structure please refer to "Supported Projects" below
 
-    4、在下方输入框中输入要转换的文字，点击“启用插件”可以执行文本Cleaner，换行为批量转换的分句符号（SoVits/DiffSvc需要输入音频路径，DiffSinger需要输入ds或json项目文件的路径）
+    4, enter the text to be converted in the input box below, click on "Enable Plugin" to execute the text Cleaner, and change the line to the batch conversion clause symbols (SoVits/DiffSvc need to enter the audio path, DiffSinger need to enter the path of the ds or json project file)
 
-    5、点击开始合成，即可开始合成语音，等待进度完成后，可以在右上方播放器预览，也可以在右上方直接保存
+    5, click on "start synthesis" to start synthesizing the voice,then wait for the progress to complete.When the audio is ready,you can preview the audio in the player at the top right,and you can also save the audio file directly at the top right of the interface.
 
-    6、可以使用命令行启动：（仅1.X版本）
-    Shell：& '.\xxx.exe' "ModDir" "InputText." "outputDir" "Symbol"
-    CMD："xxx.exe" "ModDir" "InputText." "outputDir" "Symbol"
-    其中ModDir为"模型路径\\模型名" 如预置模型的"Mods\\Shiroha\\Shiroha"
-    InputText为需要转换的文字（仅支持空格逗号句号以及字母）
-    outputDir为输出文件名（不是路径，是文件名，不需要加后缀）
-    Symbol见下文
+    6、It can also be run from the command line: (version 1.X only)
+    Shell: & '. \xxx.exe' "ModDir" "InputText." "outputDir" "Symbol"
+    CMD: "xxx.exe" "ModDir" "InputText." "outputDir" "Symbol"
+    where ModDir is the "model path\\model name" e.g. "Mods\\Shiroha\\\Shiroha"
+    InputText is the text to be converted (only spaces, commas and letters are supported)
+    outputDir is the output file name (not the path, but the file name, no need to add suffixes)
+    See below for Symbol relevance.
+    The output file is in the "tmpDir" folder by default.
 ---
-## 模型制作：
-- 本项目标准化了模型读取模块，模型保存在Mods文件夹下的子文件夹中。********.json为模型的配置文件，需要自行按照模板编写，同时需要自行将模型转换为Onnx。
+## Model adaption:
+- The software standardises the model reading module, models are saved in a sub-folder under the Mods folder. A json file like "********.json" is a model configuration file, which is used to declare the model path and its display name.You need to convert the model to an Onnx model before you can use it. The codes used to convert these models can be found in the repositories on my Github page.
 
-### 通用参数(不管是啥模型都必须填的，不填就不识别)：
-- Folder：保存模型的文件夹名
-- Name：模型在UI中的显示名称
-- Type：模型类别
-- Rate：采样率（必须和你训练时候的一模一样，不明白原因建议去学计算机音频相关的知识）
+### General configuration (required, otherwise the software will not recognise the model).
+- Folder: The name of the folder where the model is stored
+- Name: the name of the model to be displayed in the UI
+- Type: type of the model(see below)
+- Rate: the sampling rate (must be exactly the same as the rate you set during training)
 ### Tacotron2：
 ```jsonc
 {
     "Folder" : "Atri",
-    "Name" : "亚托莉-Tacotron2",
+    "Name" : "atri-Tacotron2",
     "Type" : "Tacotron2",
     "Rate" : 22050,
     "Symbol" : "_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
     "Cleaner" : "JapaneseCleaner",
     "Hifigan": "hifigan"
 }
-//Symbol：模型的Symbol，不知道Symbol是啥的建议多看几个视频了解了解TTS的基础知识，这一项在Tacotron2中必须填。
-//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
-//Hifigan：Hifigan模型名，必须填且必须将在前置模型中下载到的hifigan放置到hifigan文件夹
+//Symbol：Symbol of the model,If you don't know what it is, you are advised to check the TTS information on the internet.This field must be filled in the Tacotron2 model's configuration file.
+//Cleaner：The name of the plugin,can be left blank, but if it is filled in, the corresponding CleanerDll must be placed in the Cleaner folder, if the Dll does not exist or if there is an internal error in the Dll, it will report an error when loading the model
+//Hifigan：Hifigan model name, required and must be placed in the "hifigan" folder for hifigan model downloaded from the sub-model repository
 ```
 ### Vits：
 ```jsonc
@@ -142,9 +116,9 @@
     "Cleaner" : "JapaneseCleaner",
     "Characters" : ["鳴瀬しろは","空門蒼","鷹原うみ","紬ヴェンダース","神山識","水織静久","野村美希","久島鴎","岬鏡子"]
 }
-//Symbol：模型的Symbol，不知道Symbol是啥的建议多看几个视频了解了解TTS的基础知识，这一项在Vits中必须填。
-//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
-//Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+//Symbol：Symbol of the model,If you don't know what it is, you are advised to check the TTS information on the internet.This field must be filled in the VITS model's configuration file.
+//Cleaner：The name of the plugin,can be left blank, but if it is filled in, the corresponding CleanerDll must be placed in the Cleaner folder, if the Dll does not exist or if there is an internal error in the Dll, it will report an error when loading the model
+//Characters：For multi-speaker model this must be filled in as a list of your speakers' names, for single-speaker model it can be left out
 ```
 ### Pits：
 ```jsonc
@@ -157,26 +131,9 @@
     "Cleaner" : "JapaneseCleaner",
     "Characters" : ["鳴瀬しろは","空門蒼","鷹原うみ","紬ヴェンダース","神山識","水織静久","野村美希","久島鴎","岬鏡子"]
 }
-//Symbol：模型的Symbol，不知道Symbol是啥的建议多看几个视频了解了解TTS的基础知识，这一项在Vits中必须填。
-//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
-//Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
-```
-### RVC：
-```jsonc
-{
-    "Folder" : "NyaruTaffy",
-    "Name" : "NyaruTaffy",
-    "Type" : "RVC",
-    "Rate" : 40000,
-    "Hop" : 320,
-    "Cleaner" : "",
-    "Hubert": "hubert4.0",
-    "Characters" : ["Taffy","Nyaru"]
-}
-//Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
-//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
-//Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
-//Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+//Symbol：Symbol of the model,If you don't know what it is, you are advised to check the TTS information on the internet.This field must be filled in the VITS model's configuration file.
+//Cleaner：The name of the plugin,can be left blank, but if it is filled in, the corresponding CleanerDll must be placed in the Cleaner folder, if the Dll does not exist or if there is an internal error in the Dll, it will report an error when loading the model
+//Characters：For multi-speaker model this must be filled in as a list of your speakers' names, for single-speaker model it can be left out
 ```
 ### SoVits_3.0_32k：
 ```jsonc
@@ -191,10 +148,10 @@
     "SoVits3": true,
     "Characters" : ["Taffy","Nyaru"]
 }
-//Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
-//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
-//Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
-//Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+//Hop：HopLength of the model, if you don't know what it is you are advised to look up the information on the internet. This must be filled in the configuration file of the SoVits model.（The value must be the one you set during training and can be seen in the configuration file you used to train the model）
+//Cleaner：The name of the plugin,can be left blank, but if it is filled in, the corresponding CleanerDll must be placed in the Cleaner folder, if the Dll does not exist or if there is an internal error in the Dll, it will report an error when loading the model
+//Hubert：Hubert model name, required and must be placed in the "Hubert" folder for Hubert model downloaded from the sub-model repository
+//Characters：For multi-speaker model this must be filled in as a list of your speakers' names, for single-speaker model it can be left out
 ```
 ### SoVits_3.0_48k：
 ```jsonc
@@ -209,10 +166,10 @@
     "SoVits3": true,
     "Characters" : ["Taffy","Nyaru"]
 }
-//Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
-//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
-//Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
-//Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+//Hop：HopLength of the model, if you don't know what it is you are advised to look up the information on the internet. This must be filled in the configuration file of the SoVits model.（The value must be the one you set during training and can be seen in the configuration file you used to train the model）
+//Cleaner：The name of the plugin,can be left blank, but if it is filled in, the corresponding CleanerDll must be placed in the Cleaner folder, if the Dll does not exist or if there is an internal error in the Dll, it will report an error when loading the model
+//Hubert：Hubert model name, required and must be placed in the "Hubert" folder for Hubert model downloaded from the sub-model repository
+//Characters：For multi-speaker model this must be filled in as a list of your speakers' names, for single-speaker model it can be left out
 ```
 ### SoVits_4.0：
 ```jsonc
@@ -227,10 +184,10 @@
     "SoVits4": true,
     "Characters" : ["Taffy","Nyaru"]
 }
-//Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
-//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
-//Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
-//Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+//Hop：HopLength of the model, if you don't know what it is you are advised to look up the information on the internet. This must be filled in the configuration file of the SoVits model.（The value must be the one you set during training and can be seen in the configuration file you used to train the model）
+//Cleaner：The name of the plugin,can be left blank, but if it is filled in, the corresponding CleanerDll must be placed in the Cleaner folder, if the Dll does not exist or if there is an internal error in the Dll, it will report an error when loading the model
+//Hubert：Hubert model name, required and must be placed in the "Hubert" folder for Hubert models downloaded from the sub-model repository
+//Characters：For multi-speaker model this must be filled in as a list of your speakers' names, for single-speaker model it can be left out
 ```
 ### DiffSVC：
 ```jsonc
@@ -248,14 +205,14 @@
     "Pndm" : 100,
     "V2" : true
 }
-//Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
-//MelBins：模型的MelBins，不知道MelBins是啥的建议多看几个视频了解了解梅尔基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
-//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
-//Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
-//Hifigan：Hifigan模型名，必须填且必须将在前置模型中下载到的nsf_hifigan放置到hifigan文件夹
-//Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
-//Pndm：加速倍数，如果是V1模型则必填且必须为导出时设置的加速倍率
-//V2：是否为V2模型，V2模型就是后来我分4个模块导出的那个
+//Hop：HopLength of the model, if you don't know what it is you are advised to look up the information on the internet. This must be filled in the configuration file of the SoVits model.（The value must be the one you set during training and can be seen in the configuration file you used to train the model）
+//Melbins：Melbins of the model, if you don't know what it is you are advised to look up the information on the internet. This must be filled in the configuration file of the Diffsvc model.（The value must be the one you set during training and can be seen in the configuration file you used to train the model）
+//Cleaner：The name of the plugin,can be left blank, but if it is filled in, the corresponding CleanerDll must be placed in the Cleaner folder, if the Dll does not exist or if there is an internal error in the Dll, it will report an error when loading the model
+//Hubert：Hubert model name, required and must be placed in the "Hubert" folder for Hubert models downloaded from the sub-model repository
+//Hifigan：Hifigan model name, required and must be placed in the "hifigan" folder for nsf-hifigan model downloaded from the sub-model repository
+//Characters：For multi-speaker model this must be filled in as a list of your speakers' names, for single-speaker model it can be left out
+//Pndm：Acceleration multiplier, required in the case of V1 models and must be the acceleration multiplier set at the time of export
+//V2：If your diffsvc model is a V2 model,set this to "true".(example:FishDiffusion SVC models)
 ```
 ### DiffSinger：
 ```jsonc
@@ -270,27 +227,27 @@
     "Characters" : [],
     "MelBins" : 128
 }
-//Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
-//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
-//Hifigan：Hifigan模型名，必须填且必须将在前置模型中下载到的singer_nsf_hifigan放置到hifigan文件夹
-//Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
-//MelBins：模型的MelBins，不知道MelBins是啥的建议多看几个视频了解了解梅尔基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
+//Hop：HopLength of the model, if you don't know what it is you are advised to look up the information on the internet. This must be filled in the configuration file of the Diffsinger model.（The value must be the one you set during training and can be seen in the configuration file you used to train the model）
+//Melbins：Melbins of the model, if you don't know what it is you are advised to look up the information on the internet. This must be filled in the configuration file of the Diffsvc model.（The value must be the one you set during training and can be seen in the configuration file you used to train the model）
+//Cleaner：The name of the plugin,can be left blank, but if it is filled in, the corresponding CleanerDll must be placed in the Cleaner folder, if the Dll does not exist or if there is an internal error in the Dll, it will report an error when loading the model
+//Hifigan：Hifigan model name, required and must be placed in the "hifigan" folder for nsf-hifigan model downloaded from the sub-model repository
+//Characters：For multi-speaker model this must be filled in as a list of your speakers' names, for single-speaker model it can be left out
 ```
 
 ---
-## 支持的model项目
+## Supported Projects
 ```cxx 
-// ${xxx}是什么意思大家应该都知道吧，总之以下是多个不同项目需要的模型文件（需要放置在对应的模型文件夹下）。
+// $Below are the model files needed for several different projects (they need to be placed in the corresponding model folders).
 // Tacotron2：
     ${Folder}_decoder_iter.onnx
     ${Folder}_encoder.onnx
     ${Folder}_postnet.onnx
-// Vits:    单角色VITS
+// Vits:    Single-speaker VITS
     ${Folder}_dec.onnx
     ${Folder}_flow.onnx
     ${Folder}_enc_p.onnx
     ${Folder}_dp.onnx 
-// Vits:   多角色VITS
+// Vits:   multi-speaker VITS
     ${Folder}_dec.onnx
     ${Folder}_emb.onnx
     ${Folder}_flow.onnx
@@ -298,8 +255,6 @@
     ${Folder}_dp.onnx
 // SoVits:
     ${Folder}_SoVits.onnx
-// RVC:
-    ${Folder}_RVC.onnx
 // DiffSvc:
     ${Folder}_diffSvc.onnx
 // DiffSvc: V2
@@ -316,30 +271,29 @@
     ${Folder}_after.onnx
 ```
 ---
-## Symbol的设置
-    例如：_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
-    打开你训练模型的项目，打开text\symbol.py，如图按照划线的List顺序将上面的4个字符串连接即可
+## Symbol settings
+    For example：_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
+    Open the project you are using to train the model, open text\symbol.py and join the 4 strings above in the order of the underlined list as shown
 ![image](https://user-images.githubusercontent.com/40709280/183290732-dcb93323-1061-431b-aafa-c285a3ec5e82.png)
 
 ---
-## Cleaner的设置
+## Cleaner settings
 ```cxx
 /*
-Cleaner请放置于根目录的Cleaners文件夹内，应该是一个按照要求定义的动态库（.dll），dll应当命名为Cleaner名，Cleaner名即为模型定义Json文件中Cleaner一栏填写的内容。
-所有的插件dll需要定义以下函数，函数名必须为PluginMain，Dll名必须为插件名（或Cleaner名）：
+The Cleaner should be placed in the Cleaners folder in the root directory and should be a dynamic library (.dll) defined as required. The dll should be named Cleaner and the Cleaner name is what is entered in the "Cleaner" of the model configuration file.
+The following functions need to be defined for all plug-in dlls, the function name must be PluginMain and the Dll name must be the plug-in name (or Cleaner name).
 */
 const wchar_t* PluginMain(const wchar_t*);
-// 该接口只要求输入输出一致，并不要求功能一致，也就是说，你可以在改Dll中实现任何想要的功能，比方说ChatGpt，机器翻译等等。
-// 以ChatGpt为例，PluginMain函数传入了一个输入字符串input，将该输入传入ChatGpt，再将ChatGpt的输出传入PluginMain，最后返回输出。
+// The interface only requires consistent input and output, not consistent functionality, which means that you can implement any functionality you want in the Dll, such as ChatGpt, translation, etc.
+// Using ChatGpt as an example, the PluginMain function passes in an input string input, passes that input into ChatGpt, passes ChatGpt's output into PluginMain, and finally returns the output.
 wchar_t* PluginMain(wchar_t* input){
     wchar_t* tmpOutput = ChatGpt(input);
     return Clean(tmpOutput);
 }
-// 注意：导出dll时请使用 extern "C" 关键字来防止C++语言的破坏性命名。
+// Note: Please use the extern "C" keyword when exporting the dll to prevent destructive naming in C++.
 ```
 
----
-## 依赖列表
+## List of dependencies
 - [FFmpeg](https://ffmpeg.org/)
 - [World](https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder)
 - [rapidJson](https://github.com/Tencent/rapidjson)
@@ -347,7 +301,7 @@ wchar_t* PluginMain(wchar_t* input){
 ---
 ## 📚 相关法规
 
-#### 使用该项目的任何组织或个人都应当遵守包括但不限于以下的法律。
+#### Any country, region, organization, or individual using this project must comply with the following laws.
 
 #### 《民法典》
 
