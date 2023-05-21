@@ -99,14 +99,6 @@
     4、在下方输入框中输入要转换的文字，点击“启用插件”可以执行文本Cleaner，换行为批量转换的分句符号（SoVits/DiffSvc需要输入音频路径，DiffSinger需要输入ds或json项目文件的路径）
 
     5、点击开始合成，即可开始合成语音，等待进度完成后，可以在右上方播放器预览，也可以在右上方直接保存
-
-    6、可以使用命令行启动：（仅1.X版本）
-    Shell：& '.\xxx.exe' "ModDir" "InputText." "outputDir" "Symbol"
-    CMD："xxx.exe" "ModDir" "InputText." "outputDir" "Symbol"
-    其中ModDir为"模型路径\\模型名" 如预置模型的"Mods\\Shiroha\\Shiroha"
-    InputText为需要转换的文字（仅支持空格逗号句号以及字母）
-    outputDir为输出文件名（不是路径，是文件名，不需要加后缀）
-    Symbol见下文
 ---
 ## 模型制作：
 - 本项目标准化了模型读取模块，模型保存在Mods文件夹下的子文件夹中。********.json为模型的配置文件，需要自行按照模板编写，同时需要自行将模型转换为Onnx。
@@ -124,12 +116,14 @@
     "Type" : "Tacotron2",
     "Rate" : 22050,
     "Symbol" : "_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz",
-    "Cleaner" : "JapaneseCleaner",
+    "Cleaner" : "",
+    "AddBlank": false,
     "Hifigan": "hifigan"
 }
 //Symbol：模型的Symbol，不知道Symbol是啥的建议多看几个视频了解了解TTS的基础知识，这一项在Tacotron2中必须填。
 //Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
 //Hifigan：Hifigan模型名，必须填且必须将在前置模型中下载到的hifigan放置到hifigan文件夹
+//AddBlank：是否在音素之间插0作为分隔
 ```
 ### Vits：
 ```jsonc
@@ -139,12 +133,18 @@
     "Type" : "Vits",
     "Rate" : 22050,
     "Symbol" : "_,.!?-~…AEINOQUabdefghijkmnoprstuvwyzʃʧʦ↓↑ ",
-    "Cleaner" : "JapaneseCleaner",
+    "Cleaner" : "",
+    "AddBlank": true,
+    "Emotional" : true,
+    "EmotionalPath" : "all_emotions",
     "Characters" : ["鳴瀬しろは","空門蒼","鷹原うみ","紬ヴェンダース","神山識","水織静久","野村美希","久島鴎","岬鏡子"]
 }
 //Symbol：模型的Symbol，不知道Symbol是啥的建议多看几个视频了解了解TTS的基础知识，这一项在Vits中必须填。
 //Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+//AddBlank：是否在音素之间插0作为分隔（大多数Vits模型必须为true）
+//Emotional：是否加入情感向量
+//EmotionalPath：情感向量npy文件名
 ```
 ### Pits：
 ```jsonc
@@ -154,12 +154,18 @@
     "Type" : "Pits",
     "Rate" : 22050,
     "Symbol" : "_,.!?-~…AEINOQUabdefghijkmnoprstuvwyzʃʧʦ↓↑ ",
-    "Cleaner" : "JapaneseCleaner",
+    "Cleaner" : "",
+    "AddBlank": true,
+    "Emotional" : true,
+    "EmotionalPath" : "all_emotions",
     "Characters" : ["鳴瀬しろは","空門蒼","鷹原うみ","紬ヴェンダース","神山識","水織静久","野村美希","久島鴎","岬鏡子"]
 }
 //Symbol：模型的Symbol，不知道Symbol是啥的建议多看几个视频了解了解TTS的基础知识，这一项在Vits中必须填。
 //Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+//AddBlank：是否在音素之间插0作为分隔（大多数Pits模型必须为true）
+//Emotional：是否加入情感向量
+//EmotionalPath：情感向量npy文件名
 ```
 ### RVC：
 ```jsonc
@@ -171,12 +177,20 @@
     "Hop" : 320,
     "Cleaner" : "",
     "Hubert": "hubert4.0",
+    "Diffusion": false,
+    "CharaMix": true,
+    "Volume": false,
+    "HiddenSize": 256,
     "Characters" : ["Taffy","Nyaru"]
 }
 //Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
 //Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
 //Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+//Diffusion：是否为DDSP仓库下的扩散模型
+//CharaMix：是否使用角色混合轨道
+//Volume：该模型是否有音量Emb
+//HiddenSize：Vec模型的尺寸（768/256）
 ```
 ### SoVits_3.0_32k：
 ```jsonc
@@ -189,12 +203,20 @@
     "Cleaner" : "",
     "Hubert": "hubert",
     "SoVits3": true,
+    "Diffusion": false,
+    "CharaMix": true,
+    "Volume": false,
+    "HiddenSize": 256,
     "Characters" : ["Taffy","Nyaru"]
 }
 //Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
 //Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
 //Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+//Diffusion：是否为DDSP仓库下的扩散模型
+//CharaMix：是否使用角色混合轨道
+//Volume：该模型是否有音量Emb
+//HiddenSize：Vec模型的尺寸（768/256）
 ```
 ### SoVits_3.0_48k：
 ```jsonc
@@ -207,12 +229,20 @@
     "Cleaner" : "",
     "Hubert": "hubert",
     "SoVits3": true,
+    "Diffusion": false,
+    "CharaMix": true,
+    "Volume": false,
+    "HiddenSize": 256,
     "Characters" : ["Taffy","Nyaru"]
 }
 //Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
 //Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
 //Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+//Diffusion：是否为DDSP仓库下的扩散模型
+//CharaMix：是否使用角色混合轨道
+//Volume：该模型是否有音量Emb
+//HiddenSize：Vec模型的尺寸（768/256）
 ```
 ### SoVits_4.0：
 ```jsonc
@@ -225,12 +255,20 @@
     "Cleaner" : "",
     "Hubert": "hubert4.0",
     "SoVits4": true,
+    "Diffusion": false,
+    "CharaMix": true,
+    "Volume": false,
+    "HiddenSize": 256,
     "Characters" : ["Taffy","Nyaru"]
 }
 //Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
 //Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
 //Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+//Diffusion：是否为DDSP仓库下的扩散模型
+//CharaMix：是否使用角色混合轨道
+//Volume：该模型是否有音量Emb
+//HiddenSize：Vec模型的尺寸（768/256）
 ```
 ### DiffSVC：
 ```jsonc
@@ -246,6 +284,10 @@
     "Hubert": "hubert",
     "Characters" : [],
     "Pndm" : 100,
+    "Diffusion": false,
+    "CharaMix": true,
+    "Volume": false,
+    "HiddenSize": 256,
     "V2" : true
 }
 //Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
@@ -256,6 +298,10 @@
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
 //Pndm：加速倍数，如果是V1模型则必填且必须为导出时设置的加速倍率
 //V2：是否为V2模型，V2模型就是后来我分4个模块导出的那个
+//Diffusion：是否为DDSP仓库下的扩散模型
+//CharaMix：是否使用角色混合轨道
+//Volume：该模型是否有音量Emb
+//HiddenSize：Vec模型的尺寸（768/256）
 ```
 ### DiffSinger：
 ```jsonc
