@@ -3,14 +3,14 @@
 
 INFERCLASSHEADER
 
-class Tacotron2 : public BaseModelType
+class Tacotron2 : public TTS
 {
 public:
-    Tacotron2(const rapidjson::Document&, const callback&, const callback_params&);
+    Tacotron2(const rapidjson::Document&, const callback&, const callback_params&, const DurationCallback&, Device _dev = Device::CPU);
 
-    virtual ~Tacotron2();
+	~Tacotron2() override;
 
-    std::vector<int16_t> Infer(std::wstring&) override;
+    std::vector<int16_t> Inference(std::wstring& _inputLens) const override;
 
     static void cat(std::vector<float>& tensorA, std::vector<int64>& Shape, const MTensor& tensorB) {
         const int64 n = Shape[1];
@@ -23,11 +23,6 @@ private:
     Ort::Session* sessionDecoderIter = nullptr;
     Ort::Session* sessionPostNet = nullptr;
     Ort::Session* sessionGan = nullptr;
-    long _samplingRate = 22050;
-    std::map<std::wstring, int64_t> _Phs;
-    std::map<wchar_t, int64_t> _Symbols;
-    bool add_blank = false;
-    bool use_ph = false;
 
     const std::vector<const char*> ganIn = { "x" };
     const std::vector<const char*> ganOut = { "audio" };
