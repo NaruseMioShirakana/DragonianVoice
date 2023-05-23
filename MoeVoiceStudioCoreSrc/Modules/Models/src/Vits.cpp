@@ -19,19 +19,21 @@ Vits::~Vits()
 	logger.log(L"[Info] Vits Models unloaded");
 }
 
-Vits::Vits(const rapidjson::Document& _config, const callback& _cb, const callback_params& _mr,const DurationCallback& _dcbb)
+Vits::Vits(const rapidjson::Document& _config, const callback& _cb, const callback_params& _mr,const DurationCallback& _dcbb, Device _dev)
 {
 	_modelType = modelType::Vits;
 
+	ChangeDevice(_dev);
+
 	//Check Folder
-	if (_config["folder"].IsNull())
+	if (_config["Folder"].IsNull())
 		throw std::exception("[Error] Missing field \"folder\" (Model Folder)");
-	if (!_config["folder"].IsString())
+	if (!_config["Folder"].IsString())
 		throw std::exception("[Error] Field \"folder\" (Model Folder) Must Be String");
-	const auto _folder = to_wide_string(_config["folder"].GetString());
+	const auto _folder = to_wide_string(_config["Folder"].GetString());
 	if (_folder.empty())
 		throw std::exception("[Error] Field \"folder\" (Model Folder) Can Not Be Empty");
-	const std::wstring _path = GetCurrentFolder() + L"\\Models\\" + _folder + L"\\";
+	const std::wstring _path = GetCurrentFolder() + L"\\Models\\" + _folder + L"\\" + _folder;
 
 	//LoadModels
 	try
@@ -60,6 +62,8 @@ Vits::Vits(const rapidjson::Document& _config, const callback& _cb, const callba
 	else
 		throw std::exception("[Error] Field \"Rate\" (SamplingRate) Must Be Int/Int64");
 
+	logger.log(L"[Info] Current Sampling Rate is" + std::to_wstring(_samplingRate));
+
 	//Check Symbol
 	if (_config["Symbol"].IsNull())
 		throw std::exception("[Error] Missing field \"Symbol\" (PhSymbol)");
@@ -81,7 +85,7 @@ Vits::Vits(const rapidjson::Document& _config, const callback& _cb, const callba
 	}
 	else
 	{
-		logger.log(L"[Info] Use Phs");
+		logger.log(L"[Info] Use Symbols");
 		const std::wstring SymbolsStr = to_wide_string(_config["Symbol"].GetString());
 		if (SymbolsStr.empty())
 			throw std::exception("[Error] Field \"Symbol\" (PhSymbol) Can Not Be Empty");
@@ -110,50 +114,47 @@ Vits::Vits(const rapidjson::Document& _config, const callback& _cb, const callba
 	else
 		logger.log(L"[Info] Disable Plugin");
 
+	if(_config["EmotionalPath"].IsString())
+	{
+		const auto emoStringload = to_wide_string(_config["EmotionalPath"].GetString());
+		if(!emoStringload.empty())
+		{
+			logger.log(L"[Info] Loading EmotionVector");
+			const auto emopath = GetCurrentFolder() + L"\\emotion\\" + emoStringload + L".npy";
+			const auto emopathdef = GetCurrentFolder() + L"\\emotion\\" + emoStringload + L".json";
+			emoLoader.open(emopath);
+			emoStringa.clear();
+			EmoJson.Clear();
+			std::ifstream EmoFiles(emopathdef.c_str());
+			if (EmoFiles.is_open())
+			{
+				std::string JsonLine;
+				while (std::getline(EmoFiles, JsonLine))
+					emoStringa += JsonLine;
+				EmoFiles.close();
+				EmoJson.Parse(emoStringa.c_str());
+			}
+			logger.log(L"[Info] EmotionVector Loaded");
+			emo = true;
+		}
+	}
+
+	if (!_config["CharaMix"].IsBool())
+		logger.log(L"[Warn] Missing Field \"CharaMix\", Use Default Value (False)");
+	else
+		CharaMix = _config["CharaMix"].GetBool();
+	if (_config["Characters"].IsArray())
+		n_speaker = _config["Characters"].Size();
 	_callback = _cb;
 	_get_init_params = _mr;
 	_dcb = _dcbb;
 }
 
-std::vector<std::vector<bool>> Vits::generatePath(float* duration, size_t durationSize, size_t maskSize)
-{
-	for (size_t i = 1; i < durationSize; ++i)
-		duration[i] = duration[i - 1] + duration[i];
-	std::vector<std::vector<bool>> path(durationSize, std::vector<bool>(maskSize, false));
-	//const auto path = new float[maskSize * durationSize];
-	/*
-	for (size_t i = 0; i < maskSize; ++i)
-		for (size_t j = 0; j < durationSize; ++j)
-			path[i][j] = (j < (size_t)duration[i] ? 1.0f : 0.0f);
-	for (size_t i = maskSize - 1; i > 0ull; --i)
-		for (size_t j = 0; j < durationSize; ++j)
-			path[i][j] -= path[i-1][j];
-	 */
-	auto dur = (size_t)duration[0];
-	for (size_t j = 0; j < dur; ++j)
-		path[j][0] = true;
-	/*
-	for (size_t i = maskSize - 1; i > 0ull; --i)
-		for (size_t j = 0; j < durationSize; ++j)
-			path[i][j] = (j < (size_t)duration[i] && j >= (size_t)duration[i - 1]);
-	std::vector<std::vector<float>> tpath(durationSize, std::vector<float>(maskSize));
-	for (size_t i = 0; i < maskSize; ++i)
-		for (size_t j = 0; j < durationSize; ++j)
-			tpath[j][i] = path[i][j];
-	 */
-	for (size_t j = maskSize - 1; j > 0ull; --j)
-	{
-		dur = (size_t)duration[j];
-		for (auto i = (size_t)duration[j - 1]; i < dur; ++i)
-			path[i][j] = true;
-	}
-	return path;
-}
-
-std::vector<int16_t> Vits::Infer(std::wstring& _inputLens)
+std::vector<int16_t> Vits::Inference(std::wstring& _inputLens) const
 {
 	if (_inputLens.length() == 0)
 	{
+		logger.log(L"[Warn] Empty Input Box");
 		int ret = InsertMessageToEmptyEditBox(_inputLens);
 		if (ret == -1)
 			throw std::exception("TTS Does Not Support Automatic Completion");
@@ -167,10 +168,15 @@ std::vector<int16_t> Vits::Infer(std::wstring& _inputLens)
 	_callback(proc, _Lens.size());
 	std::vector<int16_t> _wavData;
 	_wavData.reserve(441000);
+	logger.log(L"[Info] Inferring");
 	for (const auto& _input : _Lens)
 	{
+		logger.log(L"[Inferring] Inferring \"" + _input + L'\"');
 		if (_input.empty())
+		{
+			logger.log(L"[Inferring] Skip Empty Len");
 			continue;
+		}
 		auto noise_scale = _configs[proc].noise_scale;
 		auto noise_scale_w = _configs[proc].noise_scale_w;
 		auto length_scale = _configs[proc].length_scale;
@@ -194,7 +200,7 @@ std::vector<int16_t> Vits::Infer(std::wstring& _inputLens)
 			{
 				if (add_blank)
 					text.push_back(0);
-				text.push_back(_Symbols[it]);
+				text.push_back(_Symbols.at(it));
 			}
 			if (add_blank)
 				text.push_back(0);
@@ -209,7 +215,7 @@ std::vector<int16_t> Vits::Infer(std::wstring& _inputLens)
 				const auto this_ph = _inputStrW.substr(0, _inputStrW.find(L'_'));
 				if (add_blank)
 					text.push_back(0);
-				text.push_back(_Phs[this_ph]);
+				text.push_back(_Phs.at(this_ph));
 				const auto idx = _inputStrW.find(L'|');
 				if (idx != std::wstring::npos)
 					_inputStrW = _inputStrW.substr(idx + 1);
@@ -226,6 +232,7 @@ std::vector<int16_t> Vits::Infer(std::wstring& _inputLens)
 			*memory_info, text.data(), textLength[0], inputShape1, 2));
 		inputTensors.push_back(MTensor::CreateTensor<int64>(
 			*memory_info, textLength, 1, inputShape2, 1));
+		logger.log(L"[Inferring] Inferring \"" + _input + L"\" Encoder");
 		if (emo)
 		{
 			constexpr int64 inputShape3[1] = { 1024 };
@@ -273,16 +280,65 @@ std::vector<int16_t> Vits::Infer(std::wstring& _inputLens)
 		std::vector<MTensor> outputG;
 		if (sessionEmb)
 		{
-			int64 Character[1] = { chara };
-			inputSid.push_back(MTensor::CreateTensor<int64>(
-				*memory_info, Character, 1, inputShape2, 1));
+			logger.log(L"[Inferring] Inferring \"" + _input + L"\" Character Embidding");
 			try {
-				outputG = sessionEmb->Run(Ort::RunOptions{ nullptr },
-					EMBInput.data(),
-					inputSid.data(),
-					inputSid.size(),
-					EMBOutput.data(),
-					EMBOutput.size());
+				if (CharaMix && !_configs[proc].chara_mix.empty())
+				{
+					const auto& Charas = _configs[proc].chara_mix;
+					int64_t csid = 0;
+					for (const auto& CharaP : Charas)
+					{
+						if (!csid)
+						{
+							int64 Character[1] = { csid };
+							inputSid.push_back(MTensor::CreateTensor<int64>(
+								*memory_info, Character, 1, inputShape2, 1));
+
+							outputG = sessionEmb->Run(Ort::RunOptions{ nullptr },
+								EMBInput.data(),
+								inputSid.data(),
+								inputSid.size(),
+								EMBOutput.data(),
+								EMBOutput.size());
+
+							auto gemb = outputG[0].GetTensorMutableData<float>();
+							for (int gembi = 0; gembi < 256; ++gembi)
+								gemb[gembi] *= float(CharaP);
+							++csid;
+						}
+						else
+						{
+							inputSid.clear();
+							int64 Character[1] = { csid };
+							inputSid.push_back(MTensor::CreateTensor<int64>(
+								*memory_info, Character, 1, inputShape2, 1));
+
+							const auto TempG = sessionEmb->Run(Ort::RunOptions{ nullptr },
+								EMBInput.data(),
+								inputSid.data(),
+								inputSid.size(),
+								EMBOutput.data(),
+								EMBOutput.size());
+
+							auto gemb = outputG[0].GetTensorMutableData<float>();
+							for (int gembi = 0; gembi < 256; ++gembi)
+								gemb[gembi] += TempG[0].GetTensorData<float>()[gembi] * float(CharaP);
+							++csid;
+						}
+					}
+				}
+				else
+				{
+					int64 Character[1] = { chara };
+					inputSid.push_back(MTensor::CreateTensor<int64>(
+						*memory_info, Character, 1, inputShape2, 1));
+					outputG = sessionEmb->Run(Ort::RunOptions{ nullptr },
+						EMBInput.data(),
+						inputSid.data(),
+						inputSid.size(),
+						EMBOutput.data(),
+						EMBOutput.size());
+				}
 			}
 			catch (Ort::Exception& e)
 			{
@@ -315,6 +371,7 @@ std::vector<int16_t> Vits::Infer(std::wstring& _inputLens)
 		}
 		try
 		{
+			logger.log(L"[Inferring] Inferring \"" + _input + L"\" DurationPredictor");
 			outputTensors = sessionDp->Run(Ort::RunOptions{ nullptr },
 				DpInput.data(),
 				inputTensors.data(),
@@ -392,6 +449,7 @@ std::vector<int16_t> Vits::Infer(std::wstring& _inputLens)
 				*memory_info, nlogs_pData.data(), 192 * y_length, zshape, 3));
 			inputTensors.push_back(MTensor::CreateTensor<float>(
 				*memory_info, y_mask.data(), y_length, yshape, 3));
+			logger.log(L"[Inferring] Inferring \"" + _input + L"\" Flow");
 			if (sessionEmb)
 			{
 				inputTensors.push_back(MTensor::CreateTensor<float>(
@@ -407,6 +465,7 @@ std::vector<int16_t> Vits::Infer(std::wstring& _inputLens)
 			if (sessionEmb)
 				inputTensors[1] = std::move(inputTensors[2]);
 			inputTensors.pop_back();
+			logger.log(L"[Inferring] Inferring \"" + _input + L"\" Decoder");
 			outputTensors = sessionDec->Run(Ort::RunOptions{ nullptr },
 				DecInput.data(),
 				inputTensors.data(),
@@ -422,8 +481,10 @@ std::vector<int16_t> Vits::Infer(std::wstring& _inputLens)
 		const auto outData = outputTensors[0].GetTensorData<float>();
 		for (int bbb = 0; bbb < shapeOut[2]; bbb++)
 			_wavData.emplace_back(static_cast<int16_t>(outData[bbb] * 32768.0f));
-		_callback(proc, _Lens.size());
+		_callback(++proc, _Lens.size());
+		logger.log(L"[Inferring] \"" + _input + L"\" Finished");
 	}
+	logger.log(L"[Info] Finished");
 	return _wavData;
 }
 INFERCLASSEND

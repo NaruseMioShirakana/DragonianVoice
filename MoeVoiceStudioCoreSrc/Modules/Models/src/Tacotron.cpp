@@ -14,19 +14,21 @@ Tacotron2::~Tacotron2()
 	logger.log(L"[Info] Tacotron Models unloaded");
 }
 
-Tacotron2::Tacotron2(const rapidjson::Document& _config, const callback& _cb, const callback_params& _mr)
+Tacotron2::Tacotron2(const rapidjson::Document& _config, const callback& _cb, const callback_params& _mr, const DurationCallback& _dcbb, Device _dev)
 {
 	_modelType = modelType::Taco;
 
+	ChangeDevice(_dev);
+
 	//Check Folder
-	if (_config["folder"].IsNull())
+	if (_config["Folder"].IsNull())
 		throw std::exception("[Error] Missing field \"folder\" (Model Folder)");
-	if (!_config["folder"].IsString())
+	if (!_config["Folder"].IsString())
 		throw std::exception("[Error] Field \"folder\" (Model Folder) Must Be String");
-	const auto _folder = to_wide_string(_config["folder"].GetString());
+	const auto _folder = to_wide_string(_config["Folder"].GetString());
 	if(_folder.empty())
 		throw std::exception("[Error] Field \"folder\" (Model Folder) Can Not Be Empty");
-	const std::wstring _path = GetCurrentFolder() + L"\\Models\\" + _folder + L"\\";
+	const std::wstring _path = GetCurrentFolder() + L"\\Models\\" + _folder + L"\\" + _folder;
 
 	//Check Hifigan
 	if (_config["Hifigan"].IsNull())
@@ -64,6 +66,9 @@ Tacotron2::Tacotron2(const rapidjson::Document& _config, const callback& _cb, co
 	else
 		throw std::exception("[Error] Field \"Rate\" (SamplingRate) Must Be Int/Int64");
 
+	logger.log(L"[Info] Current Sampling Rate is" + std::to_wstring(_samplingRate));
+
+	add_blank = false;
 	//Check Symbol
 	if (_config["Symbol"].IsNull())
 		throw std::exception("[Error] Missing field \"Symbol\" (PhSymbol)");
@@ -85,7 +90,7 @@ Tacotron2::Tacotron2(const rapidjson::Document& _config, const callback& _cb, co
 	}
 	else
 	{
-		logger.log(L"[Info] Use Phs");
+		logger.log(L"[Info] Use Symbols");
 		const std::wstring SymbolsStr = to_wide_string(_config["Symbol"].GetString());
 		if (SymbolsStr.empty())
 			throw std::exception("[Error] Field \"Symbol\" (PhSymbol) Can Not Be Empty");
@@ -118,10 +123,11 @@ Tacotron2::Tacotron2(const rapidjson::Document& _config, const callback& _cb, co
 	_get_init_params = _mr;
 }
 
-std::vector<int16_t> Tacotron2::Infer(std::wstring& _inputLens)
+std::vector<int16_t> Tacotron2::Inference(std::wstring& _inputLens) const
 {
 	if (_inputLens.length() == 0)
 	{
+		logger.log(L"[Warn] Empty Input Box");
 		int ret = InsertMessageToEmptyEditBox(_inputLens);
 		if(ret == -1)
 			throw std::exception("TTS Does Not Support Automatic Completion");
@@ -135,8 +141,15 @@ std::vector<int16_t> Tacotron2::Infer(std::wstring& _inputLens)
 	_callback(proc, _Lens.size());
 	std::vector<int16_t> _wavData;
 	_wavData.reserve(441000);
+	logger.log(L"[Info] Inferring");
 	for(const auto& _input : _Lens)
 	{
+		logger.log(L"[Inferring] Inferring \"" + _input + L'\"');
+		if (_input.empty())
+		{
+			logger.log(L"[Inferring] Skip Empty Len");
+			continue;
+		}
 		int64_t maxDecoderSteps = _configs[proc].maxDecoderSteps;
 		float gateThreshold = _configs[proc].gateThreshold;
 		//preprocess phs
@@ -148,7 +161,7 @@ std::vector<int16_t> Tacotron2::Infer(std::wstring& _inputLens)
 			{
 				if (add_blank)
 					text.push_back(0);
-				text.push_back(_Symbols[it]);
+				text.push_back(_Symbols.at(it));
 			}
 			if (add_blank)
 				text.push_back(0);
@@ -163,7 +176,7 @@ std::vector<int16_t> Tacotron2::Infer(std::wstring& _inputLens)
 				const auto this_ph = _inputStrW.substr(0, _inputStrW.find(L'_'));
 				if (add_blank)
 					text.push_back(0);
-				text.push_back(_Phs[this_ph]);
+				text.push_back(_Phs.at(this_ph));
 				const auto idx = _inputStrW.find(L'|');
 				if (idx != std::wstring::npos)
 					_inputStrW = _inputStrW.substr(idx + 1);
@@ -180,6 +193,7 @@ std::vector<int16_t> Tacotron2::Infer(std::wstring& _inputLens)
 			*memory_info, text.data(), textLength[0], inputShape1, 2));
 		inputTensors.push_back(MTensor::CreateTensor<int64>(
 			*memory_info, textLength, 1, inputShape2, 1));
+		logger.log(L"[Inferring] Inferring \"" + _input + L"\" Encoder");
 		std::vector<MTensor> outputTensors = sessionEncoder->Run(Ort::RunOptions{ nullptr },
 			inputNodeNamesSessionEncoder.data(),
 			inputTensors.data(),
@@ -220,15 +234,17 @@ std::vector<int16_t> Tacotron2::Infer(std::wstring& _inputLens)
 			*memory_info, zero8.data(), zero8.size(), encoder_embedding_dim.data(), encoder_embedding_dim.size()));
 		inputTensors.push_back(std::move(outputTensors[0]));
 		inputTensors.push_back(std::move(outputTensors[1]));
-		auto BooleanVec = new bool[seqLen[0] * seqLen[1]];
-		memset(BooleanVec, 0, seqLen[0] * seqLen[1] * sizeof(bool));
+		std::vector<char> BooleanTensor(seqLen[0] * seqLen[1], 0);
+		//auto BooleanVec = new bool[seqLen[0] * seqLen[1]];
+		//memset(BooleanVec, 0, seqLen[0] * seqLen[1] * sizeof(bool));
 		inputTensors.push_back(MTensor::CreateTensor<bool>(
-			*memory_info, BooleanVec, seqLen[0] * seqLen[1], seqLen.data(), seqLen.size()));
+			*memory_info, reinterpret_cast<bool*>(BooleanTensor.data()), seqLen[0] * seqLen[1], seqLen.data(), seqLen.size()));
 		int32_t notFinished = 1;
 		int32_t melLengths = 0;
 		std::vector<float> melGateAlig;
 		std::vector<int64> melGateAligShape;
 		bool firstIter = true;
+		logger.log(L"[Inferring] Inferring \"" + _input + L"\" Decoder");
 		while (true) {
 			try
 			{
@@ -241,7 +257,6 @@ std::vector<int16_t> Tacotron2::Infer(std::wstring& _inputLens)
 			}
 			catch (Ort::Exception& e)
 			{
-				delete[] BooleanVec;
 				throw std::exception(e.what());
 			}
 			if (firstIter) {
@@ -262,8 +277,8 @@ std::vector<int16_t> Tacotron2::Infer(std::wstring& _inputLens)
 				break;
 			}
 			if (melGateAligShape[2] >= maxDecoderSteps) {
-				delete[] BooleanVec;
-				throw(std::exception("reach max decode steps"));
+				logger.log(L"[Info] reach max decode steps");
+				break;
 			}
 			inputTensors[0] = std::move(outputTensors[0]);
 			inputTensors[1] = std::move(outputTensors[2]);
@@ -277,12 +292,14 @@ std::vector<int16_t> Tacotron2::Infer(std::wstring& _inputLens)
 		std::vector<MTensor> melInput;
 		melInput.push_back(MTensor::CreateTensor<float>(
 			*memory_info, melGateAlig.data(), melGateAligShape[0] * melGateAligShape[1] * melGateAligShape[2], melGateAligShape.data(), melGateAligShape.size()));
+		logger.log(L"[Inferring] Inferring \"" + _input + L"\" PostNet");
 		outputTensors = sessionPostNet->Run(Ort::RunOptions{ nullptr },
 			inputNodeNamesSessionPostNet.data(),
 			melInput.data(),
 			melInput.size(),
 			outputNodeNamesSessionPostNet.data(),
 			outputNodeNamesSessionPostNet.size());
+		logger.log(L"[Inferring] Inferring \"" + _input + L"\" VoCoder");
 		const std::vector<MTensor> wavOuts = sessionGan->Run(Ort::RunOptions{ nullptr },
 			ganIn.data(),
 			outputTensors.data(),
@@ -293,9 +310,11 @@ std::vector<int16_t> Tacotron2::Infer(std::wstring& _inputLens)
 		const auto outData = wavOuts[0].GetTensorData<float>();
 		for (int i = 0; i < wavOutsSharp[2]; i++)
 			_wavData.emplace_back(static_cast<int16_t>(outData[i] * 32768.0f));
-		delete[] BooleanVec;
 		_callback(++proc, _Lens.size());
+		logger.log(L"[Inferring] \"" + _input + L"\" Finished");
+		BooleanTensor.clear();
 	}
+	logger.log(L"[Info] Finished");
 	return _wavData;
 }
 INFERCLASSEND
