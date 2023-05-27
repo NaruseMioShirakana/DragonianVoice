@@ -2,6 +2,8 @@
 
 ---
 
+### 本项目目前已完全支持自行调用其中方法来实现命令行推理或其他软件，欢迎大家向本项目提PR
+
 选择语言：[简体中文](README.md)    [English](README_en.md)
 
 目前该仓库的项目为MoeSS，MoeVoiceStudio会在本月或下月发布，敬请期待。
