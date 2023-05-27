@@ -12,4 +12,4 @@ namespace MoeSSLogger
 	};
 }
 
-static MoeSSLogger::Logger logger;
+static  MoeSSLogger::Logger logger;

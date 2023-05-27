@@ -25,6 +25,10 @@ public:
 		move.m_hDynLib = nullptr;
 		return *this;
 	}
+	bool enabled() const
+	{
+		return m_hDynLib != nullptr;
+	}
 	MoeSSPluginAPI& operator=(const MoeSSPluginAPI&) = delete;
 private:
 	const wchar_t*(*func)(const wchar_t*) = nullptr;

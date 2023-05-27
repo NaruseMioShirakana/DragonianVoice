@@ -482,6 +482,11 @@ std::vector<float> InferClass::SVC::GetInterpedF0(const std::vector<float>& F0)
 		}
 		else
 		{
+			if (i == 0)
+			{
+				Of0[i] = float(F0[i]);
+				continue;
+			}
 			Of0[i] = float(F0[i - 1]);
 			last_value = F0[i];
 		}

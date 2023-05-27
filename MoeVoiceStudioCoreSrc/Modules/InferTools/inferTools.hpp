@@ -1,11 +1,8 @@
-#ifndef InferTool
+ï»¿#ifndef InferTool
 #define InferTool
 #include <Mui_Base.h>
+#include <fstream>
 #pragma comment(lib,"Lib/World/World.lib")
-
-std::wstring to_wide_string(const std::string& input);
-
-std::string to_byte_string(const std::wstring& input);
 
 constexpr int HEAD_LENGTH = 1024;
 
@@ -20,19 +17,19 @@ class Wav {
 public:
 
 	struct WAV_HEADER {
-		char             RIFF[4] = { 'R','I','F','F' };              //RIFF±êÊ¶
-		unsigned long    ChunkSize;                                  //ÎÄ¼þ´óÐ¡-8
-		char             WAVE[4] = { 'W','A','V','E' };              //WAVE¿é
-		char             fmt[4] = { 'f','m','t',' ' };               //fmt¿é
-		unsigned long    Subchunk1Size;                              //fmt¿é´óÐ¡
-		unsigned short   AudioFormat;                                //±àÂë¸ñÊ½
-		unsigned short   NumOfChan;                                  //ÉùµÀÊý
-		unsigned long    SamplesPerSec;                              //²ÉÑùÂÊ
-		unsigned long    bytesPerSec;                                //Ã¿·ÖÖÓ×Ö½ÚÊý
-		unsigned short   blockAlign;                                 //µ¥²ÉÑù×Ö½Ú
-		unsigned short   bitsPerSample;                              //µ¥²ÉÑùÎ»Êý
-		char             Subchunk2ID[4] = { 'd','a','t','a' };       //Êý¾Ý¿é
-		unsigned long    Subchunk2Size;                              //Êý¾Ý¿é´óÐ¡
+		char             RIFF[4] = { 'R','I','F','F' };              //RIFFï¿½ï¿½Ê¶
+		unsigned long    ChunkSize;                                  //ï¿½Ä¼ï¿½ï¿½ï¿½Ð¡-8
+		char             WAVE[4] = { 'W','A','V','E' };              //WAVEï¿½ï¿½
+		char             fmt[4] = { 'f','m','t',' ' };               //fmtï¿½ï¿½
+		unsigned long    Subchunk1Size;                              //fmtï¿½ï¿½ï¿½Ð¡
+		unsigned short   AudioFormat;                                //ï¿½ï¿½ï¿½ï¿½ï¿½Ê½
+		unsigned short   NumOfChan;                                  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		unsigned long    SamplesPerSec;                              //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+		unsigned long    bytesPerSec;                                //Ã¿ï¿½ï¿½ï¿½ï¿½ï¿½Ö½ï¿½ï¿½ï¿½
+		unsigned short   blockAlign;                                 //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö½ï¿½
+		unsigned short   bitsPerSample;                              //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+		char             Subchunk2ID[4] = { 'd','a','t','a' };       //ï¿½ï¿½ï¿½Ý¿ï¿½
+		unsigned long    Subchunk2Size;                              //ï¿½ï¿½ï¿½Ý¿ï¿½ï¿½Ð¡
 		WAV_HEADER(unsigned long cs = 36, unsigned long sc1s = 16, unsigned short af = 1, unsigned short nc = 1, unsigned long sr = 22050, unsigned long bps = 44100, unsigned short ba = 2, unsigned short bips = 16, unsigned long sc2s = 0) :ChunkSize(cs), Subchunk1Size(sc1s), AudioFormat(af), NumOfChan(nc), SamplesPerSec(sr), bytesPerSec(bps), blockAlign(ba), bitsPerSample(bips), Subchunk2Size(sc2s) {}
 	};
 	using iterator = int16_t*;
@@ -80,7 +77,7 @@ public:
 	WAV_HEADER getHeader() const { return header; }
 	WAV_HEADER& Header() { return header; }
 	void destory() const { delete[] Data; }
-	void changeData(const void* indata,long length,int sr)
+	void changeData(const void* indata, long length, int sr)
 	{
 		delete[] Data;
 		Data = new char[length];
@@ -143,6 +140,17 @@ public:
 	{
 		return static_cast<int64_t>(dataSize);
 	}
+	void Writef(const std::wstring& filepath) const
+	{
+		FILE* FOut = nullptr;
+		_wfopen_s(&FOut, filepath.c_str(), L"wb");
+		if (!FOut)
+			return;
+		fwrite(&header, 1, sizeof(header), FOut);
+		fwrite(Data, 1, dataSize * 2, FOut);
+		fclose(FOut);
+		FOut = nullptr;
+	}
 private:
 	WAV_HEADER header;
 	char* Data;
@@ -166,8 +174,14 @@ public:
 	{
 		std::vector<float> f0;
 		std::vector<float> uv;
-		V4Return() {}
+		V4Return() = default;
 		V4Return(std::vector<float>&& rF0, std::vector<float>&& ruv) :f0(rF0), uv(ruv) {}
+	};
+	struct RVCR
+	{
+		std::vector<float> f0f;
+		std::vector<long long> f0;
+		RVCR(std::vector<float>&& rF0, std::vector<long long>&& melp) :f0f(rF0), f0(melp) {}
 	};
 	int fs;
 	short hop;
@@ -186,14 +200,18 @@ public:
 	void InterPf0(int64_t len);
 	long long* f0Log();
 	std::vector<long long> GetF0AndOtherInput(const double* audio, int64_t audioLen, int64_t hubLen, int64_t tran);
+	RVCR GetF0AndOtherInputR(const double* audio, int64_t audioLen, int64_t hubLen, int64_t tran);
 	std::vector<float> GetF0AndOtherInput3(const double* audio, int64_t audioLen, int64_t hubLen, int64_t tran);
 	V4Return GetF0AndOtherInput4(const double* audio, int64_t audioLen, int64_t tran);
 	std::vector<float> GetF0AndOtherInputF0(const double* audio, int64_t audioLen, int64_t tran);
+	std::vector<float> GetOrgF0(const double* audio, int64_t audioLen, int64_t hubLen, int64_t tran);
 	int64_t getLen()const { return f0Len; }
 private:
 	double* rf0 = nullptr;
 	int64_t f0Len = 0;
 };
+
+std::vector<double> arange(double start, double end, double step = 1.0, double div = 1.0);
 
 std::vector<std::vector<bool>> generatePath(float* duration, size_t durationSize, size_t maskSize);
 
@@ -205,4 +223,15 @@ namespace tranTokens
 	std::wstring JapaneseToChinese(std::wstring);
 }
 
+std::vector<float> mean_filter(const std::vector<float>& vec, size_t window_size);
+
+template<typename T>
+double getAvg(const T* start, const T* end)
+{
+	const auto size = end - start + 1;
+	auto avg = (double)(*start);
+	for (auto i = 1; i < size; i++)
+		avg = avg + (abs((double)start[i]) - avg) / (double)(i + 1ull);
+	return avg;
+}
 #endif

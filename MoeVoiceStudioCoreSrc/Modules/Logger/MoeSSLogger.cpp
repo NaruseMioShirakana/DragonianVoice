@@ -1,0 +1,21 @@
+#include "MoeSSLogger.hpp"
+#include "../StringPreprocess.hpp"
+#include <iostream>
+
+namespace MoeSSLogger
+{
+	Logger::Logger()
+	{
+		
+	}
+
+	void Logger::log(const std::wstring& format)
+	{
+		std::cout << to_byte_string(format) + '\n';
+	}
+
+	void Logger::error(const std::wstring& format)
+	{
+		std::cout<< "[ERROR] " << to_byte_string(format) + '\n';
+	}
+}

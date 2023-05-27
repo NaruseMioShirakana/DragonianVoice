@@ -22,6 +22,7 @@ public:
 	std::vector<int16_t> Inference(std::wstring& _inputLens) const override;
 
 #ifdef WIN32
+#ifdef MoeVSMui
     void StartRT(Mui::Window::UIWindowBasic* window) = delete;
     void EndRT();
     std::vector<int16_t> RTInference(const std::vector<int16_t>& PCMData, long srcSr) const;
@@ -29,6 +30,7 @@ public:
     {
         return RTParams;
     }
+#endif
 #endif
 private:
     Ort::Session* VitsSvcModel = nullptr;
@@ -38,6 +40,7 @@ private:
     const std::vector<const char*> RVCInput = { "phone", "phone_lengths", "pitch", "pitchf", "ds", "rnd" };
 
 #ifdef WIN32
+#ifdef MoeVSMui
     bool RTSTAT = false;
     std::deque<std::vector<int16_t>> inputBuffer, outputBuffer, rawInputBuffer;
     std::deque<std::pair<std::vector<int16_t>, size_t>> rawOutputBuffer;
@@ -45,6 +48,7 @@ private:
     Mui::MDS_AudioPlayer* audio_player = nullptr;
     Mui::MAudioStream* audio_stream = nullptr;
     InferConfigs RTParams;
+#endif
 #endif
 };
 INFERCLASSEND

@@ -2,6 +2,7 @@
 #include <vector>
 #include "../StringPreprocess.hpp"
 #include "../../Lib/World/src/world/matlabfunctions.h"
+#include "../InferTools/inferTools.hpp"
 extern "C" {
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
@@ -9,8 +10,6 @@ extern "C" {
 #include "libswresample/swresample.h"
 #include "libavutil/samplefmt.h"
 }
-
-
 
 class AudioPreprocess
 {

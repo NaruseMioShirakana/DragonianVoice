@@ -636,6 +636,7 @@ std::vector<int16_t> VitsSvc::Inference(std::wstring& _inputLens) const
 }
 
 #ifdef WIN32
+#ifdef MoeVSMui
 std::vector<int16_t> VitsSvc::RTInference(const std::vector<int16_t>& PCMData, long srcSr) const
 {
 	auto hubertin = InterpResample<float>(PCMData, srcSr, 16000);
@@ -1069,6 +1070,7 @@ void VitsSvc::EndRT()
 	rawInputBuffer.clear();
 	rawOutputBuffer.clear();
 }
+#endif
 #endif
 
 INFERCLASSEND

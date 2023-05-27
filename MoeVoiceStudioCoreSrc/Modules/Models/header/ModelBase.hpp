@@ -6,7 +6,9 @@
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #endif
+#ifdef MoeVSMui
 #include <Mui.h>
+#endif
 #include "../../StringPreprocess.hpp"
 #include "../../PluginApi/pluginApi.hpp"
 #include "../../Logger/MoeSSLogger.hpp"
@@ -14,13 +16,23 @@
 #include "../../InferTools/Project.hpp"
 #ifdef max
 #undef max
-#include "../../Lib/rapidjson/rapidjson.h"
-#include "../../Lib/rapidjson/document.h"
+#include "../../../Lib/rapidjson/rapidjson.h"
+#include "../../../Lib/rapidjson/document.h"
 #define max(a,b)            (((a) > (b)) ? (a) : (b))
 #endif
 #define INFERCLASSHEADER namespace InferClass{
 #define INFERCLASSEND }
-#include "../../Helper/Helper.h"
+
+static std::wstring GetCurrentFolder(const std::wstring& defualt = L"")
+{
+	WCHAR path[256];
+#ifdef WIN32
+	GetCurrentDirectory(256, path);
+	return path;
+#else
+	return L"";
+#endif
+}
 
 INFERCLASSHEADER
 enum class FileType
