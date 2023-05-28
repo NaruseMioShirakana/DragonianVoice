@@ -24,7 +24,7 @@ int main(){
   std::vector<int16_t> output;
   try
   {
-  	std::wstring inp(watashinoonaniomitekudasai);
+  	std::wstring inp("watashinoonaniomitekudasai");
   	auto model = dynamic_cast<InferClass::BaseModelType*>(new InferClass::VitsSvc(modConfigJson, a_callback, b_callback));
     
   	output = model->Inference(inp);
