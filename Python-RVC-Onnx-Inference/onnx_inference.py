@@ -88,6 +88,8 @@ class OnnxRVC():
                                         )
         wav, sr = librosa.load(raw_path, sr=self.sampling_rate)
         org_length = len(wav)
+        if org_length / sr > 50.:
+            raise RuntimeError("Reached Max Length")
 
         wav16k = librosa.resample(wav, orig_sr=self.sampling_rate, target_sr=16000)
         wav16k = wav16k
