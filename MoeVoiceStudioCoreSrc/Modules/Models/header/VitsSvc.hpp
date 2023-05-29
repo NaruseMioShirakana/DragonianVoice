@@ -2,8 +2,10 @@
 #include <queue>
 #include "ModelBase.hpp"
 #ifdef WIN32
+#ifdef MoeVSMui
 #include <Render/Sound/Mui_DirectSound.h>
 #include "../../AvCodec/Recorder.h"
+#endif
 #endif
 
 INFERCLASSHEADER
@@ -14,7 +16,7 @@ public:
 
 	~VitsSvc() override;
 
-    //ÒÑÆúÓÃ
+    //Ã’Ã‘Ã†ÃºÃ“Ãƒ
     std::vector<int16_t> InferBatch() const;
 
     std::vector<int16_t> InferWithF0AndHiddenUnit(std::vector<MoeVSProject::Params>&) const;
