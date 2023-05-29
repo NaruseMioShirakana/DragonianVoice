@@ -386,6 +386,15 @@ wchar_t* PluginMain(wchar_t* input){
 // 注意：导出dll时请使用 extern "C" 关键字来防止C++语言的破坏性命名。
 ```
 
+## 本地编译
+```cxx
+cd MoeVoiceStudioCoreSrc
+mkdir build
+cd build
+cmake ../
+make .
+```
+
 ---
 ## 依赖列表
 - [FFmpeg](https://ffmpeg.org/)
