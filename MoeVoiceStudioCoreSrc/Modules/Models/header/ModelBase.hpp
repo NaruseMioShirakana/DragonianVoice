@@ -6,9 +6,7 @@
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #endif
-#ifdef MoeVSMui
-#include <Mui.h>
-#endif
+
 #include "../../StringPreprocess.hpp"
 #include "../../PluginApi/pluginApi.hpp"
 #include "../../Logger/MoeSSLogger.hpp"
@@ -20,17 +18,20 @@
 #include "../../../Lib/rapidjson/document.h"
 #define max(a,b)            (((a) > (b)) ? (a) : (b))
 #endif
+#include <map>
 #define INFERCLASSHEADER namespace InferClass{
 #define INFERCLASSEND }
 
 static std::wstring GetCurrentFolder(const std::wstring& defualt = L"")
 {
-	WCHAR path[256];
+	WCHAR path[MAX_PATH];
 #ifdef WIN32
-	GetCurrentDirectory(256, path);
-	return path;
+	GetModuleFileName(nullptr, path, MAX_PATH);
+	std::wstring _curPath = path;
+	_curPath = _curPath.substr(0, _curPath.rfind(L'\\'));
+	return _curPath;
 #else
-	return L"";
+	return defualt;
 #endif
 }
 
@@ -103,16 +104,16 @@ public:
 	int InsertMessageToEmptyEditBox(std::wstring& _inputLens) const;
 	static std::vector<std::wstring> CutLens(const std::wstring& input);
 	void initRegex();
-	long GetSamplingRate() const
+	[[nodiscard]] long GetSamplingRate() const
 	{
 		return _samplingRate;
 	}
 	void ChangeDevice(Device _dev);
-	std::wstring getEndString() const
+	[[nodiscard]] std::wstring getEndString() const
 	{
 		return EndString;
 	}
-	const MoeSSPluginAPI* getPlugin() const
+	[[nodiscard]] const MoeSSPluginAPI* getPlugin() const
 	{
 		return &_plugin;
 	}
@@ -205,7 +206,7 @@ public:
 
 	static std::vector<std::vector<bool>> generatePath(float* duration, size_t durationSize, size_t maskSize);
 
-	std::vector<float> GetEmotionVector(std::wstring src) const;
+	[[nodiscard]] std::vector<float> GetEmotionVector(std::wstring src) const;
 protected:
 	~TTS() override = default;
 	DurationCallback _dcb;
@@ -268,7 +269,7 @@ public:
 
 	std::vector<MoeVSProject::Params> GetSvcParam(std::wstring& RawPath) const;
 
-	std::vector<int64_t> GetNSFF0(const std::vector<float>&) const;
+	[[nodiscard]] std::vector<int64_t> GetNSFF0(const std::vector<float>&) const;
 
 	static std::vector<float> GetInterpedF0(const std::vector<float>&);
 
@@ -333,36 +334,36 @@ public:
 		return Data;
 	}
 
-	std::vector<float> ExtractVolume(const std::vector<double>& OrgAudio) const;
+	[[nodiscard]] std::vector<float> ExtractVolume(const std::vector<double>& OrgAudio) const;
 
-	std::vector<float> GetInterpedF0log(const std::vector<float>&) const;
+	[[nodiscard]] std::vector<float> GetInterpedF0log(const std::vector<float>&) const;
 
-	InferConfigs GetInferConfigs() const
+	[[nodiscard]] InferConfigs GetInferConfigs() const
 	{
 		return _get_init_params();
 	}
 
-	int GetHopSize() const
+	[[nodiscard]] int GetHopSize() const
 	{
 		return hop;
 	}
 
-	int64_t GetHiddenSize() const
+	[[nodiscard]] int64_t GetHiddenSize() const
 	{
 		return Hidden_Size;
 	}
 
-	long GetPndm() const
+	[[nodiscard]] long GetPndm() const
 	{
 		return pndm;
 	}
 
-	long GetMelBins() const
+	[[nodiscard]] long GetMelBins() const
 	{
 		return melBins;
 	}
 
-	int64_t GetNSpeaker() const
+	[[nodiscard]] int64_t GetNSpeaker() const
 	{
 		return n_speaker;
 	}

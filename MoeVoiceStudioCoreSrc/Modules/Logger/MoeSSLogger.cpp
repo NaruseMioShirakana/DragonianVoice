@@ -4,17 +4,14 @@
 
 namespace MoeSSLogger
 {
-	Logger::Logger()
-	{
-		
-	}
+	Logger::Logger() = default;
 
-	void Logger::log(const std::wstring& format)
+	void Logger::log(const std::wstring& format) const
 	{
 		std::cout << to_byte_string(format) + '\n';
 	}
 
-	void Logger::error(const std::wstring& format)
+	void Logger::error(const std::wstring& format) const
 	{
 		std::cout<< "[ERROR] " << to_byte_string(format) + '\n';
 	}

@@ -1,4 +1,26 @@
 #include "pluginApi.hpp"
+#ifdef WIN32
+MoeSSPluginAPI::~MoeSSPluginAPI()
+{
+	func = nullptr;
+	if (m_hDynLib)
+		FreeLibrary(m_hDynLib);
+	m_hDynLib = nullptr;
+}
+
+MoeSSPluginAPI& MoeSSPluginAPI::operator=(MoeSSPluginAPI&& move) noexcept
+{
+	func = move.func;
+	m_hDynLib = move.m_hDynLib;
+	move.func = nullptr;
+	move.m_hDynLib = nullptr;
+	return *this;
+}
+
+bool MoeSSPluginAPI::enabled() const
+{
+	return m_hDynLib != nullptr;
+}
 
 char MoeSSPluginAPI::Load(const std::wstring& PluginName)
 {
@@ -44,3 +66,4 @@ void MoeSSPluginAPI::unLoad()
 		FreeLibrary(m_hDynLib);
 	m_hDynLib = nullptr;
 }
+#endif

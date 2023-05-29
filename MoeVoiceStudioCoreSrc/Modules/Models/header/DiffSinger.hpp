@@ -27,7 +27,7 @@ public:
 
     static std::map<std::wstring, int64_t> GetPhones(const std::map<std::wstring, std::vector<std::wstring>>& PhonesPair);
 
-    std::vector<DiffSingerInput> preprocessDiffSinger(const std::vector<std::wstring>& Jsonpath) const;
+    [[nodiscard]] std::vector<DiffSingerInput> preprocessDiffSinger(const std::vector<std::wstring>& Jsonpath) const;
 
     static std::vector<double> arange(double start, double end, double step = 1.0, double div = 1.0)
     {

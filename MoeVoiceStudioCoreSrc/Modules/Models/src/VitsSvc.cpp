@@ -144,6 +144,7 @@ VitsSvc::VitsSvc(const rapidjson::Document& _config, const callback& _cb, const 
 }
 
 //已弃用（旧MoeSS的推理函数）
+#ifdef MOESSDFN
 std::vector<int16_t> VitsSvc::InferBatch() const
 {
 	std::wstring RawPath;
@@ -403,6 +404,7 @@ std::vector<int16_t> VitsSvc::InferBatch() const
 	logger.log(L"[Info] Finished");
 	return {};
 }
+#endif
 
 //推理
 std::vector<int16_t> VitsSvc::InferWithF0AndHiddenUnit(std::vector<MoeVSProject::Params>& Inputs) const

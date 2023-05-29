@@ -16,8 +16,7 @@ public:
 
 	~VitsSvc() override;
 
-    //ÒÑÆúÓÃ
-    std::vector<int16_t> InferBatch() const;
+    [[nodiscard]] std::vector<int16_t> InferBatch() const = delete;
 
     std::vector<int16_t> InferWithF0AndHiddenUnit(std::vector<MoeVSProject::Params>&) const;
 

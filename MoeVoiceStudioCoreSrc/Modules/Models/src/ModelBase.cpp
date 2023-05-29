@@ -334,7 +334,6 @@ void InferClass::BaseModelType::ChangeDevice(Device _dev)
 std::vector<int16_t> InferClass::BaseModelType::Inference(std::wstring& _inputLens) const
 {
 	throw std::exception("Base");
-	return {};
 }
 
 std::vector<InferClass::InferConfigs> InferClass::TTS::GetParam(std::vector<std::wstring>& input) const

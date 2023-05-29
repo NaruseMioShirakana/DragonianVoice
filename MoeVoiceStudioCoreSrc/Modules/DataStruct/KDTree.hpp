@@ -12,13 +12,12 @@
  */
 
 #include <algorithm>
-#include <functional>
 #include <memory>
 #include <vector>
 
 using point_t = std::vector<float>;
 using indexArr = std::vector< size_t >;
-using pointIndex = typename std::pair< std::vector< float >, size_t >;
+using pointIndex = std::pair< std::vector< float >, size_t >;
 
 class KDNode {
    public:
@@ -68,7 +67,7 @@ class comparer {
     );
 };
 
-using pointIndexArr = typename std::vector< pointIndex >;
+using pointIndexArr = std::vector< pointIndex >;
 
 inline void sort_on_idx(const pointIndexArr::iterator &,  //
                         const pointIndexArr::iterator &,  //

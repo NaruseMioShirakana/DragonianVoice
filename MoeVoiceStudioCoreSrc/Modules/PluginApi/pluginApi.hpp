@@ -1,37 +1,30 @@
 #pragma once
 #include <string>
+#ifdef WIN32
+#ifndef UNICODE
+#define UNICODE
+#endif
 #include <Windows.h>
+#endif
 class MoeSSPluginAPI
 {
 public:
 	using funTy = const wchar_t* (*)(const wchar_t*);
 	using freTy = void (*)();
 	MoeSSPluginAPI() = default;
-	~MoeSSPluginAPI() {
-		func = nullptr;
-		if (m_hDynLib)
-			FreeLibrary(m_hDynLib);
-		m_hDynLib = nullptr;
-	}
+	~MoeSSPluginAPI();
 	char Load(const std::wstring& PluginName);
 	void unLoad();
-	std::wstring functionAPI(const std::wstring& inputLen) const;
+	[[nodiscard]] std::wstring functionAPI(const std::wstring& inputLen) const;
 	MoeSSPluginAPI(const MoeSSPluginAPI&) = delete;
 	MoeSSPluginAPI(MoeSSPluginAPI&&) = delete;
-	MoeSSPluginAPI& operator=(MoeSSPluginAPI&& move) noexcept{
-		func = move.func;
-		m_hDynLib = move.m_hDynLib;
-		move.func = nullptr;
-		move.m_hDynLib = nullptr;
-		return *this;
-	}
-	bool enabled() const
-	{
-		return m_hDynLib != nullptr;
-	}
+	MoeSSPluginAPI& operator=(MoeSSPluginAPI&& move) noexcept;
+	[[nodiscard]] bool enabled() const;
 	MoeSSPluginAPI& operator=(const MoeSSPluginAPI&) = delete;
 private:
+#ifdef WIN32
 	const wchar_t*(*func)(const wchar_t*) = nullptr;
 	void (*frel)() = nullptr;
 	HINSTANCE m_hDynLib = nullptr;
+#endif
 };

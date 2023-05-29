@@ -7,8 +7,8 @@ namespace MoeSSLogger
 	{
 	public:
 		Logger();
-		void log(const std::wstring&);
-		void error(const std::wstring&);
+		void log(const std::wstring&) const;
+		void error(const std::wstring&) const;
 	};
 }
 
