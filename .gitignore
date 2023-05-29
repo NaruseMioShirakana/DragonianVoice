@@ -4,3 +4,11 @@ build
 cmake-build-debug
 
 .vscode
+/MoeVoiceStudioCoreSrc/onnxruntime-win-x64-gpu-1.15.0
+/.vs
+/MoeVoiceStudioCoreSrc/onnxruntime
+/MoeVoiceStudioCoreSrc/onnxruntime.zip
+/MoeVoiceStudioCoreSrc/hifigan
+/MoeVoiceStudioCoreSrc/hubert
+/MoeVoiceStudioCoreSrc/Models
+/MoeVoiceStudioCoreSrc/OutPuts
