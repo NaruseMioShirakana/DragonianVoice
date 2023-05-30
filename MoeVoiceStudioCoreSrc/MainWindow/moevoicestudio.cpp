@@ -6,6 +6,7 @@ MoeVoiceStudio::MoeVoiceStudio(QWidget *parent)
     , ui(new Ui::MoeVoiceStudio)
 {
     ui->setupUi(this);
+    ui->retranslateUi(this);
 }
 
 MoeVoiceStudio::~MoeVoiceStudio()

@@ -63,7 +63,7 @@ file(GLOB_RECURSE SRCS "${PROJECT_SOURCE_DIR}/Modules/*.cpp")
 file(GLOB_RECURSE HDRS "${PROJECT_SOURCE_DIR}/Modules/*.hpp")
 
 # QT相关
-set(TS_FILES MainWindow/MoeVS_zh_CN.ts)
+set(TS_FILES_M localization/MoeVS_zh_CN.ts)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -82,7 +82,8 @@ set(PROJECT_SOURCES
         MainWindow/SVS/svsmainwindow.h 
         MainWindow/SVS/svsmainwindow.cpp 
         MainWindow/SVS/svsmainwindow.ui
-        ${TS_FILES}
+        ${TS_FILES_M}
+        MResource.qrc
 )
 
 # 添加主文件
@@ -92,7 +93,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         ${SRCS}
     )
-    qt_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+    qt_add_translations(${PROJECT_NAME} TS_FILES ${TS_FILES_M})
 else()
     if(ANDROID)
         add_library(${PROJECT_NAME} SHARED
@@ -105,7 +106,7 @@ else()
             ${SRCS}
         )
     endif()
-    qt5_create_translation(QM_FILES ${CMAKE_SOURCE_DIR} ${TS_FILES})
+    qt_add_translations(${PROJECT_NAME} TS_FILES ${TS_FILES_M})
 endif()
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
