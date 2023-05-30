@@ -10,7 +10,7 @@
 
 作者的其他项目：[AiToolKits](https://github.com/NaruseMioShirakana/ShirakanaNoAiToolKits)
 
-如果想要参加开发，可以加入QQ群:263805400
+如果想要参加开发，可以加入QQ群:263805400或直接提PR
 
 ---
 
