@@ -31,6 +31,7 @@ static std::wstring GetCurrentFolder(const std::wstring& defualt = L"")
 	_curPath = _curPath.substr(0, _curPath.rfind(L'\\'));
 	return _curPath;
 #else
+	//TODO Other System
 	return defualt;
 #endif
 }

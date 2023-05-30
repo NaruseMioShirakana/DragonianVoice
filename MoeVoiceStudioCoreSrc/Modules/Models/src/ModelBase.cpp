@@ -1,6 +1,7 @@
 #include "../header/ModelBase.hpp"
-
+#ifdef WIN32
 #include <commdlg.h>
+#endif
 #include <thread>
 #include <fstream>
 
@@ -94,9 +95,9 @@ int InferClass::BaseModelType::InsertMessageToEmptyEditBox(std::wstring& _inputL
 	ofn.hwndOwner = nullptr;
 	if (_modelType == modelType::SoVits || _modelType == modelType::diffSvc || _modelType == modelType::RVC || _modelType == modelType::DDSP)
 	{
-		constexpr TCHAR szFilter[] = TEXT("音频 (*.wav;*.mp3;*.ogg;*.flac;*.aac)\0*.wav;*.mp3;*.ogg;*.flac;*.aac\0");
+		constexpr TCHAR szFilter[] = TEXT("Audio (*.wav;*.mp3;*.ogg;*.flac;*.aac)\0*.wav;*.mp3;*.ogg;*.flac;*.aac\0");
 		ofn.lpstrFilter = szFilter;
-		ofn.lpstrTitle = L"打开音频";
+		ofn.lpstrTitle = nullptr;
 		ofn.lpstrDefExt = TEXT("wav");
 		ofn.Flags = OFN_HIDEREADONLY | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_EXPLORER;
 		if (GetOpenFileName(&ofn))
@@ -122,9 +123,9 @@ int InferClass::BaseModelType::InsertMessageToEmptyEditBox(std::wstring& _inputL
 	}
 	else
 	{
-		constexpr TCHAR szFilter[] = TEXT("DiffSinger项目文件 (*.json;*.ds)\0*.json;*.ds\0");
+		constexpr TCHAR szFilter[] = TEXT("DiffSinger Project (*.json;*.ds)\0*.json;*.ds\0");
 		ofn.lpstrFilter = szFilter;
-		ofn.lpstrTitle = L"打开项目";
+		ofn.lpstrTitle = nullptr;
 		ofn.lpstrDefExt = TEXT("json");
 		ofn.Flags = OFN_HIDEREADONLY | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_ALLOWMULTISELECT | OFN_EXPLORER;
 		if (GetOpenFileName(&ofn))
@@ -584,9 +585,9 @@ std::vector<MoeVSProject::Params> InferClass::SVC::GetSvcParam(std::wstring& Raw
 		logger.log(L"[Inferring] PreProcessing \"" + path + L"\" Encoder");
 		auto RawWav = AudioPreprocess().codec(path, _samplingRate);
 		auto HubertWav = AudioPreprocess().codec(path, 16000);
-		auto info = cutWav(RawWav, threshold, minLen, static_cast<unsigned short>(frame_len), static_cast<unsigned short>(frame_shift));
+		auto info = cutWav(RawWav, _samplingRate, threshold, minLen, static_cast<unsigned short>(frame_len), static_cast<unsigned short>(frame_shift));
 		for (size_t i = 1; i < info.cutOffset.size(); ++i)
-			if ((info.cutOffset[i] - info.cutOffset[i - 1]) / RawWav.getHeader().bytesPerSec > 60)
+			if ((info.cutOffset[i] - info.cutOffset[i - 1]) / _samplingRate * 2 > 60)
 				throw std::exception("Reached max slice length, please change slicer param");
 		const auto LenFactor = ((double)16000 / (double)_samplingRate);
 		std::vector<std::vector<float>> Hidden_Unit, F0, Volume, SpeakerMix;

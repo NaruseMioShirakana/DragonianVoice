@@ -75,7 +75,7 @@ public:
         }
         return output;
     }
-	Wav codec(const std::wstring& path, int sr)
+    std::vector<short> codec(const std::wstring& path, int sr)
 	{
         //if (path.substr(path.rfind(L'.')) == L".wav")
         //    return resample(path, sr);
@@ -149,8 +149,9 @@ public:
                 av_packet_unref(packet);
             }
         }
-        Wav outWav(static_cast<unsigned long>(sr), static_cast<unsigned long>(outData.size()), outData.data());
-        const auto RawWavLen = outWav.getDataLen();
+        //Wav outWav(static_cast<unsigned long>(sr), static_cast<unsigned long>(outData.size()), outData.data());
+        auto outWav = reinterpret_cast<int16_t*>(outData.data());
+        const auto RawWavLen = int64_t(outData.size()) / 2;
         if (nSample != static_cast<size_t>(RawWavLen))
         {
             const double interpOff = static_cast<double>(RawWavLen) / static_cast<double>(nSample);
@@ -169,10 +170,10 @@ public:
             for (size_t i = 0; i < nSample; ++i)
                 DataChun[i] = isnan(yi[i]) ? 0i16 : static_cast<short>(yi[i]);
             delete[] yi;
-            outWav = { static_cast<unsigned long>(sr), static_cast<unsigned long>(DataChun.size() * 2), DataChun.data() };
+            return DataChun;
         }
         release();
-		return outWav;
+        return { outWav , outWav + RawWavLen };
 	}
     void release()
 	{

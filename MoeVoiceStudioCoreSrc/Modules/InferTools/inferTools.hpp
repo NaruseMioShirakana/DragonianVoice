@@ -122,7 +122,7 @@ private:
 	int StartPos;
 };
 
-cutResult cutWav(Wav& input, double threshold = 30, unsigned long minLen = 5, unsigned short frame_len = 4 * 1024, unsigned short frame_shift = 512);
+cutResult cutWav(std::vector<int16_t>& input, long bps, double threshold = 30, unsigned long minLen = 5, unsigned short frame_len = 4 * 1024, unsigned short frame_shift = 512);
 
 class F0PreProcess
 {

@@ -156,15 +156,17 @@ Wav& Wav::cat(const Wav& input)
     return *this;
 }
 
-cutResult cutWav(Wav& input, double threshold, unsigned long minLen, unsigned short frame_len, unsigned short frame_shift)
+cutResult cutWav(std::vector<int16_t>& input, long bps, double threshold, unsigned long minLen, unsigned short frame_len, unsigned short frame_shift)
 {
-    const auto header = input.getHeader();
-    if (header.Subchunk2Size < minLen * header.bytesPerSec)
-        return { {0,header.Subchunk2Size},{true} };
-    auto ptr = input.getData();
+    //const auto header = input.getHeader();
+    auto sc2s = input.size() * 2;
+    if (sc2s < size_t(minLen) * bps)
+        return { {0,sc2s},{true} };
+    auto ptr = (char*)input.data();
+    const auto begin_ptr = ptr;
     std::vector<unsigned long long> output;
     std::vector<bool> tag;
-    auto n = (header.Subchunk2Size / frame_shift) - 2 * (frame_len / frame_shift);
+    auto n = (sc2s / frame_shift) - 2ull * (frame_len / frame_shift);
     unsigned long nn = 0;
     bool cutTag = true;
     output.emplace_back(0);
@@ -177,10 +179,10 @@ cutResult cutWav(Wav& input, double threshold, unsigned long minLen, unsigned sh
             if (vol < threshold)
             {
                 cutTag = false;
-                if (nn > minLen * header.bytesPerSec)
+                if (nn > minLen * bps)
                 {
                     nn = 0;
-                    output.emplace_back((ptr - input.getData()) + (frame_len / 2));
+                    output.emplace_back((ptr - begin_ptr) + (frame_len / 2));
                 }
             }
             else
@@ -198,20 +200,20 @@ cutResult cutWav(Wav& input, double threshold, unsigned long minLen, unsigned sh
             else
             {
                 cutTag = true;
-                if (nn > minLen * header.bytesPerSec)
+                if (nn > minLen * bps)
                 {
                     nn = 0;
-                    output.emplace_back((ptr - input.getData()) + (frame_len / 2));
+                    output.emplace_back((ptr - begin_ptr) + (frame_len / 2));
                 }
             }
         }
         nn += frame_shift;
         ptr += frame_shift;
     }
-    output.push_back(header.Subchunk2Size);
+    output.push_back(sc2s);
     for (size_t i = 1; i < output.size(); i++)
     {
-        tag.push_back(abs(getAvg((short*)(input.getData() + output[i - 1]), (short*)(input.getData() + output[i]))) > threshold);
+        tag.push_back(abs(getAvg((short*)(begin_ptr + output[i - 1]), (short*)(begin_ptr + output[i]))) > threshold);
     }
     return { std::move(output),std::move(tag) };
 }
