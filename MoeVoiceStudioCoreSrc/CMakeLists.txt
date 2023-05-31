@@ -106,7 +106,7 @@ set_source_files_properties(${TS_FILES}
 )
 
 # 创建翻译的最关键一步
-qt5_create_translation(QM_FILES ${TS_FILES} ${PROJECT_SOURCES})
+qt_create_translation(QM_FILES ${TS_FILES} ${PROJECT_SOURCES})
 
 # 添加更新翻译的目标
 add_custom_target(lupdate_task DEPENDS ${TS_FILES})
