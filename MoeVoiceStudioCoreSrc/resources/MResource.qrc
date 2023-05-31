@@ -1,5 +1,8 @@
 <RCC>
     <qresource prefix="/">
-        <file>../localization/MoeVS_zh_CN.qm</file>
+        <file alias="MoeVS_zh_CN">../localization/MoeVS_zh_CN.qm</file>
+    </qresource>
+    <qresource prefix="/image/bg">
+        <file alias="bg_sq_small_1">Images/bg/bg_sq_small_1.png</file>
     </qresource>
 </RCC>

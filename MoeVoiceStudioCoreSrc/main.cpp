@@ -12,12 +12,12 @@ int main(int argc, char* argv[])
     const QStringList uiLanguages = QLocale::system().uiLanguages();
     for (const QString& locale : uiLanguages) {
         const QString baseName = "MoeVS_" + QLocale(locale).name();
-        if (translator.load(QString(":/localization/%1.qm").arg(baseName))) {
+        if (translator.load(QString(":/%1").arg(baseName))) {
             app.installTranslator(&translator);
             break;
         }
     }
-    MoeVoiceStudio w;
-    w.show();
+    MoeVoiceStudio DWindow;
+    DWindow.show();
     return app.exec();
 }

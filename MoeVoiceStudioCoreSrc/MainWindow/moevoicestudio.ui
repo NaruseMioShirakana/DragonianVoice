@@ -7,13 +7,31 @@
     <x>0</x>
     <y>0</y>
     <width>600</width>
-    <height>400</height>
+    <height>600</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>600</width>
+    <height>600</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>600</width>
+    <height>600</height>
+   </size>
+  </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::DefaultContextMenu</enum>
+  </property>
+  <property name="acceptDrops">
+   <bool>false</bool>
   </property>
   <property name="windowTitle">
    <string>MoeVoiceStudio</string>
   </property>
-  <widget class="QWidget" name="centralwidget">
+  <widget class="QWidget" name="DisclaimerPageCentralwidget">
    <widget class="QLabel" name="DisclaimerPageTitle">
     <property name="geometry">
      <rect>
@@ -39,8 +57,8 @@
     <property name="geometry">
      <rect>
       <x>80</x>
-      <y>355</y>
-      <width>130</width>
+      <y>557</y>
+      <width>140</width>
       <height>25</height>
      </rect>
     </property>
@@ -56,15 +74,15 @@
    <widget class="QPushButton" name="DisclaimerPageRefuseButton">
     <property name="geometry">
      <rect>
-      <x>390</x>
-      <y>355</y>
-      <width>130</width>
+      <x>380</x>
+      <y>557</y>
+      <width>140</width>
       <height>25</height>
      </rect>
     </property>
     <property name="font">
      <font>
-      <pointsize>10</pointsize>
+      <pointsize>11</pointsize>
      </font>
     </property>
     <property name="text">
@@ -74,11 +92,15 @@
    <widget class="QTextBrowser" name="DisclaimerPageTextBrowser">
     <property name="geometry">
      <rect>
-      <x>50</x>
-      <y>70</y>
-      <width>500</width>
-      <height>250</height>
+      <x>40</x>
+      <y>60</y>
+      <width>520</width>
+      <height>480</height>
      </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgba(255, 255, 255, 0);
+border: 0;</string>
     </property>
     <property name="markdown">
      <string>DisclaimerPageText
@@ -89,6 +111,24 @@
      <string/>
     </property>
    </widget>
+   <widget class="QLabel" name="DisclaimerPageBackGround">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>600</width>
+      <height>600</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string notr="true"/>
+    </property>
+   </widget>
+   <zorder>DisclaimerPageBackGround</zorder>
+   <zorder>DisclaimerPageTitle</zorder>
+   <zorder>DisclaimerPageAgreeButton</zorder>
+   <zorder>DisclaimerPageRefuseButton</zorder>
+   <zorder>DisclaimerPageTextBrowser</zorder>
   </widget>
  </widget>
  <resources/>

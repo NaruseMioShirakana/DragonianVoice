@@ -13,7 +13,7 @@ class SVCMainWindow : public QDialog
 
 public:
     explicit SVCMainWindow(QWidget *parent = nullptr);
-    ~SVCMainWindow();
+    ~SVCMainWindow() override;
 
 private:
     Ui::SVCMainWindow *ui;

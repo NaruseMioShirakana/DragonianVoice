@@ -13,7 +13,7 @@ class TTSMainWindow : public QDialog
 
 public:
     explicit TTSMainWindow(QWidget *parent = nullptr);
-    ~TTSMainWindow();
+    ~TTSMainWindow() override;
 
 private:
     Ui::TTSMainWindow *ui;

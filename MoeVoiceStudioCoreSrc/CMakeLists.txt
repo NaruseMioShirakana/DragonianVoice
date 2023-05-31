@@ -81,6 +81,7 @@ moevs_add_files(PROJECT_SOURCES
     Modules/*.hpp
     Modules/*.cpp
     MainWindow/*.h
+    MainWindow/*.hpp
     MainWindow/*.cpp
     MainWindow/*.ui
     resources/*.qrc
