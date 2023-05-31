@@ -146,7 +146,7 @@
     <message>
         <location filename="../MainWindow/SVC/svcmainwindow.ui" line="13"/>
         <source>Dialog</source>
-        <translation></translation>
+        <translation>MoeVoiceStudio 语音合成 （Singing Voice Conversion）</translation>
     </message>
 </context>
 <context>
@@ -154,15 +154,170 @@
     <message>
         <location filename="../MainWindow/SVS/svsmainwindow.ui" line="13"/>
         <source>Dialog</source>
-        <translation></translation>
+        <translation>MoeVoiceStudio 语音合成 （Singing Voice Synthesis）</translation>
     </message>
 </context>
 <context>
     <name>TTSMainWindow</name>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="13"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="14"/>
         <source>Dialog</source>
-        <translation></translation>
+        <translation>MoeVoiceStudio 语音合成 （Text to Speech）</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="34"/>
+        <source>TTSTextList</source>
+        <translation>文本列表</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="48"/>
+        <source>TTSTextSavePushButton</source>
+        <translatorcomment>将编辑的结果保存到列表中对应项</translatorcomment>
+        <translation>保存</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="160"/>
+        <source>TTSClearPushButton</source>
+        <translatorcomment>清空列表中所有项</translatorcomment>
+        <translation>清空列表</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="86"/>
+        <source>TTSEditPushButton</source>
+        <translatorcomment>编辑在列表中选中的一项</translatorcomment>
+        <translation>编辑选中项</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="170"/>
+        <source>TTSSaveToFileButton</source>
+        <translatorcomment>将列表中的所有文件保存为ttsproj文件</translatorcomment>
+        <translation>保存为文件</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="276"/>
+        <source>SendToPlayerButtonText</source>
+        <translatorcomment>将列表中选中的音频送至播放器播放</translatorcomment>
+        <translation>送至播放器</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="289"/>
+        <source>DrawMelSpecButtonText</source>
+        <translatorcomment>绘制频谱与时长图</translatorcomment>
+        <translation>绘制声学图</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="312"/>
+        <source>ClearAudioListButtonText</source>
+        <translatorcomment>清空播放列表中的所有元素</translatorcomment>
+        <translation>清空列表</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="396"/>
+        <source>TTSRefreshModelListButtonText</source>
+        <translatorcomment>重新读取文件夹中已经安装的模型</translatorcomment>
+        <translation>重载模型列表</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="426"/>
+        <source>TTSCharacterMixProportionText</source>
+        <translation>角色混合比例</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="436"/>
+        <source>TTSCharacterMixBoolText</source>
+        <translation>开启角色混合</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="443"/>
+        <source>TTSModelListDirButtonText</source>
+        <translatorcomment>在exploer中打开模型目录</translatorcomment>
+        <translation>打开模型目录</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="450"/>
+        <source>TTSLoadModelButtonText</source>
+        <translatorcomment>加载选中的模型</translatorcomment>
+        <translation>加载模型</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="517"/>
+        <source>TTSLengthScaleText</source>
+        <translatorcomment>长度规模，时长预测中对每个音素长度的乘数（扩大这个数值倍）</translatorcomment>
+        <translation>长度规模</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="524"/>
+        <source>TTSEmotionText</source>
+        <translatorcomment>情感向量的ID或json中的描述</translatorcomment>
+        <translation>情感描述（或ID）</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="575"/>
+        <source>TTSMaxDecodeStepText</source>
+        <translatorcomment>Rnn中的最大解码步数</translatorcomment>
+        <translation>Tacotron2最大解码步数</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="653"/>
+        <source>TTSNoiseScaleText</source>
+        <translatorcomment>Encoder的噪声规模，影响玄学</translatorcomment>
+        <translation>噪声规模</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="679"/>
+        <source>TTSGateThText</source>
+        <translatorcomment>解码跳出阈值</translatorcomment>
+        <translation>Tacotron2门阈值</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="756"/>
+        <source>TTSNoiseScaleWText</source>
+        <translatorcomment>随机时长预测模块噪声规模，影响时长预测出的数值</translatorcomment>
+        <translation>随机时长预测模块噪声规模</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="923"/>
+        <source>InferenceButtonText</source>
+        <translatorcomment>将该按钮之上文本框的内容作为输入输入到MoeVS中推理</translatorcomment>
+        <translation>开始推理（旧MoeSS的方法）</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="947"/>
+        <source>TTSCleanerButton</source>
+        <translatorcomment>启用TextCleaner进行G2P</translatorcomment>
+        <translation>清理文本</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="890"/>
+        <source>TTSToneLabel</source>
+        <translation>音素音调（暂时无用）</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="237"/>
+        <source>TTSDurationLabel</source>
+        <translation>音素时长</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="224"/>
+        <source>TTSSrcTextLabel</source>
+        <translation>源文本</translation>
+    </message>
+    <message>
+        <source>TextSavePushButton</source>
+        <translation type="vanished">保存</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="102"/>
+        <source>TTSPushButton</source>
+        <translation>开始批量转换</translation>
+    </message>
+    <message>
+        <source>ClearPushButton</source>
+        <translation type="vanished">清空列表</translation>
+    </message>
+    <message>
+        <source>EditPushButton</source>
+        <translation type="vanished">编辑选中项</translation>
     </message>
 </context>
 </TS>

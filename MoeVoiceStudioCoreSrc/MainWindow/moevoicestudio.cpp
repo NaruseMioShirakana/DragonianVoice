@@ -9,7 +9,7 @@ MoeVoiceStudio::MoeVoiceStudio(QWidget *parent)
 {
     ui->setupUi(this);
     ui->retranslateUi(this);
-    this->setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
+    this->setWindowFlags(Qt::FramelessWindowHint);
 }
 
 MoeVoiceStudio::~MoeVoiceStudio()

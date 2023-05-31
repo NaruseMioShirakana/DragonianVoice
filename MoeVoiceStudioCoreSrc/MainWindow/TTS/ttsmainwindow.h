@@ -12,11 +12,12 @@ class TTSMainWindow : public QDialog
     Q_OBJECT
 
 public:
-    explicit TTSMainWindow(QWidget *parent = nullptr);
+    explicit TTSMainWindow(const std::function<void(QDialog*)>& _callback, QWidget *parent = nullptr);
     ~TTSMainWindow() override;
 
 private:
     Ui::TTSMainWindow *ui;
+    const std::function<void(QDialog*)>& exit_callback;
 };
 
 #endif // TTSMAINWINDOW_H

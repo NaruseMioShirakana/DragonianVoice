@@ -17,6 +17,12 @@ class MainMenu : public QDialog
 public:
     explicit MainMenu(QWidget *parent = nullptr);
     ~MainMenu() override;
+    std::function<void(QDialog*)> _close_callback = [&](QDialog* _tts_window)
+    {
+        _tts_window->hide();
+        show();
+    };
+
 public slots:
     void on_MainMenuExitButton_clicked();
     void on_MainMenuInfoAndConfigButton_clicked();
@@ -25,9 +31,9 @@ public slots:
     void on_MainMenuTTSButton_clicked();
 private:
     Ui::MainMenu *ui;
-    SVCMainWindow _svc;
-    SVSMainWindow _svs;
-    TTSMainWindow _tts;
+    SVCMainWindow _svc{ _close_callback };
+    SVSMainWindow _svs{ _close_callback };
+    TTSMainWindow _tts{ _close_callback };
 };
 
 #endif // MAINMENU_H

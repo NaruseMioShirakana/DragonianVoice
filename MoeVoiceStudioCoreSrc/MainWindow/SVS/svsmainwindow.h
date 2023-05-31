@@ -12,11 +12,12 @@ class SVSMainWindow : public QDialog
     Q_OBJECT
 
 public:
-    explicit SVSMainWindow(QWidget *parent = nullptr);
+    explicit SVSMainWindow(const std::function<void(QDialog*)>& _callback, QWidget *parent = nullptr);
     ~SVSMainWindow() override;
 
 private:
     Ui::SVSMainWindow *ui;
+    const std::function<void(QDialog*)>& exit_callback;
 };
 
 #endif // SVSMAINWINDOW_H
