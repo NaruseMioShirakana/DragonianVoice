@@ -1,5 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>localization/MoeVS_zh_CN.qm</file>
+        <file>../localization/MoeVS_zh_CN.qm</file>
     </qresource>
 </RCC>

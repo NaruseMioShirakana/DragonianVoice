@@ -83,35 +83,42 @@ moevs_add_files(PROJECT_SOURCES
     MainWindow/*.h
     MainWindow/*.cpp
     MainWindow/*.ui
-    MainWindow/*.qrc
+    resources/*.qrc
 )
 
-# 添加可执行目标
-add_executable(${PROJECT_NAME}
-    main.cpp
-    MResource.qrc
-    ${PROJECT_SOURCES}
-)
+# 添加主文件
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+    qt_add_executable(${PROJECT_NAME}
+        MANUAL_FINALIZATION
+        ${PROJECT_SOURCES}
+        main.cpp
+    )
+else()
+    if(ANDROID)
+        add_library(${PROJECT_NAME} SHARED
+            ${PROJECT_SOURCES}
+            main.cpp
+        )
+    else()
+        add_executable(${PROJECT_NAME}
+            ${PROJECT_SOURCES}
+            main.cpp
+        )
+    endif()
+endif()
 
-# 初始化要使用的列表
+# 翻译文件
 set(TS_FILES)
 set(QM_FILES)
-
-# 将要生成的翻译文件添加到列表中
 list(APPEND TS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/localization/MoeVS_zh_CN.ts)
-
-# 设置翻译文件的生成路径，如果不指定就会生成在CMakeFiles的目录里
 set_source_files_properties(${TS_FILES}
     PROPERTIES OUTPUT_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/localization
 )
-
-# 创建翻译的最关键一步
 qt_create_translation(QM_FILES ${TS_FILES} ${PROJECT_SOURCES})
-
-# 添加更新翻译的目标
 add_custom_target(lupdate_task DEPENDS ${TS_FILES})
 add_custom_target(lrelease_task DEPENDS ${QM_FILES})
 
+# 链接
 target_link_libraries(${PROJECT_NAME} PRIVATE
     world
     avcodec.lib
@@ -136,3 +143,7 @@ install(TARGETS ${PROJECT_NAME}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+if(QT_VERSION_MAJOR EQUAL 6)
+    qt_finalize_executable(${PROJECT_NAME})
+endif()
