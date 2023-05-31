@@ -460,13 +460,12 @@ std::vector<int16_t> VitsSvc::InferWithF0AndHiddenUnit(std::vector<MoeVSProject:
 				int64_t Chara[] = { charEmb };
 				std::vector<float> charaMix;
 
-				std::vector<Ort::Value> inputTensors;
-
 				const auto& srcHiddenUnits = inp_audio.Hidden_Unit[slice];
 				const auto& srcF0Data = inp_audio.F0[slice];
-				std::vector<float> HiddenUnits; // = inp_audio.Hidden_Unit[slice]
-				std::vector<float> F0Data; // = inp_audio.F0[slice]
+				std::vector<float> HiddenUnits;
+				std::vector<float> F0Data;
 
+				//Compatible with all versions
 				if (SV3)
 				{
 					int64_t upSample = _samplingRate / 16000;
@@ -508,6 +507,8 @@ std::vector<int16_t> VitsSvc::InferWithF0AndHiddenUnit(std::vector<MoeVSProject:
 					XLength[0] = HiddenUnitShape[1];
 				}
 
+				//Construct Input Tensors
+				std::vector<Ort::Value> inputTensors;
 				inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, HiddenUnits.data(), HubertSize, HiddenUnitShape, 3));
 				if(!SV4)
 					inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, XLength, 1, LengthShape, 1));
@@ -561,7 +562,6 @@ std::vector<int16_t> VitsSvc::InferWithF0AndHiddenUnit(std::vector<MoeVSProject:
 					{
 						std::vector<float> charaMap(n_speaker, 0.f);
 						charaMap[params.chara] = 1.f;
-						//std::vector<float>(n_speaker * CharaMixShape[0], 1.f / float(n_speaker));
 						charaMix.reserve((n_speaker + 1) * F0Shape[1]);
 						for (int64_t index = 0; index < F0Shape[1]; ++index)
 							charaMix.insert(charaMix.end(), charaMap.begin(), charaMap.end());
@@ -577,6 +577,7 @@ std::vector<int16_t> VitsSvc::InferWithF0AndHiddenUnit(std::vector<MoeVSProject:
 				if(VolumeB)
 					inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, inp_audio.Volume[slice].data(), UV.size(), F0Shape, 2));
 
+				//Inference
 				std::vector<Ort::Value> finaOut;
 				try
 				{
@@ -609,6 +610,7 @@ std::vector<int16_t> VitsSvc::InferWithF0AndHiddenUnit(std::vector<MoeVSProject:
 			}
 			else
 			{
+				//Mute clips
 				const auto len = inp_audio.OrgLen[slice];
 				const auto data = new int16_t[len];
 				memset(data, 0, int64_t(len) * 2);
