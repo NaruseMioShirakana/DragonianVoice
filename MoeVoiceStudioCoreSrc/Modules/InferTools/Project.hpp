@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
-#include "../AvCodec/AvCodeResample.h"
+#include "AvCodeResample.h"
 
 namespace MoeVSProject
 {
@@ -36,7 +36,7 @@ namespace MoeVSProject
         std::vector<bool> symbolb;
         std::wstring paths;
         Params() = default;
-        size_type Size() const
+        [[nodiscard]] size_type Size() const
         {
             size_type _size = 0;
             const std::string bytePath = to_byte_string(paths);
@@ -52,7 +52,7 @@ namespace MoeVSProject
         std::vector<size_type> F0;
         std::vector<size_type> Volume;
         std::vector<size_type> Speaker;
-        size_type Size() const
+        [[nodiscard]] size_type Size() const
         {
             return size_type(Hidden_Unit.size() + F0.size() + Volume.size() + Speaker.size()) * sizeof(size_type);
         }
@@ -93,7 +93,7 @@ namespace MoeVSProject
             DataHeader Header;
             ParamsOffset Offset;
             Params ParamData;
-            size_type Size() const
+            [[nodiscard]] size_type Size() const
             {
                 size_type size = sizeof(DataHeader);
                 size += Offset.Size();
@@ -107,7 +107,7 @@ namespace MoeVSProject
         MoeVSProject(const std::wstring& _path);
         MoeVSProject(const std::vector<Params>& _params, uint16_t HiddenSize = 256);
         void Write(const std::wstring& _path) const;
-        std::vector<Params> GetParams() const
+        [[nodiscard]] std::vector<Params> GetParams() const
         {
             std::vector<Params> Params_data;
             Params_data.reserve(data_.size());
@@ -121,6 +121,93 @@ namespace MoeVSProject
         std::vector<size_type> data_pos_;
         size_type data_chunk_begin_ = 0;
         std::vector<Data> data_;
+    };
+
+    struct TTSParams
+    {
+        double noise = 0.666;
+        double noise_w = 0.800;
+        double length = 1.000;
+        double gate = 0.6666;
+        int64_t decode_step = 2000;
+        int64_t seed = 52468;
+        std::wstring emotion;
+        std::wstring phs;
+        std::vector<int64_t> tones;
+        std::vector<int64_t> durations;
+        std::vector<float> chara_mix;
+        int64_t chara = -1;
+    };
+
+    class TTSProject
+    {
+    public:
+        enum class T_LOAD
+        {
+	        APPEND,
+            REPLACE
+        };
+        struct TTSHEADER
+        {
+            char ChunkSymbol[8] = { 'M','T','T','S','P','R','O','J' };
+            size_type DataHeaderAmount = 0;
+        };
+        struct DataHeader
+        {
+            char ChunkSymbol[4] = { 'D','A','T','A' };
+
+            size_type PhSize = 0;
+
+            size_type DurSize = 0;
+
+            size_type ToneSize = 0;
+
+            size_type EmoSize = 0;
+
+            size_type n_speaker = 0;
+        };
+        TTSProject() = default;
+        ~TTSProject() = default;
+        void push(const TTSParams& _item)
+        {
+            data_.emplace_back(_item);
+        }
+        void push(TTSParams&& _item)
+        {
+            data_.emplace_back(_item);
+        }
+        void push(const std::vector<TTSParams>& _items)
+        {
+            data_.insert(data_.end(), _items.begin(), _items.end());
+        }
+        void pop()
+        {
+	        data_.pop_back();
+        }
+        void erase(size_t idx)
+        {
+            data_.erase(data_.begin() + int64_t(idx));
+        }
+        [[nodiscard]] std::vector<std::string> load(const std::wstring& _path, T_LOAD _T);
+        TTSParams& operator[](size_t idx)
+        {
+            return data_[idx];
+        }
+        [[nodiscard]] const std::vector<TTSParams>& data() const
+    	{
+            return data_;
+        }
+        [[nodiscard]] size_t size() const
+        {
+            return data_.size();
+        }
+        void Write(const std::wstring& _path) const;
+        void clear()
+        {
+            data_.clear();
+        }
+    private:
+        std::vector<TTSParams> data_;
     };
 }
 

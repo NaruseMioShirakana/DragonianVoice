@@ -11,6 +11,8 @@ public:
 	~Pits() override;
 
     std::vector<int16_t> Inference(std::wstring& _inputLens) const override;
+
+    [[nodiscard]] std::vector<int16_t> Inference(const MoeVSProject::TTSParams& _input) const override;
 private:
     Ort::Session* sessionDec = nullptr;
     Ort::Session* sessionDp = nullptr;

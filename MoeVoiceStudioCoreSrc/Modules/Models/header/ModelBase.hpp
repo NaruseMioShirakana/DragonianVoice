@@ -6,7 +6,6 @@
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #endif
-
 #include "../../StringPreprocess.hpp"
 #include "../../PluginApi/pluginApi.hpp"
 #include "../../Logger/MoeSSLogger.hpp"
@@ -14,8 +13,8 @@
 #include "../../InferTools/Project.hpp"
 #ifdef max
 #undef max
-#include "../../../Lib/rapidjson/rapidjson.h"
-#include "../../../Lib/rapidjson/document.h"
+#include "rapidjson.h"
+#include "document.h"
 #define max(a,b)            (((a) > (b)) ? (a) : (b))
 #endif
 #include <map>
@@ -121,6 +120,28 @@ public:
 	BaseModelType();
 	virtual ~BaseModelType();
 	virtual std::vector<int16_t> Inference(std::wstring& _inputLens) const;
+
+	template <typename T = float>
+	static void LinearCombination(std::vector<T>& _data, T Value = T(1.0))
+	{
+		if(_data.empty())
+		{
+			_data = std::vector<T>(1, Value);
+			return;
+		}
+		T Sum = T(0.0);
+		for(const auto& i : _data)
+			Sum += i;
+		if (Sum < T(0.0001))
+		{
+			_data = std::vector<T>(_data.size(), T(0.0));
+			_data[0] = Value;
+			return;
+		}
+		Sum *= T(Value);
+		for (auto& i : _data)
+			i /= Sum;
+	}
 protected:
 	Ort::Env* env = nullptr;
 	Ort::SessionOptions* session_options = nullptr;
@@ -208,8 +229,24 @@ public:
 	static std::vector<std::vector<bool>> generatePath(float* duration, size_t durationSize, size_t maskSize);
 
 	[[nodiscard]] std::vector<float> GetEmotionVector(std::wstring src) const;
-protected:
+
+	std::vector<int16_t> Inference(std::wstring& _inputLens) const override;
+
+	[[nodiscard]] virtual std::vector<int16_t> Inference(const MoeVSProject::TTSParams& _input) const;
+
+	[[nodiscard]] std::vector<int16_t> Inference(const std::vector<MoeVSProject::TTSParams>& _input) const;
+
+	static int64_t find_max_idx(const std::vector<float>& inp)
+	{
+		int64_t idx = 0;
+		for (size_t i = 1; i < inp.size(); ++i)
+			if (inp[i] > inp[idx])
+				idx = int64_t(i);
+		return idx;
+	}
 	~TTS() override = default;
+protected:
+	
 	DurationCallback _dcb;
 
 	int64_t n_speaker = 1;
@@ -368,8 +405,9 @@ public:
 	{
 		return n_speaker;
 	}
-protected:
 	~SVC() override = default;
+protected:
+	
 	Ort::Session* hubert = nullptr;
 
 	int hop = 320;

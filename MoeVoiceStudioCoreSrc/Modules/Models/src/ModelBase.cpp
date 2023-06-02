@@ -393,7 +393,7 @@ std::vector<float> InferClass::TTS::GetEmotionVector(std::wstring src) const
 
 std::vector<std::vector<bool>> InferClass::TTS::generatePath(float* duration, size_t durationSize, size_t maskSize)
 {
-	for (size_t i = 1; i < durationSize; ++i)
+	for (size_t i = 1; i < maskSize; ++i)
 		duration[i] = duration[i - 1] + duration[i];
 	std::vector<std::vector<bool>> path(durationSize, std::vector<bool>(maskSize, false));
 	//const auto path = new float[maskSize * durationSize];
@@ -420,7 +420,7 @@ std::vector<std::vector<bool>> InferClass::TTS::generatePath(float* duration, si
 	for (size_t j = maskSize - 1; j > 0ull; --j)
 	{
 		dur = (size_t)duration[j];
-		for (auto i = (size_t)duration[j - 1]; i < dur; ++i)
+		for (auto i = (size_t)duration[j - 1]; i < dur && i < durationSize; ++i)
 			path[i][j] = true;
 	}
 	return path;
@@ -722,4 +722,32 @@ std::vector<float> InferClass::SVC::GetInterpedF0log(const std::vector<float>& r
 		}
 	}
 	return Of0;
+}
+
+std::vector<int16_t> InferClass::TTS::Inference(std::wstring& _inputLens) const
+{
+	throw std::exception("Empty Function");
+}
+
+std::vector<int16_t> InferClass::TTS::Inference(const MoeVSProject::TTSParams& _input) const
+{
+	throw std::exception("Empty Function");
+}
+
+std::vector<int16_t> InferClass::TTS::Inference(const std::vector<MoeVSProject::TTSParams>& _input) const
+{
+	std::vector<int16_t> return_val;
+	size_t proc = 0;
+	logger.log(L"[Info] Inference Start");
+	_callback(proc, _input.size());
+	for (const auto& i : _input)
+	{
+		const auto tmp = Inference(i);
+		if(tmp.empty())
+			continue;
+		return_val.insert(return_val.end(), tmp.begin(), tmp.end());
+		_callback(++proc, _input.size());
+	}
+	logger.log(L"[Info] Inference Finished");
+	return return_val;
 }

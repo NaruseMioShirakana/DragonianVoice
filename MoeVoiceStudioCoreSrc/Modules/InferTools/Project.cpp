@@ -195,7 +195,6 @@ MoeVSProject::MoeVSProject::MoeVSProject(const std::vector<Params>& _params, uin
         data_pos_.push_back(_offset);
         data_.emplace_back(std::move(_data));
     }
-
     data_pos_.pop_back();
 }
 
@@ -251,3 +250,112 @@ void MoeVSProject::MoeVSProject::Write(const std::wstring& _path) const
     fclose(project_file);
 }
 
+std::vector<std::string> MoeVSProject::TTSProject::load(const std::wstring& _path, T_LOAD _T)
+{
+    FILE* project_file = nullptr;
+    _wfopen_s(&project_file, _path.c_str(), L"rb");
+    if (!project_file)
+        throw std::exception("File Doesn't Exists");
+    std::vector<std::string> return_val;
+    if (_T == T_LOAD::REPLACE)
+        data_.clear();
+
+    TTSHEADER moevs_proj_header_;
+    if (fread(&moevs_proj_header_, 1, sizeof(TTSHEADER), project_file) != sizeof(TTSHEADER))
+        throw std::exception("Unexpected EOF");
+    if (!(moevs_proj_header_.ChunkSymbol[0] == 'M' && moevs_proj_header_.ChunkSymbol[1] == 'T' && moevs_proj_header_.ChunkSymbol[2] == 'T' && moevs_proj_header_.ChunkSymbol[3] == 'S' && moevs_proj_header_.ChunkSymbol[4] == 'P' && moevs_proj_header_.ChunkSymbol[5] == 'R' && moevs_proj_header_.ChunkSymbol[6] == 'O' && moevs_proj_header_.ChunkSymbol[7] == 'J'))
+        throw std::exception("Unrecognized File");
+    if (moevs_proj_header_.DataHeaderAmount == 0)
+        throw std::exception("Empty Project");
+
+    for (size_type i = 0; i < moevs_proj_header_.DataHeaderAmount; ++i)
+    {
+        DataHeader _datas;
+        TTSParams tts_params;
+        //Header
+        if (fread(&_datas, 1, sizeof(DataHeader), project_file) != sizeof(DataHeader))
+            throw std::exception("Unexpected EOF");
+        if (!(_datas.ChunkSymbol[0] == 'D' && _datas.ChunkSymbol[1] == 'A' && _datas.ChunkSymbol[2] == 'T' && _datas.ChunkSymbol[3] == 'A'))
+            throw std::exception("Unrecognized File");
+        if (fread(&tts_params.noise, 1, sizeof(double), project_file) != sizeof(double))
+            throw std::exception("Unexpected EOF");
+        if (fread(&tts_params.noise_w, 1, sizeof(double), project_file) != sizeof(double))
+            throw std::exception("Unexpected EOF");
+        if (fread(&tts_params.length, 1, sizeof(double), project_file) != sizeof(double))
+            throw std::exception("Unexpected EOF");
+        if (fread(&tts_params.gate, 1, sizeof(double), project_file) != sizeof(double))
+            throw std::exception("Unexpected EOF");
+        if (fread(&tts_params.decode_step, 1, sizeof(int64_t), project_file) != sizeof(int64_t))
+            throw std::exception("Unexpected EOF");
+        if (fread(&tts_params.seed, 1, sizeof(int64_t), project_file) != sizeof(int64_t))
+            throw std::exception("Unexpected EOF");
+        std::vector<wchar_t> _ph(_datas.PhSize + 1, 0);
+        std::vector<wchar_t> _emo(_datas.EmoSize + 1, 0);
+        tts_params.durations = std::vector(_datas.DurSize, 0i64);
+        tts_params.tones = std::vector(_datas.ToneSize, 0i64);
+        tts_params.chara_mix = std::vector(_datas.n_speaker, 0.f);
+
+        size_type _n_bytes = _datas.PhSize * sizeof(wchar_t);
+        if (fread(_ph.data(), 1, _n_bytes, project_file) != _n_bytes)
+            throw std::exception("Unexpected EOF");
+        tts_params.phs = _ph.data();
+
+        _n_bytes = _datas.EmoSize * sizeof(wchar_t);
+        if (fread(_emo.data(), 1, _n_bytes, project_file) != _n_bytes)
+            throw std::exception("Unexpected EOF");
+        tts_params.emotion = _emo.data();
+
+        _n_bytes = _datas.DurSize * sizeof(int64_t);
+        if (fread(tts_params.durations.data(), 1, _n_bytes, project_file) != _n_bytes)
+            throw std::exception("Unexpected EOF");
+
+        _n_bytes = _datas.ToneSize * sizeof(int64_t);
+        if (fread(tts_params.tones.data(), 1, _n_bytes, project_file) != _n_bytes)
+            throw std::exception("Unexpected EOF");
+
+        _n_bytes = _datas.n_speaker * sizeof(float);
+        if (fread(tts_params.chara_mix.data(), 1, _n_bytes, project_file) != _n_bytes)
+            throw std::exception("Unexpected EOF");
+
+        return_val.emplace_back(to_byte_string(tts_params.phs));
+        data_.emplace_back(std::move(tts_params));
+        
+    }
+    fclose(project_file);
+    return return_val;
+}
+
+void MoeVSProject::TTSProject::Write(const std::wstring& _path) const
+{
+    FILE* project_file = nullptr;
+    _wfopen_s(&project_file, _path.c_str(), L"wb");
+    if (!project_file)
+        {throw std::exception("Cannot Create File");}
+	TTSHEADER moevs_proj_header_;
+    moevs_proj_header_.DataHeaderAmount = data_.size();
+    fwrite(&moevs_proj_header_, 1, sizeof(TTSHEADER), project_file);
+
+    for (const auto& i : data_)
+    {
+        DataHeader _head;
+        _head.EmoSize = i.emotion.length();
+        _head.PhSize = i.phs.length();
+        _head.DurSize = i.durations.size();
+        _head.ToneSize = i.tones.size();
+        _head.n_speaker = i.chara_mix.size();
+        fwrite(&_head, 1, sizeof(DataHeader), project_file);
+        fwrite(&i.noise, 1, sizeof(double), project_file);
+        fwrite(&i.noise_w, 1, sizeof(double), project_file);
+        fwrite(&i.length, 1, sizeof(double), project_file);
+        fwrite(&i.gate, 1, sizeof(double), project_file);
+        fwrite(&i.decode_step, 1, sizeof(int64_t), project_file);
+        fwrite(&i.seed, 1, sizeof(int64_t), project_file);
+
+        fwrite(i.phs.data(), 1, sizeof(wchar_t) * i.phs.size(), project_file);
+        fwrite(i.emotion.data(), 1, sizeof(wchar_t) * i.emotion.size(), project_file);
+        fwrite(i.durations.data(), 1, sizeof(int64_t) * i.durations.size(), project_file);
+        fwrite(i.tones.data(), 1, sizeof(int64_t) * i.tones.size(), project_file);
+        fwrite(i.chara_mix.data(), 1, sizeof(float) * i.chara_mix.size(), project_file);
+    }
+    fclose(project_file);
+}

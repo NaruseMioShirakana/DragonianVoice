@@ -36,8 +36,30 @@
        <layout class="QGridLayout" name="gridLayout_3">
         <item row="1" column="0">
          <layout class="QGridLayout" name="TextListGridLayout">
+          <item row="6" column="0" colspan="3">
+           <widget class="QPushButton" name="BatchedTTSButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>TTSPushButton</string>
+            </property>
+            <property name="shortcut">
+             <string notr="true">Ctrl+B</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="2">
            <widget class="QPushButton" name="SaveTextButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="maximumSize">
              <size>
               <width>16777215</width>
@@ -53,7 +75,7 @@
            </widget>
           </item>
           <item row="1" column="0" colspan="3">
-           <widget class="QListView" name="TextListView">
+           <widget class="QListWidget" name="TextListWidget">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
               <horstretch>0</horstretch>
@@ -71,6 +93,15 @@
               <width>100</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="dragEnabled">
+             <bool>true</bool>
+            </property>
+            <property name="dragDropMode">
+             <enum>QAbstractItemView::DropOnly</enum>
+            </property>
+            <property name="defaultDropAction">
+             <enum>Qt::MoveAction</enum>
             </property>
            </widget>
           </item>
@@ -90,8 +121,8 @@
             </property>
            </widget>
           </item>
-          <item row="5" column="0" colspan="3">
-           <widget class="QPushButton" name="BatchedTTSButton">
+          <item row="4" column="0" colspan="3">
+           <widget class="QPushButton" name="ClearTextListButton">
             <property name="maximumSize">
              <size>
               <width>100</width>
@@ -99,31 +130,10 @@
              </size>
             </property>
             <property name="text">
-             <string>TTSPushButton</string>
+             <string>TTSClearPushButton</string>
             </property>
             <property name="shortcut">
-             <string notr="true">Ctrl+B</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QPushButton" name="RemoveTextButton">
-            <property name="maximumSize">
-             <size>
-              <width>18</width>
-              <height>18</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string notr="true">-</string>
-            </property>
-            <property name="shortcut">
-             <string notr="true">-, Del</string>
+             <string notr="true"/>
             </property>
            </widget>
           </item>
@@ -148,26 +158,34 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0" colspan="3">
-           <widget class="QPushButton" name="ClearTextListButton">
+          <item row="0" column="1">
+           <widget class="QPushButton" name="RemoveTextButton">
             <property name="maximumSize">
              <size>
-              <width>100</width>
-              <height>16777215</height>
+              <width>18</width>
+              <height>18</height>
              </size>
             </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
             <property name="text">
-             <string>TTSClearPushButton</string>
+             <string notr="true">-</string>
             </property>
             <property name="shortcut">
-             <string notr="true"/>
+             <string notr="true">-, Del</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="3">
-           <widget class="QPushButton" name="TTSSaveToFileButton">
+          <item row="5" column="0" colspan="3">
+           <widget class="QPushButton" name="TTSInferOnceButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
-             <string>TTSSaveToFileButton</string>
+             <string>TTSInferOnceButton</string>
             </property>
             <property name="shortcut">
              <string notr="true">Ctrl+S</string>
@@ -273,7 +291,7 @@
                   </size>
                  </property>
                  <property name="text">
-                  <string>SendToPlayerButtonText</string>
+                  <string>TTSSendToPlayerButtonText</string>
                  </property>
                 </widget>
                </item>
@@ -286,7 +304,7 @@
                   </size>
                  </property>
                  <property name="text">
-                  <string>DrawMelSpecButtonText</string>
+                  <string>TTSDrawMelSpecButtonText</string>
                  </property>
                 </widget>
                </item>
@@ -297,6 +315,15 @@
                    <width>100</width>
                    <height>16777215</height>
                   </size>
+                 </property>
+                 <property name="dragEnabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="dragDropMode">
+                  <enum>QAbstractItemView::DropOnly</enum>
+                 </property>
+                 <property name="defaultDropAction">
+                  <enum>Qt::MoveAction</enum>
                  </property>
                 </widget>
                </item>
@@ -309,7 +336,7 @@
                   </size>
                  </property>
                  <property name="text">
-                  <string>ClearAudioListButtonText</string>
+                  <string>TTSClearAudioListButtonText</string>
                  </property>
                 </widget>
                </item>
@@ -321,12 +348,12 @@
                  <property name="maximumSize">
                   <size>
                    <width>100</width>
-                   <height>18</height>
+                   <height>16777215</height>
                   </size>
                  </property>
                  <property name="font">
                   <font>
-                   <pointsize>12</pointsize>
+                   <pointsize>9</pointsize>
                   </font>
                  </property>
                  <property name="text">
@@ -337,28 +364,6 @@
               </layout>
              </item>
             </layout>
-           </widget>
-          </item>
-          <item row="6" column="0" colspan="2">
-           <widget class="QLineEdit" name="ToneEdit">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>300</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>400</width>
-              <height>20</height>
-             </size>
-            </property>
            </widget>
           </item>
           <item row="0" column="0" colspan="2">
@@ -409,6 +414,9 @@
                </item>
                <item row="1" column="0" colspan="2">
                 <widget class="QComboBox" name="CharacterComboBox">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
                  <property name="minimumSize">
                   <size>
                    <width>100</width>
@@ -418,7 +426,14 @@
                 </widget>
                </item>
                <item row="2" column="1">
-                <widget class="QDoubleSpinBox" name="CharacterMixProportion"/>
+                <widget class="QDoubleSpinBox" name="CharacterMixProportion">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
+                 </property>
+                </widget>
                </item>
                <item row="2" column="0">
                 <widget class="QLabel" name="CharacterMixProportionLabel">
@@ -432,6 +447,9 @@
                </item>
                <item row="1" column="2" colspan="2">
                 <widget class="QCheckBox" name="CharacterCheckBox">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
                  <property name="text">
                   <string>TTSCharacterMixBoolText</string>
                  </property>
@@ -485,134 +503,61 @@
             <layout class="QGridLayout" name="gridLayout_5">
              <item row="0" column="0">
               <layout class="QGridLayout" name="ParamsSettingLayout">
-               <item row="1" column="2">
-                <widget class="QLabel" name="NoiseMax">
+               <item row="3" column="1">
+                <widget class="QDoubleSpinBox" name="NoiseScaleWSpinBox">
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
+                 </property>
+                 <property name="decimals">
+                  <number>4</number>
+                 </property>
+                 <property name="minimum">
+                  <double>0.001000000000000</double>
+                 </property>
+                 <property name="maximum">
+                  <double>10.000000000000000</double>
+                 </property>
+                 <property name="singleStep">
+                  <double>0.001000000000000</double>
+                 </property>
+                 <property name="value">
+                  <double>0.800000000000000</double>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="3">
+                <widget class="QLabel" name="LengthMax">
                  <property name="text">
                   <string notr="true">10.00</string>
                  </property>
                  <property name="alignment">
                   <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="9" column="0">
-                <widget class="QSpinBox" name="MaxDecodeStepSpinBox">
-                 <property name="minimum">
-                  <number>1000</number>
-                 </property>
-                 <property name="maximum">
-                  <number>10000</number>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="0" colspan="3">
-                <widget class="QLabel" name="LengthLabel">
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                 <property name="text">
-                  <string>TTSLengthScaleText</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="10" column="0" colspan="3">
-                <widget class="QLabel" name="EmotionLabel">
-                 <property name="text">
-                  <string>TTSEmotionText</string>
                  </property>
                 </widget>
                </item>
                <item row="1" column="1">
-                <widget class="QSlider" name="NoiseScaleSlider">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
+                <widget class="QDoubleSpinBox" name="NoiseScaleSpinBox">
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
+                 </property>
+                 <property name="decimals">
+                  <number>4</number>
                  </property>
                  <property name="minimum">
-                  <number>1</number>
+                  <double>0.001000000000000</double>
                  </property>
                  <property name="maximum">
-                  <number>10000</number>
+                  <double>10.000000000000000</double>
                  </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
+                 <property name="singleStep">
+                  <double>0.001000000000000</double>
                  </property>
-                </widget>
-               </item>
-               <item row="5" column="1">
-                <widget class="QSlider" name="LengthScaleSlider">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimum">
-                  <number>100</number>
-                 </property>
-                 <property name="maximum">
-                  <number>10000</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="8" column="0" colspan="3">
-                <widget class="QLabel" name="MaxDecodeStepLabel">
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                 <property name="text">
-                  <string>TTSMaxDecodeStepText</string>
+                 <property name="value">
+                  <double>0.666000000000000</double>
                  </property>
                 </widget>
                </item>
                <item row="9" column="2">
-                <widget class="QLabel" name="MaxDecodeStepMax">
-                 <property name="text">
-                  <string notr="true">10000</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="7" column="1">
-                <widget class="QSlider" name="GateThSlider">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimum">
-                  <number>2000</number>
-                 </property>
-                 <property name="maximum">
-                  <number>10000</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="2">
-                <widget class="QLabel" name="NoiseWMax">
-                 <property name="text">
-                  <string notr="true">10.00</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
-                 </property>
-                </widget>
-               </item>
-               <item row="9" column="1">
                 <widget class="QSlider" name="MaxDecodeStepSlider">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -626,23 +571,23 @@
                  <property name="maximum">
                   <number>10000</number>
                  </property>
+                 <property name="value">
+                  <number>2000</number>
+                 </property>
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                  </property>
                 </widget>
                </item>
-               <item row="7" column="2">
-                <widget class="QLabel" name="GateThMax">
+               <item row="9" column="3">
+                <widget class="QLabel" name="MaxDecodeStepMax">
                  <property name="text">
-                  <string notr="true">1.000</string>
-                 </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
+                  <string notr="true">10000</string>
                  </property>
                 </widget>
                </item>
-               <item row="0" column="0" colspan="3">
-                <widget class="QLabel" name="NoiseLabel">
+               <item row="8" column="1" colspan="3">
+                <widget class="QLabel" name="MaxDecodeStepLabel">
                  <property name="maximumSize">
                   <size>
                    <width>16777215</width>
@@ -650,38 +595,31 @@
                   </size>
                  </property>
                  <property name="text">
-                  <string>TTSNoiseScaleText</string>
+                  <string>TTSMaxDecodeStepText</string>
                  </property>
                 </widget>
                </item>
-               <item row="1" column="0">
-                <widget class="QDoubleSpinBox" name="NoiseScaleSpinBox">
-                 <property name="decimals">
-                  <number>4</number>
+               <item row="9" column="1">
+                <widget class="QSpinBox" name="MaxDecodeStepSpinBox">
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
                  </property>
                  <property name="minimum">
-                  <double>0.001000000000000</double>
+                  <number>1000</number>
                  </property>
-                 <property name="singleStep">
-                  <double>0.001000000000000</double>
+                 <property name="maximum">
+                  <number>10000</number>
                  </property>
-                </widget>
-               </item>
-               <item row="6" column="0" colspan="3">
-                <widget class="QLabel" name="GateThLabel">
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                 <property name="text">
-                  <string>TTSGateThText</string>
+                 <property name="value">
+                  <number>2000</number>
                  </property>
                 </widget>
                </item>
-               <item row="7" column="0">
+               <item row="7" column="1">
                 <widget class="QDoubleSpinBox" name="GateThSpinBox">
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
+                 </property>
                  <property name="decimals">
                   <number>4</number>
                  </property>
@@ -692,12 +630,18 @@
                   <double>1.000000000000000</double>
                  </property>
                  <property name="singleStep">
-                  <double>0.001000000000000</double>
+                  <double>0.000100000000000</double>
+                 </property>
+                 <property name="value">
+                  <double>0.666600000000000</double>
                  </property>
                 </widget>
                </item>
-               <item row="5" column="0">
+               <item row="5" column="1">
                 <widget class="QDoubleSpinBox" name="LengthScaleSpinBox">
+                 <property name="keyboardTracking">
+                  <bool>false</bool>
+                 </property>
                  <property name="decimals">
                   <number>4</number>
                  </property>
@@ -710,9 +654,90 @@
                  <property name="singleStep">
                   <double>0.001000000000000</double>
                  </property>
+                 <property name="value">
+                  <double>1.000000000000000</double>
+                 </property>
                 </widget>
                </item>
-               <item row="3" column="1">
+               <item row="3" column="3">
+                <widget class="QLabel" name="NoiseWMax">
+                 <property name="text">
+                  <string notr="true">10.00</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="5" column="2">
+                <widget class="QSlider" name="LengthScaleSlider">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimum">
+                  <number>100</number>
+                 </property>
+                 <property name="maximum">
+                  <number>10000</number>
+                 </property>
+                 <property name="value">
+                  <number>1000</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="3">
+                <widget class="QLabel" name="NoiseMax">
+                 <property name="text">
+                  <string notr="true">10.00</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="4" column="1" colspan="3">
+                <widget class="QLabel" name="LengthLabel">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>TTSLengthScaleText</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1" colspan="3">
+                <widget class="QLabel" name="NoiseLabel">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>TTSNoiseScaleText</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="3">
+                <widget class="QLabel" name="GateThMax">
+                 <property name="text">
+                  <string notr="true">1.000</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignCenter</set>
+                 </property>
+                </widget>
+               </item>
+               <item row="3" column="2">
                 <widget class="QSlider" name="NoiseScaleWSlider">
                  <property name="sizePolicy">
                   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -727,24 +752,49 @@
                   <number>10000</number>
                  </property>
                  <property name="value">
-                  <number>1</number>
+                  <number>800</number>
                  </property>
                  <property name="orientation">
                   <enum>Qt::Horizontal</enum>
                  </property>
                 </widget>
                </item>
-               <item row="5" column="2">
-                <widget class="QLabel" name="LengthMax">
-                 <property name="text">
-                  <string notr="true">10.00</string>
+               <item row="1" column="2">
+                <widget class="QSlider" name="NoiseScaleSlider">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
                  </property>
-                 <property name="alignment">
-                  <set>Qt::AlignCenter</set>
+                 <property name="minimum">
+                  <number>1</number>
+                 </property>
+                 <property name="maximum">
+                  <number>10000</number>
+                 </property>
+                 <property name="value">
+                  <number>666</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
                  </property>
                 </widget>
                </item>
-               <item row="2" column="0" colspan="3">
+               <item row="6" column="1" colspan="3">
+                <widget class="QLabel" name="GateThLabel">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>TTSGateThText</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="1" colspan="3">
                 <widget class="QLabel" name="NoiseWLabel">
                  <property name="maximumSize">
                   <size>
@@ -757,24 +807,64 @@
                  </property>
                 </widget>
                </item>
-               <item row="3" column="0">
-                <widget class="QDoubleSpinBox" name="NoiseScaleWSpinBox">
-                 <property name="decimals">
-                  <number>4</number>
-                 </property>
-                 <property name="minimum">
-                  <double>0.001000000000000</double>
-                 </property>
-                 <property name="singleStep">
-                  <double>0.001000000000000</double>
-                 </property>
-                 <property name="value">
-                  <double>0.001000000000000</double>
+               <item row="10" column="2" colspan="2">
+                <widget class="QLabel" name="EmotionLabel">
+                 <property name="text">
+                  <string>TTSEmotionText</string>
                  </property>
                 </widget>
                </item>
-               <item row="11" column="0" colspan="3">
-                <widget class="QLineEdit" name="EmotionEdit"/>
+               <item row="10" column="1">
+                <widget class="QLabel" name="TTSParamSeedLabel">
+                 <property name="text">
+                  <string>TTSParamSeedText</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="7" column="2">
+                <widget class="QSlider" name="GateThSlider">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimum">
+                  <number>2000</number>
+                 </property>
+                 <property name="maximum">
+                  <number>10000</number>
+                 </property>
+                 <property name="value">
+                  <number>6666</number>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="11" column="1">
+                <widget class="QLineEdit" name="TTSParamSeedEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="maxLength">
+                  <number>20</number>
+                 </property>
+                </widget>
+               </item>
+               <item row="11" column="2" colspan="2">
+                <widget class="QLineEdit" name="EmotionEdit">
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </widget>
                </item>
               </layout>
              </item>
@@ -783,44 +873,34 @@
           </item>
           <item row="8" column="2">
            <layout class="QGridLayout" name="Player">
-            <item row="1" column="3">
-             <widget class="QSlider" name="VolumeSlider">
-              <property name="minimumSize">
-               <size>
-                <width>18</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximum">
-               <number>100</number>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="QSlider" name="PlayerProgress">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0" rowspan="2" colspan="3">
-             <widget class="QWidget" name="AudioWaveWidget" native="true"/>
-            </item>
-            <item row="2" column="2">
-             <widget class="QLabel" name="MaxTimePlayer">
+            <item row="2" column="9">
+             <widget class="QPushButton" name="MuteButton">
               <property name="maximumSize">
                <size>
-                <width>16777215</width>
-                <height>20</height>
+                <width>18</width>
+                <height>18</height>
                </size>
               </property>
               <property name="text">
-               <string notr="true">00:00</string>
+               <string notr="true"/>
               </property>
              </widget>
+            </item>
+            <item row="3" column="1">
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="0" rowspan="2" colspan="9">
+             <widget class="QWidget" name="AudioWaveWidget" native="true"/>
             </item>
             <item row="2" column="0">
              <widget class="QLabel" name="CurTimePlayer">
@@ -835,7 +915,23 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
+            <item row="3" column="3">
+             <spacer name="horizontalSpacer_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>1</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="3" column="4">
              <widget class="QPushButton" name="PlayerPlayButton">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -863,8 +959,8 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="3">
-             <widget class="QPushButton" name="MuteButton">
+            <item row="3" column="2">
+             <widget class="QPushButton" name="LastAudioButton">
               <property name="maximumSize">
                <size>
                 <width>18</width>
@@ -875,6 +971,87 @@
                <string notr="true"/>
               </property>
              </widget>
+            </item>
+            <item row="3" column="7">
+             <spacer name="horizontalSpacer_2">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="2" column="1" colspan="7">
+             <widget class="QSlider" name="PlayerProgress">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="6">
+             <widget class="QPushButton" name="NextAudioButton">
+              <property name="maximumSize">
+               <size>
+                <width>18</width>
+                <height>18</height>
+               </size>
+              </property>
+              <property name="text">
+               <string notr="true"/>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="8">
+             <widget class="QLabel" name="MaxTimePlayer">
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>20</height>
+               </size>
+              </property>
+              <property name="text">
+               <string notr="true">00:00</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="9">
+             <widget class="QSlider" name="VolumeSlider">
+              <property name="minimumSize">
+               <size>
+                <width>18</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximum">
+               <number>100</number>
+              </property>
+              <property name="value">
+               <number>80</number>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="5">
+             <spacer name="horizontalSpacer_4">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>1</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
             </item>
            </layout>
           </item>
@@ -914,15 +1091,28 @@
             <layout class="QGridLayout" name="gridLayout_9">
              <item row="0" column="0">
               <layout class="QGridLayout" name="InferenceLayout">
-               <item row="0" column="0">
-                <widget class="QTextEdit" name="InferTextEdit"/>
-               </item>
                <item row="1" column="0">
                 <widget class="QPushButton" name="InferenceButton">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
                  <property name="text">
-                  <string>InferenceButtonText</string>
+                  <string>TTSInferenceButtonText</string>
                  </property>
                 </widget>
+               </item>
+               <item row="1" column="1">
+                <widget class="QPushButton" name="TTSInferenceCleanerButton">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="text">
+                  <string>TTSInferenceCleanerButton</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="0" colspan="2">
+                <widget class="QTextEdit" name="InferTextEdit"/>
                </item>
               </layout>
              </item>
@@ -931,6 +1121,9 @@
           </item>
           <item row="2" column="1">
            <widget class="QPushButton" name="TextCleaner">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="minimumSize">
              <size>
               <width>80</width>
@@ -948,7 +1141,7 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="0" colspan="2">
+          <item row="4" column="0">
            <widget class="QLineEdit" name="DurationEdit">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -967,6 +1160,69 @@
               <width>400</width>
               <height>20</height>
              </size>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="0">
+           <widget class="QLineEdit" name="ToneEdit">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>300</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>400</width>
+              <height>20</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="1">
+           <widget class="QPushButton" name="TTSOpenEditor">
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>TTSOpenEditor</string>
+            </property>
+           </widget>
+          </item>
+          <item row="6" column="1">
+           <widget class="QPushButton" name="TTSInferCur">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>TTSInferCur</string>
             </property>
            </widget>
           </item>
@@ -999,7 +1255,7 @@
       <bool>true</bool>
      </property>
      <property name="value">
-      <number>24</number>
+      <number>0</number>
      </property>
     </widget>
    </item>

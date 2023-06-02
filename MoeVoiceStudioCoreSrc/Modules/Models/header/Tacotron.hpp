@@ -12,6 +12,8 @@ public:
 
     std::vector<int16_t> Inference(std::wstring& _inputLens) const override;
 
+    [[nodiscard]] std::vector<int16_t> Inference(const MoeVSProject::TTSParams& _input) const override;
+
     static void cat(std::vector<float>& tensorA, std::vector<int64>& Shape, const MTensor& tensorB) {
         const int64 n = Shape[1];
         for (int64 i = n; i > 0; --i)

@@ -57,6 +57,7 @@ include_directories(${PROJECT_SOURCE_DIR}/Modules/Logger)
 include_directories(${PROJECT_SOURCE_DIR}/Modules/Models)
 include_directories(${PROJECT_SOURCE_DIR}/Modules/PluginApi)
 include_directories(${PROJECT_SOURCE_DIR}/Modules/DataStruct)
+include_directories(${PROJECT_SOURCE_DIR}/Modules/Models/header)
 
 # 添加库的头文件路径
 include_directories(${PROJECT_SOURCE_DIR}/Lib/ffmpeg-4.2.1/include)
