@@ -10,193 +10,28 @@
     <height>768</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>1024</width>
+    <height>0</height>
+   </size>
+  </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="1" column="0">
+    <widget class="QProgressBar" name="InferProgressBar">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="value">
+      <number>0</number>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0">
     <layout class="QGridLayout" name="TTSMainWindowGridLayout">
-     <item row="0" column="0">
-      <widget class="QGroupBox" name="TextList">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>120</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="title">
-        <string>TTSTextList</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout_3">
-        <item row="1" column="0">
-         <layout class="QGridLayout" name="TextListGridLayout">
-          <item row="6" column="0" colspan="3">
-           <widget class="QPushButton" name="BatchedTTSButton">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>100</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>TTSPushButton</string>
-            </property>
-            <property name="shortcut">
-             <string notr="true">Ctrl+B</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QPushButton" name="SaveTextButton">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>18</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>TTSTextSavePushButton</string>
-            </property>
-            <property name="shortcut">
-             <string notr="true">S</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="3">
-           <widget class="QListWidget" name="TextListWidget">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>100</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>100</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="dragEnabled">
-             <bool>true</bool>
-            </property>
-            <property name="dragDropMode">
-             <enum>QAbstractItemView::DropOnly</enum>
-            </property>
-            <property name="defaultDropAction">
-             <enum>Qt::MoveAction</enum>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0" colspan="3">
-           <widget class="QPushButton" name="EditTextButton">
-            <property name="maximumSize">
-             <size>
-              <width>100</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>TTSEditPushButton</string>
-            </property>
-            <property name="shortcut">
-             <string notr="true">E</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0" colspan="3">
-           <widget class="QPushButton" name="ClearTextListButton">
-            <property name="maximumSize">
-             <size>
-              <width>100</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>TTSClearPushButton</string>
-            </property>
-            <property name="shortcut">
-             <string notr="true"/>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="QPushButton" name="AddTextButton">
-            <property name="maximumSize">
-             <size>
-              <width>18</width>
-              <height>18</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string notr="true">+</string>
-            </property>
-            <property name="shortcut">
-             <string notr="true">+</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QPushButton" name="RemoveTextButton">
-            <property name="maximumSize">
-             <size>
-              <width>18</width>
-              <height>18</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string notr="true">-</string>
-            </property>
-            <property name="shortcut">
-             <string notr="true">-, Del</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0" colspan="3">
-           <widget class="QPushButton" name="TTSInferOnceButton">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="text">
-             <string>TTSInferOnceButton</string>
-            </property>
-            <property name="shortcut">
-             <string notr="true">Ctrl+S</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-     </item>
      <item row="0" column="1">
       <widget class="QFrame" name="OtherControls">
        <property name="frameShape">
@@ -240,19 +75,6 @@
             </property>
             <property name="text">
              <string>TTSSrcTextLabel</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0" colspan="2">
-           <widget class="QLabel" name="DurationLabel">
-            <property name="maximumSize">
-             <size>
-              <width>300</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>TTSDurationLabel</string>
             </property>
            </widget>
           </item>
@@ -1226,6 +1048,220 @@
             </property>
            </widget>
           </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="DurationLabel">
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>TTSDurationLabel</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QGroupBox" name="TextList">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>120</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="title">
+        <string>TTSTextList</string>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="0">
+         <layout class="QGridLayout" name="TextListGridLayout">
+          <item row="6" column="0" colspan="3">
+           <widget class="QPushButton" name="EditTextButton">
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>TTSEditPushButton</string>
+            </property>
+            <property name="shortcut">
+             <string notr="true">E</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QPushButton" name="RemoveTextButton">
+            <property name="maximumSize">
+             <size>
+              <width>18</width>
+              <height>18</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string notr="true">-</string>
+            </property>
+            <property name="shortcut">
+             <string notr="true">-, Del</string>
+            </property>
+           </widget>
+          </item>
+          <item row="7" column="0" colspan="3">
+           <widget class="QPushButton" name="ClearTextListButton">
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>TTSClearPushButton</string>
+            </property>
+            <property name="shortcut">
+             <string notr="true"/>
+            </property>
+           </widget>
+          </item>
+          <item row="8" column="0" colspan="3">
+           <widget class="QPushButton" name="TTSInferOnceButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>TTSInferOnceButton</string>
+            </property>
+            <property name="shortcut">
+             <string notr="true">Ctrl+S</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QPushButton" name="AddTextButton">
+            <property name="maximumSize">
+             <size>
+              <width>18</width>
+              <height>18</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string notr="true">+</string>
+            </property>
+            <property name="shortcut">
+             <string notr="true">+</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="3">
+           <widget class="QPushButton" name="SaveProjectButton">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>SaveProjectButton</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0" colspan="3">
+           <widget class="QListWidget" name="TextListWidget">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>100</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="dragEnabled">
+             <bool>true</bool>
+            </property>
+            <property name="dragDropMode">
+             <enum>QAbstractItemView::DropOnly</enum>
+            </property>
+            <property name="defaultDropAction">
+             <enum>Qt::MoveAction</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QPushButton" name="SaveTextButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>18</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>TTSTextSavePushButton</string>
+            </property>
+            <property name="shortcut">
+             <string notr="true">S</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="0" colspan="3">
+           <widget class="QPushButton" name="BatchedTTSButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>TTSPushButton</string>
+            </property>
+            <property name="shortcut">
+             <string notr="true">Ctrl+B</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="3">
+           <widget class="QPushButton" name="OpenProjectButton">
+            <property name="text">
+             <string>OpenProjectButton</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
@@ -1233,33 +1269,67 @@
      </item>
     </layout>
    </item>
-   <item row="0" column="0">
-    <spacer name="UpperSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="2" column="0">
-    <widget class="QProgressBar" name="InferProgressBar">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="value">
-      <number>0</number>
-     </property>
-    </widget>
-   </item>
   </layout>
+  <action name="actionTTSNewProject">
+   <property name="text">
+    <string>TTSNewProject</string>
+   </property>
+  </action>
+  <action name="actionTTSOpenProject">
+   <property name="text">
+    <string>TTSOpenProject</string>
+   </property>
+  </action>
+  <action name="actionTTSAppendProject">
+   <property name="text">
+    <string>TTSAppendProject</string>
+   </property>
+  </action>
+  <action name="actionTTSSaveProject">
+   <property name="text">
+    <string>TTSSaveProject</string>
+   </property>
+  </action>
+  <action name="actionTTSAppendAudios">
+   <property name="text">
+    <string>TTSAppendAudios</string>
+   </property>
+  </action>
+  <action name="actionTTSClearAudios">
+   <property name="text">
+    <string>TTSClearAudios</string>
+   </property>
+  </action>
+  <action name="actionTTSExit">
+   <property name="text">
+    <string>TTSExit</string>
+   </property>
+  </action>
+  <action name="actionTTSClearSpec">
+   <property name="text">
+    <string>TTSClearSpec</string>
+   </property>
+  </action>
+  <action name="actionTTSPluginManager">
+   <property name="text">
+    <string>TTSPluginManager</string>
+   </property>
+  </action>
+  <action name="actionTTSEditorOpen">
+   <property name="text">
+    <string>TTSEditorOpen</string>
+   </property>
+  </action>
+  <action name="actionTTSAbout">
+   <property name="text">
+    <string>TTSAbout</string>
+   </property>
+  </action>
+  <action name="actionTTSSettings">
+   <property name="text">
+    <string>TTSSettings</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
