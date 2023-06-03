@@ -136,7 +136,7 @@ Vits::Vits(const rapidjson::Document& _config, const callback& _cb, const callba
 		logger.log(L"[Warn] Missing Field \"CharaMix\", Use Default Value (False)");
 	else
 		CharaMix = _config["CharaMix"].GetBool();
-	if (!_config.HasMember("Characters") && _config["Characters"].IsArray())
+	if (_config.HasMember("Characters") && _config["Characters"].IsArray())
 		n_speaker = _config["Characters"].Size();
 
 	_callback = _cb;
@@ -528,6 +528,9 @@ std::vector<int16_t> Vits::Inference(const MoeVSProject::TTSParams& _input) cons
 	auto input_text = _input.phs;
 	auto dur_vec = _input.durations;
 	auto inp_emo = _input.emotion;
+	if (chara_mix_dat.size() > size_t(n_speaker))
+		chara_mix_dat.resize(n_speaker);
+	LinearCombination(chara_mix_dat);
 
 	std::mt19937 gen(static_cast<unsigned int>(seed));
 	std::normal_distribution<float> normal(0, 1);
@@ -629,6 +632,9 @@ std::vector<int16_t> Vits::Inference(const MoeVSProject::TTSParams& _input) cons
 			for (const auto& CharaP : chara_mix_dat)
 			{
 				outputG.clear();
+				inputSid.clear();
+				if (csid >= n_speaker)
+					break;
 				if (CharaP < 0.0001f)
 				{
 					++csid;
@@ -685,6 +691,7 @@ std::vector<int16_t> Vits::Inference(const MoeVSProject::TTSParams& _input) cons
 			}
 			const auto GOutCount = outputG[0].GetTensorTypeAndShapeInfo().GetElementCount();
 			GEmbidding = std::vector(outputG[0].GetTensorData<float>(), outputG[0].GetTensorData<float>() + GOutCount);
+			GOutShape = outputG[0].GetTensorTypeAndShapeInfo().GetShape();
 		}
 	}
 	else
@@ -746,7 +753,7 @@ std::vector<int16_t> Vits::Inference(const MoeVSProject::TTSParams& _input) cons
 			for (size_t i = 0; i < w_ceil.size(); ++i)
 				w_ceil[i] = float(dur_vec[i]);
 		else if (add_blank && dur_vec.size() == text.size() / 2ull)
-			for (size_t i = 0; i < w_ceil.size(); ++i)
+			for (size_t i = 0; i < dur_vec.size(); ++i)
 				w_ceil[1 + i * 2] = float(dur_vec[i]);
 	}
 	const auto maskSize = x_mask.size();

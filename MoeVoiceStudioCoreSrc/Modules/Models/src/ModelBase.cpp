@@ -734,19 +734,27 @@ std::vector<int16_t> InferClass::TTS::Inference(const MoeVSProject::TTSParams& _
 	throw std::exception("Empty Function");
 }
 
-std::vector<int16_t> InferClass::TTS::Inference(const std::vector<MoeVSProject::TTSParams>& _input) const
+std::vector<std::wstring> InferClass::TTS::Inference(const std::vector<MoeVSProject::TTSParams>& _input) const
 {
-	std::vector<int16_t> return_val;
+	std::vector<std::wstring> return_val;
 	size_t proc = 0;
 	logger.log(L"[Info] Inference Start");
 	_callback(proc, _input.size());
-	for (const auto& i : _input)
+	for (const auto& iii : _input)
 	{
-		const auto tmp = Inference(i);
+		const auto tmp = Inference(iii);
+		_callback(++proc, _input.size());
 		if(tmp.empty())
 			continue;
-		return_val.insert(return_val.end(), tmp.begin(), tmp.end());
-		_callback(++proc, _input.size());
+		std::wstring OutDir;
+		for (size_t i = 0; i < (1ull << 20ull); ++i)
+		{
+			OutDir = GetCurrentFolder() + L"\\OutPuts\\" + std::to_wstring(i) + L".wav";
+			if (_waccess(OutDir.c_str(), 0) == -1)
+				break;
+		}
+		Wav(uint32_t(_samplingRate), uint32_t(tmp.size() * 2ull), tmp.data()).Writef(OutDir);
+		return_val.emplace_back(OutDir);
 	}
 	logger.log(L"[Info] Inference Finished");
 	return return_val;

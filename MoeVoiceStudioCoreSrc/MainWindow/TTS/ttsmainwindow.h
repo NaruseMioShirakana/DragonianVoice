@@ -2,12 +2,15 @@
 #define TTSMAINWINDOW_H
 
 #include <QDialog>
-
+#include "../MessageSender.h"
 #include "ui_ttsmainwindow.h"
 #include "../../Modules/Models/header/Vits.hpp"
 #include "../../Modules/Models/header/Pits.hpp"
 #include "../../Modules/Models/header/Tacotron.hpp"
-
+#include "../Controls/Player/player.h"
+#include <QtMultimedia/QMediaPlayer>
+#include <QtMultimedia/QAudioOutput>
+#include <QtMultimedia/QAudioDevice>
 namespace Ui {
 class TTSMainWindow;
 }
@@ -25,12 +28,16 @@ public:
     void SetCharaMixEnabled(bool condition) const;
     void unloadModel();
     void initSetup();
+    void initControls();
     void reloadModels();
     void modelsClear();
     void SetModelSelectEnabled(bool condition) const;
     void dragEnterEvent(QDragEnterEvent* event) override;
     void dropEvent(QDropEvent* event) override;
+    void setAudio(const std::wstring& path) const;
+    void initPlayer();
     [[nodiscard]] int saveProject(std::string& error);
+    void setSoundModelEnabled(bool condition) const;
 #ifdef WIN32
     static void openModelFolder();
 #endif
@@ -65,12 +72,28 @@ public slots:
     void on_ClearListButton_clicked();
     void on_DrawMelSpecButton_clicked();
     void on_SendToPlayerButton_clicked();
-    void on_DeleteSelectedAudioButton_clicked() const;
+    void on_DeleteSelectedAudioButton_clicked();
+    void on_PlayerPlayButton_clicked() const;
+    void on_MuteButton_clicked() const;
+    void on_NextAudioButton_clicked();
+    void on_LastAudioButton_clicked();
 
     void on_CharacterMixProportion_valueChanged(double value);
     void on_CharacterComboBox_currentIndexChanged(int value) const;
     void on_TextListWidget_itemSelectionChanged() const;
+    void on_VolumeSlider_valueChanged(int value) const;
+    void on_PlayerProgress_valueChanged(int value) const;
 
+    void on_TextListWidget_itemDoubleClicked(QListWidgetItem* item);
+    void on_AudioList_itemDoubleClicked(QListWidgetItem* item);
+
+    void getDurationChanged(qint64 time);
+    void playbackPosChanged(qint64 time) const;
+
+    void InferenceProcessChanged(size_t cur, size_t all) const;
+    void InferenceStatChanged(bool condition) const;
+    void InsertFilePaths(std::wstring _str) const;
+    void ErrorMsgBoxEvent(std::string _str);
 #ifdef WIN32
     static void on_ModelListDirButton_clicked();
 #endif
@@ -86,12 +109,18 @@ private:
     size_t cur_model_index = 0;
     int64_t samplingRate = 22050;
     InferClass::BaseModelType::Device __MOESS_DEVICE = InferClass::BaseModelType::Device::CPU;
+    waveWidget* wave_widget_ = nullptr;
+    QGridLayout* wave_widget_layout = nullptr;
+    QMediaPlayer* media_player = nullptr;
+    QAudioOutput* media_audio_output = nullptr;
+    int duration_media = 0;
+    size_t cur_media = -1;
+    MessageSender _InferMsgSender;
+    MoeVSProject::TTSParams _cur_params;
 public:
     InferClass::BaseModelType::callback BarCallback = [&](size_t _cur, size_t _max) -> void
     {
-        if (!_cur)
-            ui->InferProgressBar->setMaximum((int)_max);
-        ui->InferProgressBar->setValue((int)_cur);
+        _InferMsgSender.InferProcess(_cur, _max);
     };
 
     InferClass::BaseModelType::callback_params TTSParamCallback = [&]()

@@ -234,7 +234,7 @@ public:
 
 	[[nodiscard]] virtual std::vector<int16_t> Inference(const MoeVSProject::TTSParams& _input) const;
 
-	[[nodiscard]] std::vector<int16_t> Inference(const std::vector<MoeVSProject::TTSParams>& _input) const;
+	[[nodiscard]] std::vector<std::wstring> Inference(const std::vector<MoeVSProject::TTSParams>& _input) const;
 
 	static int64_t find_max_idx(const std::vector<float>& inp)
 	{

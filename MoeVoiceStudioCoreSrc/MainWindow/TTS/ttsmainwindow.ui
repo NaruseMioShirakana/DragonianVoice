@@ -279,9 +279,6 @@
             <layout class="QGridLayout" name="gridLayout_8">
              <item row="0" column="1">
               <layout class="QGridLayout" name="PlayerSpecLayout">
-               <item row="0" column="2">
-                <widget class="QWidget" name="MelSpecWidget" native="true"/>
-               </item>
                <item row="5" column="3">
                 <widget class="QPushButton" name="SendToPlayerButton">
                  <property name="maximumSize">
@@ -340,9 +337,6 @@
                  </property>
                 </widget>
                </item>
-               <item row="1" column="2" rowspan="5">
-                <widget class="QWidget" name="DurationWidget" native="true"/>
-               </item>
                <item row="2" column="3">
                 <widget class="QPushButton" name="DeleteSelectedAudioButton">
                  <property name="maximumSize">
@@ -360,6 +354,9 @@
                   <string notr="true">-</string>
                  </property>
                 </widget>
+               </item>
+               <item row="0" column="2" rowspan="6">
+                <widget class="spectrogramWidget" name="MelWidget" native="true"/>
                </item>
               </layout>
              </item>
@@ -986,7 +983,10 @@
              </spacer>
             </item>
             <item row="2" column="1" colspan="7">
-             <widget class="QSlider" name="PlayerProgress">
+             <widget class="MSlider" name="PlayerProgress">
+              <property name="tracking">
+               <bool>false</bool>
+              </property>
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
@@ -1261,6 +1261,19 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MSlider</class>
+   <extends>QSlider</extends>
+   <header>../Controls/BaseControls/MSlider.h</header>
+  </customwidget>
+  <customwidget>
+   <class>spectrogramWidget</class>
+   <extends>QWidget</extends>
+   <header>../Controls/Player/player.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

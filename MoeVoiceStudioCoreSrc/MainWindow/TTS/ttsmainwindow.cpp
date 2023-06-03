@@ -1,11 +1,11 @@
 #include "ttsmainwindow.h"
-
 #include <QMessageBox>
 #include "ui_ttsmainwindow.h"
 #include <QStringListModel>
 #include <QFileDialog>
 #include <QDragEnterEvent>
 #include <QMimeData>
+#include <thread>
 
 TTSMainWindow::TTSMainWindow(const std::function<void(QDialog*)>& _callback, QWidget *parent) :
     QDialog(parent),
@@ -15,11 +15,21 @@ TTSMainWindow::TTSMainWindow(const std::function<void(QDialog*)>& _callback, QWi
     ui->setupUi(this);
     setWindowFlags(Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
     initSetup();
+    connect(media_player, SIGNAL(durationChanged(qint64)), this, SLOT(getDurationChanged(qint64)));
+    connect(media_player, SIGNAL(positionChanged(qint64)), this, SLOT(playbackPosChanged(qint64)));
+    connect(&_InferMsgSender, SIGNAL(onProcessBarChanging(size_t, size_t)), this, SLOT(InferenceProcessChanged(size_t, size_t)));
+    connect(&_InferMsgSender, SIGNAL(onAnyStatChanging(bool)), this, SLOT(InferenceStatChanged(bool)));
+    connect(&_InferMsgSender, SIGNAL(astrParamedEvent(std::string)), this, SLOT(ErrorMsgBoxEvent(std::string)));
+    connect(&_InferMsgSender, SIGNAL(strParamedEvent(std::wstring)), this, SLOT(InsertFilePaths(std::wstring)));
 }
 
 TTSMainWindow::~TTSMainWindow()
 {
     delete ui;
+    delete wave_widget_;
+    delete wave_widget_layout;
+    delete media_player;
+    delete media_audio_output;
 }
 
 void TTSMainWindow::SetInferenceEnabled(bool condition) const
@@ -90,11 +100,23 @@ void TTSMainWindow::initSetup()
 {
     setAcceptDrops(true);
     ui->TTSParamSeedEdit->setValidator(new QIntValidator(ui->TTSParamSeedEdit));
+    initControls();
     SetParamsEnabled(true);
     SetCharaMixEnabled(false);
     SetInferenceEnabled(false);
     ui->CharacterComboBox->setEnabled(false);
+    initPlayer();
     reloadModels();
+}
+
+void TTSMainWindow::initControls()
+{
+    wave_widget_layout = new QGridLayout(ui->AudioWaveWidget);
+    wave_widget_layout->setObjectName("wave_widget_layout");
+    wave_widget_ = new waveWidget(ui->AudioWaveWidget);
+    wave_widget_->setObjectName("wave_widget_");
+    wave_widget_layout->addWidget(wave_widget_);
+    ui->AudioWaveWidget->setLayout(wave_widget_layout);
 }
 
 void TTSMainWindow::modelsClear()
@@ -372,6 +394,52 @@ int TTSMainWindow::saveProject(std::string& error)
     }
 }
 
+void TTSMainWindow::initPlayer()
+{
+    media_player = new QMediaPlayer(this);
+    media_audio_output = new QAudioOutput(this);
+    media_player->setAudioOutput(media_audio_output);
+    media_audio_output->setDevice(QAudioDevice());
+    media_audio_output->setVolume(float(ui->VolumeSlider->value()) / 100);
+    ui->PlayerProgress->setValue(0);
+    ui->PlayerProgress->setMaximum(0);
+    setSoundModelEnabled(false);
+}
+
+void TTSMainWindow::setSoundModelEnabled(bool condition) const
+{
+    ui->PlayerPlayButton->setEnabled(condition);
+    ui->PlayerProgress->setEnabled(condition);
+}
+
+void TTSMainWindow::setAudio(const std::wstring& path) const
+{
+	wave_widget_->setWavFile(path);
+    media_player->setSource(QUrl::fromLocalFile(to_byte_string(path).c_str()));
+}
+
+//*******************AudioSlotFn**********************//
+
+void TTSMainWindow::getDurationChanged(qint64 time) {
+    duration_media = int(time);
+    const auto audio_dur = int(time);
+    ui->PlayerProgress->setMaximum(audio_dur);
+    ui->PlayerProgress->setValue(0);
+    media_player->setPosition(0);
+    const auto times = QString("%1:%2").arg(audio_dur / 60000, 2, 10, QChar('0')).arg((audio_dur % 60000) / 1000, 2, 10, QChar('0'));
+    ui->MaxTimePlayer->setText(times);
+    ui->CurTimePlayer->setText("00:00");
+    if (duration_media)
+        setSoundModelEnabled(true);
+    else
+        setSoundModelEnabled(false);
+}
+
+void TTSMainWindow::playbackPosChanged(qint64 time) const
+{
+    ui->PlayerProgress->setValue(int(time));
+}
+
 //*******************EventFn**********************//
 
 void TTSMainWindow::on_GateThSlider_valueChanged(int value) const
@@ -445,39 +513,39 @@ void TTSMainWindow::on_InferenceButton_clicked()
         QMessageBox::warning(this, tr("TTSModelNotExistErrorTitle"), tr("TTSModelNotExistErrorText"), QMessageBox::Ok);
         return;
     }
-    SetInferenceEnabled(false);
-    SetModelSelectEnabled(false);
-    auto inp = ui->InferTextEdit->toPlainText().toStdWString();
-    if(!inp.empty())
-    {
-        std::vector<int16_t> PCMDATA;
-    	try
+    std::thread Infer([&]()
         {
-            PCMDATA = _model->Inference(inp);
-        }
-    	catch(std::exception& e)
-    	{
-            QMessageBox::warning(this, "ERROR", e.what(), QMessageBox::Ok);
-            ui->InferProgressBar->setValue(0);
-            SetModelSelectEnabled(true);
-            SetInferenceEnabled(true);
-    		return;
-    	}
-        std::wstring OutDir;
-        for (size_t i = 0; i < 1ull << 20ull; ++i)
-        {
-            OutDir = GetCurrentFolder() + L"\\OutPuts\\" + std::to_wstring(i) + L".wav";
-            if (_waccess(OutDir.c_str(), 0) == -1)
-                break;
-        }
-        Wav(uint32_t(samplingRate), uint32_t(PCMDATA.size() * 2ull), PCMDATA.data()).Writef(OutDir);
-        waveFolder.emplace_back(OutDir);
-        OutDir = OutDir.substr(OutDir.rfind(L'\\') + 1);
-        ui->AudioList->addItem(to_byte_string(OutDir).c_str());
-    }
-    ui->InferProgressBar->setValue(0);
-    SetModelSelectEnabled(true);
-    SetInferenceEnabled(true);
+            _InferMsgSender.ChangeInferenceStat(false);
+            auto inp = ui->InferTextEdit->toPlainText().toStdWString();
+            if (!inp.empty())
+            {
+                std::vector<int16_t> PCMDATA;
+                try
+                {
+                    PCMDATA = _model->Inference(inp);
+                }
+                catch (std::exception& e)
+                {
+                    _InferMsgSender.astrParamEvent(e.what());
+                    _InferMsgSender.InferProcess(0, 1);
+                    _InferMsgSender.ChangeInferenceStat(true);
+                    return;
+                }
+                std::wstring OutDir;
+                for (size_t i = 0; i < (1ull << 20ull); ++i)
+                {
+                    OutDir = GetCurrentFolder() + L"\\OutPuts\\" + std::to_wstring(i) + L".wav";
+                    if (_waccess(OutDir.c_str(), 0) == -1)
+                        break;
+                }
+                Wav(uint32_t(samplingRate), uint32_t(PCMDATA.size() * 2ull), PCMDATA.data()).Writef(OutDir);
+                waveFolder.emplace_back(OutDir);
+                _InferMsgSender.strParamEvent(OutDir);
+            }
+            _InferMsgSender.ChangeInferenceStat(true);
+            _InferMsgSender.InferProcess(0, 1);
+        });
+    Infer.detach();
 }
 
 void TTSMainWindow::on_CharacterMixProportion_valueChanged(double value)
@@ -619,10 +687,9 @@ void TTSMainWindow::on_EditTextButton_clicked()
     }
 }
 
-std::wregex changeLineSymb(L"\r");
-
 void TTSMainWindow::on_TTSInferenceCleanerButton_clicked()
 {
+    const std::wregex changeLineSymb(L"\r");
 	if(!_model)
 	{
         QMessageBox::warning(this, tr("TTSModelNotExistErrorTitle"), tr("TTSModelNotExistErrorText"), QMessageBox::Ok);
@@ -715,11 +782,47 @@ void TTSMainWindow::on_BatchedTTSButton_clicked()
         QMessageBox::warning(this, tr("TTSModelNotExistErrorTitle"), tr("TTSModelNotExistErrorText"), QMessageBox::Ok);
         return;
     }
-    SetInferenceEnabled(false);
-    SetModelSelectEnabled(false);
-    //TODO
-    SetInferenceEnabled(true);
-    SetModelSelectEnabled(true);
+    if (_proj.data().empty())
+        return;
+    std::thread Infer([&]()
+        {
+            _InferMsgSender.ChangeInferenceStat(false);
+            auto _params_all = _proj.data();
+            for (auto& params : _params_all)
+            {
+                if (ui->CharacterCheckBox->checkState() != Qt::Checked)
+                {
+                    params.chara_mix.clear();
+                    if (n_speakers)
+                        params.chara = ui->CharacterComboBox->currentIndex();
+                    else
+                        params.chara = 0;
+                }
+                else
+                    if (params.chara_mix.size() > size_t(n_speakers))
+                        params.chara_mix.resize(n_speakers);
+                InferClass::BaseModelType::LinearCombination(params.chara_mix, 1.f);
+            }
+            try
+            {
+                const auto paths = _model->Inference(_params_all);
+                for (const auto& OutDir : paths)
+                {
+                    waveFolder.emplace_back(OutDir);
+                    _InferMsgSender.strParamEvent(OutDir);
+                }
+            }
+			catch(std::exception& e)
+			{
+                _InferMsgSender.astrParamEvent(e.what());
+                _InferMsgSender.InferProcess(0, 1);
+                _InferMsgSender.ChangeInferenceStat(true);
+                return;
+			}
+            _InferMsgSender.ChangeInferenceStat(true);
+            _InferMsgSender.InferProcess(0, 1);
+        });
+    Infer.detach();
 }
 
 void TTSMainWindow::on_TTSInferOnceButton_clicked()
@@ -729,51 +832,155 @@ void TTSMainWindow::on_TTSInferOnceButton_clicked()
         QMessageBox::warning(this, tr("TTSModelNotExistErrorTitle"), tr("TTSModelNotExistErrorText"), QMessageBox::Ok);
         return;
     }
-    SetInferenceEnabled(false);
-    SetModelSelectEnabled(false);
-    if (ui->TextListWidget->currentItem())
-    {
-        std::vector<int16_t> PCMDATA;
-        try
+    std::thread Infer([&]()
         {
-            auto params = _proj[ui->TextListWidget->currentRow()];
-            if(ui->CharacterCheckBox->checkState() != Qt::Checked)
+            _InferMsgSender.ChangeInferenceStat(false);
+            if (ui->TextListWidget->currentItem())
             {
-                params.chara_mix.clear();
-                if (n_speakers)
-                    params.chara = ui->CharacterComboBox->currentIndex();
-                else
-                    params.chara = 0;
+                std::vector<int16_t> PCMDATA;
+                try
+                {
+                    auto params = _proj[ui->TextListWidget->currentRow()];
+                    if (ui->CharacterCheckBox->checkState() != Qt::Checked)
+                    {
+                        params.chara_mix.clear();
+                        if (n_speakers)
+                            params.chara = ui->CharacterComboBox->currentIndex();
+                        else
+                            params.chara = 0;
+                    }
+                    else
+                        if (params.chara_mix.size() > size_t(n_speakers))
+                            params.chara_mix.resize(n_speakers);
+                    InferClass::BaseModelType::LinearCombination(params.chara_mix, 1.f);
+                    PCMDATA = _model->Inference(params);
+                }
+                catch (std::exception& e)
+                {
+                    _InferMsgSender.astrParamEvent(e.what());
+                    _InferMsgSender.InferProcess(0, 1);
+                    _InferMsgSender.ChangeInferenceStat(true);
+                    return;
+                }
+                std::wstring OutDir;
+                for (size_t i = 0; i < (1ull << 20ull); ++i)
+                {
+                    OutDir = GetCurrentFolder() + L"\\OutPuts\\" + std::to_wstring(i) + L".wav";
+                    if (_waccess(OutDir.c_str(), 0) == -1)
+                        break;
+                }
+                Wav(uint32_t(samplingRate), uint32_t(PCMDATA.size() * 2ull), PCMDATA.data()).Writef(OutDir);
+                waveFolder.emplace_back(OutDir);
+                _InferMsgSender.strParamEvent(OutDir);
             }
-            else
-                if (params.chara_mix.size() > size_t(n_speakers))
-                    params.chara_mix.resize(n_speakers);
-            InferClass::BaseModelType::LinearCombination(params.chara_mix, 1.f);
-            PCMDATA = _model->Inference(params);
-        }
-        catch (std::exception& e)
+            _InferMsgSender.ChangeInferenceStat(true);
+            _InferMsgSender.InferProcess(0, 1);
+        });
+    Infer.detach();
+}
+
+void TTSMainWindow::on_TTSInferCur_clicked()
+{
+    if (!_model)
+    {
+        QMessageBox::warning(this, tr("TTSModelNotExistErrorTitle"), tr("TTSModelNotExistErrorText"), QMessageBox::Ok);
+        return;
+    }
+    _cur_params = dumpPatamsFromControl();
+    if (_cur_params.phs.empty())
+    {
+        QMessageBox::warning(this, tr("TTSPhsSizeErrorTitle"), tr("TTSPhsSizeErrorText"), QMessageBox::Ok);
+        return;
+    }
+    if (!_cur_params.durations.empty())
+        if (_cur_params.phs.size() != _cur_params.durations.size() && _cur_params.phs.size() != _cur_params.durations.size() * 2 + 1)
         {
-            QMessageBox::warning(this, "ERROR", e.what(), QMessageBox::Ok);
-            ui->InferProgressBar->setValue(0);
-            SetModelSelectEnabled(true);
-            SetInferenceEnabled(true);
+            QMessageBox::warning(this, tr("TTSDurationSizeErrorTitle"), tr("TTSDurationSizeErrorText"), QMessageBox::Ok);
             return;
         }
-        std::wstring OutDir;
-        for (size_t i = 0; i < (1ull << 20ull); ++i)
+    if (!_cur_params.tones.empty())
+        if (_cur_params.phs.size() != _cur_params.tones.size() && _cur_params.phs.size() != _cur_params.tones.size() * 2 + 1)
         {
-            OutDir = GetCurrentFolder() + L"\\OutPuts\\" + std::to_wstring(i) + L".wav";
-            if (_waccess(OutDir.c_str(), 0) == -1)
-                break;
+            QMessageBox::warning(this, tr("TTSTonesSizeErrorTitle"), tr("TTSTonesSizeErrorText"), QMessageBox::Ok);
+            return;
         }
-        Wav(uint32_t(samplingRate), uint32_t(PCMDATA.size() * 2ull), PCMDATA.data()).Writef(OutDir);
-        waveFolder.emplace_back(OutDir);
-        OutDir = OutDir.substr(OutDir.rfind(L'\\') + 1);
-        ui->AudioList->addItem(to_byte_string(OutDir).c_str());
-    }
-    SetInferenceEnabled(true);
-    SetModelSelectEnabled(true);
+    std::thread Infer([&]()
+        {
+            _InferMsgSender.ChangeInferenceStat(false);
+            std::vector<int16_t> PCMDATA;
+            try
+            {
+                if (ui->CharacterCheckBox->checkState() != Qt::Checked)
+                {
+                    _cur_params.chara_mix.clear();
+                    if (n_speakers)
+                        _cur_params.chara = ui->CharacterComboBox->currentIndex();
+                    else
+                        _cur_params.chara = 0;
+                }
+                else
+                    if (_cur_params.chara_mix.size() > size_t(n_speakers))
+                        _cur_params.chara_mix.resize(n_speakers);
+                InferClass::BaseModelType::LinearCombination(_cur_params.chara_mix, 1.f);
+                PCMDATA = _model->Inference(_cur_params);
+            }
+            catch (std::exception& e)
+            {
+                _InferMsgSender.astrParamEvent(e.what());
+                _InferMsgSender.InferProcess(0, 1);
+                _InferMsgSender.ChangeInferenceStat(true);
+                return;
+            }
+            std::wstring OutDir;
+            for (size_t i = 0; i < (1ull << 20ull); ++i)
+            {
+                OutDir = GetCurrentFolder() + L"\\OutPuts\\" + std::to_wstring(i) + L".wav";
+                if (_waccess(OutDir.c_str(), 0) == -1)
+                    break;
+            }
+            Wav(uint32_t(samplingRate), uint32_t(PCMDATA.size() * 2ull), PCMDATA.data()).Writef(OutDir);
+            waveFolder.emplace_back(OutDir);
+            _InferMsgSender.strParamEvent(OutDir);
+            _InferMsgSender.ChangeInferenceStat(true);
+            _InferMsgSender.InferProcess(0, 1);
+        });
+    Infer.detach();
 }
+
+void TTSMainWindow::on_AudioList_itemDoubleClicked(QListWidgetItem* item)
+{
+    if (item)
+    {
+        const auto idx = ui->AudioList->row(item);
+        setAudio(waveFolder[idx]);
+        cur_media = idx;
+    }
+}
+
+void TTSMainWindow::on_TextListWidget_itemDoubleClicked(QListWidgetItem* item)
+{
+    if (item)
+    {
+        QMessageBox msgBox;
+        msgBox.setWindowTitle(tr("TTSEditTextButtonButtonTitle"));
+        msgBox.setText(tr("TTSEditTextButtonButtonText"));
+        msgBox.setInformativeText(tr("TTSEditTextButtonButtonInformativeText"));
+        msgBox.setIcon(QMessageBox::Question);
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::No);
+        msgBox.button(QMessageBox::Yes)->setText(tr("TTSEditTextButtonYes"));
+        msgBox.button(QMessageBox::No)->setText(tr("TTSEditTextButtonNo"));
+        msgBox.setWindowFlag(Qt::WindowStaysOnTopHint);
+        const auto ret = msgBox.exec();
+        if (ret == QMessageBox::No)
+            return;
+        const auto idx = ui->TextListWidget->row(item);
+        const auto& params_ = _proj[idx];
+        setParamsControlValue(params_);
+    }
+}
+
+/*********Player**********/
 
 void TTSMainWindow::on_ClearListButton_clicked()
 {
@@ -794,20 +1001,35 @@ void TTSMainWindow::on_ClearListButton_clicked()
     {
         ui->AudioList->clear();
         waveFolder.clear();
+        setAudio(L"");
+        cur_media = -1;
     }
 }
 
 void TTSMainWindow::on_DrawMelSpecButton_clicked()
 {
-	
+    std::thread MelThread([&]()
+        {
+            _InferMsgSender.ChangeAnyStat(false);
+            if (ui->AudioList->currentItem())
+                if (!waveFolder.empty())
+                    ui->MelWidget->setWavFile(waveFolder[ui->AudioList->currentRow()]);
+            _InferMsgSender.ChangeAnyStat(true);
+        });
+    MelThread.detach();
 }
 
 void TTSMainWindow::on_SendToPlayerButton_clicked()
 {
-	
+    if (ui->AudioList->currentItem())
+    {
+        const auto idx = ui->AudioList->currentRow();
+        setAudio(waveFolder[idx]);
+        cur_media = idx;
+    }
 }
 
-void TTSMainWindow::on_DeleteSelectedAudioButton_clicked() const
+void TTSMainWindow::on_DeleteSelectedAudioButton_clicked()
 {
     if (!ui->AudioList->currentItem())
         return;
@@ -826,76 +1048,137 @@ void TTSMainWindow::on_DeleteSelectedAudioButton_clicked() const
     {
         const auto index = ui->AudioList->currentIndex().row();
         delete ui->AudioList->takeItem(index);
-    }
-}
-
-void TTSMainWindow::on_TTSInferCur_clicked()
-{
-    if (!_model)
-    {
-        QMessageBox::warning(this, tr("TTSModelNotExistErrorTitle"), tr("TTSModelNotExistErrorText"), QMessageBox::Ok);
-        return;
-    }
-    auto params = dumpPatamsFromControl();
-    if (params.phs.empty())
-    {
-        QMessageBox::warning(this, tr("TTSPhsSizeErrorTitle"), tr("TTSPhsSizeErrorText"), QMessageBox::Ok);
-        return;
-    }
-    if (!params.durations.empty())
-        if (params.phs.size() != params.durations.size() && params.phs.size() != params.durations.size() * 2 + 1)
+        waveFolder.erase(waveFolder.begin() + index);
+        if (cur_media != -1ull && cur_media >= size_t(index))
         {
-            QMessageBox::warning(this, tr("TTSDurationSizeErrorTitle"), tr("TTSDurationSizeErrorText"), QMessageBox::Ok);
-            return;
-        }
-    if (!params.tones.empty())
-        if (params.phs.size() != params.tones.size() && params.phs.size() != params.tones.size() * 2 + 1)
-        {
-            QMessageBox::warning(this, tr("TTSTonesSizeErrorTitle"), tr("TTSTonesSizeErrorText"), QMessageBox::Ok);
-            return;
-        }
-    SetInferenceEnabled(false);
-    SetModelSelectEnabled(false);
-    std::vector<int16_t> PCMDATA;
-    try
-    {
-        if (ui->CharacterCheckBox->checkState() != Qt::Checked)
-        {
-            params.chara_mix.clear();
-            if (n_speakers)
-                params.chara = ui->CharacterComboBox->currentIndex();
+            if (cur_media)
+                --cur_media;
+            if (waveFolder.empty())
+                setAudio(L"");
             else
-                params.chara = 0;
+                setAudio(waveFolder[cur_media]);
         }
-        else
-            if (params.chara_mix.size() > size_t(n_speakers))
-                params.chara_mix.resize(n_speakers);
-        InferClass::BaseModelType::LinearCombination(params.chara_mix, 1.f);
-        PCMDATA = _model->Inference(params);
+        if (index != 0)
+            ui->AudioList->setCurrentRow(index - 1);
+        if (waveFolder.empty())
+            setAudio(L"");
     }
-    catch (std::exception& e)
-    {
-        QMessageBox::warning(this, "ERROR", e.what(), QMessageBox::Ok);
-        ui->InferProgressBar->setValue(0);
-        SetModelSelectEnabled(true);
-        SetInferenceEnabled(true);
-        return;
-    }
-    std::wstring OutDir;
-    for (size_t i = 0; i < (1ull << 20ull); ++i)
-    {
-        OutDir = GetCurrentFolder() + L"\\OutPuts\\" + std::to_wstring(i) + L".wav";
-        if (_waccess(OutDir.c_str(), 0) == -1)
-            break;
-    }
-    Wav(uint32_t(samplingRate), uint32_t(PCMDATA.size() * 2ull), PCMDATA.data()).Writef(OutDir);
-    waveFolder.emplace_back(OutDir);
-    OutDir = OutDir.substr(OutDir.rfind(L'\\') + 1);
-    ui->AudioList->addItem(to_byte_string(OutDir).c_str());
-    SetInferenceEnabled(true);
-    SetModelSelectEnabled(true);
 }
 
+void TTSMainWindow::on_LastAudioButton_clicked()
+{
+    if (waveFolder.empty())
+    {
+        cur_media = -1;
+        return;
+    }
+    if (cur_media == 0 || cur_media == -1ull)
+    {
+        cur_media = waveFolder.size() - 1;
+        setAudio(waveFolder[cur_media]);
+    }
+    else
+    {
+        --cur_media;
+        setAudio(waveFolder[cur_media]);
+    }
+    ui->AudioList->setCurrentRow(int(cur_media));
+}
+
+void TTSMainWindow::on_NextAudioButton_clicked()
+{
+    if (waveFolder.empty())
+    {
+        cur_media = -1;
+        return;
+    }
+    if (cur_media == waveFolder.size() - 1)
+    {
+        cur_media = 0;
+        setAudio(waveFolder[cur_media]);
+    }
+    else
+    {
+        ++cur_media;
+        setAudio(waveFolder[cur_media]);
+    }
+    ui->AudioList->setCurrentRow(int(cur_media));
+}
+
+void TTSMainWindow::on_PlayerPlayButton_clicked() const
+{
+    if (!duration_media)
+        return;
+    switch (media_player->playbackState())
+    {
+    case QMediaPlayer::PlayingState:
+        media_player->pause();
+        break;
+    case QMediaPlayer::PausedState:
+        media_player->play();
+        break;
+    case QMediaPlayer::StoppedState:
+        media_player->play();
+        break;
+    }
+}
+
+void TTSMainWindow::on_MuteButton_clicked() const
+{
+    media_audio_output->setVolume(0.f);
+    ui->VolumeSlider->setValue(0);
+    //TODO
+}
+
+void TTSMainWindow::on_PlayerProgress_valueChanged(int value) const
+{
+    if (!duration_media)
+        return;
+    if (value == duration_media) {
+        ui->PlayerProgress->setValue(0);
+        media_player->stop();
+        media_player->setPosition(0);
+        return;
+    }
+    media_player->setPosition(value);
+}
+
+void TTSMainWindow::on_VolumeSlider_valueChanged(int value) const
+{
+    media_audio_output->setVolume(float(value) / 100);
+    if (!value)
+    {
+        //TODO
+    }
+}
+
+/*************Other**************/
+
+void TTSMainWindow::InferenceProcessChanged(size_t cur, size_t all) const
+{
+    if (!cur)
+        ui->InferProgressBar->setMaximum((int)all);
+    ui->InferProgressBar->setValue((int)cur);
+}
+
+void TTSMainWindow::InferenceStatChanged(bool condition) const
+{
+    SetInferenceEnabled(condition);
+    SetModelSelectEnabled(condition);
+    ui->DrawMelSpecButton->setEnabled(condition);
+}
+
+void TTSMainWindow::InsertFilePaths(std::wstring _str) const
+{
+    ui->AudioList->addItem(to_byte_string(_str.substr(_str.rfind(L'\\') + 1)).c_str());
+}
+
+void TTSMainWindow::ErrorMsgBoxEvent(std::string _str)
+{
+    QMessageBox::warning(this, "ERROR", _str.c_str(), QMessageBox::Ok);
+}
+
+/**********Win32Only************/
 #ifdef WIN32
 void TTSMainWindow::openModelFolder()
 {

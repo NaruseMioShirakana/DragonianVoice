@@ -9,11 +9,14 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+#设置FFTW静态库路径
+set (FFTW3_Lib_DIRS ${PROJECT_SOURCE_DIR}/Lib/fftw/build/Release)
+
 # 设置 OnnxRuntime 版本
 set(ONNXRUNTIME_VERSION 1.15.0)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools Multimedia)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools Multimedia)
 
 if(WIN32)
     set(ONNXRUNTIME_DOWNLOAD_URL https://github.com/microsoft/onnxruntime/releases/download/v${ONNXRUNTIME_VERSION}/onnxruntime-win-x64-${ONNXRUNTIME_VERSION}.zip)
@@ -58,6 +61,7 @@ include_directories(${PROJECT_SOURCE_DIR}/Modules/Models)
 include_directories(${PROJECT_SOURCE_DIR}/Modules/PluginApi)
 include_directories(${PROJECT_SOURCE_DIR}/Modules/DataStruct)
 include_directories(${PROJECT_SOURCE_DIR}/Modules/Models/header)
+include_directories(${PROJECT_SOURCE_DIR}/MainWindow)
 
 # 添加库的头文件路径
 include_directories(${PROJECT_SOURCE_DIR}/Lib/ffmpeg-4.2.1/include)
@@ -69,6 +73,10 @@ include_directories(${PROJECT_SOURCE_DIR}/onnxruntime/include)
 link_directories(${PROJECT_SOURCE_DIR}/Lib/ffmpeg-4.2.1/Lib)
 link_directories(${ONNXRUNTIME_LIB_DIR})
 link_directories(${PROJECT_SOURCE_DIR}/Lib/World)
+link_directories(${FFTW3_Lib_DIRS})
+
+set (FFTW3_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/Lib/fftw/api)
+include_directories(${FFTW3_INCLUDE_DIRS})
 
 function(moevs_add_files _out)
     file(GLOB_RECURSE _tmp ${ARGN})
@@ -128,8 +136,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     avutil.lib
     swresample.lib
     swscale.lib
+    fftw3
     onnxruntime.lib
     Qt${QT_VERSION_MAJOR}::Widgets
+    Qt${QT_VERSION_MAJOR}::Multimedia
 )
 
 set_target_properties(${PROJECT_NAME} PROPERTIES

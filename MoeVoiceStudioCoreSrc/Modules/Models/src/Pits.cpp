@@ -111,7 +111,7 @@ Pits::Pits(const rapidjson::Document& _config, const callback& _cb, const callba
 		logger.log(L"[Warn] Missing Field \"CharaMix\", Use Default Value (False)");
 	else
 		CharaMix = _config["CharaMix"].GetBool();
-	if (!_config.HasMember("Characters") && _config["Characters"].IsArray())
+	if (_config.HasMember("Characters") && _config["Characters"].IsArray())
 		n_speaker = _config["Characters"].Size();
 
 	_callback = _cb;
@@ -469,7 +469,6 @@ std::vector<int16_t> Pits::Inference(const MoeVSProject::TTSParams& _input) cons
 		logger.log(L"[Inferring] Skip Empty Len");
 		return {};
 	}
-	_callback(0, 4);
 	auto noise_scale = (float)_input.noise;
 	auto noise_scale_w = (float)_input.noise_w;
 	auto length_scale = float(_input.length);
@@ -478,9 +477,12 @@ std::vector<int16_t> Pits::Inference(const MoeVSProject::TTSParams& _input) cons
 	bool use_spk_mix = CharaMix;
 	if (_input.chara_mix.empty())
 		use_spk_mix = false;
-	const auto& chara_mix_dat = _input.chara_mix;
+	auto chara_mix_dat = _input.chara_mix;
 	const auto& input_text = _input.phs;
 	auto dur_vec = _input.durations;
+	if (chara_mix_dat.size() > size_t(n_speaker))
+		chara_mix_dat.resize(n_speaker);
+	LinearCombination(chara_mix_dat);
 	
 	std::mt19937 gen(static_cast<unsigned int>(seed));
 	std::normal_distribution<float> normal(0, 1);
@@ -555,7 +557,6 @@ std::vector<int16_t> Pits::Inference(const MoeVSProject::TTSParams& _input) cons
 	std::vector<MTensor> inputSid;
 	std::vector<float> GEmbidding;
 	std::vector<int64_t> GOutShape;
-	_callback(1, 4);
 	if (sessionEmb)
 	{
 		logger.log(L"[Inferring] Inferring \"" + input_text + L"\" Character Embidding");
@@ -566,6 +567,9 @@ std::vector<int16_t> Pits::Inference(const MoeVSProject::TTSParams& _input) cons
 			for (const auto& CharaP : chara_mix_dat)
 			{
 				outputG.clear();
+				inputSid.clear();
+				if (csid >= n_speaker)
+					break;
 				if (CharaP < 0.0001f)
 				{
 					++csid;
@@ -684,10 +688,9 @@ std::vector<int16_t> Pits::Inference(const MoeVSProject::TTSParams& _input) cons
 			for (size_t i = 0; i < w_ceil.size(); ++i)
 				w_ceil[i] = float(dur_vec[i]);
 		else if (add_blank && dur_vec.size() == text.size() / 2ull)
-			for (size_t i = 0; i < w_ceil.size(); ++i)
+			for (size_t i = 0; i < dur_vec.size(); ++i)
 				w_ceil[1 + i * 2] = float(dur_vec[i]);
 	}
-	_callback(2, 4);
 	const auto maskSize = x_mask.size();
 	float y_length_f = 0.0;
 	int64 y_length;
@@ -738,7 +741,6 @@ std::vector<int16_t> Pits::Inference(const MoeVSProject::TTSParams& _input) cons
 			FlowOutput.data(),
 			FlowOutput.size());
 		inputTensors[0] = std::move(outputTensors[0]);
-		_callback(3, 4);
 		if (sessionEmb)
 			inputTensors[1] = std::move(inputTensors[2]);
 		inputTensors.pop_back();
@@ -749,7 +751,6 @@ std::vector<int16_t> Pits::Inference(const MoeVSProject::TTSParams& _input) cons
 			inputTensors.size(),
 			DecOutput.data(),
 			DecOutput.size());
-		_callback(4, 4);
 	}
 	catch (Ort::Exception& e)
 	{
