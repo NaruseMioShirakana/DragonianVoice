@@ -13,16 +13,14 @@ TTSMainWindow::TTSMainWindow(const std::function<void(QDialog*)>& _callback, QWi
     exit_callback(_callback)
 {
     ui->setupUi(this);
-    //setWindowFlags();
-    initSetup();
     setWindowFlags(Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
+    initSetup();
     connect(media_player, SIGNAL(durationChanged(qint64)), this, SLOT(getDurationChanged(qint64)));
     connect(media_player, SIGNAL(positionChanged(qint64)), this, SLOT(playbackPosChanged(qint64)));
     connect(&_InferMsgSender, SIGNAL(onProcessBarChanging(size_t, size_t)), this, SLOT(InferenceProcessChanged(size_t, size_t)));
     connect(&_InferMsgSender, SIGNAL(onAnyStatChanging(bool)), this, SLOT(InferenceStatChanged(bool)));
     connect(&_InferMsgSender, SIGNAL(astrParamedEvent(std::string)), this, SLOT(ErrorMsgBoxEvent(std::string)));
     connect(&_InferMsgSender, SIGNAL(strParamedEvent(std::wstring)), this, SLOT(InsertFilePaths(std::wstring)));
-    connect(&_InferMsgSender, SIGNAL(mPaintEvent()), this, SLOT(PaintSpec()));
 }
 
 TTSMainWindow::~TTSMainWindow()
@@ -365,15 +363,8 @@ void TTSMainWindow::dropEvent(QDropEvent* event)
         const auto file_suffix = path.substr(path.rfind(L'.') + 1);
         if (file_suffix == L"mttsproj")
         {
-            try
-            {
-                const auto temp = _proj.load(path, MoeVSProject::TTSProject::T_LOAD::APPEND);
-                _texts.insert(_texts.end(), temp.begin(), temp.end());
-            }
-        	catch(std::exception& e)
-            {
-                QMessageBox::warning(this, "ERROR", e.what(), QMessageBox::Ok);
-            }
+            const auto temp = _proj.load(path, MoeVSProject::TTSProject::T_LOAD::APPEND);
+            _texts.insert(_texts.end(), temp.begin(), temp.end());
         }
         else if (file_suffix == L"wav" || file_suffix == L"mp3" || file_suffix == L"ogg" || file_suffix == L"flac")
         {
@@ -989,26 +980,6 @@ void TTSMainWindow::on_TextListWidget_itemDoubleClicked(QListWidgetItem* item)
     }
 }
 
-void TTSMainWindow::on_OpenProjectButton_clicked()
-{
-    const auto file_path = QFileDialog::getOpenFileName(this, tr("SaveTTSProject"), to_byte_string(GetCurrentFolder()).c_str(), "MttsProj files (*.mttsproj);");
-    if (file_path.isEmpty())
-        return;
-    const auto _texts = _proj.load(file_path.toStdWString(), MoeVSProject::TTSProject::T_LOAD::APPEND);
-    if (!_texts.empty())
-        for (const auto& i : _texts)
-            ui->TextListWidget->addItem(i.c_str());
-}
-
-void TTSMainWindow::on_SaveProjectButton_clicked()
-{
-    if (_proj.data().empty())
-        return;
-    std::string error_txt;
-    if (saveProject(error_txt) == -1)
-        QMessageBox::warning(this, "ERROR", error_txt.c_str(), QMessageBox::Ok);
-}
-
 /*********Player**********/
 
 void TTSMainWindow::on_ClearListButton_clicked()
@@ -1043,7 +1014,6 @@ void TTSMainWindow::on_DrawMelSpecButton_clicked()
             if (ui->AudioList->currentItem())
                 if (!waveFolder.empty())
                     ui->MelWidget->setWavFile(waveFolder[ui->AudioList->currentRow()]);
-            _InferMsgSender.mPaintEventSender();
             _InferMsgSender.ChangeAnyStat(true);
         });
     MelThread.detach();
