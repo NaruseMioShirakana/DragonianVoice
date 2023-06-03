@@ -77,6 +77,8 @@ public slots:
     void on_MuteButton_clicked() const;
     void on_NextAudioButton_clicked();
     void on_LastAudioButton_clicked();
+    void on_OpenProjectButton_clicked();
+    void on_SaveProjectButton_clicked();
 
     void on_CharacterMixProportion_valueChanged(double value);
     void on_CharacterComboBox_currentIndexChanged(int value) const;
@@ -94,6 +96,10 @@ public slots:
     void InferenceStatChanged(bool condition) const;
     void InsertFilePaths(std::wstring _str) const;
     void ErrorMsgBoxEvent(std::string _str);
+    void PaintSpec() const
+    {
+        ui->MelWidget->update();
+    }
 #ifdef WIN32
     static void on_ModelListDirButton_clicked();
 #endif
