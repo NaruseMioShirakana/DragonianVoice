@@ -317,9 +317,11 @@ std::vector<std::string> MoeVSProject::TTSProject::load(const std::wstring& _pat
         if (fread(tts_params.chara_mix.data(), 1, _n_bytes, project_file) != _n_bytes)
             throw std::exception("Unexpected EOF");
 
+        if (fread(&tts_params.PlaceHolder, 1, sizeof(wchar_t), project_file) != sizeof(wchar_t))
+            throw std::exception("Unexpected EOF");
+
         return_val.emplace_back(to_byte_string(tts_params.phs));
         data_.emplace_back(std::move(tts_params));
-        
     }
     fclose(project_file);
     return return_val;
@@ -356,6 +358,7 @@ void MoeVSProject::TTSProject::Write(const std::wstring& _path) const
         fwrite(i.durations.data(), 1, sizeof(int64_t) * i.durations.size(), project_file);
         fwrite(i.tones.data(), 1, sizeof(int64_t) * i.tones.size(), project_file);
         fwrite(i.chara_mix.data(), 1, sizeof(float) * i.chara_mix.size(), project_file);
+        fwrite(&i.PlaceHolder, 1, sizeof(wchar_t), project_file);
     }
     fclose(project_file);
 }

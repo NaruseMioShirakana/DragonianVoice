@@ -88,7 +88,115 @@ struct InferConfigs
 	InferConfigs() = default;
 };
 
-class BaseModelType
+class MVSDict
+{
+public:
+	MVSDict() = default;
+	~MVSDict() = default;
+
+	[[nodiscard]] bool enabled() const
+	{
+		return !_Dict.empty();
+	}
+
+	void unload()
+	{
+		_Dict.clear();
+	}
+
+	[[nodiscard]] std::vector<std::wstring> DictReplace(const std::vector<std::wstring>& input) const;
+
+	[[nodiscard]] std::vector<std::wstring> DictReplace(const std::wstring& input, const std::wstring& tPlaceholderSymbol) const;
+
+	[[nodiscard]] std::wstring DictReplaceGetStr(const std::wstring& input, const std::wstring& tPlaceholderSymbol, bool usePlaceholderSymbol = true) const;
+
+	void GetDict(const std::wstring& path);
+
+	[[nodiscard]] std::wstring getPlaceholderSymbol() const
+	{
+		return PlaceholderSymbol;
+	}
+private:
+	std::map<std::wstring, std::vector<std::wstring>> _Dict;
+	std::wstring PlaceholderSymbol = L"|";
+};
+
+class MVSCleaner
+{
+public:
+	MVSCleaner() = default;
+
+	~MVSCleaner()
+	{
+		unloadDict();
+		unloadG2p();
+	}
+
+	void unloadDict()
+	{
+		_Dict.unload();
+	}
+
+	void unloadG2p()
+	{
+		_G2p.unLoad();
+	}
+
+	void loadDict(const std::wstring& _path)
+	{
+		if (_Dict.enabled())
+			unloadDict();
+		_Dict.GetDict(_path);
+	}
+
+	void loadG2p(const std::wstring& _path)
+	{
+		if (_G2p.enabled())
+			unloadG2p();
+		_G2p.Load(_path);
+	}
+
+	[[nodiscard]] bool G2pEnabled() const
+	{
+		return _G2p.enabled();
+	}
+
+	[[nodiscard]] bool DictEnabled() const
+	{
+		return _Dict.enabled();
+	}
+
+	[[nodiscard]] std::wstring G2p(const std::wstring& _text) const
+	{
+		return _G2p.functionAPI(_text);
+	}
+
+	[[nodiscard]] auto DictReplace(const std::vector<std::wstring>& input) const 
+	{
+		return _Dict.DictReplace(input);
+	}
+
+	[[nodiscard]] auto DictReplace(const std::wstring& input, const std::wstring& tPlaceholderSymbol) const
+	{
+		return _Dict.DictReplace(input, tPlaceholderSymbol);
+	}
+
+	[[nodiscard]] auto DictReplaceGetStr(const std::wstring& input, const std::wstring& tPlaceholderSymbol, bool usePlaceholderSymbol = true) const
+	{
+		return _Dict.DictReplaceGetStr(input, tPlaceholderSymbol, usePlaceholderSymbol);
+	}
+
+	[[nodiscard]] std::wstring getPlaceholderSymbol() const
+	{
+		return _Dict.getPlaceholderSymbol();
+	}
+
+private:
+	MoeSSPluginAPI _G2p;
+	MVSDict _Dict;
+};
+
+class OnnxModule
 {
 public:
 	enum class Device
@@ -113,12 +221,8 @@ public:
 	{
 		return EndString;
 	}
-	[[nodiscard]] const MoeSSPluginAPI* getPlugin() const
-	{
-		return &_plugin;
-	}
-	BaseModelType();
-	virtual ~BaseModelType();
+	OnnxModule();
+	virtual ~OnnxModule();
 	virtual std::vector<int16_t> Inference(std::wstring& _inputLens) const;
 
 	template <typename T = float>
@@ -151,8 +255,6 @@ protected:
 	Device device_ = Device::CPU;
 
 	long _samplingRate = 22050;
-
-	MoeSSPluginAPI _plugin;
 
 	callback _callback;
 	callback_params _get_init_params;
@@ -217,7 +319,7 @@ private:
 	FILE* emofile = nullptr;
 };
 
-class TTS : public BaseModelType
+class TTS : public OnnxModule
 {
 public:
 	using DurationCallback = std::function<void(std::vector<float>&)>;
@@ -300,7 +402,7 @@ private:
 	std::vector<KDTree> _tree;
 };
 
-class SVC : public BaseModelType
+class SVC : public OnnxModule
 {
 public:
 	SVC() = default;

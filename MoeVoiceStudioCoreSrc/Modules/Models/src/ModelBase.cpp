@@ -5,7 +5,7 @@
 #include <thread>
 #include <fstream>
 
-InferClass::BaseModelType::BaseModelType()
+InferClass::OnnxModule::OnnxModule()
 {
 	logger.log(L"[Info] Creating Env");
 #ifdef CUDAMOESS
@@ -60,7 +60,7 @@ InferClass::BaseModelType::BaseModelType()
 	logger.log(L"[Info] Env Created");
 }
 
-InferClass::BaseModelType::~BaseModelType()
+InferClass::OnnxModule::~OnnxModule()
 {
 	logger.log(L"[Info] Removing Env & Release Memory");
 	delete session_options;
@@ -70,15 +70,9 @@ InferClass::BaseModelType::~BaseModelType()
 	session_options = nullptr;
 	memory_info = nullptr;
 	logger.log(L"[Info] Complete!");
-	if(_plugin.enabled())
-	{
-		logger.log(L"[Info] Unload Plugins");
-		_plugin.unLoad();
-		logger.log(L"[Info] Plugins Unloaded");
-	}
 }
 
-int InferClass::BaseModelType::InsertMessageToEmptyEditBox(std::wstring& _inputLens) const
+int InferClass::OnnxModule::InsertMessageToEmptyEditBox(std::wstring& _inputLens) const
 {
 #ifdef WIN32
 	if (_modelType == modelType::Taco || _modelType == modelType::Vits || _modelType == modelType::Pits)
@@ -155,7 +149,7 @@ int InferClass::BaseModelType::InsertMessageToEmptyEditBox(std::wstring& _inputL
 #endif
 }
 
-std::vector<std::wstring> InferClass::BaseModelType::CutLens(const std::wstring& input)
+std::vector<std::wstring> InferClass::OnnxModule::CutLens(const std::wstring& input)
 {
 	std::vector<std::wstring> _Lens;
 	std::wstring _tmpLen;
@@ -175,7 +169,7 @@ std::vector<std::wstring> InferClass::BaseModelType::CutLens(const std::wstring&
 	return _Lens;
 }
 
-void InferClass::BaseModelType::initRegex()
+void InferClass::OnnxModule::initRegex()
 {
 	std::wstring JsonPath = GetCurrentFolder() + L"\\ParamsRegex.json";
 	std::string JsonData;
@@ -290,7 +284,7 @@ void InferClass::BaseModelType::initRegex()
 	}
 }
 
-void InferClass::BaseModelType::ChangeDevice(Device _dev)
+void InferClass::OnnxModule::ChangeDevice(Device _dev)
 {
 	if (_dev == device_)
 		return;
@@ -332,7 +326,7 @@ void InferClass::BaseModelType::ChangeDevice(Device _dev)
 	}
 }
 
-std::vector<int16_t> InferClass::BaseModelType::Inference(std::wstring& _inputLens) const
+std::vector<int16_t> InferClass::OnnxModule::Inference(std::wstring& _inputLens) const
 {
 	throw std::exception("Base");
 }
@@ -758,4 +752,83 @@ std::vector<std::wstring> InferClass::TTS::Inference(const std::vector<MoeVSProj
 	}
 	logger.log(L"[Info] Inference Finished");
 	return return_val;
+}
+
+void InferClass::MVSDict::GetDict(const std::wstring& path)
+{
+	PlaceholderSymbol = L"|";
+	std::string phoneInfo, phoneInfoAll;
+	std::ifstream phonefile(path.c_str());
+	if (!phonefile.is_open())
+		throw std::exception("phone file not found");
+	while (std::getline(phonefile, phoneInfo))
+		phoneInfoAll += phoneInfo;
+	phonefile.close();
+	rapidjson::Document PhoneJson;
+	PhoneJson.Parse(phoneInfoAll.c_str());
+	if (PhoneJson.HasParseError())
+		throw std::exception("json file error");
+	for (auto itr = PhoneJson.MemberBegin(); itr != PhoneJson.MemberEnd(); ++itr)
+	{
+		std::wstring Key = to_wide_string(itr->name.GetString());
+		if(Key == L"PlaceholderSymbol")
+		{
+			if (itr->value.IsString() && itr->value.GetStringLength())
+				PlaceholderSymbol = to_wide_string(itr->value.GetString());
+			if (PlaceholderSymbol.length() > 1)
+				PlaceholderSymbol = L"|";
+			continue;
+		}
+		const auto Value = itr->value.GetArray();
+		_Dict[Key] = std::vector<std::wstring>();
+		for (const auto& it : Value)
+			_Dict[Key].push_back(to_wide_string(it.GetString()));
+	}
+}
+
+std::vector<std::wstring> InferClass::MVSDict::DictReplace(const std::vector<std::wstring>& input) const
+{
+	std::vector<std::wstring> _out;
+	for(const auto& i : input)
+		if (_Dict.find(i) != _Dict.end())
+		{
+			const auto& Value = _Dict.at(i);
+			_out.insert(_out.end(), Value.begin(), Value.end());
+		}
+		else
+			_out.emplace_back(i);
+	return _out;
+}
+
+std::vector<std::wstring> InferClass::MVSDict::DictReplace(const std::wstring& input, const std::wstring& tPlaceholderSymbol) const
+{
+	std::vector<std::wstring> _output;
+	auto tmp = input;
+	tmp += tPlaceholderSymbol;
+	while(!tmp.empty())
+	{
+		const size_t pos = tmp.find(tPlaceholderSymbol);
+		const auto Key = tmp.substr(0, pos);
+		tmp = tmp.substr(pos + 1);
+		if (_Dict.find(Key) != _Dict.end())
+		{
+			const auto& Value = _Dict.at(Key);
+			_output.insert(_output.end(), Value.begin(), Value.end());
+		}
+		else
+			_output.emplace_back(Key);
+	}
+	return _output;
+}
+
+std::wstring InferClass::MVSDict::DictReplaceGetStr(const std::wstring& input, const std::wstring& tPlaceholderSymbol, bool usePlaceholderSymbol) const
+{
+	const auto tmp = DictReplace(input, tPlaceholderSymbol);
+	std::wstring output;
+	for (const auto& i : tmp)
+		if(usePlaceholderSymbol)
+			output += i + tPlaceholderSymbol;
+		else
+			output += i;
+	return output;
 }

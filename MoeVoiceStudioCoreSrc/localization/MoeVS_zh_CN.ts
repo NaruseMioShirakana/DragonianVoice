@@ -2,6 +2,14 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_CN">
 <context>
+    <name>MCurveEditor</name>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.ui" line="17"/>
+        <source>MCurveEditorMainWindow</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>MainMenu</name>
     <message>
         <location filename="../MainWindow/mainmenu.ui" line="26"/>
@@ -165,24 +173,24 @@
         <translation>MoeVoiceStudio 语音合成 （Text to Speech）</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1084"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1150"/>
         <source>TTSTextList</source>
         <translation>文本列表</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1232"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1298"/>
         <source>TTSTextSavePushButton</source>
         <translatorcomment>将编辑的结果保存到列表中对应项</translatorcomment>
         <translation>保存</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1135"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1201"/>
         <source>TTSClearPushButton</source>
         <translatorcomment>清空列表中所有项</translatorcomment>
         <translation>清空列表</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1098"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1164"/>
         <source>TTSEditPushButton</source>
         <translatorcomment>编辑在列表中选中的一项</translatorcomment>
         <translation>编辑选中项</translation>
@@ -237,34 +245,34 @@
         <translation>角色混合比例</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="273"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="287"/>
         <source>TTSCharacterMixBoolText</source>
         <translation>开启角色混合</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="280"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="270"/>
         <source>TTSModelListDirButtonText</source>
         <translatorcomment>在exploer中打开模型目录</translatorcomment>
         <translation>打开模型目录</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="287"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="277"/>
         <source>TTSLoadModelButtonText</source>
         <translatorcomment>加载选中的模型</translatorcomment>
         <translation>加载模型</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="639"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="670"/>
         <source>TTSParamSeedText</source>
         <translation>随机数种子</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1025"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1091"/>
         <source>TTSOpenEditor</source>
         <translation>打开编辑器</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1047"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1113"/>
         <source>TTSInferCur</source>
         <translation>推理当前页面</translation>
     </message>
@@ -289,119 +297,124 @@
         <translation type="vanished">设置</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1261"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1327"/>
         <source>OpenProjectButton</source>
         <translation>打开项目</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1185"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1251"/>
         <source>SaveProjectButton</source>
         <translation>保存项目</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1275"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="750"/>
+        <source>UseDictCheckBox</source>
+        <translation>使用字典（后面为占位符设置）</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1341"/>
         <source>TTSNewProject</source>
         <translation>创建新工程</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1280"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1346"/>
         <source>TTSOpenProject</source>
         <translation>打开工程</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1285"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1351"/>
         <source>TTSAppendProject</source>
         <translation>添加工程</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1290"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1356"/>
         <source>TTSSaveProject</source>
         <translation>保存工程</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1295"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1361"/>
         <source>TTSAppendAudios</source>
         <translation>添加音频</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1300"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1366"/>
         <source>TTSClearAudios</source>
         <translation>清除所有音频</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1305"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1371"/>
         <source>TTSExit</source>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1310"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1376"/>
         <source>TTSClearSpec</source>
         <translation>清空频谱图</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1315"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1381"/>
         <source>TTSPluginManager</source>
         <translation>插件管理器</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1320"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1386"/>
         <source>TTSEditorOpen</source>
         <translation>打开编辑器</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1325"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1391"/>
         <source>TTSAbout</source>
         <translation>关于</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1330"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1396"/>
         <source>TTSSettings</source>
         <translation>高级设置</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="532"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="570"/>
         <source>TTSLengthScaleText</source>
         <translatorcomment>长度规模，时长预测中对每个音素长度的乘数（扩大这个数值倍）</translatorcomment>
         <translation>长度规模</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="632"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="663"/>
         <source>TTSEmotionText</source>
         <translatorcomment>情感向量的ID或json中的描述</translatorcomment>
         <translation>情感描述（或ID）</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="417"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="443"/>
         <source>TTSMaxDecodeStepText</source>
         <translatorcomment>Rnn中的最大解码步数</translatorcomment>
         <translation>Tacotron2最大解码步数</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="545"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="728"/>
         <source>TTSNoiseScaleText</source>
         <translatorcomment>Encoder的噪声规模，影响玄学</translatorcomment>
         <translation>噪声规模</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="612"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="643"/>
         <source>TTSGateThText</source>
         <translatorcomment>解码跳出阈值</translatorcomment>
         <translation>Tacotron2门阈值</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="625"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="656"/>
         <source>TTSNoiseScaleWText</source>
         <translatorcomment>随机时长预测模块噪声规模，影响时长预测出的数值</translatorcomment>
         <translation>随机时长预测模块噪声规模</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="922"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="988"/>
         <source>TTSInferenceButtonText</source>
         <translatorcomment>将该按钮之上文本框的内容作为输入输入到MoeVS中推理</translatorcomment>
         <translation>开始推理（旧MoeSS的方法）</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="932"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="998"/>
         <source>TTSInferenceCleanerButton</source>
         <translation>清理文本</translation>
     </message>
@@ -411,23 +424,23 @@
         <translation type="vanished">开始推理（旧MoeSS的方法）</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="962"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1028"/>
         <source>TTSCleanerButton</source>
         <translatorcomment>启用TextCleaner进行G2P</translatorcomment>
         <translation>清理文本</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="889"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="955"/>
         <source>TTSToneLabel</source>
         <translation>音素音调（暂时无用）</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1148"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1214"/>
         <source>TTSInferOnceButton</source>
         <translation>推理选中项</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1060"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1126"/>
         <source>TTSDurationLabel</source>
         <translation>音素时长</translation>
     </message>
@@ -441,7 +454,7 @@
         <translation type="vanished">保存</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1251"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1317"/>
         <source>TTSPushButton</source>
         <translation>开始批量合成</translation>
     </message>
@@ -474,124 +487,112 @@
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="588"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="656"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="901"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="617"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="674"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="929"/>
         <source>TTSPhsSizeErrorTitle</source>
         <translation>音素长度为0</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="588"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="656"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="901"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="617"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="674"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="929"/>
         <source>TTSPhsSizeErrorText</source>
         <translation>音素长度不可为0，请补全音素</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="594"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="662"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="907"/>
         <source>TTSDurationSizeErrorTitle</source>
-        <translation>时长长度错误</translation>
+        <translation type="vanished">时长长度错误</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="594"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="662"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="907"/>
         <source>TTSDurationSizeErrorText</source>
-        <translation>时长的长度必须与音素相等</translation>
+        <translation type="vanished">时长的长度必须与音素相等</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="600"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="668"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="913"/>
         <source>TTSTonesSizeErrorTitle</source>
-        <translation>音调长度错误</translation>
+        <translation type="vanished">音调长度错误</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="600"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="668"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="913"/>
         <source>TTSTonesSizeErrorText</source>
-        <translation>音调的长度必须与音素相等</translation>
+        <translation type="vanished">音调的长度必须与音素相等</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="612"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="630"/>
         <source>TTSRemoveTextButtonButtonTitle</source>
         <translation>确认删除</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="613"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="631"/>
         <source>TTSRemoveTextButtonButtonText</source>
         <translation>请确认您是否要删除选中的数据</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="614"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="632"/>
         <source>TTSRemoveTextButtonButtonInformativeText</source>
         <translation>该操作不可恢复</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="618"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="636"/>
         <source>TTSRemoveTextButtonButtonButtonYes</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="619"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="637"/>
         <source>TTSRemoveTextButtonButtonButtonNo</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="640"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="658"/>
         <source>TTSSaveTextButtonButtonTitle</source>
         <translation>是否保存此条</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="641"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="659"/>
         <source>TTSSaveTextButtonButtonText</source>
         <translation>保存时将覆盖原有的数据</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="642"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="660"/>
         <source>TTSSaveTextButtonButtonInformativeText</source>
         <translation>即使这样也要确定保存吗</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="646"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="664"/>
         <source>TTSSaveTextButtonYes</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="647"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="665"/>
         <source>TTSSaveTextButtonNo</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="681"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="974"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="687"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1004"/>
         <source>TTSEditTextButtonButtonTitle</source>
         <translation>确认编辑选中项</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="682"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="975"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="688"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1005"/>
         <source>TTSEditTextButtonButtonText</source>
         <translation>当前在编辑框中的数据将会被覆盖</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="683"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="976"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="689"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1006"/>
         <source>TTSEditTextButtonButtonInformativeText</source>
         <translation>并且永久丢失</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="687"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="980"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="693"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1010"/>
         <source>TTSEditTextButtonYes</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="688"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="981"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="694"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1011"/>
         <source>TTSEditTextButtonNo</source>
         <translation>取消</translation>
     </message>
@@ -621,89 +622,87 @@
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="391"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="994"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="419"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1024"/>
         <source>SaveTTSProject</source>
         <translation>保存TTS工程</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1019"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1075"/>
         <source>TTSAudioListClearTitle</source>
         <translation>确认清空</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1020"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1076"/>
         <source>TTSAudioListClearText</source>
         <translation>是否清空播放列表</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1021"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1077"/>
         <source>TTSAudioListInformativeClearText</source>
         <translation>该操作不会删除文件</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1025"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1081"/>
         <source>TTSAudioListClearYes</source>
         <translation>确定</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1026"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1082"/>
         <source>TTSAudioListClearNo</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1067"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1123"/>
         <source>TTSDeleteSelectedAudioButtonTitle</source>
         <translation>确认移除</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1068"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1124"/>
         <source>TTSDeleteSelectedAudioButtonText</source>
         <translation>是否将选中的音频从播放列表移除</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1069"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1125"/>
         <source>TTSDeleteSelectedAudioButtonInformativeText</source>
         <translation>该操作不会删除文件</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1073"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1129"/>
         <source>TTSDeleteSelectedAudioButtonButtonYes</source>
         <translation>确认</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1074"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1130"/>
         <source>TTSDeleteSelectedAudioButtonButtonNo</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="522"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="704"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="741"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="550"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="710"/>
         <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="791"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="841"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="895"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="855"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="923"/>
         <source>TTSModelNotExistErrorTitle</source>
         <translation>未载入模型</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="522"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="704"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="741"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="550"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="710"/>
         <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="791"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="841"/>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="895"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="855"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="923"/>
         <source>TTSModelNotExistErrorText</source>
         <translation>请载入一个模型，才可以使用功能</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="733"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="738"/>
         <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="753"/>
         <source>TTSCleanerNotExistErrorTitle</source>
         <translation>TextCleaner不存在</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="733"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="738"/>
         <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="753"/>
         <source>TTSCleanerNotExistErrorText</source>
         <translation>TextCleaner不存在，请确定你安装了TextCleaner</translation>

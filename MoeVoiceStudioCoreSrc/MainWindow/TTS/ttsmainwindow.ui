@@ -264,16 +264,6 @@
                  </property>
                 </widget>
                </item>
-               <item row="1" column="2" colspan="2">
-                <widget class="QCheckBox" name="CharacterCheckBox">
-                 <property name="enabled">
-                  <bool>false</bool>
-                 </property>
-                 <property name="text">
-                  <string>TTSCharacterMixBoolText</string>
-                 </property>
-                </widget>
-               </item>
                <item row="2" column="3">
                 <widget class="QPushButton" name="ModelListDirButton">
                  <property name="text">
@@ -285,6 +275,30 @@
                 <widget class="QPushButton" name="LoadModelButton">
                  <property name="text">
                   <string>TTSLoadModelButtonText</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="2">
+                <widget class="QCheckBox" name="CharacterCheckBox">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="text">
+                  <string>TTSCharacterMixBoolText</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="2">
+                <widget class="QComboBox" name="G2pComboBox">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="1" column="3">
+                <widget class="QComboBox" name="DictComboBox">
+                 <property name="enabled">
+                  <bool>false</bool>
                  </property>
                 </widget>
                </item>
@@ -346,6 +360,12 @@
                </item>
                <item row="5" column="3">
                 <widget class="QLabel" name="LengthMax">
+                 <property name="maximumSize">
+                  <size>
+                   <width>25</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string notr="true">10.00</string>
                  </property>
@@ -400,6 +420,12 @@
                </item>
                <item row="9" column="3">
                 <widget class="QLabel" name="MaxDecodeStepMax">
+                 <property name="maximumSize">
+                  <size>
+                   <width>25</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string notr="true">10000</string>
                  </property>
@@ -480,6 +506,12 @@
                </item>
                <item row="3" column="3">
                 <widget class="QLabel" name="NoiseWMax">
+                 <property name="maximumSize">
+                  <size>
+                   <width>25</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string notr="true">10.00</string>
                  </property>
@@ -512,6 +544,12 @@
                </item>
                <item row="1" column="3">
                 <widget class="QLabel" name="NoiseMax">
+                 <property name="maximumSize">
+                  <size>
+                   <width>25</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string notr="true">10.00</string>
                  </property>
@@ -533,21 +571,14 @@
                  </property>
                 </widget>
                </item>
-               <item row="0" column="1" colspan="3">
-                <widget class="QLabel" name="NoiseLabel">
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>20</height>
-                  </size>
-                 </property>
-                 <property name="text">
-                  <string>TTSNoiseScaleText</string>
-                 </property>
-                </widget>
-               </item>
                <item row="7" column="3">
                 <widget class="QLabel" name="GateThMax">
+                 <property name="maximumSize">
+                  <size>
+                   <width>25</width>
+                   <height>16777215</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string notr="true">1.000</string>
                  </property>
@@ -682,6 +713,41 @@
                    <width>0</width>
                    <height>20</height>
                   </size>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QLabel" name="NoiseLabel">
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>TTSNoiseScaleText</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="2">
+                <widget class="QCheckBox" name="UseDictCheckBox">
+                 <property name="enabled">
+                  <bool>false</bool>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>18</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                 <property name="text">
+                  <string>UseDictCheckBox</string>
                  </property>
                 </widget>
                </item>

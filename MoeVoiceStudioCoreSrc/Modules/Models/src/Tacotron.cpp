@@ -83,36 +83,6 @@ Tacotron2::Tacotron2(const rapidjson::Document& _config, const callback& _cb, co
 		use_ph = false;
 	}
 
-	if(_config.HasMember("Cleaner") && _config["Cleaner"].IsString())
-	{
-		const auto Cleaner = to_wide_string(_config["Cleaner"].GetString());
-		if (!Cleaner.empty())
-			switch (_plugin.Load(Cleaner))
-			{
-			case (-1):
-				{
-					logger.log(L"[Error] Plugin File Does Not Exist");
-					_plugin.unLoad();
-					break;
-				}
-			case (1):
-				{
-					logger.log(L"[Error] Plugin Has Some Error");
-					_plugin.unLoad();
-					break;
-				}
-			default:
-				{
-					logger.log(L"[Info] Plugin Loaded");
-					break;
-				}
-			}
-		else
-			logger.log(L"[Info] Disable Plugin");
-	}
-	else
-		logger.log(L"[Info] Disable Plugin");
-
 	_callback = _cb;
 	_get_init_params = _mr;
 
@@ -355,28 +325,51 @@ std::vector<int16_t> Tacotron2::Inference(const MoeVSProject::TTSParams& _input)
 		{
 			if (add_blank)
 				text.push_back(0);
-			text.push_back(_Symbols.at(it));
+			if (_Symbols.find(it) != _Symbols.end())
+				text.push_back(_Symbols.at(it));
+			else
+				text.push_back(int64_t(size_t(rand()) % _Symbols.size()));
 		}
 		if (add_blank)
 			text.push_back(0);
 	}
 	else
 	{
-		std::vector<std::wstring> textVec;
-		textVec.reserve((_input.phs.length() + 2) * 2);
-		std::wstring _inputStrW = _input.phs + L'|';
-		while (!_inputStrW.empty())
+		if (_input.PlaceHolder)
 		{
-			const auto this_ph = _inputStrW.substr(0, _inputStrW.find(L'_'));
+			std::vector<std::wstring> textVec;
+			textVec.reserve((_input.phs.length() + 2) * 2);
+			std::wstring _inputStrW = _input.phs + _input.PlaceHolder;
+			while (!_inputStrW.empty())
+			{
+				const auto this_ph = _inputStrW.substr(0, _inputStrW.find(_input.PlaceHolder));
+				if (add_blank)
+					text.push_back(0);
+				if (_Phs.find(this_ph) != _Phs.end())
+					text.push_back(_Phs.at(this_ph));
+				else
+					text.push_back(int64_t(size_t(rand()) % _Phs.size()));
+				const auto idx = _inputStrW.find(_input.PlaceHolder);
+				if (idx != std::wstring::npos)
+					_inputStrW = _inputStrW.substr(idx + 1);
+			}
 			if (add_blank)
 				text.push_back(0);
-			text.push_back(_Phs.at(this_ph));
-			const auto idx = _inputStrW.find(L'|');
-			if (idx != std::wstring::npos)
-				_inputStrW = _inputStrW.substr(idx + 1);
 		}
-		if (add_blank)
-			text.push_back(0);
+		else
+		{
+			for (auto it : _input.phs)
+			{
+				if (add_blank)
+					text.push_back(0);
+				if (_Phs.find(std::wstring() + it) != _Phs.end())
+					text.push_back(_Phs.at(std::wstring() + it));
+				else
+					text.push_back(int64_t(size_t(rand()) % _Phs.size()));
+			}
+			if (add_blank)
+				text.push_back(0);
+		}
 	}
 	int64 textLength[1] = { static_cast<int64>(_input.phs.length()) };
 

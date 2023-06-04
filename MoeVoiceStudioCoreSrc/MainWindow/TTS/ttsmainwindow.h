@@ -11,6 +11,7 @@
 #include <QtMultimedia/QMediaPlayer>
 #include <QtMultimedia/QAudioOutput>
 #include <QtMultimedia/QAudioDevice>
+#include "../Controls/CurveEditor/mcurveeditor.h"
 namespace Ui {
 class TTSMainWindow;
 }
@@ -43,7 +44,7 @@ public:
 #endif
     void loadModel(size_t idx);
     void setParamsControlValue(const MoeVSProject::TTSParams& _params);
-    [[nodiscard]] MoeVSProject::TTSParams dumpPatamsFromControl() const;
+    [[nodiscard]] MoeVSProject::TTSParams dumpParamsFromControl() const;
 
 public slots:
     void on_NoiseScaleSlider_valueChanged(int value) const;
@@ -79,12 +80,15 @@ public slots:
     void on_LastAudioButton_clicked();
     void on_OpenProjectButton_clicked();
     void on_SaveProjectButton_clicked();
+    void on_TTSOpenEditor_clicked();
 
     void on_CharacterMixProportion_valueChanged(double value);
     void on_CharacterComboBox_currentIndexChanged(int value) const;
     void on_TextListWidget_itemSelectionChanged() const;
     void on_VolumeSlider_valueChanged(int value) const;
     void on_PlayerProgress_valueChanged(int value) const;
+    void on_G2pComboBox_currentIndexChanged(int value);
+    void on_DictComboBox_currentIndexChanged(int value);
 
     void on_TextListWidget_itemDoubleClicked(QListWidgetItem* item);
     void on_AudioList_itemDoubleClicked(QListWidgetItem* item);
@@ -114,7 +118,7 @@ private:
     int64_t n_speakers = 0;
     size_t cur_model_index = 0;
     int64_t samplingRate = 22050;
-    InferClass::BaseModelType::Device __MOESS_DEVICE = InferClass::BaseModelType::Device::CPU;
+    InferClass::OnnxModule::Device __MOESS_DEVICE = InferClass::OnnxModule::Device::CPU;
     waveWidget* wave_widget_ = nullptr;
     QGridLayout* wave_widget_layout = nullptr;
     QMediaPlayer* media_player = nullptr;
@@ -123,13 +127,16 @@ private:
     size_t cur_media = -1;
     MessageSender _InferMsgSender;
     MoeVSProject::TTSParams _cur_params;
+    MCurveEditor editor;
+    InferClass::MVSCleaner textCleaner;
+    std::vector<std::wstring> DictPaths, CleanerPaths;
 public:
-    InferClass::BaseModelType::callback BarCallback = [&](size_t _cur, size_t _max) -> void
+    InferClass::OnnxModule::callback BarCallback = [&](size_t _cur, size_t _max) -> void
     {
         _InferMsgSender.InferProcess(_cur, _max);
     };
 
-    InferClass::BaseModelType::callback_params TTSParamCallback = [&]()
+    InferClass::OnnxModule::callback_params TTSParamCallback = [&]()
     {
         InferClass::InferConfigs _conf;
         _conf.noise_scale = (float)ui->NoiseScaleSpinBox->value();
@@ -145,6 +152,8 @@ public:
         _conf.cp = false;
         return _conf;
     };
+
+    bool CheckInputStat(const MoeVSProject::TTSParams& params);
 };
 
 #endif // TTSMAINWINDOW_H

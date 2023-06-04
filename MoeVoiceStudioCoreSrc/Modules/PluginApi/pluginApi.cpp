@@ -31,7 +31,7 @@ char MoeSSPluginAPI::Load(const std::wstring& PluginName)
 		FreeLibrary(m_hDynLib);
 		m_hDynLib = nullptr;
 	}
-	m_hDynLib = LoadLibrary((L"cleaners\\" + PluginName + L".dll").c_str());
+	m_hDynLib = LoadLibrary((PluginName).c_str());
 	if (m_hDynLib == nullptr)
 		return -1;
 	func = reinterpret_cast<funTy>(

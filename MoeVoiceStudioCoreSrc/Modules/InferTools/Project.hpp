@@ -136,6 +136,7 @@ namespace MoeVSProject
         std::vector<int64_t> tones;
         std::vector<int64_t> durations;
         std::vector<float> chara_mix;
+        wchar_t PlaceHolder = L'|';
         int64_t chara = -1;
     };
 

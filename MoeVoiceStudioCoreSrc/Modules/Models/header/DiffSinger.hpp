@@ -3,7 +3,7 @@
 
 INFERCLASSHEADER
 
-class DiffusionSinger : public BaseModelType
+class DiffusionSinger : public OnnxModule
 {
 public:
     struct DiffSingerInput

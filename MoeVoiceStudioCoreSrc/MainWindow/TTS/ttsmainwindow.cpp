@@ -166,54 +166,85 @@ void TTSMainWindow::reloadModels()
     if (_waccess(prefix.c_str(), 0) == -1)
         if (_wmkdir(prefix.c_str()))
             logger.log(L"[Info] Create hubert Dir");
+    prefix = L"dict";
+    if (_waccess(prefix.c_str(), 0) == -1)
+        if (_wmkdir(prefix.c_str()))
+            logger.log(L"[Info] Create dict Dir");
     _wfinddata_t file_info;
     std::wstring current_path = GetCurrentFolder() + L"\\Models";
     intptr_t handle = _wfindfirst((current_path + L"\\*.json").c_str(), &file_info);
-    if (-1 == handle) {
-        return;
-    }
-	ui->ModelComboBox->addItem("None");
-    do
-    {
-        std::string modInfo, modInfoAll;
-        std::ifstream modfile((current_path + L"\\" + file_info.name).c_str());
-        while (std::getline(modfile, modInfo))
-            modInfoAll += modInfo;
-        modfile.close();
-        rapidjson::Document modConfigJson;
-        modConfigJson.Parse(modInfoAll.c_str());
-        if(modConfigJson.HasParseError() ||
-            !modConfigJson.HasMember("Folder") ||
-            !modConfigJson.HasMember("Name") ||
-            !modConfigJson.HasMember("Type") ||
-            !modConfigJson.HasMember("Rate") ||
-            !modConfigJson["Folder"].IsString() ||
-            !modConfigJson["Name"].IsString() ||
-            !modConfigJson["Type"].IsString() ||
-            !(modConfigJson["Rate"].IsInt() || modConfigJson["Rate"].IsInt64()) ||
-            !modConfigJson["Folder"].GetStringLength() ||
-            !modConfigJson["Name"].GetStringLength() ||
-            !modConfigJson["Type"].GetStringLength() ||
-            modConfigJson["Rate"].IsNull()
-            )
-            continue;
-
-        std::string Name = modConfigJson["Name"].GetString();
-        std::string Type = modConfigJson["Type"].GetString();
-        if (Type == "VITS_LJS" || Type == "VITS_VCTK")
+    if (-1 != handle) {
+        ui->ModelComboBox->addItem("None");
+        do
         {
-            Type = "Vits";
-            modConfigJson["Type"].SetString("Vits");
-        }
-        
-        if (Type != "Tacotron" && Type != "Tacotron2" && Type != "Vits" && Type != "Pits")
-            continue;
-        auto _tmpText = Type + ":" + Name;
-        ui->ModelComboBox->addItem(_tmpText.c_str());
-        _models.emplace_back(std::move(modConfigJson));
-    } while (!_wfindnext(handle, &file_info));
-    if (!_models.empty())
-        ui->ModelComboBox->setEnabled(true);
+            std::string modInfo, modInfoAll;
+            std::ifstream modfile((current_path + L"\\" + file_info.name).c_str());
+            while (std::getline(modfile, modInfo))
+                modInfoAll += modInfo;
+            modfile.close();
+            rapidjson::Document modConfigJson;
+            modConfigJson.Parse(modInfoAll.c_str());
+            if (modConfigJson.HasParseError() ||
+                !modConfigJson.HasMember("Folder") ||
+                !modConfigJson.HasMember("Name") ||
+                !modConfigJson.HasMember("Type") ||
+                !modConfigJson.HasMember("Rate") ||
+                !modConfigJson["Folder"].IsString() ||
+                !modConfigJson["Name"].IsString() ||
+                !modConfigJson["Type"].IsString() ||
+                !(modConfigJson["Rate"].IsInt() || modConfigJson["Rate"].IsInt64()) ||
+                !modConfigJson["Folder"].GetStringLength() ||
+                !modConfigJson["Name"].GetStringLength() ||
+                !modConfigJson["Type"].GetStringLength() ||
+                modConfigJson["Rate"].IsNull()
+                )
+                continue;
+
+            std::string Name = modConfigJson["Name"].GetString();
+            std::string Type = modConfigJson["Type"].GetString();
+            if (Type == "VITS_LJS" || Type == "VITS_VCTK")
+            {
+                Type = "Vits";
+                modConfigJson["Type"].SetString("Vits");
+            }
+
+            if (Type != "Tacotron" && Type != "Tacotron2" && Type != "Vits" && Type != "Pits")
+                continue;
+            auto _tmpText = Type + ":" + Name;
+            ui->ModelComboBox->addItem(_tmpText.c_str());
+            _models.emplace_back(std::move(modConfigJson));
+        } while (!_wfindnext(handle, &file_info));
+        if (!_models.empty())
+            ui->ModelComboBox->setEnabled(true);
+    }
+
+    current_path = GetCurrentFolder() + L"\\Cleaners";
+	handle = _wfindfirst((current_path + L"\\*.dll").c_str(), &file_info);
+    if (-1 != handle) {
+        ui->G2pComboBox->addItem("None");
+        do
+        {
+        	auto path = current_path + L"\\" + file_info.name;
+            ui->G2pComboBox->addItem(to_byte_string(file_info.name).c_str());
+            CleanerPaths.emplace_back(path);
+        } while (!_wfindnext(handle, &file_info));
+        if (!CleanerPaths.empty())
+            ui->G2pComboBox->setEnabled(true);
+    }
+
+    current_path = GetCurrentFolder() + L"\\dict";
+    handle = _wfindfirst((current_path + L"\\*.json").c_str(), &file_info);
+    if (-1 != handle) {
+        ui->DictComboBox->addItem("None");
+        do
+        {
+            auto path = current_path + L"\\" + file_info.name;
+            ui->DictComboBox->addItem(to_byte_string(file_info.name).c_str());
+            DictPaths.emplace_back(path);
+        } while (!_wfindnext(handle, &file_info));
+        if (!DictPaths.empty())
+            ui->DictComboBox->setEnabled(true);
+    }
 }
 
 void TTSMainWindow::loadModel(size_t idx)
@@ -273,11 +304,6 @@ void TTSMainWindow::loadModel(size_t idx)
     }
     cur_model_index = idx;
     SetInferenceEnabled(true);
-    if (_model->getPlugin()->enabled())
-    {
-	    ui->TextCleaner->setEnabled(true);
-        ui->TTSInferenceCleanerButton->setEnabled(true);
-    }
     if(n_speakers > 1)
     {
 	    charaMixData = std::vector(n_speakers, 0.f);
@@ -308,7 +334,7 @@ void TTSMainWindow::setParamsControlValue(const MoeVSProject::TTSParams& _params
     ui->TTSParamSeedEdit->setText(std::to_string(_params.seed).c_str());
 }
 
-MoeVSProject::TTSParams TTSMainWindow::dumpPatamsFromControl() const
+MoeVSProject::TTSParams TTSMainWindow::dumpParamsFromControl() const
 {
     MoeVSProject::TTSParams _params;
     _params.noise = ui->NoiseScaleSpinBox->value();
@@ -342,6 +368,8 @@ MoeVSProject::TTSParams TTSMainWindow::dumpPatamsFromControl() const
 		}
     _params.tones = tone;
     _params.seed = ui->TTSParamSeedEdit->text().toInt();
+    if (textCleaner.DictEnabled())
+        _params.PlaceHolder = textCleaner.getPlaceholderSymbol()[0];
     return _params;
 }
 
@@ -582,24 +610,14 @@ void TTSMainWindow::on_CharacterComboBox_currentIndexChanged(int value) const
 
 void TTSMainWindow::on_AddTextButton_clicked()
 {
-	auto params = dumpPatamsFromControl();
-    if(params.phs.empty())
+	auto params = dumpParamsFromControl();
+
+    if (params.phs.empty())
     {
         QMessageBox::warning(this, tr("TTSPhsSizeErrorTitle"), tr("TTSPhsSizeErrorText"), QMessageBox::Ok);
         return;
     }
-    if(!params.durations.empty())
-		if(params.phs.size() != params.durations.size() && params.phs.size() != params.durations.size() * 2 + 1)
-		{
-            QMessageBox::warning(this, tr("TTSDurationSizeErrorTitle"), tr("TTSDurationSizeErrorText"), QMessageBox::Ok);
-            return;
-		}
-    if (!params.tones.empty())
-        if (params.phs.size() != params.tones.size() && params.phs.size() != params.tones.size() * 2 + 1)
-        {
-            QMessageBox::warning(this, tr("TTSTonesSizeErrorTitle"), tr("TTSTonesSizeErrorText"), QMessageBox::Ok);
-            return;
-        }
+
     ui->TextListWidget->addItem(to_byte_string(params.phs).c_str());
     _proj.push(std::move(params));
 }
@@ -650,24 +668,12 @@ void TTSMainWindow::on_SaveTextButton_clicked()
         if (ret == QMessageBox::No)
             return;
         const auto idx = ui->TextListWidget->currentRow();
-    	auto params = dumpPatamsFromControl();
+    	auto params = dumpParamsFromControl();
         if (params.phs.empty())
         {
             QMessageBox::warning(this, tr("TTSPhsSizeErrorTitle"), tr("TTSPhsSizeErrorText"), QMessageBox::Ok);
             return;
         }
-        if (!params.durations.empty())
-            if (params.phs.size() != params.durations.size() && params.phs.size() != params.durations.size() * 2 + 1)
-            {
-                QMessageBox::warning(this, tr("TTSDurationSizeErrorTitle"), tr("TTSDurationSizeErrorText"), QMessageBox::Ok);
-                return;
-            }
-        if (!params.tones.empty())
-            if (params.phs.size() != params.tones.size() && params.phs.size() != params.tones.size() * 2 + 1)
-            {
-                QMessageBox::warning(this, tr("TTSTonesSizeErrorTitle"), tr("TTSTonesSizeErrorText"), QMessageBox::Ok);
-                return;
-            }
         ui->TextListWidget->currentItem()->setText(to_byte_string(params.phs).c_str());
         _proj[idx] = std::move(params);
     }
@@ -704,9 +710,8 @@ void TTSMainWindow::on_TTSInferenceCleanerButton_clicked()
         QMessageBox::warning(this, tr("TTSModelNotExistErrorTitle"), tr("TTSModelNotExistErrorText"), QMessageBox::Ok);
         return;
 	}
-    const auto cleaner = _model->getPlugin();
     const std::wstring EndString = _model->getEndString();
-    if(cleaner && cleaner->enabled())
+    if(textCleaner.G2pEnabled())
     {
         auto input = ui->InferTextEdit->toPlainText().toStdWString() + L'\n';
         input = std::regex_replace(input, changeLineSymb, L"\n");
@@ -722,7 +727,7 @@ void TTSMainWindow::on_TTSInferenceCleanerButton_clicked()
                 output += tmp.substr(0, fit_t + 1);
                 tmp = tmp.substr(fit_t + 1);
             }
-            tmp = cleaner->functionAPI(tmp);
+            tmp = textCleaner.G2p(tmp);
             output += tmp + L'\n';
             input = input.substr(fit + 1);
             fit = input.find(L'\n');
@@ -736,17 +741,12 @@ void TTSMainWindow::on_TTSInferenceCleanerButton_clicked()
 
 void TTSMainWindow::on_TextCleaner_clicked()
 {
-    if (!_model)
-    {
-        QMessageBox::warning(this, tr("TTSModelNotExistErrorTitle"), tr("TTSModelNotExistErrorText"), QMessageBox::Ok);
-        return;
-    }
-    const auto cleaner = _model->getPlugin();
-    const std::wstring EndString = _model->getEndString();
-    if (cleaner && cleaner->enabled())
+    if (textCleaner.G2pEnabled())
     {
         const auto input = ui->SrcTextEdit->text().toStdWString() + L'\n';
-        ui->SrcTextEdit->setText(QString::fromStdWString(cleaner->functionAPI(input)));
+        if (input.size() < 2)
+            return;
+        ui->SrcTextEdit->setText(QString::fromStdWString(textCleaner.G2p(input)));
     }
     else
     {
@@ -808,9 +808,23 @@ void TTSMainWindow::on_BatchedTTSButton_clicked()
                         params.chara = 0;
                 }
                 else
-                    if (params.chara_mix.size() > size_t(n_speakers))
-                        params.chara_mix.resize(n_speakers);
-                InferClass::BaseModelType::LinearCombination(params.chara_mix, 1.f);
+                {
+	                if (params.chara_mix.size() > size_t(n_speakers))
+	                	params.chara_mix.resize(n_speakers);
+                    InferClass::OnnxModule::LinearCombination(params.chara_mix, 1.f);
+                }
+                if(textCleaner.DictEnabled())
+                {
+                    if (ui->UseDictCheckBox->checkState() == Qt::Checked)
+                        params.phs = textCleaner.DictReplaceGetStr(params.phs, std::wstring(L"") + params.PlaceHolder, true);
+                    else
+                    {
+	                    params.phs = textCleaner.DictReplaceGetStr(params.phs, std::wstring(L"") + params.PlaceHolder, false);
+                        params.PlaceHolder = 0;
+                    }
+                }
+                else
+                    params.PlaceHolder = 0;
             }
             try
             {
@@ -859,9 +873,23 @@ void TTSMainWindow::on_TTSInferOnceButton_clicked()
                             params.chara = 0;
                     }
                     else
-                        if (params.chara_mix.size() > size_t(n_speakers))
-                            params.chara_mix.resize(n_speakers);
-                    InferClass::BaseModelType::LinearCombination(params.chara_mix, 1.f);
+                    {
+	                    if (params.chara_mix.size() > size_t(n_speakers))
+	                    	params.chara_mix.resize(n_speakers);
+                        InferClass::OnnxModule::LinearCombination(_cur_params.chara_mix, 1.f);
+                    }
+                    if (textCleaner.DictEnabled())
+                    {
+                        if (ui->UseDictCheckBox->checkState() == Qt::Checked)
+                            params.phs = textCleaner.DictReplaceGetStr(params.phs, std::wstring(L"") + params.PlaceHolder, true);
+                        else
+                        {
+                            params.phs = textCleaner.DictReplaceGetStr(params.phs, std::wstring(L"") + params.PlaceHolder, false);
+                            params.PlaceHolder = 0;
+                        }
+                    }
+                    else
+                        params.PlaceHolder = 0;
                     PCMDATA = _model->Inference(params);
                 }
                 catch (std::exception& e)
@@ -895,24 +923,12 @@ void TTSMainWindow::on_TTSInferCur_clicked()
         QMessageBox::warning(this, tr("TTSModelNotExistErrorTitle"), tr("TTSModelNotExistErrorText"), QMessageBox::Ok);
         return;
     }
-    _cur_params = dumpPatamsFromControl();
+    _cur_params = dumpParamsFromControl();
     if (_cur_params.phs.empty())
     {
         QMessageBox::warning(this, tr("TTSPhsSizeErrorTitle"), tr("TTSPhsSizeErrorText"), QMessageBox::Ok);
         return;
     }
-    if (!_cur_params.durations.empty())
-        if (_cur_params.phs.size() != _cur_params.durations.size() && _cur_params.phs.size() != _cur_params.durations.size() * 2 + 1)
-        {
-            QMessageBox::warning(this, tr("TTSDurationSizeErrorTitle"), tr("TTSDurationSizeErrorText"), QMessageBox::Ok);
-            return;
-        }
-    if (!_cur_params.tones.empty())
-        if (_cur_params.phs.size() != _cur_params.tones.size() && _cur_params.phs.size() != _cur_params.tones.size() * 2 + 1)
-        {
-            QMessageBox::warning(this, tr("TTSTonesSizeErrorTitle"), tr("TTSTonesSizeErrorText"), QMessageBox::Ok);
-            return;
-        }
     std::thread Infer([&]()
         {
             _InferMsgSender.ChangeInferenceStat(false);
@@ -928,9 +944,23 @@ void TTSMainWindow::on_TTSInferCur_clicked()
                         _cur_params.chara = 0;
                 }
                 else
-                    if (_cur_params.chara_mix.size() > size_t(n_speakers))
-                        _cur_params.chara_mix.resize(n_speakers);
-                InferClass::BaseModelType::LinearCombination(_cur_params.chara_mix, 1.f);
+                {
+	                if (_cur_params.chara_mix.size() > size_t(n_speakers))
+	                	_cur_params.chara_mix.resize(n_speakers);
+                    InferClass::OnnxModule::LinearCombination(_cur_params.chara_mix, 1.f);
+                }
+                if (textCleaner.DictEnabled())
+                {
+                    if (ui->UseDictCheckBox->checkState() == Qt::Checked)
+                        _cur_params.phs = textCleaner.DictReplaceGetStr(_cur_params.phs, std::wstring(L"") + _cur_params.PlaceHolder, true);
+                    else
+                    {
+                        _cur_params.phs = textCleaner.DictReplaceGetStr(_cur_params.phs, std::wstring(L"") + _cur_params.PlaceHolder, false);
+                        _cur_params.PlaceHolder = 0;
+                    }
+                }
+                else
+                    _cur_params.PlaceHolder = 0;
                 PCMDATA = _model->Inference(_cur_params);
             }
             catch (std::exception& e)
@@ -1007,6 +1037,32 @@ void TTSMainWindow::on_SaveProjectButton_clicked()
     std::string error_txt;
     if (saveProject(error_txt) == -1)
         QMessageBox::warning(this, "ERROR", error_txt.c_str(), QMessageBox::Ok);
+}
+
+void TTSMainWindow::on_TTSOpenEditor_clicked()
+{
+    editor.show();
+}
+
+void TTSMainWindow::on_DictComboBox_currentIndexChanged(int value)
+{
+    if (value)
+        textCleaner.loadDict(DictPaths[value - 1]);
+    else
+        textCleaner.unloadDict();
+    ui->UseDictCheckBox->setCheckState(Qt::Unchecked);
+    ui->UseDictCheckBox->setEnabled(textCleaner.DictEnabled());
+}
+
+void TTSMainWindow::on_G2pComboBox_currentIndexChanged(int value)
+{
+    if (value)
+        textCleaner.loadG2p(CleanerPaths[value - 1]);
+    else
+        textCleaner.unloadG2p();
+
+    ui->TextCleaner->setEnabled(textCleaner.G2pEnabled());
+    ui->TTSInferenceCleanerButton->setEnabled(textCleaner.G2pEnabled());
 }
 
 /*********Player**********/

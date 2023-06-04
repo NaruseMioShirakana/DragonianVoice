@@ -86,26 +86,6 @@ DiffusionSinger::DiffusionSinger(const rapidjson::Document& _config, const callb
 
 	logger.log(L"[Info] Current Sampling Rate is" + std::to_wstring(_samplingRate));
 
-	if (!_config["Cleaner"].IsNull())
-	{
-		const auto Cleaner = to_wide_string(_config["Cleaner"].GetString());
-		if (!Cleaner.empty())
-			switch (_plugin.Load(Cleaner))
-			{
-			case (-1):
-				throw std::exception("[Error] Plugin File Does Not Exist");
-			case (1):
-				throw std::exception("[Error] Plugin Has Some Error");
-			default:
-				logger.log(L"[Info] Plugin Loaded");
-				break;
-			}
-		else
-			logger.log(L"[Info] Disable Plugin");
-	}
-	else
-		logger.log(L"[Info] Disable Plugin");
-
 	if (_config["MelBins"].IsNull())
 		throw std::exception("[Error] Missing field \"MelBins\" (MelBins)");
 	if (_config["MelBins"].IsInt() || _config["MelBins"].IsInt64())
