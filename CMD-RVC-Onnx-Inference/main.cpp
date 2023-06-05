@@ -96,8 +96,8 @@ void SetInterConfigFromJson(InferClass::InferConfigs& config, const std::string&
 
         // 检查解析是否成功
         if (!interConfigParam.HasParseError()) {
-            if (interConfigParam.HasMember("key")) {
-                config.keys = interConfigParam["key"].GetInt64();
+            if (interConfigParam.HasMember("keys")) {
+                config.keys = interConfigParam["keys"].GetInt64();
             }
             if (interConfigParam.HasMember("kmeans_rate")) {
                 config.kmeans_rate = interConfigParam["kmeans_rate"].GetInt64();
