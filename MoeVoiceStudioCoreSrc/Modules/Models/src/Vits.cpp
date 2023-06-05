@@ -532,12 +532,15 @@ std::vector<int16_t> Vits::Inference(const MoeVSProject::TTSParams& _input) cons
 			while (!_inputStrW.empty())
 			{
 				const auto this_ph = _inputStrW.substr(0, _inputStrW.find(_input.PlaceHolder));
-				if (add_blank)
-					text.push_back(0);
-				if (_Phs.find(this_ph) != _Phs.end())
-					text.push_back(_Phs.at(this_ph));
-				else
-					text.push_back(int64_t(size_t(rand()) % _Phs.size()));
+				if(!this_ph.empty())
+				{
+					if (add_blank)
+						text.push_back(0);
+					if (_Phs.find(this_ph) != _Phs.end())
+						text.push_back(_Phs.at(this_ph));
+					else
+						text.push_back(int64_t(size_t(rand()) % _Phs.size()));
+				}
 				const auto idx = _inputStrW.find(_input.PlaceHolder);
 				if (idx != std::wstring::npos)
 					_inputStrW = _inputStrW.substr(idx + 1);
@@ -686,6 +689,7 @@ std::vector<int16_t> Vits::Inference(const MoeVSProject::TTSParams& _input) cons
 			const auto GOutCount = outputG[0].GetTensorTypeAndShapeInfo().GetElementCount();
 			GEmbidding = std::vector(outputG[0].GetTensorData<float>(), outputG[0].GetTensorData<float>() + GOutCount);
 			GOutShape = outputG[0].GetTensorTypeAndShapeInfo().GetShape();
+			GOutShape.emplace_back(1);
 		}
 	}
 	else

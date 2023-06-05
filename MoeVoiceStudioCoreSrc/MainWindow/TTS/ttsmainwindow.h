@@ -11,7 +11,8 @@
 #include <QtMultimedia/QMediaPlayer>
 #include <QtMultimedia/QAudioOutput>
 #include <QtMultimedia/QAudioDevice>
-#include "../Controls/CurveEditor/mcurveeditor.h"
+#include "../Controls/TTSEditor/ttseditor.h"
+
 namespace Ui {
 class TTSMainWindow;
 }
@@ -127,7 +128,7 @@ private:
     size_t cur_media = -1;
     MessageSender _InferMsgSender;
     MoeVSProject::TTSParams _cur_params;
-    MCurveEditor editor;
+    TTSEditor editor;
     InferClass::MVSCleaner textCleaner;
     std::vector<std::wstring> DictPaths, CleanerPaths;
 public:
@@ -152,8 +153,6 @@ public:
         _conf.cp = false;
         return _conf;
     };
-
-    bool CheckInputStat(const MoeVSProject::TTSParams& params);
 };
 
 #endif // TTSMAINWINDOW_H

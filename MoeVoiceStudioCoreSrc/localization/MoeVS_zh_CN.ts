@@ -166,6 +166,22 @@
     </message>
 </context>
 <context>
+    <name>TTSEditor</name>
+    <message>
+        <location filename="../MainWindow/Controls/TTSEditor/ttseditor.ui" line="14"/>
+        <source>TTSEDITOR</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>TTSEditorBlock</name>
+    <message>
+        <location filename="../MainWindow/Controls/TTSEditor/ttseditorblock.ui" line="14"/>
+        <source>Form</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>TTSMainWindow</name>
     <message>
         <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="20"/>
@@ -309,7 +325,7 @@
     <message>
         <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="750"/>
         <source>UseDictCheckBox</source>
-        <translation>使用字典（后面为占位符设置）</translation>
+        <translation>使用字典</translation>
     </message>
     <message>
         <location filename="../MainWindow/TTS/ttsmainwindow.ui" line="1341"/>
