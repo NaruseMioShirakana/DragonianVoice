@@ -25,15 +25,33 @@ VitsSvc::VitsSvc(const rapidjson::Document& _config, const callback& _cb, const 
 	ChangeDevice(_dev);
 
 	//Check Folder
-	if (_config["Folder"].IsNull())
-		throw std::exception("[Error] Missing field \"folder\" (Model Folder)");
-	if (!_config["Folder"].IsString())
-		throw std::exception("[Error] Field \"folder\" (Model Folder) Must Be String");
-	const auto _folder = to_wide_string(_config["Folder"].GetString());
-	const auto K_means_folder = GetCurrentFolder() + L"\\Models\\" + _folder + L"\\" + L"kmeans.npy";
-	if (_folder.empty())
-		throw std::exception("[Error] Field \"folder\" (Model Folder) Can Not Be Empty");
-	const std::wstring _path = GetCurrentFolder() + L"\\Models\\" + _folder + L"\\" + _folder;
+	std::wstring _path;
+	std::wstring K_means_folder;
+	if (_config.HasMember("ModelPath")) {
+		const auto modelPath = _config["ModelPath"].GetString();
+		_path = to_wide_string(modelPath);
+
+		//
+		std::filesystem::path pathObj(modelPath);
+		//
+		std::filesystem::path directory = pathObj.parent_path();
+
+		K_means_folder = to_wide_string( directory.string() ) + L"\\"+L"kmeans.npy";
+	}
+	else {
+		if (_config["Folder"].IsNull())
+			throw std::exception("[Error] Missing field \"folder\" (Model Folder)");
+		if (!_config["Folder"].IsString())
+			throw std::exception("[Error] Field \"folder\" (Model Folder) Must Be String");
+		const auto _folder = to_wide_string(_config["Folder"].GetString());
+		K_means_folder = GetCurrentFolder() + L"\\Models\\" + _folder + L"\\" + L"kmeans.npy";
+		if (_folder.empty())
+			throw std::exception("[Error] Field \"folder\" (Model Folder) Can Not Be Empty");
+		if (_modelType == modelType::RVC)
+			_path = GetCurrentFolder() + L"\\Models\\" + _folder + L"\\" + _folder + L"_RVC.onnx";
+		else
+			_path = GetCurrentFolder() + L"\\Models\\" + _folder + L"\\" + _folder + L"_RVC.onnx";
+	}
 
 	if (_config["Hubert"].IsNull())
 		throw std::exception("[Error] Missing field \"Hubert\" (Hubert Folder)");
@@ -48,10 +66,11 @@ VitsSvc::VitsSvc(const rapidjson::Document& _config, const callback& _cb, const 
 	{
 		logger.log(L"[Info] loading VitsSvcModel Models");
 		hubert = new Ort::Session(*env, (GetCurrentFolder() + L"\\hubert\\" + HuPath + L".onnx").c_str(), *session_options);
-		if (_modelType == modelType::RVC)
+		/*if (_modelType == modelType::RVC)
 			VitsSvcModel = new Ort::Session(*env, (_path + L"_RVC.onnx").c_str(), *session_options);
 		else
-			VitsSvcModel = new Ort::Session(*env, (_path + L"_SoVits.onnx").c_str(), *session_options);
+			VitsSvcModel = new Ort::Session(*env, (_path + L"_SoVits.onnx").c_str(), *session_options);*/
+		VitsSvcModel = new Ort::Session(*env, _path.c_str(), *session_options);
 		logger.log(L"[Info] VitsSvcModel Models loaded");
 	}
 	catch (Ort::Exception& _exception)
@@ -69,36 +88,68 @@ VitsSvc::VitsSvc(const rapidjson::Document& _config, const callback& _cb, const 
 
 	logger.log(L"[Info] Current Sampling Rate is" + std::to_wstring(_samplingRate));
 
-	if (!_config["SoVits3"].IsNull())
-		SV3 = _config["SoVits3"].GetBool();
-	if (!_config["SoVits4"].IsNull())
-		SV4 = _config["SoVits4"].GetBool();
+	if (!_config["Cleaner"].IsNull())
+	{
+		const auto Cleaner = to_wide_string(_config["Cleaner"].GetString());
+		if (!Cleaner.empty())
+			switch (_plugin.Load(Cleaner))
+			{
+			case (-1):
+				throw std::exception("[Error] Plugin File Does Not Exist");
+			case (1):
+				throw std::exception("[Error] Plugin Has Some Error");
+			default:
+				logger.log(L"[Info] Plugin Loaded");
+				break;
+			}
+		else
+			logger.log(L"[Info] Disable Plugin");
+	}
+	else
+		logger.log(L"[Info] Disable Plugin");
+
+	if (_config.HasMember("SoVits3")) {
+		if (!_config["SoVits3"].IsNull())
+			SV3 = _config["SoVits3"].GetBool();
+	}
+	if (_config.HasMember("SoVits4")) {
+		if (!_config["SoVits4"].IsNull())
+			SV4 = _config["SoVits4"].GetBool();
+	}
 
 	if (SV3 && SV4)
 		throw std::exception("[Error] SoVits3 && SoVits4 Must Be False");
 
-	if(!(_config["Hop"].IsInt() || _config["Hop"].IsInt64()))
-		throw std::exception("[Error] Hop Must Exist And Must Be Int");
-	hop = _config["Hop"].GetInt();
+	if (_config.HasMember("Hop")) {
+		if (!(_config["Hop"].IsInt() || _config["Hop"].IsInt64()))
+			throw std::exception("[Error] Hop Must Exist And Must Be Int");
+		hop = _config["Hop"].GetInt();
+	}
 
-	if (!(_config["HiddenSize"].IsInt() || _config["HiddenSize"].IsInt64()))
-		logger.log(L"[Warn] Missing Field \"HiddenSize\", Use Default Value (256)");
-	else
-		Hidden_Size = _config["HiddenSize"].GetInt();
+	if (_config.HasMember("HiddenSize")) {
+		if (!(_config["HiddenSize"].IsInt() || _config["HiddenSize"].IsInt64()))
+			logger.log(L"[Warn] Missing Field \"HiddenSize\", Use Default Value (256)");
+		else
+			Hidden_Size = _config["HiddenSize"].GetInt();
+	}
 
-	if (!_config["CharaMix"].IsBool())
-		logger.log(L"[Warn] Missing Field \"CharaMix\", Use Default Value (False)");
-	else
-		CharaMix = _config["CharaMix"].GetBool();
+	if (_config.HasMember("CharaMix")) {
+		if (!_config["CharaMix"].IsBool())
+			logger.log(L"[Warn] Missing Field \"CharaMix\", Use Default Value (False)");
+		else
+			CharaMix = _config["CharaMix"].GetBool();
+	}
 
 	if(_waccess(K_means_folder.c_str(), 0) != -1)
 	{
 		KMenas_Stat = true;
-		if (!(_config["KMeansLength"].IsInt() || _config["KMeansLength"].IsInt64()))
-			logger.log(L"[Warn] Missing Field \"KMeansLength\", Use Default Value (10000)");
-		else
-			KMeans_Size = _config["KMeansLength"].GetInt();
-		kmeans_ = new Kmeans(K_means_folder, Hidden_Size, KMeans_Size);
+		if (_config.HasMember("KMeansLength")) {
+			if (!(_config["KMeansLength"].IsInt() || _config["KMeansLength"].IsInt64()))
+				logger.log(L"[Warn] Missing Field \"KMeansLength\", Use Default Value (10000)");
+			else
+				KMeans_Size = _config["KMeansLength"].GetInt();
+			kmeans_ = new Kmeans(K_means_folder, Hidden_Size, KMeans_Size);
+		}
 	}
 
 	if(hop < 1)
@@ -111,10 +162,12 @@ VitsSvc::VitsSvc(const rapidjson::Document& _config, const callback& _cb, const 
 		SVV2 = inpname != "uv";
 	}
 
-	if (_config["Volume"].IsBool())
-		VolumeB = _config["Volume"].GetBool();
-	else
-		logger.log(L"[Warn] Missing Field \"Volume\", Use Default Value (False)");
+	if (_config.HasMember("Volume")) {
+		if (_config["Volume"].IsBool())
+			VolumeB = _config["Volume"].GetBool();
+		else
+			logger.log(L"[Warn] Missing Field \"Volume\", Use Default Value (False)");
+	}
 
 	if (_config["Characters"].IsArray())
 		n_speaker = _config["Characters"].Size();
