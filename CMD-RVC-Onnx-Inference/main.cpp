@@ -33,13 +33,13 @@ rapidjson::Document parseJSONFile(const std::string& filename) {
     return document;
 }
 
-InferClass::BaseModelType* CreateModel() {
+InferClass::OnnxModule* CreateModel() {
     std::string modelPath;
-    std::cout << "输入ONNX模型路径：" << std::endl;
+    std::cout << "input onnx model" << std::endl;
     std::cin >> modelPath;
 
     std::string configPath;
-    std::cout << "输入配置路径：" << std::endl;
+    std::cout << "input config model" << std::endl;
     std::cin >> configPath;
 
     rapidjson::Document Config = parseJSONFile(configPath);
@@ -50,10 +50,10 @@ InferClass::BaseModelType* CreateModel() {
     Config.AddMember(key, value, allocator);
 
     //Progress bar
-    const InferClass::BaseModelType::callback ProgressCallback = [](size_t a, size_t b) {std::cout << std::to_string((float)a * 100.f / (float)b) << "%\n"; };
+    const InferClass::OnnxModule::callback ProgressCallback = [](size_t a, size_t b) {std::cout << std::to_string((float)a * 100.f / (float)b) << "%\n"; };
 
     //return params for inference
-    const InferClass::BaseModelType::callback_params ParamsCallback = []()
+    const InferClass::OnnxModule::callback_params ParamsCallback = []()
     {
         auto params = InferClass::InferConfigs();
         params.kmeans_rate = 0.5;
@@ -61,13 +61,13 @@ InferClass::BaseModelType* CreateModel() {
         return params;
     };
 
-    const auto model = dynamic_cast<InferClass::BaseModelType*>(
+    const auto model = dynamic_cast<InferClass::OnnxModule*>(
         new InferClass::VitsSvc(Config, ProgressCallback, ParamsCallback)
         );
     return model;
 }
 
-InferClass::BaseModelType* TryCreateModel() {
+InferClass::OnnxModule* TryCreateModel() {
 
     try
     {
@@ -84,18 +84,18 @@ InferClass::BaseModelType* TryCreateModel() {
 int main() {
     //rapidjson::Document Config;
  //   Config.Parse(R"({
- //   "Folder" : "march7",
- //   "Name" : "march7",
- //   "Type" : "RVC",
- //   "Rate" : 48000,
- //   "Hop" : 320,
- //   "Cleaner" : "",
- //   "Hubert": "hubert4.0",
- //   "Diffusion": false,
- //   "CharaMix": false,
- //   "Volume": false,
- //   "HiddenSize": 256,
- //   "Characters" : ["march7"]
+    //"Folder" : "march7",
+    //"Name" : "march7",
+    //"Type" : "RVC",
+    //"Rate" : 48000,
+    //"Hop" : 320,
+    //"Cleaner" : "",
+    //"Hubert": "hubert4.0",
+    //"Diffusion": false,
+    //"CharaMix": false,
+    //"Volume": false,
+    //"HiddenSize": 256,
+    //"Characters" : ["march7"]
 	//})");
 
     
@@ -116,7 +116,7 @@ int main() {
             std::wstring input;
             std::wstring outpath;
 
-            std::wcout << "等待输入音频路径：" << std::endl;
+            std::wcout << "input source audio path " << std::endl;
             std::wcin >> input;
 
             if (input.empty() || input.size() == 0) {
@@ -126,7 +126,7 @@ int main() {
             if (input.compare(exit) == 0 ) {
                 break;
             }
-            std::wcout << "等待输出音频路径：" << std::endl;
+            std::wcout << "out audio path " << std::endl;
             std::wcin >> outpath;
 
             if (outpath.empty() || outpath.size() == 0) {
@@ -143,7 +143,7 @@ int main() {
 
             const Wav outWav(model->GetSamplingRate(), output.size() * 2, output.data());
             outWav.Writef(outpath);
-            std::wcout << "保存音频路径：" << outpath << std::endl;
+            std::wcout << "saveed audio path " << outpath << std::endl;
 
             // 记录结束时间
             auto end = std::chrono::high_resolution_clock::now();
@@ -152,7 +152,7 @@ int main() {
             std::chrono::duration<double, std::milli> elapsed = end - start;
 
             // 输出执行时间
-            std::cout << "代码执行时间: " << elapsed.count() << " ms" << std::endl;
+            std::cout << "rvc cost time: " << elapsed.count() << " ms" << std::endl;
 
         } while (true);
 
