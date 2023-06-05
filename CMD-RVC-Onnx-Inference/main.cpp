@@ -33,7 +33,7 @@ rapidjson::Document parseJSONFile(const std::string& filename) {
     return document;
 }
 
-InferClass::OnnxModule* CreateModel() {
+InferClass::OnnxModule* CreateModel(const InferClass::OnnxModule::callback_params& ParamsCallback) {
     std::string modelPath;
     std::cout << "input onnx model" << std::endl;
     std::cin >> modelPath;
@@ -52,33 +52,61 @@ InferClass::OnnxModule* CreateModel() {
     //Progress bar
     const InferClass::OnnxModule::callback ProgressCallback = [](size_t a, size_t b) {std::cout << std::to_string((float)a * 100.f / (float)b) << "%\n"; };
 
-    //return params for inference
-    const InferClass::OnnxModule::callback_params ParamsCallback = []()
-    {
-        auto params = InferClass::InferConfigs();
-        params.kmeans_rate = 0.5;
-        params.keys = 0;
-        return params;
-    };
-
     const auto model = dynamic_cast<InferClass::OnnxModule*>(
         new InferClass::VitsSvc(Config, ProgressCallback, ParamsCallback)
         );
     return model;
 }
 
-InferClass::OnnxModule* TryCreateModel() {
+InferClass::OnnxModule* TryCreateModel(const InferClass::OnnxModule::callback_params& ParamsCallback) {
 
     try
     {
-        return CreateModel();
+        return CreateModel(ParamsCallback);
     }
     catch (std::exception& e)
     {
         std::cout << e.what();
-        return TryCreateModel();
+        return TryCreateModel(ParamsCallback);
     }
 
+}
+
+std::string extractContent(const std::string& str, std::string& remainingStr) {
+    std::size_t first = str.find('{');
+    std::size_t last = str.rfind('}');
+
+    if (first != std::string::npos && last != std::string::npos) {
+        remainingStr = str.substr(0, first) + str.substr(last + 1);
+        return str.substr(first, last - first + 1);
+    }
+    else {
+        remainingStr = str;
+        return "";
+    }
+}
+
+void SetInterConfigFromJson(InferClass::InferConfigs& config, const std::string& json) {
+
+    rapidjson::Document interConfigParam;
+    //TODO
+    // 解析JSON字符串
+    try {
+        interConfigParam.Parse(json.c_str());
+
+        // 检查解析是否成功
+        if (!interConfigParam.HasParseError()) {
+            if (interConfigParam.HasMember("key")) {
+                config.keys = interConfigParam["key"].GetInt64();
+            }
+            if (interConfigParam.HasMember("kmeans_rate")) {
+                config.kmeans_rate = interConfigParam["kmeans_rate"].GetInt64();
+            }
+        }
+    }
+    catch (std::exception& e){
+        std::cout << e.what();
+    }
 }
 
 int main() {
@@ -98,9 +126,22 @@ int main() {
     //"Characters" : ["march7"]
 	//})");
 
-    
+    auto configInfer = InferClass::InferConfigs();
+    configInfer.kmeans_rate = 0.5f;
+    configInfer.keys = 0;
 
-    const auto model = TryCreateModel();
+
+    //return params for inference
+    const InferClass::OnnxModule::callback_params ParamsCallback = [&configInfer]()  // 注意这里的改动
+    {
+        auto params = InferClass::InferConfigs();
+        params.kmeans_rate = configInfer.kmeans_rate;
+        params.keys = configInfer.keys;
+        return params;
+    };
+
+
+    const auto model = TryCreateModel(ParamsCallback);
 
 
     //modify duration per phoneme
@@ -126,6 +167,13 @@ int main() {
             if (input.compare(exit) == 0 ) {
                 break;
             }
+
+            std::string extractedJsonContent, inputWavPath;
+            extractedJsonContent = extractContent(to_byte_string(input), inputWavPath);
+            if (!extractedJsonContent.empty() && extractedJsonContent.size() > 0) {
+                SetInterConfigFromJson(configInfer, extractedJsonContent);
+            }
+
             std::wcout << "out audio path " << std::endl;
             std::wcin >> outpath;
 
@@ -138,7 +186,7 @@ int main() {
 
             // 记录开始时间
             auto start = std::chrono::high_resolution_clock::now();
-            output = model->Inference(input);
+            output = model->Inference(to_wide_string(inputWavPath));
 
 
             const Wav outWav(model->GetSamplingRate(), output.size() * 2, output.data());
