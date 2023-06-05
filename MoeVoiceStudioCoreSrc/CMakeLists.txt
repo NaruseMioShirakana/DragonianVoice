@@ -9,14 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-#设置FFTW静态库路径
-set (FFTW3_Lib_DIRS ${PROJECT_SOURCE_DIR}/Lib/fftw/build/Release)
-
 # 设置 OnnxRuntime 版本
 set(ONNXRUNTIME_VERSION 1.15.0)
-
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets LinguistTools Multimedia)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets LinguistTools Multimedia)
 
 if(WIN32)
     set(ONNXRUNTIME_DOWNLOAD_URL https://github.com/microsoft/onnxruntime/releases/download/v${ONNXRUNTIME_VERSION}/onnxruntime-win-x64-${ONNXRUNTIME_VERSION}.zip)
@@ -73,10 +67,6 @@ include_directories(${PROJECT_SOURCE_DIR}/onnxruntime/include)
 link_directories(${PROJECT_SOURCE_DIR}/Lib/ffmpeg-4.2.1/Lib)
 link_directories(${ONNXRUNTIME_LIB_DIR})
 link_directories(${PROJECT_SOURCE_DIR}/Lib/World)
-link_directories(${FFTW3_Lib_DIRS})
-
-set (FFTW3_INCLUDE_DIRS ${PROJECT_SOURCE_DIR}/Lib/fftw/api)
-include_directories(${FFTW3_INCLUDE_DIRS})
 
 function(moevs_add_files _out)
     file(GLOB_RECURSE _tmp ${ARGN})
@@ -89,44 +79,14 @@ set(PROJECT_SOURCES)
 moevs_add_files(PROJECT_SOURCES
     Modules/*.hpp
     Modules/*.cpp
-    MainWindow/*.h
-    MainWindow/*.hpp
-    MainWindow/*.cpp
-    MainWindow/*.ui
-    resources/*.qrc
 )
 
 # 添加主文件
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(${PROJECT_NAME}
-        MANUAL_FINALIZATION
-        ${PROJECT_SOURCES}
-        main.cpp
-    )
-else()
-    if(ANDROID)
-        add_library(${PROJECT_NAME} SHARED
+add_executable(${PROJECT_NAME}
             ${PROJECT_SOURCES}
             main.cpp
         )
-    else()
-        add_executable(${PROJECT_NAME}
-            ${PROJECT_SOURCES}
-            main.cpp
-        )
-    endif()
-endif()
 
-# 翻译文件
-set(TS_FILES)
-set(QM_FILES)
-list(APPEND TS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/localization/MoeVS_zh_CN.ts)
-set_source_files_properties(${TS_FILES}
-    PROPERTIES OUTPUT_LOCATION ${CMAKE_CURRENT_SOURCE_DIR}/localization
-)
-qt_create_translation(QM_FILES ${TS_FILES} ${PROJECT_SOURCES})
-add_custom_target(lupdate_task DEPENDS ${TS_FILES})
-add_custom_target(lrelease_task DEPENDS ${QM_FILES})
 
 # 链接
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -136,26 +96,5 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     avutil.lib
     swresample.lib
     swscale.lib
-    fftw3
     onnxruntime.lib
-    Qt${QT_VERSION_MAJOR}::Widgets
-    Qt${QT_VERSION_MAJOR}::Multimedia
 )
-
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
-)
-
-install(TARGETS ${PROJECT_NAME}
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(${PROJECT_NAME})
-endif()
