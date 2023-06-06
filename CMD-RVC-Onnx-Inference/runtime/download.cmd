@@ -9,7 +9,7 @@ if exist "%model%" (
   goto :eof
 )
 
-PowerShell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri https://huggingface.co/datasets/qinzhu/moevoice_config/resolve/main/%model% -OutFile hubert/%model%"
+PowerShell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri https://huggingface.co/datasets/qinzhu/moevoice_config/resolve/main/%model% -OutFile %model%"
 
 if %ERRORLEVEL% neq 0 (
   echo Failed to download hubert4 model %model%

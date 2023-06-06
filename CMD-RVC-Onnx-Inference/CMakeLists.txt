@@ -38,6 +38,11 @@ if(NOT EXISTS "${PROJECT_CORE_SOURCE_DIR}/onnxruntime")
   execute_process(COMMAND ${EXPAND_COMMAND})
 endif()
 
+if(MSVC)
+  set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+endif()
+
+
 # 添加模块的头文件路径
 include_directories(${PROJECT_CORE_SOURCE_DIR}/Modules/AvCodec)
 include_directories(${PROJECT_CORE_SOURCE_DIR}/Modules/InferTools)
@@ -62,7 +67,11 @@ link_directories(${PROJECT_CORE_SOURCE_DIR}/Lib/World)
 file(GLOB_RECURSE SRCS "${PROJECT_CORE_SOURCE_DIR}/Modules/*.cpp")
 file(GLOB_RECURSE HDRS "${PROJECT_CORE_SOURCE_DIR}/Modules/*.hpp")
 
-# 添加主文件
-add_executable(${PROJECT_NAME} main.cpp ${SRCS})
+# 添加动态库
+add_library(MoeVoiceLib SHARED ${SRCS})
+target_link_libraries(MoeVoiceLib World.lib avcodec.lib avformat.lib avutil.lib swresample.lib swscale.lib onnxruntime.lib)
 
-target_link_libraries(${PROJECT_NAME} World.lib avcodec.lib avformat.lib avutil.lib swresample.lib swscale.lib onnxruntime.lib)
+# 添加主文件
+add_executable(${PROJECT_NAME} main.cpp)
+
+target_link_libraries(${PROJECT_NAME} MoeVoiceLib)
