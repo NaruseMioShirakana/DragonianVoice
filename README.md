@@ -31,7 +31,7 @@
 - [模型配置](#模型配置)
   - [前置模型](#前置模型) 
   - [配置文件](#配置文件)
-- [支持的model项目](#支持的model项目)
+- [支持的项目](#支持的项目)
 - [其他设置](#其他设置)
   - [Symbol](#symbol)
   - [Cleaner](#cleaner)
@@ -426,7 +426,7 @@ demo: [RVC命令行示例](https://github.com/NaruseMioShirakana/MoeVoiceStudio/
     
 </details>
 
-## 支持的model项目
+## 支持的项目
 ```cmake
 // ${xxx}是什么意思大家应该都知道吧，总之以下是多个不同项目需要的模型文件（需要放置在对应的模型文件夹下）。
 // Tacotron2：
