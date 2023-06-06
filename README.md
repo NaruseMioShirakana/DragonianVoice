@@ -1,5 +1,5 @@
 # MoeVoiceStudio
-| [中文](ReadMe.md) | [English](ReadMe_en.md)
+| [中文](README.md) | [English](README_en.md)
 
 本项目是专注于二次元亚文化圈，面向动漫爱好者的语音辅助软件。
 
@@ -528,7 +528,9 @@ make .
 
 #### 《[中华人民共和国民法典](http://gongbao.court.gov.cn/Details/51eb6750b8361f79be8f90d09bc202.html)》
 
-使用的图像素材来源于：
+#
+
+MoeSS使用的图像素材来源于：
 - [SummerPockets](http://key.visualarts.gr.jp/summer/)
 
 ## 💪 感谢所有贡献者的努力
