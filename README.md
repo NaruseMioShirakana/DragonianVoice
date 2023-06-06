@@ -1,47 +1,129 @@
-# 模型需要转换为ONNX模型，转换ONNX的程序我已经pull到每个项目的源仓库了，PTH不能直接用！！！！！！！！！！！！！
+# MoeVoiceStudio
+| [中文](ReadMe.md) | [English](ReadMe_en.md)
 
----
+本项目是专注于二次元亚文化圈，面向动漫爱好者的语音辅助软件。
 
-### 本项目目前已完全支持自行调用其中方法来实现命令行推理或其他软件，欢迎大家向本项目提PR
+<details><summary><b>支持的Net：</b></summary>
+    
+- [DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
+- [VITS](https://github.com/jaywalnut310/vits)
+- [SoVits](https://github.com/innnky/so-vits-svc/tree/32k)
+- [DiffSvc](https://github.com/prophesier/diff-SVC)
+- [DiffSinger](https://github.com/openvpi/DiffSinger)
+- [RVC](https://github.com/liujing04/Retrieval-based-Voice-Conversion-WebUI)
+- [FishDiffusion](https://github.com/fishaudio/fish-diffusion)
+    
+</details>
 
-选择语言：[简体中文](README.md)    [English](README_en.md)
+## 目录
+- [协议](#用户协议)
+  - [免责声明](#免责声明) 
+- [说明](#说明)
+  - [分支说明](#分支)
+- [FAQ问答](#faq)
+  - Q: [这个项目到底有什么作用?](#q-这个项目到底有什么作用)
+  - Q: [该项目以后会收费吗?](#q-该项目以后会收费吗)
+  - Q: [是否提供有偿模型代训练?](#q-是否提供有偿模型代训练)
+  - Q: [电子垃圾评判标准是什么?](#q-电子垃圾评判标准是什么)
+  - Q: [技术支持?](#q-技术支持)
+- [注意事项](#注意事项)
+- [使用方法](#使用方法)
+- [模型配置](#模型配置)
+  - [前置模型](#前置模型) 
+  - [配置文件](#配置文件)
+- [支持的model项目](#支持的model项目)
+- [其他设置](#其他设置)
+  - [Symbol](#symbol)
+  - [Cleaner](#cleaner)
+- [本地编译](#本地编译)
+- [依赖列表](#依赖列表)
+- [相关法规](#-相关法规)
 
-目前该仓库的项目为MoeSS，MoeVoiceStudio会在本月或下月发布，敬请期待。
+## 用户协议：
+### 使用该项目你必须同意以下条款，若不同意则禁止使用该项目：
+1. 你必须自行承担由于使用该项目而造成的一切后果。
+2. 禁止出售该程序。
+3. 使用该项目时，你必须自觉遵守当地的法律法规，禁止使用该项目从事违法活动。
+4. 禁止用于任何商业游戏、低创游戏[^1]以及Galgame制作，不反对无偿的精品游戏制作以及Mod制作。
+5. 禁止使用该项目及该项目衍生物以及发布模型等制作各种电子垃圾[^2] (例如AIGalgame，AI游戏制作等)。
+6. 禁止一切政治相关内容。
+7. 你使用该项目生成的一切内容均与该项目开发者无关。
 
-作者的其他项目：[AiToolKits](https://github.com/NaruseMioShirakana/ShirakanaNoAiToolKits)
+[^1]: 低创的评判标准为: 大量使用AI生成的任何内容，原创内容较低，意义不明，内容质量低下等。
+[^2]: 电子垃圾评判标准: 1、原创度。自己的东西在整个项目中的比例（对于AI来说，使用完全由你独立训练模型的创作属于你自己；使用他人模型的创作属于别人）。涵盖的方面包括但不限于程序、美工、音频、策划等等。例如，套用Unity等引擎模板换皮属于电子垃圾。
 
-如果想要参加开发，可以加入QQ群:263805400或直接提PR
-
-带有QTUI的分支已移动到副分支，主分支改为命令行
-
----
-
-## 一些疑问
-#### 这个项目到底有什么作用？
-这个项目的开发初衷主要是实现无需环境部属各个语音合成项目，而现在打算制作为一个SVC的辅助编辑器。
-
-由于这个项目毕竟是一个"个人的" "不专业"的项目，所以在您拥有更专业的软件，或者您是Python Cli爱好者，又或者您是相关领域大佬。我自知本软件不够专业且很大可能无法满足您的需求甚至对您没有用处。
-
-本项目并不是不可替代的项目，相反的本项目的功能您可以使用各种工具替代，我没有奢望本项目成为相关领域的领军项目，我只是怀着一腔热情继续着该项目的开发。但是热情总有消散的一天，但是该项目承诺在我的开发热情完全消散之前会一直保持维护（不管有没有人使用，就算用户数目为0）
-
-本项目在设计上可能存在着各种各样的问题，所以也是需要大家积极的点炒饭来帮助我完善功能的，大部分对于功能和体验的优化我都会接受。
-
-最后再说一句我对于这个项目的看法吧：MoeSS和MoeVS就是依托答辩。
-
----
-
-# 免责声明
-本项目为开源、离线的项目，本项目的所有开发者以及维护者（以下简称贡献者）对本项目没有控制力。本项目的贡献者从未向任何组织或个人提供包括但不限于数据集提取、数据集加工、算力支持、训练支持、推理等一切形式的帮助；本项目的贡献者不知晓也无法知晓使用者使用该项目的用途。故一切基于本项目合成的音频都与本项目贡献者无关。一切由此造成的问题由使用者自行承担。
+## 免责声明
+本项目为**开源、离线的项目，本项目的所有开发者以及维护者（以下简称贡献者）对本项目没有控制力**。本项目的贡献者从未向任何组织或个人提供包括但不限于数据集提取、数据集加工、算力支持、训练支持、推理等一切形式的帮助；本项目的贡献者不知晓也无法知晓使用者使用该项目的用途。故一切基于本项目合成的音频都与本项目贡献者无关。**一切由此造成的问题由使用者自行承担**。
 
 本项目本身不具备任何语音合成的功能，一切的功能均需要由使用者自行训练模型并自行将其制作为Onnx模型，且模型的训练与Onnx模型的制作均与本项目的贡献者无关，均为使用者自己的行为，本项目贡献者未参与一切使用者的模型训练与制作。
 
 本项目为完全离线状态下运行，无法采集任何用户信息，也无法获取用户的输入数据，故本项目贡献者对用户的一切输入以及模型不知情，因此不对任何用户输入负责。
 
-本项目也没有附带任何模型，任何二次发布所附带的模型以及用于此项目的模型均与此项目开发者无关。
+**本项目也没有附带任何模型，任何二次发布所附带的模型以及用于此项目的模型均与此项目开发者无关。**
 
----
-# 由于OnnxRuntime引发的问题
+## 说明
+本项目目前已完全支持自行调用其中方法来实现命令行推理或其他软件，欢迎大家向本项目提PR
 
+作者的其他项目：[AiToolKits](https://github.com/NaruseMioShirakana/ShirakanaNoAiToolKits)
+
+如果想要参加开发，可以加入QQ群:263805400或直接提PR
+
+**模型需要转换为ONNX模型，转换ONNX的程序我已经pull到每个项目的源仓库了，PTH不能直接用！！！！！！！！！！！！！**
+
+## 分支
+本项目的各分支:
+- [MoeVoiceStudioCore(主分支)](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudioCore) 项目核心
+- [MoeVoiceStudio](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudio) 本项目的简单GUI实现 基于qt
+- [MoeSSV2](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/V2) 旧版MoeSSV2版本存档
+- [MoeSSV1](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/V2) 旧版MoeSSV1版本存档
+
+## FAQ
+### Q: 这个项目到底有什么作用？
+<details><summary>A: </b></summary>
+
+> 这个项目的开发初衷主要是实现无需环境部属各个语音合成项目，而现在打算制作为一个SVC的辅助编辑器。
+> 由于这个项目毕竟是一个"个人的" "不专业"的项目，所以在您拥有更专业的软件，或者您是Python Cli爱好者，又或者您是相关领域大佬。我自知本软件不够专业且很大可能无法满足您的需求甚至对您没有用处。
+> 本项目并不是不可替代的项目，相反的本项目的功能您可以使用各种工具替代，我没有奢望本项目成为相关领域的领军项目，我只是怀着一腔热情继续着该项目的开发。但是热情总有消散的一天，但是该项目承诺在我的开   > 发热情完全消散之前会一直保持维护（不管有没有人使用，就算用户数目为0）
+> 
+> 本项目在设计上可能存在着各种各样的问题，所以也是需要大家积极的点炒饭来帮助我完善功能的，大部分对于功能和体验的优化我都会接受。
+> 
+> 最后再说一句我对于这个项目的看法吧：MoeSS和MoeVS就是依托答辩。
+
+</details>
+
+### Q: 该项目以后会收费吗？
+<details><summary>A: </b></summary>
+
+> 该项目永久开源免费，如果在其他地方存在本项目的收费版本，请立即举报且不要购买，本项目永久免费。如果想用疯狂星期四塞满白叶，可以前往爱发癫 https://afdian.net/a/NaruseMioShirakana
+> 
+</details>
+
+### Q: 是否提供有偿模型代训练？
+<details><summary>A: </b></summary>
+
+> 不提供，训练模型比较简单，没必要花冤枉钱，按照网上教程一步一步走就可以了。
+
+</details>
+
+
+### Q: 电子垃圾评判标准是什么？
+<details><summary>A: </b></summary>
+
+> 1. 原创度。自己的东西在整个项目中的比例（对于AI来说，使用完全由你独立训练模型的创作属于你自己；使用他人模型的创作属于别人）。涵盖的方面包括但不限于程序、美工、音频、策划等等。举个例子，套用Unity等引擎模板换皮属于电子垃圾。
+> 2. 开发者态度。作者开发的态度是不是捞一波流量和钱走人或单纯虚荣。比方说打了无数的tag，像什么“国产”“首个”“最强”“自制”这种引流宣传，结果是非常烂或是平庸的东西，且作者明显没有好好制作该项目的想法，属于电子垃圾。
+> 3. 反对一切使用未授权的数据集训练出来的AI模型商用的行为。 
+
+</details>
+
+### Q: 技术支持？
+<details><summary>A: </b></summary>
+
+> 如果能够确定你做的不是电子垃圾，同时合法合规，没有严重的政治错误，我会提供一些力所能及的技术支持。 
+
+</details>
+
+## 注意事项
+### 由于OnnxRuntime引发的问题
 使用GPU（CUDA）版本，请安装12.0以下，11.0版本以上的CUDA驱动程序，83.0版本以下的CUDNN动态库，并按照网上的教程安装。
 
 为什么有这样的要求？那就得问CUDA，CUDNN背后的英伟达公司以及OnnxRuntime的官方了，这两个问题都是由CUDA驱动的一些特性和OnnxRuntime的一些问题引起的。
@@ -52,83 +134,60 @@
 
 建议使用CPU版本，CPU版本推理速度也比较可观，且没有其他问题。
 
----
+## 使用方法
+MoeVoiceStudioCore以Lib的形式提供 使用C++语言调用
 
-# 前置模型（与所支持的几个项目无关）：
+按需引用以下对应的类
+```cpp
+#include <Modules/Models/header/Tacotron.hpp>
+#include <Modules/Models/header/Vits.hpp>
+#include <Modules/Models/header/VitsSvc.hpp>
+#include <Modules/Models/header/DiffSvc.hpp>
+#include <Modules/Models/header/DiffSinger.hpp>
+
+InferClass::Tacotron2;
+InferClass::Vits;
+InferClass::VitsSvc;
+InferClass::DiffusionSvc;
+InferClass::DiffusionSinger;
+
+/*
+构造函数第一个是配置文件json
+第二个是进度条回调
+第三个是参数回调 (若为TTS 此参数为空即可)
+第四个参数为设备
+使用调用Inference函数即可
+*/
+```
+模型配置请参见[#模型配置](#模型配置)
+
+demo: [RVC命令行示例](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudioCore/CMD-RVC-Onnx-Inference)
+
+## 模型配置
+### 前置模型
+#### 与所支持的几个项目无关 为深度学习领域的通用模型
 停止更新（由于下载和上传速度）: [Vocoder & HiddenUnitBert](https://github.com/NaruseMioShirakana/RequireMent-Model-For-MoeSS) 
 
 最新仓库地址 : [HuggingFace](https://huggingface.co/NaruseMioShirakana/MoeSS-SUBModel) 
 
 自己导出前置：
-- HuBert：input_names应该为["source"]，output_names应该为["embed"]，dynamic_axes应当为{"source":[0,2],}
-- Diffusion模型使用的hifigan：input_names应该为["c","f0"]，output_names应该为["audio"]，dynamic_axes应当为{"c":[0,1],"f0":[0,1],}
-- Tacotron2使用的hifigan：input_names应该为["x"]，output_names应该为["audio"]，dynamic_axes应当为{"x":[0,1],}
+- HuBert：`input_names`应该为`["source"]`，`output_names`应该为`["embed"]`，`dynamic_axes`应当为`{"source":[0,2],}`
+- Diffusion模型使用的hifigan：`input_names`应该为`["c","f0"]`，`output_names`应该为`["audio"]`，`dynamic_axes`应当为`{"c":[0,1],"f0":[0,1],}`
+- Tacotron2使用的hifigan：`input_names`应该为`["x"]`，`output_names`应该为`["audio"]`，`dynamic_axes`应当为`{"x":[0,1],}`
 
----
-# 用户协议：
-## 使用该项目你必须同意以下条款，若不同意则禁止使用该项目：
-- 1、你必须自行承担由于使用该项目而造成的一切后果。
-- 2、禁止出售该程序。
-- 3、使用该项目时，你必须自觉遵守当地的法律法规，禁止使用该项目从事违法活动。
-- 4、禁止用于任何商业游戏、低创游戏以及Galgame制作，不反对无偿的精品游戏制作以及Mod制作。
-- 5、禁止使用该项目及该项目衍生物以及发布模型等制作各种电子垃圾（比方说AIGalgame，AI游戏制作等）
-- 6、禁止一切政治相关内容。
-- 7、你使用该项目生成的一切内容均与该项目开发者无关。
----
+## 配置文件
+- 本项目标准化了模型读取模块，模型保存在Mods文件夹下的子文件夹中。`xxx.json` 为模型的配置文件，需要自行按照模板编写，同时需要自行将模型转换为Onnx。
 
-## Q&A：
-### Q：该项目以后会收费吗？
-    A：该项目永久开源免费，如果在其他地方存在本项目的收费版本，请立即举报且不要购买，本项目永久免费。如果想用疯狂星期四塞满白叶，可以前往爱发癫 https://afdian.net/a/NaruseMioShirakana 
-### Q：是否提供有偿模型代训练？
-    A：不提供，训练模型比较简单，没必要花冤枉钱，按照网上教程一步一步走就可以了。
-### Q：电子垃圾评判标准是什么？
-    A：1、原创度。自己的东西在整个项目中的比例（对于AI来说，使用完全由你独立训练模型的创作属于你自己；使用他人模型的创作属于别人）。涵盖的方面包括但不限于程序、美工、音频、策划等等。举个例子，套用Unity等引擎模板换皮属于电子垃圾。
+#### 通用参数(不管是啥模型都必须填的，不填就不识别)：
+- `Folder`：保存模型的文件夹名
+- `Name`：模型在UI中的显示名称
+- `Type`：模型类别
+- `Rate`：采样率（必须和你训练时候的一模一样，不明白原因建议去学计算机音频相关的知识）
 
-    2、开发者态度。作者开发的态度是不是捞一波流量和钱走人或单纯虚荣。比方说打了无数的tag，像什么“国产”“首个”“最强”“自制”这种引流宣传，结果是非常烂或是平庸的东西，且作者明显没有好好制作该项目的想法，属于电子垃圾。
-    
-    3、反对一切使用未授权的数据集训练出来的AI模型商用的行为。 
-### Q：技术支持？
-    A：如果能够确定你做的不是电子垃圾，同时合法合规，没有严重的政治错误，我会提供一些力所能及的技术支持。 
----
+### 配置示例
 
-# Moe Voice Studio
-本项目是专注于二次元亚文化圈，面向动漫爱好者的语音辅助软件。
+<details><summary>Tacotron2:</summary>
 
-支持的Net：
-- [DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
-- [VITS](https://github.com/jaywalnut310/vits)
-- [SoVits](https://github.com/innnky/so-vits-svc/tree/32k)
-- [DiffSvc](https://github.com/prophesier/diff-SVC)
-- [DiffSinger](https://github.com/openvpi/DiffSinger)
-- [RVC](https://github.com/liujing04/Retrieval-based-Voice-Conversion-WebUI)
-- [FishDiffusion](https://github.com/fishaudio/fish-diffusion)
-
-使用的图像素材来源于：
-- [SummerPockets](http://key.visualarts.gr.jp/summer/)
-
-目前仅支持Windows
-
----
-## 使用方法：
-    1、在release中下载项目压缩包，解压之
-
-    2、在上文 [Vocoder & HiddenUnitBert] 仓库中下载相应的前置模型或附加模块，并放置到相应文件夹，前置模型与项目的对应关系会在下文提到
-
-    3、将模型放置在Mods文件夹中，在左上方模型选择模块中选择模型，标准模型结构请查阅下文“支持的项目”
-
-    4、在下方输入框中输入要转换的文字，点击“启用插件”可以执行文本Cleaner，换行为批量转换的分句符号（SoVits/DiffSvc需要输入音频路径，DiffSinger需要输入ds或json项目文件的路径）
-
-    5、点击开始合成，即可开始合成语音，等待进度完成后，可以在右上方播放器预览，也可以在右上方直接保存
----
-## 模型制作：
-- 本项目标准化了模型读取模块，模型保存在Mods文件夹下的子文件夹中。********.json为模型的配置文件，需要自行按照模板编写，同时需要自行将模型转换为Onnx。
-
-### 通用参数(不管是啥模型都必须填的，不填就不识别)：
-- Folder：保存模型的文件夹名
-- Name：模型在UI中的显示名称
-- Type：模型类别
-- Rate：采样率（必须和你训练时候的一模一样，不明白原因建议去学计算机音频相关的知识）
-### Tacotron2：
 ```jsonc
 {
     "Folder" : "Atri",
@@ -145,7 +204,10 @@
 //Hifigan：Hifigan模型名，必须填且必须将在前置模型中下载到的hifigan放置到hifigan文件夹
 //AddBlank：是否在音素之间插0作为分隔
 ```
-### Vits：
+
+</details>
+<details><summary>Vits:</summary>
+    
 ```jsonc
 {
     "Folder" : "SummerPockets",
@@ -166,7 +228,9 @@
 //Emotional：是否加入情感向量
 //EmotionalPath：情感向量npy文件名
 ```
-### Pits：
+</details>
+<details><summary>Pits:</summary>
+
 ```jsonc
 {
     "Folder" : "SummerPockets",
@@ -187,7 +251,10 @@
 //Emotional：是否加入情感向量
 //EmotionalPath：情感向量npy文件名
 ```
-### RVC：
+    
+</details>
+<details><summary>RVC:</summary>
+    
 ```jsonc
 {
     "Folder" : "NyaruTaffy",
@@ -212,7 +279,9 @@
 //Volume：该模型是否有音量Emb
 //HiddenSize：Vec模型的尺寸（768/256）
 ```
-### SoVits_3.0_32k：
+</details>
+<details><summary>SoVits_3.0_32k:</summary>
+
 ```jsonc
 {
     "Folder" : "NyaruTaffySo",
@@ -238,7 +307,10 @@
 //Volume：该模型是否有音量Emb
 //HiddenSize：Vec模型的尺寸（768/256）
 ```
-### SoVits_3.0_48k：
+    
+</details>
+<details><summary>SoVits_3.0_48k:</summary>
+
 ```jsonc
 {
     "Folder" : "NyaruTaffySo",
@@ -264,7 +336,10 @@
 //Volume：该模型是否有音量Emb
 //HiddenSize：Vec模型的尺寸（768/256）
 ```
-### SoVits_4.0：
+    
+</details>
+<details><summary>SoVits_4.0:</summary>
+    
 ```jsonc
 {
     "Folder" : "NyaruTaffySo",
@@ -290,7 +365,10 @@
 //Volume：该模型是否有音量Emb
 //HiddenSize：Vec模型的尺寸（768/256）
 ```
-### DiffSVC：
+    
+</details>
+<details><summary>DiffSVC:</summary>
+    
 ```jsonc
 {
     "Folder" : "DiffShiroha",
@@ -323,7 +401,10 @@
 //Volume：该模型是否有音量Emb
 //HiddenSize：Vec模型的尺寸（768/256）
 ```
-### DiffSinger：
+    
+</details>
+<details><summary>DiffSinger:</summary>
+    
 ```jsonc
 {
     "Folder" : "utagoe",
@@ -342,10 +423,11 @@
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
 //MelBins：模型的MelBins，不知道MelBins是啥的建议多看几个视频了解了解梅尔基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
 ```
+    
+</details>
 
----
 ## 支持的model项目
-```cxx 
+```cmake
 // ${xxx}是什么意思大家应该都知道吧，总之以下是多个不同项目需要的模型文件（需要放置在对应的模型文件夹下）。
 // Tacotron2：
     ${Folder}_decoder_iter.onnx
@@ -381,14 +463,14 @@
     ${Folder}_pred.onnx
     ${Folder}_after.onnx
 ```
----
-## Symbol的设置
+## 其他设置
+### Symbol
+
     例如：_-!'(),.:;? ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
     打开你训练模型的项目，打开text\symbol.py，如图按照划线的List顺序将上面的4个字符串连接即可
 ![image](https://user-images.githubusercontent.com/40709280/183290732-dcb93323-1061-431b-aafa-c285a3ec5e82.png)
 
----
-## Cleaner的设置
+### Cleaner
 ```cxx
 /*
 Cleaner请放置于根目录的Cleaners文件夹内，应该是一个按照要求定义的动态库（.dll），dll应当命名为Cleaner名，Cleaner名即为模型定义Json文件中Cleaner一栏填写的内容。
@@ -406,20 +488,19 @@ wchar_t* PluginMain(wchar_t* input){
 
 ## 本地编译
 ```cxx
-cd MoeVoiceStudioCoreSrc
+git clone https://github.com/NaruseMioShirakana/MoeVoiceStudio.git
+cd MoeVoiceStudio
 mkdir build
 cd build
 cmake ../
 make .
 ```
 
----
 ## 依赖列表
 - [FFmpeg](https://ffmpeg.org/)
 - [World](https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder)
 - [rapidJson](https://github.com/Tencent/rapidjson)
 
----
 ## 📚 相关法规
 
 #### 使用该项目的任何组织或个人都应当遵守包括但不限于以下的法律。
@@ -447,8 +528,10 @@ make .
 
 #### 《[中华人民共和国民法典](http://gongbao.court.gov.cn/Details/51eb6750b8361f79be8f90d09bc202.html)》
 
----
-## 💪 Thanks to all contributors for their efforts
+使用的图像素材来源于：
+- [SummerPockets](http://key.visualarts.gr.jp/summer/)
+
+## 💪 感谢所有贡献者的努力
 <a href="https://github.com/NaruseMioShirakana/MoeSS/graphs/contributors" target="_blank">
   <img src="https://contrib.rocks/image?repo=NaruseMioShirakana/MoeSS" />
 </a>
