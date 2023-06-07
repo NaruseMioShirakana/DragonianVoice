@@ -30,8 +30,9 @@ void MainMenu::on_MainMenuSVCButton_clicked()
 
 void MainMenu::on_MainMenuSVSButton_clicked()
 {
-    _svs.show();
-    hide();
+    //TODO
+    //_svs.show();
+    //hide();
 }
 
 void MainMenu::on_MainMenuInfoAndConfigButton_clicked()

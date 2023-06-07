@@ -46,3 +46,10 @@ void TTSEditor::paintEvent(QPaintEvent* event)
 	ui->TTSEditorScrollArea->update();
 	ui->TTSEditorScrollAreaWidgetContents->update();
 }
+
+void TTSEditor::resizeEvent(QResizeEvent* event)
+{
+	if (ui->TTSEditorScrollArea->width() > ui->TTSEditorScrollAreaWidgetContents->width())
+		ui->TTSEditorScrollAreaWidgetContents->setFixedWidth(ui->TTSEditorScrollArea->width());
+	update();
+}

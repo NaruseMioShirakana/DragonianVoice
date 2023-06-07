@@ -13,7 +13,7 @@ TTSEditorBlock::~TTSEditorBlock()
     delete ui;
 }
 
-std::pair<std::wstring, int64_t> TTSEditorBlock::GetCurInfo() const
+std::wstring TTSEditorBlock::GetCurInfo() const
 {
-	return { ui->TTSEditorBlockLayoutPh->text().toStdWString() , tone };
+	return ui->TTSEditorBlockLayoutPh->text().toStdWString();
 }

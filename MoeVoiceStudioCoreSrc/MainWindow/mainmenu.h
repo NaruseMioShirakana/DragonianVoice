@@ -2,9 +2,9 @@
 #define MAINMENU_H
 
 #include <QDialog>
-#include "SVC/svcmainwindow.h"
 #include "TTS/ttsmainwindow.h"
 #include "SVS/svsmainwindow.h"
+#include "SVC/svcmainwindow.h"
 
 namespace Ui {
 class MainMenu;

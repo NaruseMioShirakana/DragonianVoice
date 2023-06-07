@@ -15,6 +15,7 @@ public:
     ~TTSEditor() override;
     void wheelEvent(QWheelEvent* event) override;
     void paintEvent(QPaintEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
 private:
     Ui::TTSEditor *ui;
 };

@@ -2,7 +2,7 @@
 
 MTTSEditor::MTTSEditor(QWidget* parent) : QWidget(parent)
 {
-    totalDuration = (double)width();
+    pageFrame = width() / pixPerFrame;
 }
 
 void MTTSEditor::paintEvent(QPaintEvent* event)
@@ -17,10 +17,9 @@ void MTTSEditor::paintEvent(QPaintEvent* event)
             painter.fillRect(QRect(QPoint(0, int(BeginPointPos[i] * mheight)), QPoint(mwidth, int(BeginPointPos[i + 1] * mheight))), { 192,192,192 });
     for (size_t i = 0; i < _blocks.size(); ++i)
     {
-        const auto durpc = _durations[i] / totalDuration;
+        const auto durpc = _durations[i] / 100;
         _blocks[i]->setFixedWidth(int(durpc * width()));
         _blocks[i]->setFixedHeight(BlockHeight);
         _blocks[i]->update();
     }
-    update();
 }

@@ -14,14 +14,9 @@ class TTSEditorBlock : public QWidget
 public:
     explicit TTSEditorBlock(QWidget *parent = nullptr);
     ~TTSEditorBlock() override;
-    [[nodiscard]] std::pair<std::wstring, int64_t> GetCurInfo() const;
-    void changeTone(const int64_t tone_)
-    {
-        tone = tone_;
-    }
+    [[nodiscard]] std::wstring GetCurInfo() const;
 private:
     Ui::TTSEditorBlock *ui;
-    int64_t tone = 0;
 };
 
 #endif // TTSEDITORBLOCK_H

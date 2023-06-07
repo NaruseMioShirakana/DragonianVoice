@@ -3,6 +3,7 @@
 
 #include <QDialog>
 
+
 namespace Ui {
 class SVCMainWindow;
 }
@@ -18,6 +19,7 @@ public:
 private:
     Ui::SVCMainWindow *ui;
     const std::function<void(QDialog*)>& exit_callback;
+    //QCustomPlot* F0;
 };
 
 #endif // SVCMAINWINDOW_H

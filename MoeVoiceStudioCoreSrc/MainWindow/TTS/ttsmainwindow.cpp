@@ -6,6 +6,9 @@
 #include <QDragEnterEvent>
 #include <QMimeData>
 #include <thread>
+#include "../../Modules/Models/header/Vits.hpp"
+#include "../../Modules/Models/header/Tacotron.hpp"
+#include "../../Modules/Models/header/Pits.hpp"
 
 TTSMainWindow::TTSMainWindow(const std::function<void(QDialog*)>& _callback, QWidget *parent) :
     QDialog(parent),
@@ -1041,7 +1044,8 @@ void TTSMainWindow::on_SaveProjectButton_clicked()
 
 void TTSMainWindow::on_TTSOpenEditor_clicked()
 {
-    editor.show();
+    //TODO
+    //editor.show();
 }
 
 void TTSMainWindow::on_DictComboBox_currentIndexChanged(int value)

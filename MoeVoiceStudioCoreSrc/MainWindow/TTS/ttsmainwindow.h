@@ -4,9 +4,7 @@
 #include <QDialog>
 #include "../MessageSender.h"
 #include "ui_ttsmainwindow.h"
-#include "../../Modules/Models/header/Vits.hpp"
-#include "../../Modules/Models/header/Pits.hpp"
-#include "../../Modules/Models/header/Tacotron.hpp"
+#include "../../Modules/Models/header/ModelBase.hpp"
 #include "../Controls/Player/player.h"
 #include <QtMultimedia/QMediaPlayer>
 #include <QtMultimedia/QAudioOutput>

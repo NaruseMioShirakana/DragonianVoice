@@ -8,6 +8,8 @@ SVCMainWindow::SVCMainWindow(const std::function<void(QDialog*)>& _callback, QWi
 {
     ui->setupUi(this);
     setWindowFlags(Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
+    //F0 = new QCustomPlot(this);
+    //F0->show();
 }
 
 SVCMainWindow::~SVCMainWindow()
