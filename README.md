@@ -1,5 +1,3 @@
-## 注意：关于UI相关内容请到MoeVoiceStudio分支查看，与本分支略有不同
-
 # MoeVoiceStudio
 | [中文](README.md) | [English](README_en.md)
 
