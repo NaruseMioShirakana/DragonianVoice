@@ -172,16 +172,16 @@ std::vector<std::wstring> InferClass::OnnxModule::CutLens(const std::wstring& in
 void InferClass::OnnxModule::initRegex()
 {
 	std::wstring JsonPath = GetCurrentFolder() + L"\\ParamsRegex.json";
-	std::string JsonData;
 	std::ifstream ParamFiles(JsonPath.c_str());
 	if (ParamFiles.is_open())
 	{
+		std::string JsonData;
 		std::string JsonLine;
 		while (std::getline(ParamFiles, JsonLine))
 			JsonData += JsonLine;
 		ParamFiles.close();
-		rapidjson::Document ConfigJson;
-		ConfigJson.Parse(JsonData.c_str());
+		MJson ConfigJson;
+		ConfigJson.Parse(JsonData);
 		try
 		{
 			std::wstring NoiseScaleStr, NoiseScaleWStr, LengthScaleStr, SeedStr, CharaStr, BeginStr, emoStr, decodeStr, gateStr;
@@ -372,8 +372,8 @@ std::vector<float> InferClass::TTS::GetEmotionVector(std::wstring src) const
 	{
 		long emoId;
 		const auto emoStr = to_byte_string(mat.str());
-		if (!EmoJson[emoStr.c_str()].Empty())
-			emoId = EmoJson[emoStr.c_str()].GetInt();
+		if (!EmoJson[emoStr].Empty())
+			emoId = EmoJson[emoStr].GetInt();
 		else
 			emoId = atoi(emoStr.c_str());
 		auto emoVec = emoLoader[emoId];
@@ -514,6 +514,27 @@ std::vector<int64_t> InferClass::SVC::GetAligments(size_t specLen, size_t hubert
 		startFrame = endFrame + 1;
 	}
 	return mel2ph;
+}
+
+std::vector<float> InferClass::SVC::ExtractVolume(const std::vector<int16_t>& OrgAudio, int hop_size)
+{
+	std::vector<double> Audio;
+	Audio.reserve(OrgAudio.size() * 2);
+	Audio.insert(Audio.end(), hop_size, double(OrgAudio[0]) / 32768.);
+	for (const auto i : OrgAudio)
+		Audio.emplace_back((double)i / 32768.);
+	Audio.insert(Audio.end(), hop_size, double(OrgAudio[OrgAudio.size() - 1]) / 32768.);
+	const size_t n_frames = (OrgAudio.size() / hop_size) + 1;
+	std::vector<float> volume(n_frames);
+	for (auto& i : Audio)
+		i = pow(i, 2);
+	int64_t index = 0;
+	for (auto& i : volume)
+	{
+		i = sqrt((float)getAvg(Audio.begin()._Ptr + index * hop_size, Audio.begin()._Ptr + (index + 1) * hop_size));
+		++index;
+	}
+	return volume;
 }
 
 std::vector<float> InferClass::SVC::ExtractVolume(const std::vector<double>& OrgAudio) const
@@ -764,22 +785,22 @@ void InferClass::MVSDict::GetDict(const std::wstring& path)
 	while (std::getline(phonefile, phoneInfo))
 		phoneInfoAll += phoneInfo;
 	phonefile.close();
-	rapidjson::Document PhoneJson;
-	PhoneJson.Parse(phoneInfoAll.c_str());
+	MJson PhoneJson;
+	PhoneJson.Parse(phoneInfoAll);
 	if (PhoneJson.HasParseError())
 		throw std::exception("json file error");
-	for (auto itr = PhoneJson.MemberBegin(); itr != PhoneJson.MemberEnd(); ++itr)
+	for (const auto& itr : PhoneJson.GetMemberArray())
 	{
-		std::wstring Key = to_wide_string(itr->name.GetString());
-		if(Key == L"PlaceholderSymbol")
+		std::wstring Key = to_wide_string(itr.first);
+		if (Key == L"PlaceholderSymbol")
 		{
-			if (itr->value.IsString() && itr->value.GetStringLength())
-				PlaceholderSymbol = to_wide_string(itr->value.GetString());
+			if (itr.second.IsString() && itr.second.GetStringLength())
+				PlaceholderSymbol = to_wide_string(itr.second.GetString());
 			if (PlaceholderSymbol.length() > 1)
 				PlaceholderSymbol = L"|";
 			continue;
 		}
-		const auto Value = itr->value.GetArray();
+		const auto Value = itr.second.GetArray();
 		_Dict[Key] = std::vector<std::wstring>();
 		for (const auto& it : Value)
 			_Dict[Key].push_back(to_wide_string(it.GetString()));
@@ -831,4 +852,9 @@ std::wstring InferClass::MVSDict::DictReplaceGetStr(const std::wstring& input, c
 		else
 			output += i;
 	return output;
+}
+
+std::vector<int16_t> InferClass::SVC::InferCurAudio(MoeVSProject::Params& input_audio_infer)
+{
+	throw std::exception("Base class");
 }

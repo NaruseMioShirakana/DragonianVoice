@@ -11,12 +11,7 @@
 #include "../../Logger/MoeSSLogger.hpp"
 #include "../../DataStruct/KDTree.hpp"
 #include "../../InferTools/Project.hpp"
-#ifdef max
-#undef max
-#include "rapidjson.h"
-#include "document.h"
-#define max(a,b)            (((a) > (b)) ? (a) : (b))
-#endif
+#include "MJson.h"
 #include <map>
 #define INFERCLASSHEADER namespace InferClass{
 #define INFERCLASSEND }
@@ -363,7 +358,7 @@ protected:
 	
 	EmoLoader emoLoader;
 	std::string emoStringa;
-	rapidjson::Document EmoJson;
+	MJson EmoJson;
 };
 
 class Kmeans
@@ -407,7 +402,28 @@ class SVC : public OnnxModule
 public:
 	SVC() = default;
 
+	virtual std::vector<int16_t> InferCurAudio(MoeVSProject::Params& input_audio_infer);
+
 	std::vector<MoeVSProject::Params> GetSvcParam(std::wstring& RawPath) const;
+
+	[[nodiscard]] std::vector<float> GetOrgF0(const std::vector<double>& _OrgAudio) const
+	{
+		auto F0Extractor = F0PreProcess(_samplingRate, short(hop));
+		return F0Extractor.GetOrgF0(_OrgAudio.data(), int64_t(_OrgAudio.size()), int64_t(_OrgAudio.size() / hop) + 1, 0);
+	}
+
+	[[nodiscard]] std::vector<float> GetInitSpkMixVec(const std::vector<double>& _OrgAudio) const
+	{
+		if (n_speaker < 1)
+			return {};
+		std::vector<float> _LenData(n_speaker, 0.0), rtn_vector;
+		_LenData[0] = 1.0;
+		const size_t Length = (_OrgAudio.size() / hop) + 1;
+		rtn_vector.reserve(n_speaker * Length);
+		for (size_t i = 0; i < Length; ++i)
+			rtn_vector.insert(rtn_vector.end(), _LenData.begin(), _LenData.end());
+		return rtn_vector;
+	}
 
 	[[nodiscard]] std::vector<int64_t> GetNSFF0(const std::vector<float>&) const;
 
@@ -417,31 +433,34 @@ public:
 
 	static std::vector<int64_t> GetAligments(size_t, size_t);
 
-	template<typename T>
-	static std::vector<T> InterpResample(const std::vector<int16_t>& PCMData, long src, long dst)
+	template<typename TOut, typename TIn>
+	static std::vector<TOut> InterpResample(const std::vector<TIn>& _Data, long src, long dst, TOut n_Div = TOut(1))
 	{
 		if (src != dst)
 		{
 			const double intstep = double(src) / double(dst);
-			const auto xi = arange(0, double(PCMData.size()), intstep);
-			auto x0 = arange(0, double(PCMData.size()));
-			while (x0.size() < PCMData.size())
+			const auto xi = arange(0, double(_Data.size()), intstep);
+			auto x0 = arange(0, double(_Data.size()));
+			while (x0.size() < _Data.size())
 				x0.emplace_back(x0[x0.size() - 1] + 1.0);
-			while (x0.size() > PCMData.size())
+			while (x0.size() > _Data.size())
 				x0.pop_back();
-			std::vector<double> y0(PCMData.size());
-			for (size_t i = 0; i < PCMData.size(); ++i)
-				y0[i] = double(PCMData[i]) / 32768.0;
+
+			std::vector<double> y0(_Data.size());
+			for (size_t i = 0; i < _Data.size(); ++i)
+				y0[i] = double(_Data[i]) / double(n_Div);
+
 			std::vector<double> yi(xi.size());
 			interp1(x0.data(), y0.data(), long(x0.size()), xi.data(), long(xi.size()), yi.data());
-			std::vector<T> out(xi.size());
+
+			std::vector<TOut> out(xi.size());
 			for (size_t i = 0; i < yi.size(); ++i)
-				out[i] = T(yi[i]);
+				out[i] = TOut(yi[i]);
 			return out;
 		}
-		std::vector<T> out(PCMData.size());
-		for (size_t i = 0; i < PCMData.size(); ++i)
-			out[i] = T(PCMData[i]) / (T)(32768.0);
+		std::vector<TOut> out(_Data.size());
+		for (size_t i = 0; i < _Data.size(); ++i)
+			out[i] = TOut(_Data[i]) / n_Div;
 		return out;
 	}
 
@@ -473,6 +492,8 @@ public:
 		}
 		return Data;
 	}
+
+	[[nodiscard]] static std::vector<float> ExtractVolume(const std::vector<int16_t>& OrgAudio, int hop_size);
 
 	[[nodiscard]] std::vector<float> ExtractVolume(const std::vector<double>& OrgAudio) const;
 
@@ -506,6 +527,28 @@ public:
 	[[nodiscard]] int64_t GetNSpeaker() const
 	{
 		return n_speaker;
+	}
+
+	std::vector<float> GetCurrectSpkMixData(const std::vector<float>& srcData, size_t src_dur_frame, size_t dst_dur_frame) const
+	{
+		if (n_speaker < 2 || srcData.empty())
+			return {};
+		size_t t_n_spk;
+		if (srcData[0] > 1.5f)
+			t_n_spk = (size_t)ceil(srcData[0]);
+		else
+			return {};
+		if (t_n_spk == size_t(n_speaker))
+		{
+			std::vector<float> SpkMixData;
+			SpkMixData.reserve(n_speaker * dst_dur_frame);
+			auto alig = getAligments(dst_dur_frame, src_dur_frame);
+			alig.resize(dst_dur_frame);
+			for (const auto i : alig)
+				SpkMixData.insert(SpkMixData.end(), srcData.data() + 1 + i * n_speaker, srcData.data() + 1 + (i + 1) * n_speaker);
+			return SpkMixData;
+		}
+		return {};
 	}
 	~SVC() override = default;
 protected:

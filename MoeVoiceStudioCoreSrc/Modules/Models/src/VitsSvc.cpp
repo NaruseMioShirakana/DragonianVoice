@@ -15,7 +15,7 @@ VitsSvc::~VitsSvc()
 	logger.log(L"[Info] VitsSvc Models unloaded");
 }
 
-VitsSvc::VitsSvc(const rapidjson::Document& _config, const callback& _cb, const callback_params& _mr, Device _dev)
+VitsSvc::VitsSvc(const MJson& _config, const callback& _cb, const callback_params& _mr, Device _dev)
 {
 	if(_config["Type"].GetString() == std::string("RVC"))
 		_modelType = modelType::RVC;
@@ -42,22 +42,6 @@ VitsSvc::VitsSvc(const rapidjson::Document& _config, const callback& _cb, const 
 	const std::wstring HuPath = to_wide_string(_config["Hubert"].GetString());
 	if (HuPath.empty())
 		throw std::exception("[Error] Field \"Hubert\" (Hubert Folder) Can Not Be Empty");
-
-	//LoadModels
-	try
-	{
-		logger.log(L"[Info] loading VitsSvcModel Models");
-		hubert = new Ort::Session(*env, (GetCurrentFolder() + L"\\hubert\\" + HuPath + L".onnx").c_str(), *session_options);
-		if (_modelType == modelType::RVC)
-			VitsSvcModel = new Ort::Session(*env, (_path + L"_RVC.onnx").c_str(), *session_options);
-		else
-			VitsSvcModel = new Ort::Session(*env, (_path + L"_SoVits.onnx").c_str(), *session_options);
-		logger.log(L"[Info] VitsSvcModel Models loaded");
-	}
-	catch (Ort::Exception& _exception)
-	{
-		throw std::exception(_exception.what());
-	}
 
 	//Check SamplingRate
 	if (_config["Rate"].IsNull())
@@ -104,13 +88,6 @@ VitsSvc::VitsSvc(const rapidjson::Document& _config, const callback& _cb, const 
 	if(hop < 1)
 		throw std::exception("[Error] Hop Must > 0");
 
-	if (SV4)
-	{
-		const auto nameinp = VitsSvcModel->GetInputNameAllocated(3, allocator);
-		const std::string inpname = nameinp.get();
-		SVV2 = inpname != "uv";
-	}
-
 	if (_config["Volume"].IsBool())
 		VolumeB = _config["Volume"].GetBool();
 	else
@@ -121,6 +98,33 @@ VitsSvc::VitsSvc(const rapidjson::Document& _config, const callback& _cb, const 
 
 	_callback = _cb;
 	_get_init_params = _mr;
+
+	//LoadModels
+	try
+	{
+		logger.log(L"[Info] loading VitsSvcModel Models");
+		hubert = new Ort::Session(*env, (GetCurrentFolder() + L"\\hubert\\" + HuPath + L".onnx").c_str(), *session_options);
+		if (_modelType == modelType::RVC)
+			VitsSvcModel = new Ort::Session(*env, (_path + L"_RVC.onnx").c_str(), *session_options);
+		else
+			VitsSvcModel = new Ort::Session(*env, (_path + L"_SoVits.onnx").c_str(), *session_options);
+		logger.log(L"[Info] VitsSvcModel Models loaded");
+	}
+	catch (Ort::Exception& _exception)
+	{
+		delete VitsSvcModel;
+		VitsSvcModel = nullptr;
+		delete hubert;
+		hubert = nullptr;
+		throw std::exception(_exception.what());
+	}
+
+	if (SV4)
+	{
+		const auto nameinp = VitsSvcModel->GetInputNameAllocated(3, allocator);
+		const std::string inpname = nameinp.get();
+		SVV2 = inpname != "uv";
+	}
 }
 
 //已弃用（旧MoeSS的推理函数）
@@ -1056,5 +1060,256 @@ void VitsSvc::EndRT()
 }
 #endif
 #endif
+
+std::vector<int16_t> VitsSvc::InferCurAudio(MoeVSProject::Params& input_audio_infer)
+{
+	const auto params = _get_init_params();
+	int64_t charEmb = params.chara;
+	std::mt19937 gen(int(params.seed));
+	std::normal_distribution<float> normal(0, 1);
+	float noise_scale = params.noise_scale;
+	float ddsp_noise_scale = params.noise_scale_w;
+
+	if (!input_audio_infer.paths.empty())
+		logger.log(L"[Inferring] Inferring \"" + input_audio_infer.paths + L'\"');
+	size_t proc = 0;
+	const auto Total_Slice_Count = input_audio_infer.F0.size();
+	_callback(proc, Total_Slice_Count);
+	logger.log(L"[Inferring] Inferring \"" + input_audio_infer.paths + L"\" Svc");
+
+	std::vector<int16_t> _data;
+	size_t total_audio_size = 0;
+	for (const auto& data_size : input_audio_infer.OrgLen)
+		total_audio_size += data_size;
+	_data.reserve(size_t(double(total_audio_size) * 1.5));
+	for (size_t slice = 0; slice < Total_Slice_Count; ++slice)
+	{
+		if (input_audio_infer.symbolb[slice])
+		{
+			auto RawWav = InterpResample(input_audio_infer.OrgAudio[slice], 48000, 16000, 32768.0f);
+			const int64_t HubertInputShape[3] = { 1i64,1i64,(int64_t)RawWav.size() };
+			std::vector<Ort::Value> HubertInputTensors, HubertOutPuts;
+			HubertInputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, RawWav.data(), RawWav.size(), HubertInputShape, 3));
+			try {
+				HubertOutPuts = hubert->Run(Ort::RunOptions{ nullptr },
+					hubertInput.data(),
+					HubertInputTensors.data(),
+					HubertInputTensors.size(),
+					hubertOutput.data(),
+					hubertOutput.size());
+			}
+			catch (Ort::Exception& e)
+			{
+				throw std::exception((std::string("Locate: hubert\n") + e.what()).c_str());
+			}
+			auto HubertSize = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetElementCount();
+			auto HubertOutPutData = HubertOutPuts[0].GetTensorMutableData<float>();
+			auto HubertOutPutShape = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetShape();
+
+			if (HubertOutPutShape[2] != Hidden_Size)
+				throw std::exception("Hidden Size UnMatch");
+			
+			std::vector srcHiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
+
+			if (KMenas_Stat && params.kmeans_rate > 0.001f)
+			{
+				for (int64_t indexs = 0; indexs < HubertOutPutShape[1]; ++indexs)
+				{
+					const auto curbeg = srcHiddenUnits.data() + indexs * HubertOutPutShape[2];
+					const auto curend = srcHiddenUnits.data() + (indexs + 1) * HubertOutPutShape[2];
+					const auto hu = kmeans_->find({ curbeg ,curend }, long(params.chara));
+					for (int64_t ind = 0; ind < HubertOutPutShape[2]; ++ind)
+						*(curbeg + ind) = *(curbeg + ind) * (1.f - params.kmeans_rate) + hu[ind] * params.kmeans_rate;
+				}
+			}
+
+			const auto HubertLen = int64_t(HubertSize) / Hidden_Size;
+			int64_t F0Shape[] = { 1, int64_t(input_audio_infer.OrgAudio[slice].size() * _samplingRate / 48000 / hop) };
+			int64_t HiddenUnitShape[] = { 1, HubertLen, Hidden_Size };
+			constexpr int64_t LengthShape[] = { 1 };
+			int64_t CharaEmbShape[] = { 1 };
+			int64_t CharaMixShape[] = { F0Shape[1], n_speaker };
+			int64_t RandnShape[] = { 1, 192, F0Shape[1] };
+			const int64_t IstftShape[] = { 1, 2048, F0Shape[1] };
+			int64_t RandnCount = F0Shape[1] * 192;
+			const int64_t IstftCount = F0Shape[1] * 2048;
+
+			std::vector<float> RandnInput, IstftInput, UV, InterpedF0;
+			std::vector<int64_t> alignment;
+			int64_t XLength[1] = { HubertLen };
+			std::vector<int64_t> Nsff0;
+			auto SoVitsInput = soVitsInput;
+			int64_t Chara[] = { charEmb };
+			std::vector<float> charaMix;
+			
+			const auto& srcF0Data = input_audio_infer.F0[slice];
+			std::vector<float> HiddenUnits;
+			std::vector<float> F0Data;
+
+			//Compatible with all versions
+			if (SV3)
+			{
+				int64_t upSample = _samplingRate / 16000;
+				HiddenUnits.reserve(HubertSize * (upSample + 1));
+				for (int64_t itS = 0; itS < HiddenUnitShape[1]; ++itS)
+					for (int64_t itSS = 0; itSS < upSample; ++itSS)
+						HiddenUnits.insert(HiddenUnits.end(), srcHiddenUnits.begin() + itS * 256, srcHiddenUnits.begin() + (itS + 1) * 256);
+				HiddenUnitShape[1] *= upSample;
+				HubertSize *= upSample;
+				F0Data = GetInterpedF0(InterpFunc(srcF0Data, long(srcF0Data.size()), long(HiddenUnitShape[1])));
+				F0Shape[1] = HiddenUnitShape[1];
+				XLength[0] = HiddenUnitShape[1];
+			}
+			else if (SV4)
+			{
+				HiddenUnits = std::move(srcHiddenUnits);
+				F0Data = InterpFunc(srcF0Data, long(srcF0Data.size()), long(F0Shape[1]));
+			}
+			else if (_modelType == modelType::RVC)
+			{
+				constexpr int64_t upSample = 2;
+				HiddenUnits.reserve(HubertSize * (upSample + 1));
+				for (int64_t itS = 0; itS < HiddenUnitShape[1]; ++itS)
+					for (int64_t itSS = 0; itSS < upSample; ++itSS)
+						HiddenUnits.insert(HiddenUnits.end(), srcHiddenUnits.begin() + itS * 256, srcHiddenUnits.begin() + (itS + 1) * 256);
+				HiddenUnitShape[1] *= upSample;
+				HubertSize *= upSample;
+				F0Data = InterpFunc(srcF0Data, long(srcF0Data.size()), long(HiddenUnitShape[1]));
+				F0Shape[1] = HiddenUnitShape[1];
+				XLength[0] = HiddenUnitShape[1];
+				RandnCount = 192 * F0Shape[1];
+				RandnShape[2] = F0Shape[1];
+			}
+			else
+			{
+				HiddenUnits = std::move(srcHiddenUnits);
+				F0Shape[1] = HiddenUnitShape[1];
+				F0Data = InterpFunc(srcF0Data, long(srcF0Data.size()), long(HiddenUnitShape[1]));
+				XLength[0] = HiddenUnitShape[1];
+			}
+
+			//Construct Input Tensors
+			std::vector<Ort::Value> inputTensors;
+			inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, HiddenUnits.data(), HubertSize, HiddenUnitShape, 3));
+			if (!SV4)
+				inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, XLength, 1, LengthShape, 1));
+			if (SV3)
+				inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, F0Data.data(), F0Data.size(), F0Shape, 2));
+			else if (SV4)
+			{
+				InterpedF0 = GetInterpedF0(F0Data);
+				alignment = GetAligments(F0Shape[1], HubertLen);
+				inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, InterpedF0.data(), InterpedF0.size(), F0Shape, 2));
+				inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, alignment.data(), InterpedF0.size(), F0Shape, 2));
+				if (!SVV2)
+				{
+					UV = GetUV(F0Data);
+					SoVitsInput = { "c", "f0", "mel2ph", "uv", "noise", "sid" };
+					inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, UV.data(), UV.size(), F0Shape, 2));
+				}
+				else
+				{
+					SoVitsInput = { "c", "f0", "mel2ph", "t_window", "noise", "sid" };
+					IstftInput = std::vector<float>(IstftCount, ddsp_noise_scale);
+					inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, IstftInput.data(), IstftInput.size(), IstftShape, 3));
+				}
+				RandnInput = std::vector<float>(RandnCount, 0.f);
+				for (auto& it : RandnInput)
+					it = normal(gen) * noise_scale;
+				inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, RandnInput.data(), RandnCount, RandnShape, 3));
+			}
+			else if (_modelType == modelType::RVC)
+			{
+				InterpedF0 = GetInterpedF0(F0Data);
+				Nsff0 = GetNSFF0(InterpedF0);
+				inputTensors.emplace_back(Ort::Value::CreateTensor<long long>(*memory_info, Nsff0.data(), Nsff0.size(), F0Shape, 2));
+				inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, InterpedF0.data(), InterpedF0.size(), F0Shape, 2));
+				SoVitsInput = RVCInput;
+				RandnInput = std::vector<float>(RandnCount, 0.f);
+				for (auto& it : RandnInput)
+					it = normal(gen) * noise_scale;
+			}
+			else
+			{
+				Nsff0 = GetNSFF0(F0Data);
+				inputTensors.emplace_back(Ort::Value::CreateTensor<long long>(*memory_info, Nsff0.data(), Nsff0.size(), F0Shape, 2));
+			}
+
+			if (CharaMix)
+			{
+				if (n_speaker > 1)
+					charaMix = GetCurrectSpkMixData(input_audio_infer.Speaker[slice], input_audio_infer.F0[slice].size(), F0Shape[1]);
+				CharaMixShape[0] = F0Shape[1];
+				if(charaMix.empty())
+				{
+					std::vector charaMap(n_speaker, 0.f);
+					charaMap[params.chara] = 1.f;
+					charaMix.reserve((n_speaker + 1) * F0Shape[1]);
+					for (int64_t index = 0; index < F0Shape[1]; ++index)
+						charaMix.insert(charaMix.end(), charaMap.begin(), charaMap.end());
+				}
+				inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, charaMix.data(), charaMix.size(), CharaMixShape, 2));
+			}
+			else
+				inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, Chara, 1, CharaEmbShape, 1));
+
+			if (_modelType == modelType::RVC)
+				inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, RandnInput.data(), RandnCount, RandnShape, 3));
+
+			std::vector<float> VolumeData;
+
+			if (VolumeB)
+			{
+				VolumeData = InterpFunc(input_audio_infer.Volume[slice], long(input_audio_infer.Volume[slice].size()), long(F0Shape[1]));
+				inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, VolumeData.data(), UV.size(), F0Shape, 2));
+			}
+
+			//Inference
+			std::vector<Ort::Value> finaOut;
+			try
+			{
+				finaOut = VitsSvcModel->Run(Ort::RunOptions{ nullptr },
+					SoVitsInput.data(),
+					inputTensors.data(),
+					inputTensors.size(),
+					soVitsOutput.data(),
+					soVitsOutput.size());
+			}
+			catch (Ort::Exception& e)
+			{
+				throw std::exception((std::string("Locate: sovits\n") + e.what()).c_str());
+			}
+
+			const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();
+			const auto dstWavLen = (input_audio_infer.OrgLen[slice] * int64_t(_samplingRate)) / 48000;
+			std::vector<int16_t> TempVecWav(dstWavLen, 0);
+			if (shapeOut[2] < dstWavLen)
+			{
+				for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
+					TempVecWav[bbb] = static_cast<int16_t>(finaOut[0].GetTensorData<float>()[bbb] * 32768.0f);
+			}
+			else
+			{
+				for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
+					TempVecWav[bbb] = static_cast<int16_t>(finaOut[0].GetTensorData<float>()[bbb] * 32768.0f);
+			}
+			_data.insert(_data.end(), TempVecWav.data(), TempVecWav.data() + (dstWavLen));
+		}
+		else
+		{
+			//Mute clips
+			const auto len = input_audio_infer.OrgLen[slice] * int64_t(_samplingRate) / 48000;
+			const auto data = new int16_t[len];
+			memset(data, 0, int64_t(len) * 2);
+			_data.insert(_data.end(), data, data + len);
+			delete[] data;
+		}
+		_callback(++proc, Total_Slice_Count);
+	}
+	logger.log(L"[Inferring] \"" + input_audio_infer.paths + L"\" Finished");
+
+	logger.log(L"[Info] Finished, Send To FrontEnd");
+	return _data;
+}
 
 INFERCLASSEND

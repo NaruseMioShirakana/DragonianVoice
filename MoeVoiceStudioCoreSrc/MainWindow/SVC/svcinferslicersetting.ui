@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>SvcInferSlicerSetting</class>
+ <widget class="QWidget" name="SvcInferSlicerSetting">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>300</width>
+    <height>100</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>300</width>
+    <height>100</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>300</width>
+    <height>100</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0">
+    <layout class="QGridLayout" name="SvcInferSlicerSettingLayout">
+     <item row="2" column="0">
+      <widget class="QLabel" name="SvcInferSlicerSettingWindowSize">
+       <property name="text">
+        <string>WindowSize</string>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLabel" name="SvcInferSlicerSettingHopSize">
+       <property name="text">
+        <string>HopSize</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0">
+      <widget class="QDoubleSpinBox" name="SvcInferSlicerSettingThrSpinBox">
+       <property name="minimum">
+        <double>20.000000000000000</double>
+       </property>
+       <property name="maximum">
+        <double>300.000000000000000</double>
+       </property>
+       <property name="value">
+        <double>30.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLabel" name="SvcInferSlicerSettingMinLength">
+       <property name="text">
+        <string>SvcInferSlicerSettingMinLength</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="SvcInferSlicerSettingThr">
+       <property name="text">
+        <string>SvcInferSlicerSettingThr</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QSpinBox" name="SvcInferSlicerSettingMinLengthSpinBox">
+       <property name="minimum">
+        <number>3</number>
+       </property>
+       <property name="maximum">
+        <number>10</number>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0">
+      <widget class="QSpinBox" name="SvcInferSlicerSettingWindowSizeSpinBox">
+       <property name="minimum">
+        <number>2048</number>
+       </property>
+       <property name="maximum">
+        <number>10240</number>
+       </property>
+       <property name="singleStep">
+        <number>512</number>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QSpinBox" name="SvcInferSlicerSettingHopSizeSpinBox">
+       <property name="minimum">
+        <number>256</number>
+       </property>
+       <property name="maximum">
+        <number>2048</number>
+       </property>
+       <property name="singleStep">
+        <number>256</number>
+       </property>
+       <property name="value">
+        <number>512</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

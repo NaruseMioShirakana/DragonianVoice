@@ -218,6 +218,59 @@ cutResult cutWav(std::vector<int16_t>& input, long bps, double threshold, unsign
     return { std::move(output),std::move(tag) };
 }
 
+std::pair<std::vector<size_t>, std::vector<bool>> SliceAudio(const std::vector<int16_t>& input, long samplingRate, double threshold, unsigned long minLen, unsigned short frame_len, unsigned short frame_shift)
+{
+    if (input.size() < size_t(minLen) * samplingRate)
+        return { {0, input.size()},{true} };
+    const auto i_begin = input.data();
+    auto i_ptr = input.data();
+    std::vector<unsigned long long> slice_point;
+    std::vector<bool> mute_tag;
+    auto n = (input.size() / frame_shift) - 2ull * (frame_len / frame_shift);
+    unsigned long nn = 0;
+    bool slice_tag = true;
+    slice_point.emplace_back(0);
+    while (n--)
+    {
+        if (slice_tag)
+        {
+            const auto vol = abs(getAvg(i_ptr, i_ptr + frame_len));
+            if (vol < threshold)
+            {
+                slice_tag = false;
+                if (nn > minLen * samplingRate)
+                {
+                    nn = 0;
+                    slice_point.emplace_back((i_ptr - i_begin) + (frame_len / 2));
+                }
+            }
+            else
+                slice_tag = true;
+        }
+        else
+        {
+            const auto vol = abs(getAvg(i_ptr, i_ptr + frame_len));
+            if (vol < threshold)
+                slice_tag = false;
+            else
+            {
+                slice_tag = true;
+                if (nn > minLen * samplingRate)
+                {
+                    nn = 0;
+                    slice_point.emplace_back((i_ptr - i_begin) + (frame_len / 2));
+                }
+            }
+        }
+        nn += frame_shift;
+        i_ptr += frame_shift;
+    }
+    slice_point.push_back(input.size());
+    for (size_t i = 1; i < slice_point.size(); i++)
+        mute_tag.push_back(abs(getAvg((i_begin + slice_point[i - 1]), (i_begin + slice_point[i]))) > threshold);
+    return { std::move(slice_point),std::move(mute_tag) };
+}
+
 void F0PreProcess::compute_f0(const double* audio, int64_t len)
 {
     DioOption Doption;

@@ -6,7 +6,7 @@ INFERCLASSHEADER
 class Tacotron2 : public TTS
 {
 public:
-    Tacotron2(const rapidjson::Document&, const callback&, const callback_params&, const DurationCallback&, Device _dev = Device::CPU);
+    Tacotron2(const MJson&, const callback&, const callback_params&, const DurationCallback&, Device _dev = Device::CPU);
 
 	~Tacotron2() override;
 

@@ -28,10 +28,7 @@ MoeVSProject::MoeVSProject::MoeVSProject(const std::wstring& _path)
     fseek(project_file, long(_data_begin), SEEK_SET);
     for(const auto& i : data_pos_)
     {
-        if (i == data_pos_[moevs_proj_header_.DataHeaderAmount])
-            break;
         Data _datas;
-
 
         //Header
         if (fread(&_datas.Header, 1, sizeof(DataHeader), project_file) != sizeof(DataHeader))
@@ -41,18 +38,18 @@ MoeVSProject::MoeVSProject::MoeVSProject(const std::wstring& _path)
 
 
         //HiddenUnit
-        if (_datas.Header.HiddenUnitOffsetPosSize != 0) {
-            _datas.Offset.Hidden_Unit = std::vector<size_type>(_datas.Header.HiddenUnitOffsetPosSize);
-            _n_bytes = sizeof(size_type) * _datas.Header.HiddenUnitOffsetPosSize;
-            if (fread(_datas.Offset.Hidden_Unit.data(), 1, _n_bytes, project_file) != _n_bytes)
+        if (_datas.Header.OrgAudioOffsetPosSize != 0) {
+            _datas.Offset.OrgAudio = std::vector<size_type>(_datas.Header.OrgAudioOffsetPosSize);
+            _n_bytes = sizeof(size_type) * _datas.Header.OrgAudioOffsetPosSize;
+            if (fread(_datas.Offset.OrgAudio.data(), 1, _n_bytes, project_file) != _n_bytes)
                 throw std::exception("Unexpected EOF");
-            for (const auto& j : _datas.Offset.Hidden_Unit)
+            for (const auto& j : _datas.Offset.OrgAudio)
             {
-                std::vector<float> hs_vector(j);
-                _n_bytes = sizeof(float) * j;
+                std::vector<int16_t> hs_vector(j);
+                _n_bytes = sizeof(int16_t) * j;
                 if (fread(hs_vector.data(), 1, _n_bytes, project_file) != _n_bytes)
                     throw std::exception("Unexpected EOF");
-                _datas.ParamData.Hidden_Unit.emplace_back(std::move(hs_vector));
+                _datas.ParamData.OrgAudio.emplace_back(std::move(hs_vector));
             }
         }
 
@@ -147,9 +144,8 @@ MoeVSProject::MoeVSProject::MoeVSProject(const std::wstring& _path)
     fclose(project_file);
 }
 
-MoeVSProject::MoeVSProject::MoeVSProject(const std::vector<Params>& _params, uint16_t HiddenSize)
+MoeVSProject::MoeVSProject::MoeVSProject(const std::vector<Params>& _params)
 {
-    moevs_proj_header_.HiddenSize = HiddenSize;
     moevs_proj_header_.DataHeaderAmount = size_type(_params.size());
     data_chunk_begin_ = sizeof(Header) + sizeof(size_type) * (moevs_proj_header_.DataHeaderAmount);
     data_pos_.push_back(0);
@@ -159,9 +155,9 @@ MoeVSProject::MoeVSProject::MoeVSProject(const std::vector<Params>& _params, uin
         Data _data;
         _data.ParamData = i;
 
-        for(const auto& hidden_unit : i.Hidden_Unit)
-            _data.Offset.Hidden_Unit.push_back(hidden_unit.size());
-        _data.Header.HiddenUnitOffsetPosSize = _data.Offset.Hidden_Unit.size();
+        for(const auto& hidden_unit : i.OrgAudio)
+            _data.Offset.OrgAudio.push_back(hidden_unit.size());
+        _data.Header.OrgAudioOffsetPosSize = _data.Offset.OrgAudio.size();
 
         for (const auto& f0 : i.F0)
             _data.Offset.F0.push_back(f0.size());
@@ -213,9 +209,9 @@ void MoeVSProject::MoeVSProject::Write(const std::wstring& _path) const
         fwrite(&i.Header, 1, sizeof(DataHeader), project_file);
 
 
-        fwrite(i.Offset.Hidden_Unit.data(), 1, sizeof(size_type) * i.Offset.Hidden_Unit.size(), project_file);
-        for (const auto& hidden_unit : i.ParamData.Hidden_Unit)
-            fwrite(hidden_unit.data(), 1, hidden_unit.size() * sizeof(float), project_file);
+        fwrite(i.Offset.OrgAudio.data(), 1, sizeof(size_type) * i.Offset.OrgAudio.size(), project_file);
+        for (const auto& hidden_unit : i.ParamData.OrgAudio)
+            fwrite(hidden_unit.data(), 1, hidden_unit.size() * sizeof(int16_t), project_file);
 
 
         fwrite(i.Offset.F0.data(), 1, sizeof(size_type) * i.Offset.F0.size(), project_file);

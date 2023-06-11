@@ -6,7 +6,7 @@ INFERCLASSHEADER
 class Pits : public TTS
 {
 public:
-    Pits(const rapidjson::Document&, const callback&, const callback_params&, const DurationCallback&, Device _dev = Device::CPU);
+    Pits(const MJson&, const callback&, const callback_params&, const DurationCallback&, Device _dev = Device::CPU);
 
 	~Pits() override;
 

@@ -6,7 +6,7 @@ INFERCLASSHEADER
 class Vits : public TTS
 {
 public:
-    Vits(const rapidjson::Document&, const callback&, const callback_params&, const DurationCallback&, Device _dev = Device::CPU);
+    Vits(const MJson&, const callback&, const callback_params&, const DurationCallback&, Device _dev = Device::CPU);
 
 	~Vits() override;
 

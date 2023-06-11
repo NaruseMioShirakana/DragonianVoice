@@ -1,18 +1,791 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>SVCMainWindow</class>
- <widget name="SVCMainWindow" class="QDialog">
+ <widget class="QMainWindow" name="SVCMainWindow">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>1280</width>
+    <height>800</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1024</width>
+    <height>768</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <widget class="QWidget" name="SvcCentralwidget">
+   <layout class="QGridLayout" name="gridLayout_2">
+    <item row="0" column="0">
+     <layout class="QGridLayout" name="SvcCentralwidgetGridLayout">
+      <property name="spacing">
+       <number>4</number>
+      </property>
+      <item row="0" column="1">
+       <widget class="QGroupBox" name="SvcModelSelectorGroupBox">
+        <property name="minimumSize">
+         <size>
+          <width>150</width>
+          <height>100</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>150</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>SvcModelSelectorGroupBox</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="0" column="0">
+          <layout class="QGridLayout" name="SvcModelSelectorGroupBoxGridLayout">
+           <item row="0" column="2">
+            <widget class="QPushButton" name="vcReLoadModelButton">
+             <property name="text">
+              <string>vcReLoadModelButton</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QPushButton" name="vcLoadModelButton">
+             <property name="text">
+              <string>vcLoadModelButton</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QComboBox" name="SvcModelSelector">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>0</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QComboBox" name="SvcCharacterSelector">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QPushButton" name="SvcOpenModelFolderButton">
+             <property name="text">
+              <string>SvcOpenModelFolderButton</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="2" column="1" colspan="2">
+       <widget class="QGroupBox" name="SvcPlayerGroupBox">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>100</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>200</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>SvcPlayerGroupBox</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_9">
+         <item row="0" column="0">
+          <layout class="QGridLayout" name="SvcPlayerGroupBoxGridLayout">
+           <item row="2" column="1">
+            <spacer name="SvcPlayerhorizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Expanding</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="5" rowspan="2">
+            <widget class="QSlider" name="SvcPlayerVolumeSlider">
+             <property name="maximum">
+              <number>100</number>
+             </property>
+             <property name="value">
+              <number>80</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="5">
+            <widget class="QPushButton" name="SvcPlayerMuteButton">
+             <property name="maximumSize">
+              <size>
+               <width>18</width>
+               <height>18</height>
+              </size>
+             </property>
+             <property name="text">
+              <string notr="true">M</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="3">
+            <spacer name="SvcPlayerhorizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="2" column="2">
+            <widget class="QPushButton" name="SvcPlayerPlayButton">
+             <property name="maximumSize">
+              <size>
+               <width>18</width>
+               <height>18</height>
+              </size>
+             </property>
+             <property name="text">
+              <string notr="true">P</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="SvcPlayerCurTimeLabel">
+             <property name="text">
+              <string notr="true">00:00</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="4">
+            <widget class="QLabel" name="SvcPlayerTotalTimeLabel">
+             <property name="text">
+              <string notr="true">00:00</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1" colspan="3">
+            <widget class="QSlider" name="SvcPlayerPlayPosHorizontalSlider">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1" colspan="3">
+            <widget class="waveWidget" name="SvcPlayerWaveWidget" native="true"/>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="1" colspan="2">
+       <widget class="QGroupBox" name="SvcEditorGroupBox">
+        <property name="title">
+         <string>SvcEditorGroupBox</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_3">
+         <item row="0" column="0">
+          <layout class="QGridLayout" name="SvcEditorWidgetLayout">
+           <item row="0" column="0">
+            <widget class="MCurveEditor" name="SvcEditorWidget" native="true">
+             <property name="minimumSize">
+              <size>
+               <width>500</width>
+               <height>0</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="3">
+       <widget class="QGroupBox" name="SvcPlayListGroupBox">
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>SvcPlayListGroupBox</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_7">
+         <item row="0" column="0">
+          <layout class="QGridLayout" name="SvcPlayListGroupBoxGridLayout">
+           <item row="0" column="0">
+            <widget class="QListWidget" name="SvcPlayListWidget">
+             <property name="sizePolicy">
+              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QGroupBox" name="SvcParamsSettingGroupBox">
+        <property name="title">
+         <string>SvcParamsSettingGroupBox</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_6">
+         <item row="0" column="0">
+          <layout class="QGridLayout" name="gridLayout_5">
+           <item row="0" column="2">
+            <widget class="QLabel" name="SvcParamsSeeds">
+             <property name="maximumSize">
+              <size>
+               <width>80</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>SvcParamsSeeds</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="SvcParamsIndexRate">
+             <property name="maximumSize">
+              <size>
+               <width>80</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>SvcParamsIndexRate</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QDoubleSpinBox" name="SvcParamsNoiseScaleDDSPSpinBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
+             <property name="maximum">
+              <double>10.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.000100000000000</double>
+             </property>
+             <property name="value">
+              <double>0.800000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QDoubleSpinBox" name="SvcParamsNoiseScaleSpinBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
+             <property name="maximum">
+              <double>10.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.000100000000000</double>
+             </property>
+             <property name="value">
+              <double>0.666000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="4">
+            <widget class="QLabel" name="SvcParamsStep">
+             <property name="maximumSize">
+              <size>
+               <width>80</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>SvcParamsStep</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="5">
+            <widget class="QSpinBox" name="SvcParamsStepSpinBox">
+             <property name="minimum">
+              <number>100</number>
+             </property>
+             <property name="maximum">
+              <number>1000</number>
+             </property>
+             <property name="value">
+              <number>1000</number>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="SvcParamsNoiseScale">
+             <property name="maximumSize">
+              <size>
+               <width>80</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>SvcParamsNoiseScale</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QDoubleSpinBox" name="SvcParamsIndexRateSpinBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
+             <property name="maximum">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.000100000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLabel" name="SvcParamsUpKey">
+             <property name="maximumSize">
+              <size>
+               <width>80</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>SvcParamsUpKey</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="5">
+            <widget class="QSpinBox" name="SvcParamsPndmSpinBox">
+             <property name="minimum">
+              <number>2</number>
+             </property>
+             <property name="maximum">
+              <number>500</number>
+             </property>
+             <property name="value">
+              <number>100</number>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="4">
+            <widget class="QLabel" name="SvcParamsPndm">
+             <property name="maximumSize">
+              <size>
+               <width>80</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>SvcParamsPndm</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QLabel" name="SvcParamsKmeansRate">
+             <property name="maximumSize">
+              <size>
+               <width>80</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>SvcParamsKmeansRate</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="QSpinBox" name="SvcParamsUpKeySpinBox">
+             <property name="minimum">
+              <number>-128</number>
+             </property>
+             <property name="maximum">
+              <number>128</number>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="QSpinBox" name="SvcParamsSeedsSpinBox">
+             <property name="minimum">
+              <number>-999999999</number>
+             </property>
+             <property name="maximum">
+              <number>999999999</number>
+             </property>
+             <property name="value">
+              <number>52608</number>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="3">
+            <widget class="QDoubleSpinBox" name="SvcParamsKmeansRateSpinBox">
+             <property name="decimals">
+              <number>4</number>
+             </property>
+             <property name="maximum">
+              <double>1.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.000100000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="SvcParamsNoiseScaleDDSP">
+             <property name="maximumSize">
+              <size>
+               <width>80</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>SvcParamsNoiseScaleDDSP</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="6">
+            <spacer name="SvcParamsPndmHorizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="4">
+            <widget class="QLabel" name="SvcParamsMFLenLabel">
+             <property name="text">
+              <string>SvcParamsMFLen</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="5">
+            <widget class="QSpinBox" name="SvcParamsMFLenSpinBox">
+             <property name="minimum">
+              <number>2</number>
+             </property>
+             <property name="maximum">
+              <number>20</number>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QGroupBox" name="SvcProjectAndSegmentGroupBox">
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="title">
+         <string>ProjectAndSegment</string>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_8">
+         <item row="0" column="0">
+          <layout class="QGridLayout" name="SvcProjectAndSegmentGroupBoxridLayout">
+           <item row="2" column="0">
+            <widget class="QPushButton" name="SvcProjectDelPushButton">
+             <property name="text">
+              <string>SvcProjectDel</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0" colspan="2">
+            <widget class="QListWidget" name="SvcSegmentListWidget"/>
+           </item>
+           <item row="3" column="0" colspan="2">
+            <widget class="QLabel" name="SvcSegmentLabel">
+             <property name="text">
+              <string>SvcSegmentLabel</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="2">
+            <widget class="QLabel" name="SvcProjectLabel">
+             <property name="text">
+              <string>SvcProjectLabel</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QPushButton" name="SvcProjectInferCurPushButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>SvcProjectInferCur</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="2">
+            <widget class="QListWidget" name="SvcProjectListWidget">
+             <property name="minimumSize">
+              <size>
+               <width>100</width>
+               <height>100</height>
+              </size>
+             </property>
+             <property name="maximumSize">
+              <size>
+               <width>150</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QPushButton" name="SvcSaveSegment">
+             <property name="text">
+              <string>SvcSaveSegment</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QPushButton" name="SvcInferCurSlice">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>SvcInferCurSlice</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item row="1" column="0">
+          <widget class="QPushButton" name="SvcMoeSSInfer">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>SvcMoeSSInfer</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="3" column="1" colspan="2">
+       <widget class="QProgressBar" name="SvcInferProgressBar">
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>5</height>
+         </size>
+        </property>
+        <property name="value">
+         <number>0</number>
+        </property>
+        <property name="format">
+         <string notr="true"/>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1280</width>
+     <height>17</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuSvcMainFile">
+    <property name="title">
+     <string>SvcMainFile</string>
+    </property>
+    <addaction name="actionSvcMainNewProject"/>
+    <addaction name="separator"/>
+    <addaction name="actionSvcMainOpenProject"/>
+    <addaction name="actionSvcMainAppendProject"/>
+    <addaction name="actionSvcMainAddAudio"/>
+    <addaction name="separator"/>
+    <addaction name="actionSvcMainSaveProject"/>
+    <addaction name="actionSvcMainSaveProjectAs"/>
+    <addaction name="separator"/>
+    <addaction name="actionSvcMainExit"/>
+   </widget>
+   <widget class="QMenu" name="menuSvcMainEditor">
+    <property name="title">
+     <string>SvcMainEditor</string>
+    </property>
+    <addaction name="actionSvcMainWithdraw"/>
+    <addaction name="actionSvcMainRedo"/>
+   </widget>
+   <widget class="QMenu" name="menuSvcMainPlugins">
+    <property name="title">
+     <string>SvcMainPlugins</string>
+    </property>
+    <addaction name="actionSvcMainPluginsManager"/>
+   </widget>
+   <widget class="QMenu" name="menuSvcMainSettings">
+    <property name="title">
+     <string>SvcMainSettings</string>
+    </property>
+    <addaction name="actionSlicerSettings"/>
+    <addaction name="actiondeviceSettings"/>
+   </widget>
+   <widget class="QMenu" name="menuSvcMainAbout">
+    <property name="title">
+     <string>SvcMainAbout</string>
+    </property>
+    <addaction name="actionSvcMainAboutPage"/>
+    <addaction name="separator"/>
+    <addaction name="actionSvcMainHelpPage"/>
+   </widget>
+   <addaction name="menuSvcMainFile"/>
+   <addaction name="menuSvcMainEditor"/>
+   <addaction name="menuSvcMainPlugins"/>
+   <addaction name="menuSvcMainSettings"/>
+   <addaction name="menuSvcMainAbout"/>
+  </widget>
+  <action name="actionSlicerSettings">
+   <property name="text">
+    <string>SvcMainSlicerSettings</string>
+   </property>
+  </action>
+  <action name="actiondeviceSettings">
+   <property name="text">
+    <string>SvcMainDeviceSettings</string>
+   </property>
+  </action>
+  <action name="actionSvcMainPluginsManager">
+   <property name="text">
+    <string>SvcMainPluginsManager</string>
+   </property>
+  </action>
+  <action name="actionSvcMainWithdraw">
+   <property name="text">
+    <string>SvcMainUndo</string>
+   </property>
+  </action>
+  <action name="actionSvcMainRedo">
+   <property name="text">
+    <string>SvcMainRedo</string>
+   </property>
+  </action>
+  <action name="actionSvcMainNewProject">
+   <property name="text">
+    <string>SvcMainNewProject</string>
+   </property>
+  </action>
+  <action name="actionSvcMainOpenProject">
+   <property name="text">
+    <string>SvcMainOpenProject</string>
+   </property>
+  </action>
+  <action name="actionSvcMainSaveProject">
+   <property name="text">
+    <string>SvcMainSaveProject</string>
+   </property>
+  </action>
+  <action name="actionSvcMainSaveProjectAs">
+   <property name="text">
+    <string>SvcMainSaveProjectAs</string>
+   </property>
+  </action>
+  <action name="actionSvcMainExit">
+   <property name="text">
+    <string>SvcMainExit</string>
+   </property>
+  </action>
+  <action name="actionSvcMainAboutPage">
+   <property name="text">
+    <string>SvcMainAboutPage</string>
+   </property>
+  </action>
+  <action name="actionSvcMainHelpPage">
+   <property name="text">
+    <string>SvcMainHelpPage</string>
+   </property>
+  </action>
+  <action name="actionSvcMainAppendProject">
+   <property name="text">
+    <string>SvcMainAppendProject</string>
+   </property>
+  </action>
+  <action name="actionSvcMainAddAudio">
+   <property name="text">
+    <string>SvcMainAddAudio</string>
+   </property>
+  </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MCurveEditor</class>
+   <extends>QWidget</extends>
+   <header>../Controls/CurveEditor/mcurveeditor.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>waveWidget</class>
+   <extends>QWidget</extends>
+   <header>../Controls/Player/player.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

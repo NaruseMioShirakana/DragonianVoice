@@ -14,7 +14,7 @@ Tacotron2::~Tacotron2()
 	logger.log(L"[Info] Tacotron Models unloaded");
 }
 
-Tacotron2::Tacotron2(const rapidjson::Document& _config, const callback& _cb, const callback_params& _mr, const DurationCallback& _dcbb, Device _dev)
+Tacotron2::Tacotron2(const MJson& _config, const callback& _cb, const callback_params& _mr, const DurationCallback& _dcbb, Device _dev)
 {
 	_modelType = modelType::Taco;
 

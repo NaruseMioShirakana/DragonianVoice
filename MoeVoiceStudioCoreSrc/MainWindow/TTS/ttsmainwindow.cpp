@@ -185,8 +185,8 @@ void TTSMainWindow::reloadModels()
             while (std::getline(modfile, modInfo))
                 modInfoAll += modInfo;
             modfile.close();
-            rapidjson::Document modConfigJson;
-            modConfigJson.Parse(modInfoAll.c_str());
+            MJson modConfigJson;
+            modConfigJson.Parse(modInfoAll);
             if (modConfigJson.HasParseError() ||
                 !modConfigJson.HasMember("Folder") ||
                 !modConfigJson.HasMember("Name") ||
@@ -206,10 +206,8 @@ void TTSMainWindow::reloadModels()
             std::string Name = modConfigJson["Name"].GetString();
             std::string Type = modConfigJson["Type"].GetString();
             if (Type == "VITS_LJS" || Type == "VITS_VCTK")
-            {
                 Type = "Vits";
-                modConfigJson["Type"].SetString("Vits");
-            }
+            
 
             if (Type != "Tacotron" && Type != "Tacotron2" && Type != "Vits" && Type != "Pits")
                 continue;
@@ -269,7 +267,7 @@ void TTSMainWindow::loadModel(size_t idx)
         {
             _model = dynamic_cast<InferClass::TTS*>(new InferClass::Tacotron2(Config, BarCallback, TTSParamCallback, [&](std::vector<float>& _inp) {}, __MOESS_DEVICE));
         }
-        else if (_type_model == "Vits")
+        else if (_type_model == "Vits" || _type_model == "VITS_LJS" || _type_model == "VITS_VCTK")
         {
             _model = dynamic_cast<InferClass::TTS*>(new InferClass::Vits(Config, BarCallback, TTSParamCallback, [&](std::vector<float>& _inp) {}, __MOESS_DEVICE));
         }
@@ -299,8 +297,8 @@ void TTSMainWindow::loadModel(size_t idx)
 	    {
 	    	ui->CharacterComboBox->setEnabled(true);
 	    	for (auto& it : Config["Characters"].GetArray())
-	    		ui->CharacterComboBox->addItem(it.GetString());
-	    	n_speakers = Config["Characters"].Size();
+	    		ui->CharacterComboBox->addItem(it.GetString().c_str());
+	    	n_speakers = int64_t(Config["Characters"].Size());
 	    	if (n_speakers > 1)
 	    		SetCharaMixEnabled(true);
 	    }
@@ -477,6 +475,8 @@ void TTSMainWindow::getDurationChanged(qint64 time) {
 
 void TTSMainWindow::playbackPosChanged(qint64 time) const
 {
+    const auto times = QString("%1:%2").arg(time / 60000, 2, 10, QChar('0')).arg((time % 60000) / 1000, 2, 10, QChar('0'));
+    ui->CurTimePlayer->setText(times);
     ui->PlayerProgress->setValue(int(time));
 }
 

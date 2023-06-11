@@ -6,7 +6,7 @@ INFERCLASSHEADER
 class DiffusionSvc : public SVC
 {
 public:
-    DiffusionSvc(const rapidjson::Document&, const callback&, const callback_params&, Device _dev = Device::CPU);
+    DiffusionSvc(const MJson&, const callback&, const callback_params&, Device _dev = Device::CPU);
 
 	~DiffusionSvc() override;
 
@@ -16,6 +16,8 @@ public:
     {
         return V2;
     }
+
+    [[nodiscard]] std::vector<int16_t> InferCurAudio(MoeVSProject::Params& input_audio_infer) override;
 
     std::vector<int16_t> Inference(std::wstring& _inputLens) const override;
 private:

@@ -12,9 +12,11 @@ INFERCLASSHEADER
 class VitsSvc : public SVC
 {
 public:
-    VitsSvc(const rapidjson::Document&, const callback&, const callback_params&, Device _dev = Device::CPU);
+    VitsSvc(const MJson&, const callback&, const callback_params&, Device _dev = Device::CPU);
 
 	~VitsSvc() override;
+
+    [[nodiscard]] std::vector<int16_t> InferCurAudio(MoeVSProject::Params& input_audio_infer) override;
 
     [[nodiscard]] std::vector<int16_t> InferBatch() const = delete;
 

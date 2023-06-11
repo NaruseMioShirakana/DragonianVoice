@@ -111,7 +111,7 @@ private:
     const std::function<void(QDialog*)>& exit_callback;
     InferClass::TTS* _model = nullptr;
     MoeVSProject::TTSProject _proj;
-    std::vector<rapidjson::Document> _models;
+    std::vector<MJson> _models;
     std::vector<float> charaMixData;
     std::vector<std::wstring> waveFolder;
     int64_t n_speakers = 0;
@@ -141,7 +141,7 @@ public:
         _conf.noise_scale = (float)ui->NoiseScaleSpinBox->value();
         _conf.noise_scale_w = (float)ui->NoiseScaleWSpinBox->value();
         _conf.length_scale = (float)ui->LengthScaleSpinBox->value();
-        _conf.seed = 52608;
+        _conf.seed = ui->TTSParamSeedEdit->text().toInt();
         _conf.chara = ui->CharacterComboBox->currentIndex();
         if (_conf.chara < 0)
             _conf.chara = 0;

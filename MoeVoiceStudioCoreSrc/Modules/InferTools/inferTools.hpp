@@ -124,6 +124,8 @@ private:
 
 cutResult cutWav(std::vector<int16_t>& input, long bps, double threshold = 30, unsigned long minLen = 5, unsigned short frame_len = 4 * 1024, unsigned short frame_shift = 512);
 
+std::pair<std::vector<size_t>, std::vector<bool>> SliceAudio(const std::vector<int16_t>& input, long samplingRate, double threshold, unsigned long minLen, unsigned short frame_len, unsigned short frame_shift);
+
 class F0PreProcess
 {
 public:

@@ -31,7 +31,7 @@ DiffusionSinger::~DiffusionSinger()
 	logger.log(L"[Info] DiffSinger Models unloaded");
 }
 
-DiffusionSinger::DiffusionSinger(const rapidjson::Document& _config, const callback& _cb, const callback_params& _mr, Device _dev)
+DiffusionSinger::DiffusionSinger(const MJson& _config, const callback& _cb, const callback_params& _mr, Device _dev)
 {
 	_modelType = modelType::diffSinger;
 
@@ -129,15 +129,15 @@ std::map<std::wstring, std::vector<std::wstring>> DiffusionSinger::GetPhonesPair
 	while (std::getline(phonefile, phoneInfo))
 		phoneInfoAll += phoneInfo;
 	phonefile.close();
-	rapidjson::Document PhoneJson;
-	PhoneJson.Parse(phoneInfoAll.c_str());
+	MJson PhoneJson;
+	PhoneJson.Parse(phoneInfoAll);
 	if (PhoneJson.HasParseError())
 		throw std::exception("json file error");
 	std::map<std::wstring, std::vector<std::wstring>> TmpOut;
-	for (auto itr = PhoneJson.MemberBegin(); itr != PhoneJson.MemberEnd(); ++itr)
+	for (const auto& itr : PhoneJson.GetMemberArray())
 	{
-		std::wstring Key = to_wide_string(itr->name.GetString());
-		const auto Value = itr->value.GetArray();
+		std::wstring Key = to_wide_string(itr.first);
+		const auto Value = itr.second.GetArray();
 		TmpOut[Key] = std::vector<std::wstring>();
 		for (const auto& it : Value)
 			TmpOut[Key].push_back(to_wide_string(it.GetString()));
@@ -538,8 +538,8 @@ std::vector<DiffusionSinger::DiffSingerInput> DiffusionSinger::preprocessDiffSin
 		while (std::getline(phonefile, phoneInfo))
 			phoneInfoAll += phoneInfo;
 		phonefile.close();
-		rapidjson::Document PhoneJson;
-		PhoneJson.Parse(phoneInfoAll.c_str());
+		MJson PhoneJson;
+		PhoneJson.Parse(phoneInfoAll);
 		if (PhoneJson.HasParseError())
 			throw std::exception("json file error");
 
@@ -711,7 +711,7 @@ std::vector<DiffusionSinger::DiffSingerInput> DiffusionSinger::preprocessDiffSin
 							f0_seq.push_back(atof(amatch_results[0].str().c_str()));
 							f0str = amatch_results.suffix();
 						}
-						double f0_timestep = atof(it["f0_timestep"].GetString());
+						double f0_timestep = atof(it["f0_timestep"].GetString().c_str());
 						const double t_max = static_cast<double>(f0_seq.size() - 1) * f0_timestep;
 						const auto x0 = arange(0.0, static_cast<double>(f0_seq.size()), 1.0, (1.0 / f0_timestep));
 						auto xi = arange(0.0, t_max, frame_length);

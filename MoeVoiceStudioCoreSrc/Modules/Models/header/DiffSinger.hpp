@@ -17,7 +17,7 @@ public:
         std::vector<double> offset;
     };
 
-    DiffusionSinger(const rapidjson::Document&, const callback&, const callback_params&, Device _dev = Device::CPU);
+    DiffusionSinger(const MJson&, const callback&, const callback_params&, Device _dev = Device::CPU);
 
 	~DiffusionSinger() override;
 

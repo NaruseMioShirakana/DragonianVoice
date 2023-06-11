@@ -18,7 +18,7 @@ namespace MoeVSProject
     };
 
     template <typename T = float>
-    size_type GetSize(const std::vector<std::vector<float>>& inp_vec)
+    size_type GetSize(const std::vector<std::vector<T>>& inp_vec)
 	{
         size_type _size = 0;
         for (const auto& i : inp_vec)
@@ -28,6 +28,7 @@ namespace MoeVSProject
 
     struct Params
     {
+        std::vector<std::vector<int16_t>> OrgAudio;
         std::vector<std::vector<float>> Hidden_Unit;
         std::vector<std::vector<float>> F0;
         std::vector<std::vector<float>> Volume;
@@ -41,20 +42,21 @@ namespace MoeVSProject
             size_type _size = 0;
             const std::string bytePath = to_byte_string(paths);
             _size += sizeof(long) * OrgLen.size() + symbolb.size() + bytePath.length() + 1;
-            _size += GetSize<float>(Hidden_Unit) + GetSize<float>(F0) + GetSize<float>(Volume) + GetSize<float>(Speaker);
+            _size += GetSize(OrgAudio) + GetSize(F0) + GetSize(Volume) + GetSize(Speaker);
             return _size;
         }
     };
 
     struct ParamsOffset
     {
-        std::vector<size_type> Hidden_Unit;
+        std::vector<size_type> OrgAudio;
+        //std::vector<size_type> Hidden_Unit;
         std::vector<size_type> F0;
         std::vector<size_type> Volume;
         std::vector<size_type> Speaker;
         [[nodiscard]] size_type Size() const
         {
-            return size_type(Hidden_Unit.size() + F0.size() + Volume.size() + Speaker.size()) * sizeof(size_type);
+            return size_type(OrgAudio.size() + F0.size() + Volume.size() + Speaker.size()) * sizeof(size_type);
         }
         ParamsOffset() = default;
     };
@@ -65,14 +67,13 @@ namespace MoeVSProject
         struct Header
         {
             char ChunkSymbol[8] = { 'M','O','E','V','S','P','R','J' };
-            uint16_t HiddenSize = 256;
             size_type DataHeaderAmount = 0;
         };
         struct DataHeader
         {
             char ChunkSymbol[4] = { 'D','A','T','A' };
 
-            size_type HiddenUnitOffsetPosSize = 0;
+            size_type OrgAudioOffsetPosSize = 0;
 
             size_type F0OffsetPosSize = 0;
 
@@ -105,7 +106,7 @@ namespace MoeVSProject
         MoeVSProject() = delete;
         ~MoeVSProject() = default;
         MoeVSProject(const std::wstring& _path);
-        MoeVSProject(const std::vector<Params>& _params, uint16_t HiddenSize = 256);
+        MoeVSProject(const std::vector<Params>& _params);
         void Write(const std::wstring& _path) const;
         [[nodiscard]] std::vector<Params> GetParams() const
         {
@@ -113,6 +114,14 @@ namespace MoeVSProject
             Params_data.reserve(data_.size());
             for (const auto& i : data_)
                 Params_data.emplace_back(i.ParamData);
+            return Params_data;
+        }
+        [[nodiscard]] std::vector<Params> GetParamsMove()
+        {
+            std::vector<Params> Params_data;
+            Params_data.reserve(data_.size());
+            for (auto& i : data_)
+                Params_data.emplace_back(std::move(i.ParamData));
             return Params_data;
         }
     private:

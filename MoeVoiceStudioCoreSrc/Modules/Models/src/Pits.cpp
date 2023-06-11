@@ -19,7 +19,7 @@ Pits::~Pits()
 	logger.log(L"[Info] Pits Models unloaded");
 }
 
-Pits::Pits(const rapidjson::Document& _config, const callback& _cb, const callback_params& _mr, const DurationCallback& _dcbb, Device _dev)
+Pits::Pits(const MJson& _config, const callback& _cb, const callback_params& _mr, const DurationCallback& _dcbb, Device _dev)
 {
 	_modelType = modelType::Pits;
 

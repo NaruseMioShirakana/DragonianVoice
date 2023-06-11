@@ -2,6 +2,93 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="zh_CN">
 <context>
+    <name>MCurveEditor</name>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.ui" line="17"/>
+        <source>MCurveEditorMainWindow</source>
+        <translation>Svc曲线编辑器</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.ui" line="211"/>
+        <source>SaveF0ToNpy</source>
+        <translation>保存F0为Npy</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.ui" line="135"/>
+        <source>SaveSpeakerMixToNpy</source>
+        <translation>保存角色为Npy</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.ui" line="238"/>
+        <source>SaveVolumeToNpy</source>
+        <translation>保存响度为Npy</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.ui" line="245"/>
+        <source>SvcEditorSpeakerTextLabel</source>
+        <translation>选择角色</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.ui" line="252"/>
+        <source>SvcEditorOpenF0NpyButton</source>
+        <translation>打开F0Npy文件</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.ui" line="155"/>
+        <source>SvcEditorOpenAudioButton</source>
+        <translation>打开音频</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.cpp" line="582"/>
+        <source>SvcSaveNpyData</source>
+        <translation>保存Npy文件</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.cpp" line="607"/>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.cpp" line="614"/>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.cpp" line="621"/>
+        <source>SvcNpySaveErrorTitle</source>
+        <translation>保存失败</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.cpp" line="607"/>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.cpp" line="614"/>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.cpp" line="621"/>
+        <source>SvcNpySaveErrorText</source>
+        <translation>Npy文件保存失败，可能是文件已被占用或权限问题</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.cpp" line="626"/>
+        <source>SvcEditorOpenAudioFile</source>
+        <translation>打开音频文件</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.cpp" line="635"/>
+        <source>OpenFileError</source>
+        <translation>文件打开失败</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.cpp" line="675"/>
+        <source>EmptyGraphError</source>
+        <translation>需要载入音频</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.cpp" line="675"/>
+        <source>YouNeedToLoadAAudioFirst</source>
+        <translation>为了留存一个音频作为参考，在载入F0文件前请先载入一个音频</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.cpp" line="698"/>
+        <source>F0SizeMisMatchError</source>
+        <translation>F0长度不符</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/Controls/CurveEditor/mcurveeditor.cpp" line="698"/>
+        <source>F0SizeMisMatchErrorText</source>
+        <translation>F0长度不符设置中预期数值</translation>
+    </message>
+</context>
+<context>
     <name>MainMenu</name>
     <message>
         <location filename="../MainWindow/mainmenu.ui" line="26"/>
@@ -144,9 +231,402 @@
 <context>
     <name>SVCMainWindow</name>
     <message>
-        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="13"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="20"/>
         <source>Dialog</source>
         <translation>MoeVoiceStudio 语音合成 （Singing Voice Conversion）</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="279"/>
+        <source>SvcParamsSettingGroupBox</source>
+        <translation>推理参数</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="44"/>
+        <source>SvcModelSelectorGroupBox</source>
+        <translation>选择模型</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="52"/>
+        <source>vcReLoadModelButton</source>
+        <translation>重载模型</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="59"/>
+        <source>vcLoadModelButton</source>
+        <translation>载入模型</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="92"/>
+        <source>SvcOpenModelFolderButton</source>
+        <translation>打开模型文件夹</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="116"/>
+        <source>SvcPlayerGroupBox</source>
+        <translation>播放器</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="221"/>
+        <source>SvcEditorGroupBox</source>
+        <translation>编辑器</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="293"/>
+        <source>SvcParamsSeeds</source>
+        <translation>种子</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="306"/>
+        <source>SvcParamsIndexRate</source>
+        <translation>索引比</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="351"/>
+        <source>SvcParamsStep</source>
+        <translation>Diffusion步数</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="377"/>
+        <source>SvcParamsNoiseScale</source>
+        <translation>噪声规模</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="403"/>
+        <source>SvcParamsUpKey</source>
+        <translation>升降调</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="429"/>
+        <source>SvcParamsPndm</source>
+        <translation>Pndm倍数</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="442"/>
+        <source>SvcParamsKmeansRate</source>
+        <translation>聚类比</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="491"/>
+        <source>SvcParamsNoiseScaleDDSP</source>
+        <translation>DDSP噪声</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="539"/>
+        <source>ProjectAndSegment</source>
+        <translation>项目和切片</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="547"/>
+        <source>SvcProjectDel</source>
+        <translation>删除音频</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="574"/>
+        <source>SvcProjectInferCur</source>
+        <translation>推理当前</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="557"/>
+        <source>SvcSegmentLabel</source>
+        <translation>切片</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="564"/>
+        <source>SvcProjectLabel</source>
+        <translation>音频</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="766"/>
+        <source>SvcMainAppendProject</source>
+        <translation>添加项目</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="250"/>
+        <source>SvcPlayListGroupBox</source>
+        <translation>播放列表</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="511"/>
+        <source>SvcParamsMFLen</source>
+        <translation>均值滤波窗口大小</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="597"/>
+        <source>SvcSaveSegment</source>
+        <translation>保存切片</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="607"/>
+        <source>SvcInferCurSlice</source>
+        <translation>推理当前切片</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="619"/>
+        <source>SvcMoeSSInfer</source>
+        <translation>使用MoeSS推理</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="657"/>
+        <source>SvcMainFile</source>
+        <translation>文件</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="672"/>
+        <source>SvcMainEditor</source>
+        <translation>编辑</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="679"/>
+        <source>SvcMainPlugins</source>
+        <translation>插件</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="685"/>
+        <source>SvcMainSettings</source>
+        <translation>设置</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="692"/>
+        <source>SvcMainAbout</source>
+        <translation>关于</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="706"/>
+        <source>SvcMainSlicerSettings</source>
+        <translation>切片机设置</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="711"/>
+        <source>SvcMainDeviceSettings</source>
+        <translation>设备设置</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="716"/>
+        <source>SvcMainPluginsManager</source>
+        <translation>插件管理器</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="721"/>
+        <source>SvcMainUndo</source>
+        <translation>撤销 (Ctrl + Z)</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="726"/>
+        <source>SvcMainRedo</source>
+        <translation>重做 (Ctrl + Y)</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="731"/>
+        <source>SvcMainNewProject</source>
+        <translation>创建新项目</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="736"/>
+        <source>SvcMainOpenProject</source>
+        <translation>打开项目</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="741"/>
+        <source>SvcMainSaveProject</source>
+        <translation>保存项目</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="746"/>
+        <source>SvcMainSaveProjectAs</source>
+        <translation>另存为</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="751"/>
+        <source>SvcMainExit</source>
+        <translation>退出</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="756"/>
+        <source>SvcMainAboutPage</source>
+        <translation>关于</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="761"/>
+        <source>SvcMainHelpPage</source>
+        <translation>帮助</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.ui" line="771"/>
+        <source>SvcMainAddAudio</source>
+        <translation>添加音频文件</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="235"/>
+        <source>SvcQuitTitle</source>
+        <translation>是否退出软件</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="236"/>
+        <source>SvcQuitText</source>
+        <translation>是否退出软件，未保存的数据将会丢失</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="240"/>
+        <source>SvcQuitYes</source>
+        <translation>确定</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="241"/>
+        <source>SvcQuitNo</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="336"/>
+        <source>SvcDeleteAudioTitle</source>
+        <translation>是否删除当前音频工程</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="337"/>
+        <source>SvcDeleteAudioText</source>
+        <translation>删除的数据将会永久丢失</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="341"/>
+        <source>SvcDeleteAudioYes</source>
+        <translation>确认</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="342"/>
+        <source>SvcDeleteAudioNo</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="368"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="411"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="462"/>
+        <source>SvcPleaseLoadModelTitle</source>
+        <translation>请先加载一个模型</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="368"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="411"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="462"/>
+        <source>SvcPleaseLoadModelText</source>
+        <translation>请先加载一个模型，才可以使用一些功能</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="373"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="416"/>
+        <source>SvcPleaseSelectAParamTitle</source>
+        <translation>未选中项目</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="373"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="416"/>
+        <source>SvcPleaseSelectAParamText</source>
+        <translation>请双击选择一个要进行推理的项目</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="543"/>
+        <source>SvcEditorChangeAudioHeader</source>
+        <translation>是否切换音频项目</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="544"/>
+        <source>SvcEditorChangeAudioText</source>
+        <translation>是否切换音频项目，未保存的数据将会永久丢失</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="548"/>
+        <source>SvcEditorChangeAudioButtonYes</source>
+        <translation>确认</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="549"/>
+        <source>SvcEditorChangeAudioButtonNo</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="582"/>
+        <source>SvcEditorChangeSegmentHeader</source>
+        <translation>是否切换切片</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="583"/>
+        <source>SvcEditorChangeSegmentText</source>
+        <translation>是否切换切片，未保存的数据将会永久丢失</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="587"/>
+        <source>SvcEditorChangeSegmentButtonYes</source>
+        <translation>确认</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="588"/>
+        <source>SvcEditorChangeSegmentButtonNo</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="589"/>
+        <source>SvcEditorChangeSegmentButtonSave</source>
+        <translation>保存并确认</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="657"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="722"/>
+        <source>SvcOverwriteTitle</source>
+        <translation>是否覆盖当前项目</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="658"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="723"/>
+        <source>SvcOverwriteText</source>
+        <translation>当前项目若未保存，将会永久丢失</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="662"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="727"/>
+        <source>SvcOverwriteYes</source>
+        <translation>确认</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="663"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="728"/>
+        <source>SvcOverwriteNo</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="669"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="776"/>
+        <source>SvcCreateProjectWithAudio</source>
+        <translation>使用音频新建项目</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="732"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="753"/>
+        <source>SvcOpenProjectFile</source>
+        <translation>打开项目</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="828"/>
+        <source>SvcOverwriteFileTitle</source>
+        <translation>是否覆盖保存</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="829"/>
+        <source>SvcOverwriteFileText</source>
+        <translation>该项目文件中原先的部分将会永久丢失</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="833"/>
+        <source>SvcOverwriteFileYes</source>
+        <translation>确认</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="834"/>
+        <source>SvcOverwriteFileNo</source>
+        <translation>取消</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="838"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="848"/>
+        <source>SvcSaveProjectFile</source>
+        <translation>保存项目文件</translation>
     </message>
 </context>
 <context>
@@ -155,6 +635,34 @@
         <location filename="../MainWindow/SVS/svsmainwindow.ui" line="13"/>
         <source>Dialog</source>
         <translation>MoeVoiceStudio 语音合成 （Singing Voice Synthesis）</translation>
+    </message>
+</context>
+<context>
+    <name>SvcInferSlicerSetting</name>
+    <message>
+        <location filename="../MainWindow/SVC/svcinferslicersetting.ui" line="26"/>
+        <source>Form</source>
+        <translation>切片机设置</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcinferslicersetting.ui" line="34"/>
+        <source>WindowSize</source>
+        <translation>窗口大小</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcinferslicersetting.ui" line="41"/>
+        <source>HopSize</source>
+        <translation>HopSize</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcinferslicersetting.ui" line="61"/>
+        <source>SvcInferSlicerSettingMinLength</source>
+        <translation>最短长度</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcinferslicersetting.ui" line="68"/>
+        <source>SvcInferSlicerSettingThr</source>
+        <translation>阈值</translation>
     </message>
 </context>
 <context>
@@ -170,7 +678,7 @@
     <message>
         <location filename="../MainWindow/Controls/TTSEditor/ttseditorblock.ui" line="14"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">切片机设置</translation>
     </message>
 </context>
 <context>
@@ -630,7 +1138,7 @@
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="422"/>
+        <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="420"/>
         <location filename="../MainWindow/TTS/ttsmainwindow.cpp" line="1027"/>
         <source>SaveTTSProject</source>
         <translation>保存TTS工程</translation>

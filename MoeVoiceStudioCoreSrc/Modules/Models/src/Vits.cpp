@@ -19,7 +19,7 @@ Vits::~Vits()
 	logger.log(L"[Info] Vits Models unloaded");
 }
 
-Vits::Vits(const rapidjson::Document& _config, const callback& _cb, const callback_params& _mr,const DurationCallback& _dcbb, Device _dev)
+Vits::Vits(const MJson& _config, const callback& _cb, const callback_params& _mr,const DurationCallback& _dcbb, Device _dev)
 {
 	_modelType = modelType::Vits;
 
@@ -87,7 +87,6 @@ Vits::Vits(const rapidjson::Document& _config, const callback& _cb, const callba
 			const auto emopathdef = GetCurrentFolder() + L"\\emotion\\" + emoStringload + L".json";
 			emoLoader.open(emopath);
 			emoStringa.clear();
-			EmoJson.Clear();
 			std::ifstream EmoFiles(emopathdef.c_str());
 			if (EmoFiles.is_open())
 			{
