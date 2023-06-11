@@ -499,7 +499,10 @@ make .
 ## 依赖列表
 - [FFmpeg](https://ffmpeg.org/)
 - [World](https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder)
-- [rapidJson](https://github.com/Tencent/rapidjson)
+- [yyjson](https://github.com/ibireme/yyjson)
+- [qcustomplot](https://www.qcustomplot.com/index.php/introduction)
+- [fftw](http://fftw.org/)
+- [qt](https://www.qt.io/zh-cn)
 
 ## 📚 相关法规
 
