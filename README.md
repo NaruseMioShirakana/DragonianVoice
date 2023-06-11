@@ -186,6 +186,54 @@ demo: [RVC命令行示例](https://github.com/NaruseMioShirakana/MoeVoiceStudio/
 
 ### 配置示例
 
+<details><summary>通用:</summary>
+
+```jsonc
+{
+    "Folder" : "SummerPockets",
+    "Name" : "SummerPockets",
+    "Type" : "SoVits",
+    "Rate" : 44100,
+    "Symbol" : "",
+    "Cleaner" : "",
+    "Hop" : 512,
+    "Hubert": "hubert4.0",
+    "Hifigan": "",
+    "SoVits4": true,
+    "SoVits3": false,
+    "Diffusion": false,
+    "CharaMix": true,
+    "Volume": false,
+    "AddBlank": false,
+    "Emotional" : false,
+    "EmotionalPath" : "",
+    "HiddenSize": 256,
+    "MelBins": 128,
+    "Pndm": 100,
+    "Characters" : ["kamome","ao","miki","shiki","shiroha","shizuku","tsumugi","umi"],
+    "V2" : true
+}
+//Symbol：模型的Symbol，不知道Symbol是啥的建议多看几个视频了解了解TTS的基础知识，这一项在Tacotron2中必须填。
+//Cleaner：插件名，可以不填，填了就必须要在Cleaner文件夹防止相应的CleanerDll，如果Dll不存在或者是Dll内部有问题，则会在加载模型时报插件错误
+//Hop：FFT HopSize
+//Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
+//Hifigan：Hifigan模型名，必须填且必须将在前置模型中下载到的Hifigan放置到Hifigan文件夹
+//SoVits4：是否为SoVits4
+//SoVits3：是否为SoVits3
+//Diffusion：是否为吃土/DDSP/SoVits仓库下的扩散模型
+//CharaMix：是否使用角色混合轨道（必须使用角色混合导出方案导出Onnx）
+//Volume：该模型是否有音量Emb
+//AddBlank：是否在音素之间插0作为分隔
+//Emotional：是否加入情感向量
+//EmotionalPath：情感向量npy文件名
+//HiddenSize：Vec模型的尺寸（768/256）
+//MelBins：MelBins
+//Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
+//V2：Diffusion是否为OnnxV2（一般来说都是true）
+```
+
+</details>
+
 <details><summary>Tacotron2:</summary>
 
 ```jsonc
