@@ -173,7 +173,7 @@ void SVCMainWindow::loadModel(size_t idx)
         cur_model_index = 0;
         return;
     }
-    if (_models.size() < idx )
+    if (_models.size() < idx)
 	return;
     const auto index_model = idx - 1;
     const auto& Config = _models[index_model];
