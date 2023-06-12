@@ -257,11 +257,13 @@ void TTSMainWindow::loadModel(size_t idx)
     if (idx == cur_model_index)
         return;
     unloadModel();
-	if(idx == 0)
-	{
+    if(idx == 0)
+    {
         cur_model_index = 0;
-		return;
-	}
+        return;
+    }
+    if (_models.size() < idx)
+	return;
     const auto index_model = idx - 1;
     const auto& Config = _models[index_model];
     try
