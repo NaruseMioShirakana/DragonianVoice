@@ -71,8 +71,8 @@ void SVCMainWindow::reloadModels()
     _wfinddata_t file_info;
     std::wstring current_path = GetCurrentFolder() + L"\\Models";
     intptr_t handle = _wfindfirst((current_path + L"\\*.json").c_str(), &file_info);
+    ui->SvcModelSelector->addItem("None");
     if (-1 != handle) {
-        ui->SvcModelSelector->addItem("None");
         do
         {
             std::string modInfo, modInfoAll;
@@ -107,9 +107,9 @@ void SVCMainWindow::reloadModels()
             ui->SvcModelSelector->addItem(_tmpText.c_str());
             _models.emplace_back(std::move(modConfigJson));
         } while (!_wfindnext(handle, &file_info));
-        if (!_models.empty())
-            ui->SvcModelSelector->setEnabled(true);
     }
+	ui->SvcModelSelector->setEnabled(!_models.empty());
+    ui->vcLoadModelButton->setEnabled(!_models.empty());
 }
 
 void SVCMainWindow::SetInferenceEnabled(bool condition) const
