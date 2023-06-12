@@ -128,7 +128,11 @@ void TTSMainWindow::modelsClear()
 {
     unloadModel();
     ui->ModelComboBox->clear();
+    DictPaths.clear();
+	CleanerPaths.clear();
     _models.clear();
+    ui->DictComboBox->clear();
+    ui->G2pComboBox->clear();
 }
 
 void TTSMainWindow::SetModelSelectEnabled(bool condition) const

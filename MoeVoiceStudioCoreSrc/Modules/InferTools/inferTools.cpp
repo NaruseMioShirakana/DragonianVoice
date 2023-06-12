@@ -408,9 +408,8 @@ std::vector<float> mean_filter(const std::vector<float>& vec, size_t window_size
 {
     std::vector<float> result;
 
-    if (window_size > vec.size()) {
-        return result;
-    }
+    if (window_size > vec.size() || window_size < 2)
+        return vec;
 
     const size_t half = window_size / 2; // 窗口半径，向下取整
 
@@ -419,7 +418,7 @@ std::vector<float> mean_filter(const std::vector<float>& vec, size_t window_size
         for (size_t j = i - half; j <= i + half; j++) {
             sum += vec[j];
         }
-        result.push_back(sum / (float)window_size);
+        result.push_back(sum / (float)(window_size % 2 ? window_size : window_size + 1));
     }
 
     return result;

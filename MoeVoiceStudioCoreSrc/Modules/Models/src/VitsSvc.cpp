@@ -1142,7 +1142,9 @@ std::vector<int16_t> VitsSvc::InferCurAudio(MoeVSProject::Params& input_audio_in
 			int64_t Chara[] = { charEmb };
 			std::vector<float> charaMix;
 			
-			const auto& srcF0Data = input_audio_infer.F0[slice];
+			auto& srcF0Data = input_audio_infer.F0[slice];
+			for(auto& ifo : srcF0Data)
+				ifo *= (float)pow(2.0, static_cast<double>(params.keys) / 12.0);
 			std::vector<float> HiddenUnits;
 			std::vector<float> F0Data;
 

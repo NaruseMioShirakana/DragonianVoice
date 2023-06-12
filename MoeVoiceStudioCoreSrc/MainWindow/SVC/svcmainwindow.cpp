@@ -101,7 +101,7 @@ void SVCMainWindow::reloadModels()
             std::string Name = modConfigJson["Name"].GetString();
             std::string Type = modConfigJson["Type"].GetString();
 
-            if (Type != "SoVits" && Type != "Rvc" && Type != "DiffSvc")
+            if (Type != "SoVits" && Type != "RVC" && Type != "DiffSvc")
                 continue;
             auto _tmpText = Type + ":" + Name;
             ui->SvcModelSelector->addItem(_tmpText.c_str());
@@ -687,7 +687,9 @@ void SVCMainWindow::on_actionSvcMainNewProject_triggered()
                     _inferData.OrgAudio.emplace_back(AudioData.data() + SliceInfo.first[i - 1], AudioData.data() + SliceInfo.first[i]);
                     auto OrgAudioDouble = InferClass::SVC::InterpResample(_inferData.OrgAudio[i - 1], 48000, 48000, 32768.0);
                     auto F0Extractor = F0PreProcess(48000, 320);
-                    _inferData.F0.emplace_back(mean_filter(F0Extractor.GetOrgF0(OrgAudioDouble.data(), int64_t(OrgAudioDouble.size()), int64_t(OrgAudioDouble.size() / 320) + 1, 0), ui->SvcParamsMFLenSpinBox->value()));
+                    auto SrcF0 = F0Extractor.GetOrgF0(OrgAudioDouble.data(), int64_t(OrgAudioDouble.size()), int64_t(OrgAudioDouble.size() / 320) + 1, 0);
+                    SrcF0 = mean_filter(SrcF0, ui->SvcParamsMFLenSpinBox->value());
+                    _inferData.F0.emplace_back(std::move(SrcF0));
                     _inferData.Volume.emplace_back(mean_filter(InferClass::SVC::ExtractVolume(_inferData.OrgAudio[i - 1], 320), ui->SvcParamsMFLenSpinBox->value()));
                 }
                 else
@@ -794,7 +796,9 @@ void SVCMainWindow::on_actionSvcMainAddAudio_triggered()
                     _inferData.OrgAudio.emplace_back(AudioData.data() + SliceInfo.first[i - 1], AudioData.data() + SliceInfo.first[i]);
                     auto OrgAudioDouble = InferClass::SVC::InterpResample(_inferData.OrgAudio[i - 1], 48000, 48000, 32768.0);
                     auto F0Extractor = F0PreProcess(48000, 320);
-                    _inferData.F0.emplace_back(mean_filter(F0Extractor.GetOrgF0(OrgAudioDouble.data(), int64_t(OrgAudioDouble.size()), int64_t(OrgAudioDouble.size() / 320) + 1, 0), ui->SvcParamsMFLenSpinBox->value()));
+                    auto SrcF0 = F0Extractor.GetOrgF0(OrgAudioDouble.data(), int64_t(OrgAudioDouble.size()), int64_t(OrgAudioDouble.size() / 320) + 1, 0);
+                    SrcF0 = mean_filter(SrcF0, ui->SvcParamsMFLenSpinBox->value());
+                    _inferData.F0.emplace_back(std::move(SrcF0));
                     _inferData.Volume.emplace_back(mean_filter(InferClass::SVC::ExtractVolume(_inferData.OrgAudio[i - 1], 320), ui->SvcParamsMFLenSpinBox->value()));
                 }
                 else
