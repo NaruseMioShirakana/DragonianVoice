@@ -5,6 +5,7 @@
 #include "TTS/ttsmainwindow.h"
 #include "SVS/svsmainwindow.h"
 #include "SVC/svcmainwindow.h"
+#include "moevssetting.h"
 
 namespace Ui {
 class MainMenu;

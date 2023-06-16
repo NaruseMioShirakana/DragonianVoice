@@ -180,11 +180,11 @@ void SVCMainWindow::loadModel(size_t idx)
         const std::string _type_model = Config["Type"].GetString();
         if (_type_model == "DiffSvc")
         {
-            _model = dynamic_cast<InferClass::SVC*>(new InferClass::DiffusionSvc(Config, BarCallback, TTSParamCallback, __MOESS_DEVICE));
+            _model = dynamic_cast<InferClass::SVC*>(new InferClass::DiffusionSvc(Config, BarCallback, TTSParamCallback, InferClass::__MOESS_DEVICE));
         }
         else if (_type_model == "SoVits" || _type_model == "RVC")
         {
-            _model = dynamic_cast<InferClass::SVC*>(new InferClass::VitsSvc(Config, BarCallback, TTSParamCallback, __MOESS_DEVICE));
+            _model = dynamic_cast<InferClass::SVC*>(new InferClass::VitsSvc(Config, BarCallback, TTSParamCallback, InferClass::__MOESS_DEVICE));
         }
         else
         {
@@ -748,6 +748,7 @@ void SVCMainWindow::on_actionSvcMainOpenProject_triggered()
     CurProjectPath.clear();
     _curAudio = nullptr;
     cur_slice_index = -1;
+    CurProjectPath = file_path.toStdWString();
 }
 
 void SVCMainWindow::on_actionSvcMainAppendProject_triggered()
@@ -878,7 +879,12 @@ void SVCMainWindow::on_actionSlicerSettings_triggered()
 
 void SVCMainWindow::on_actiondeviceSettings_triggered()
 {
-    QMessageBox::information(this, "TODO", "Comming Soon", QMessageBox::Ok);
+    if(_model)
+    {
+        QMessageBox::warning(this, tr("SvcPleaseUnLoadModelTitle"), tr("SvcPleaseUnLoadModelText"), QMessageBox::Ok);
+        return;
+    }
+    _setting_widget.show();
 }
 
 void SVCMainWindow::on_actionSvcMainAboutPage_triggered()

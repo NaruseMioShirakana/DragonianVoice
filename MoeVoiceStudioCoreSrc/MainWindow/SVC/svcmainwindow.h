@@ -6,6 +6,7 @@
 #include "MessageSender.h"
 #include "ui_svcmainwindow.h"
 #include "svcinferslicersetting.h"
+#include "moevssetting.h"
 
 namespace Ui {
 class SVCMainWindow;
@@ -16,6 +17,7 @@ class SVCMainWindow : public QMainWindow
     Q_OBJECT
 
 public:
+    MoeVSSetting _setting_widget;
     struct SliceConfig
     {
         double threshold = 40;
@@ -102,7 +104,6 @@ private:
     int samplingRate = 22050;
     int duration_media = 0;
     int n_speakers = 0;
-    InferClass::OnnxModule::Device __MOESS_DEVICE = InferClass::OnnxModule::Device::CPU;
     std::vector<std::wstring> _audioFolder;
 
     std::vector<MJson> _models;

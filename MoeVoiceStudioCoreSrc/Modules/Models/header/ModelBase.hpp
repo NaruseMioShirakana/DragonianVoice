@@ -2,7 +2,7 @@
 #include <functional>
 #include <onnxruntime_cxx_api.h>
 #include <regex>
-#include <fstream>
+#include <thread>
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #endif
@@ -31,6 +31,7 @@ static std::wstring GetCurrentFolder(const std::wstring& defualt = L"")
 }
 
 INFERCLASSHEADER
+
 enum class FileType
 {
 	Audio,
@@ -196,8 +197,13 @@ class OnnxModule
 public:
 	enum class Device
 	{
-		CPU,
-		CUDA
+		CPU = 0,
+#ifdef MOEVSCUADPROVIDER
+		CUDA = 1,
+#endif
+#ifdef MOEVSDMLPROVIDER
+		DML = 1
+#endif
 	};
 	using callback = std::function<void(size_t, size_t)>;
 	using callback_params = std::function<InferConfigs()>;
@@ -529,7 +535,7 @@ public:
 		return n_speaker;
 	}
 
-	std::vector<float> GetCurrectSpkMixData(const std::vector<float>& srcData, size_t src_dur_frame, size_t dst_dur_frame) const
+	[[nodiscard]] std::vector<float> GetCurrectSpkMixData(const std::vector<float>& srcData, size_t src_dur_frame, size_t dst_dur_frame) const
 	{
 		if (n_speaker < 2 || srcData.empty())
 			return {};
@@ -584,4 +590,8 @@ protected:
 	const std::vector<const char*> hubertOutput = { "embed" };
 	const std::vector<const char*> hubertInput = { "source" };
 };
+
+inline unsigned __MoeVSNumThreads = std::thread::hardware_concurrency();
+inline OnnxModule::Device __MOESS_DEVICE = OnnxModule::Device::CPU;
+inline uint64_t __MoeVSGPUID = 0;
 INFERCLASSEND

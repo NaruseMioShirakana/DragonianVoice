@@ -269,15 +269,15 @@ void TTSMainWindow::loadModel(size_t idx)
         const std::string _type_model = Config["Type"].GetString();
         if (_type_model == "Tacotron2")
         {
-            _model = dynamic_cast<InferClass::TTS*>(new InferClass::Tacotron2(Config, BarCallback, TTSParamCallback, [&](std::vector<float>& _inp) {}, __MOESS_DEVICE));
+            _model = dynamic_cast<InferClass::TTS*>(new InferClass::Tacotron2(Config, BarCallback, TTSParamCallback, [&](std::vector<float>& _inp) {}, InferClass::__MOESS_DEVICE));
         }
         else if (_type_model == "Vits" || _type_model == "VITS_LJS" || _type_model == "VITS_VCTK")
         {
-            _model = dynamic_cast<InferClass::TTS*>(new InferClass::Vits(Config, BarCallback, TTSParamCallback, [&](std::vector<float>& _inp) {}, __MOESS_DEVICE));
+            _model = dynamic_cast<InferClass::TTS*>(new InferClass::Vits(Config, BarCallback, TTSParamCallback, [&](std::vector<float>& _inp) {}, InferClass::__MOESS_DEVICE));
         }
         else if (_type_model == "Pits")
         {
-            _model = dynamic_cast<InferClass::TTS*>(new InferClass::Pits(Config, BarCallback, TTSParamCallback, [&](std::vector<float>& _inp) {}, __MOESS_DEVICE));
+            _model = dynamic_cast<InferClass::TTS*>(new InferClass::Pits(Config, BarCallback, TTSParamCallback, [&](std::vector<float>& _inp) {}, InferClass::__MOESS_DEVICE));
         }
         else
         {

@@ -117,7 +117,6 @@ private:
     int64_t n_speakers = 0;
     size_t cur_model_index = 0;
     int64_t samplingRate = 22050;
-    InferClass::OnnxModule::Device __MOESS_DEVICE = InferClass::OnnxModule::Device::CPU;
     waveWidget* wave_widget_ = nullptr;
     QGridLayout* wave_widget_layout = nullptr;
     QMediaPlayer* media_player = nullptr;

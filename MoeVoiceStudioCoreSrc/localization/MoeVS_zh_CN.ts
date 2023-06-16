@@ -152,6 +152,29 @@
     </message>
 </context>
 <context>
+    <name>MoeVSSetting</name>
+    <message>
+        <location filename="../MainWindow/moevssetting.ui" line="14"/>
+        <source>Form</source>
+        <translation>设备设置</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/moevssetting.ui" line="22"/>
+        <source>SettingDeviceID</source>
+        <translation>设备ID</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/moevssetting.ui" line="32"/>
+        <source>SettingNumThread</source>
+        <translation>线程数</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/moevssetting.ui" line="42"/>
+        <source>SettingProvicer</source>
+        <translation>Provider</translation>
+    </message>
+</context>
+<context>
     <name>MoeVoiceStudio</name>
     <message>
         <location filename="../MainWindow/moevoicestudio.ui" line="32"/>
@@ -592,41 +615,51 @@
     </message>
     <message>
         <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="669"/>
-        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="778"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="779"/>
         <source>SvcCreateProjectWithAudio</source>
         <translation>使用音频新建项目</translation>
     </message>
     <message>
         <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="734"/>
-        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="755"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="756"/>
         <source>SvcOpenProjectFile</source>
         <translation>打开项目</translation>
     </message>
     <message>
-        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="832"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="833"/>
         <source>SvcOverwriteFileTitle</source>
         <translation>是否覆盖保存</translation>
     </message>
     <message>
-        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="833"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="834"/>
         <source>SvcOverwriteFileText</source>
         <translation>该项目文件中原先的部分将会永久丢失</translation>
     </message>
     <message>
-        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="837"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="838"/>
         <source>SvcOverwriteFileYes</source>
         <translation>确认</translation>
     </message>
     <message>
-        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="838"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="839"/>
         <source>SvcOverwriteFileNo</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="842"/>
-        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="852"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="843"/>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="853"/>
         <source>SvcSaveProjectFile</source>
         <translation>保存项目文件</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="884"/>
+        <source>SvcPleaseUnLoadModelTitle</source>
+        <translation>模型已加载</translation>
+    </message>
+    <message>
+        <location filename="../MainWindow/SVC/svcmainwindow.cpp" line="884"/>
+        <source>SvcPleaseUnLoadModelText</source>
+        <translation>修改设备前必须卸载模型</translation>
     </message>
 </context>
 <context>

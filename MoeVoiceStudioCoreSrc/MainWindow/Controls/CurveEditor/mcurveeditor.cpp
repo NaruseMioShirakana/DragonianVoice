@@ -699,4 +699,5 @@ void MCurveEditor::on_SvcEditorOpenF0NpyButton_clicked()
 		return;
 	}
 	ui->F0Widget->graph(0)->setData(_F0Key, _F0Data);
+	ui->F0Widget->replot();
 }

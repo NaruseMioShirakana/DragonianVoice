@@ -37,7 +37,7 @@ void MainMenu::on_MainMenuSVSButton_clicked()
 
 void MainMenu::on_MainMenuInfoAndConfigButton_clicked()
 {
-
+    _svc._setting_widget.show();
 }
 
 void MainMenu::on_MainMenuExitButton_clicked()
