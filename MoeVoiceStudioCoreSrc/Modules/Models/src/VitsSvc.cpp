@@ -58,6 +58,9 @@ VitsSvc::VitsSvc(const MJson& _config, const callback& _cb, const callback_param
 	if (!_config["SoVits4"].IsNull())
 		SV4 = _config["SoVits4"].GetBool();
 
+	if(__MOESS_DEVICE == Device::DML && _modelType != modelType::RVC && (SV3 || SV4))
+		throw std::exception("[Error] DirectXMl Not Support SoVits3 & SoVits4, Please Use Cuda Or Cpu");
+
 	if (SV3 && SV4)
 		throw std::exception("[Error] SoVits3 && SoVits4 Must Be False");
 
@@ -456,7 +459,7 @@ std::vector<int16_t> VitsSvc::InferWithF0AndHiddenUnit(std::vector<MoeVSProject:
 					HiddenUnits.reserve(HubertSize * (upSample + 1));
 					for (int64_t itS = 0; itS < HiddenUnitShape[1]; ++itS)
 						for (int64_t itSS = 0; itSS < upSample; ++itSS)
-							HiddenUnits.insert(HiddenUnits.end(), srcHiddenUnits.begin() + itS * 256, srcHiddenUnits.begin() + (itS + 1) * 256);
+							HiddenUnits.insert(HiddenUnits.end(), srcHiddenUnits.begin() + itS * Hidden_Size, srcHiddenUnits.begin() + (itS + 1) * Hidden_Size);
 					HiddenUnitShape[1] *= upSample;
 					HubertSize *= upSample;
 					F0Data = GetInterpedF0(InterpFunc(srcF0Data, long(srcF0Data.size()), long(HiddenUnitShape[1])));
@@ -474,7 +477,7 @@ std::vector<int16_t> VitsSvc::InferWithF0AndHiddenUnit(std::vector<MoeVSProject:
 					HiddenUnits.reserve(HubertSize * (upSample + 1));
 					for (int64_t itS = 0; itS < HiddenUnitShape[1]; ++itS)
 						for (int64_t itSS = 0; itSS < upSample; ++itSS)
-							HiddenUnits.insert(HiddenUnits.end(), srcHiddenUnits.begin() + itS * 256, srcHiddenUnits.begin() + (itS + 1) * 256);
+							HiddenUnits.insert(HiddenUnits.end(), srcHiddenUnits.begin() + itS * Hidden_Size, srcHiddenUnits.begin() + (itS + 1) * Hidden_Size);
 					HiddenUnitShape[1] *= upSample;
 					HubertSize *= upSample;
 					F0Data = InterpFunc(srcF0Data, long(srcF0Data.size()), long(HiddenUnitShape[1]));
@@ -558,8 +561,14 @@ std::vector<int16_t> VitsSvc::InferWithF0AndHiddenUnit(std::vector<MoeVSProject:
 				if (_modelType == modelType::RVC)
 					inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, RandnInput.data(), RandnCount, RandnShape, 3));
 
-				if(VolumeB)
-					inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, inp_audio.Volume[slice].data(), UV.size(), F0Shape, 2));
+				std::vector<float> VolumeData;
+
+				if (VolumeB)
+				{
+					SoVitsInput.emplace_back("vol");
+					VolumeData = InterpFunc(inp_audio.Volume[slice], long(inp_audio.Volume[slice].size()), long(F0Shape[1]));
+					inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, VolumeData.data(), F0Shape[1], F0Shape, 2));
+				}
 
 				//Inference
 				std::vector<Ort::Value> finaOut;
@@ -1155,7 +1164,7 @@ std::vector<int16_t> VitsSvc::InferCurAudio(MoeVSProject::Params& input_audio_in
 				HiddenUnits.reserve(HubertSize * (upSample + 1));
 				for (int64_t itS = 0; itS < HiddenUnitShape[1]; ++itS)
 					for (int64_t itSS = 0; itSS < upSample; ++itSS)
-						HiddenUnits.insert(HiddenUnits.end(), srcHiddenUnits.begin() + itS * 256, srcHiddenUnits.begin() + (itS + 1) * 256);
+						HiddenUnits.insert(HiddenUnits.end(), srcHiddenUnits.begin() + itS * Hidden_Size, srcHiddenUnits.begin() + (itS + 1) * Hidden_Size);
 				HiddenUnitShape[1] *= upSample;
 				HubertSize *= upSample;
 				F0Data = GetInterpedF0(InterpFunc(srcF0Data, long(srcF0Data.size()), long(HiddenUnitShape[1])));
@@ -1173,7 +1182,7 @@ std::vector<int16_t> VitsSvc::InferCurAudio(MoeVSProject::Params& input_audio_in
 				HiddenUnits.reserve(HubertSize * (upSample + 1));
 				for (int64_t itS = 0; itS < HiddenUnitShape[1]; ++itS)
 					for (int64_t itSS = 0; itSS < upSample; ++itSS)
-						HiddenUnits.insert(HiddenUnits.end(), srcHiddenUnits.begin() + itS * 256, srcHiddenUnits.begin() + (itS + 1) * 256);
+						HiddenUnits.insert(HiddenUnits.end(), srcHiddenUnits.begin() + itS * Hidden_Size, srcHiddenUnits.begin() + (itS + 1) * Hidden_Size);
 				HiddenUnitShape[1] *= upSample;
 				HubertSize *= upSample;
 				F0Data = InterpFunc(srcF0Data, long(srcF0Data.size()), long(HiddenUnitShape[1]));
@@ -1264,7 +1273,7 @@ std::vector<int16_t> VitsSvc::InferCurAudio(MoeVSProject::Params& input_audio_in
 			{
 				SoVitsInput.emplace_back("vol");
 				VolumeData = InterpFunc(input_audio_infer.Volume[slice], long(input_audio_infer.Volume[slice].size()), long(F0Shape[1]));
-				inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, VolumeData.data(), UV.size(), F0Shape, 2));
+				inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, VolumeData.data(), F0Shape[1], F0Shape, 2));
 			}
 
 			//Inference

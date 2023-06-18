@@ -488,12 +488,12 @@ public:
 				x0.pop_back();
 			std::vector<double> y0(Data.size());
 			for (size_t i = 0; i < Data.size(); ++i)
-				y0[i] = double(Data[i]);
+				y0[i] = Data[i] <= T(0.0001) ? NAN : double(Data[i]);
 			std::vector<double> yi(xi.size());
 			interp1(x0.data(), y0.data(), long(x0.size()), xi.data(), long(xi.size()), yi.data());
 			std::vector<T> out(xi.size());
 			for (size_t i = 0; i < yi.size(); ++i)
-				out[i] = T(yi[i]);
+				out[i] = isnan(yi[i])? T(0.0) : T(yi[i]);
 			return out;
 		}
 		return Data;

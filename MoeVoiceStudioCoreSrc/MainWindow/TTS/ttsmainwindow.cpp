@@ -143,6 +143,7 @@ void TTSMainWindow::SetModelSelectEnabled(bool condition) const
 
 void TTSMainWindow::reloadModels()
 {
+    cur_model_index = 0;
     modelsClear();
     ui->ModelComboBox->setEnabled(false);
     std::wstring prefix = L"Cleaners";

@@ -268,9 +268,11 @@ std::vector<int16_t> DiffusionSvc::InferWithF0AndHiddenUnit(std::vector<MoeVSPro
 					}
 					else
 					{
+						auto SvcInputNames = encoderInput;
 						std::vector<float> chara_mix;
 						if (CharaMix)
 						{
+							SvcInputNames = encoderInputSpkMix;
 							CharaMixShape[0] = F0Shape[1];
 							if (!inp_audio.Speaker[slice].empty())
 								chara_mix = inp_audio.Speaker[slice];
@@ -286,10 +288,13 @@ std::vector<int16_t> DiffusionSvc::InferWithF0AndHiddenUnit(std::vector<MoeVSPro
 							inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, chara_mix.data(), chara_mix.size(), CharaMixShape, 2));
 						}
 						if (VolumeB)
+						{
 							inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, inp_audio.Volume[slice].data(), F0Shape[1], F0Shape, 2));
+							SvcInputNames.emplace_back("volume");
+						}
 						try {
 							encTensors = encoder->Run(Ort::RunOptions{ nullptr },
-								encoderInput.data(),
+								SvcInputNames.data(),
 								inputTensors.data(),
 								inputTensors.size(),
 								encoderOutput.data(),
@@ -711,6 +716,7 @@ std::vector<int16_t> DiffusionSvc::InferCurAudio(MoeVSProject::Params& input_aud
 					std::vector<float> chara_mix;
 					if (CharaMix)
 					{
+						SvcInputNames = encoderInputSpkMix;
 						if (n_speaker > 1)
 							chara_mix = GetCurrectSpkMixData(input_audio_infer.Speaker[slice], input_audio_infer.F0[slice].size(), F0Shape[1]);
 						CharaMixShape[0] = F0Shape[1];

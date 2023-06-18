@@ -34,6 +34,7 @@ private:
     const std::vector<const char*> DiffOutput = { "mel_pred", "f0_pred" };
     const std::vector<const char*> encoderInput = { "hubert", "mel2ph", "spk_embed", "f0" };
     const std::vector<const char*> encoderInputddsp = { "hubert", "mel2ph", "f0", "volume", "spk_mix" };
+    const std::vector<const char*> encoderInputSpkMix = { "hubert", "mel2ph", "f0", "spk_mix" };
     const std::vector<const char*> denoiseInput = { "noise", "time", "condition" };
     const std::vector<const char*> predInput = { "noise", "noise_pred", "time", "time_prev" };
     const std::vector<const char*> afterInput = { "x" };

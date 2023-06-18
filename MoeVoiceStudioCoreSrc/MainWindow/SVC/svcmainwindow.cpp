@@ -34,6 +34,7 @@ SVCMainWindow::~SVCMainWindow()
 
 void SVCMainWindow::reloadModels()
 {
+    cur_model_index = 0;
     modelsClear();
     ui->SvcModelSelector->setEnabled(false);
     std::wstring prefix = L"Cleaners";
@@ -562,12 +563,12 @@ void SVCMainWindow::on_SvcProjectListWidget_itemDoubleClicked(QListWidgetItem* i
     }
 }
 
-std::vector<float> ConstructSpkMixData(size_t n_speaker, size_t Length)
+std::vector<float> ConstructSpkMixData(size_t n_speaker, size_t Length, int idxsss)
 {
     if (n_speaker < 2)
         return {};
     std::vector<float> _LenData(n_speaker, 0.0), rtn_vector;
-    _LenData[0] = 1.0;
+    _LenData[idxsss] = 1.0;
     rtn_vector.reserve(n_speaker * Length);
     for (size_t i = 0; i < Length; ++i)
         rtn_vector.insert(rtn_vector.end(), _LenData.begin(), _LenData.end());
@@ -595,19 +596,27 @@ void SVCMainWindow::on_SvcSegmentListWidget_itemDoubleClicked(QListWidgetItem* i
             if(ret == QMessageBox::Save)
             {
                 auto _datas = ui->SvcEditorWidget->getData();
-                _curAudio->F0[cur_slice_index] = std::move(_datas.F0);
-                _curAudio->Volume[cur_slice_index] = std::move(_datas.Volume);
-                _curAudio->Speaker[cur_slice_index] = std::move(_datas.Speaker);//
+                if(!_datas.F0.empty())
+                    _curAudio->F0[cur_slice_index] = std::move(_datas.F0);
+                if (!_datas.Volume.empty())
+                    _curAudio->Volume[cur_slice_index] = std::move(_datas.Volume);
+                if (!_datas.Speaker.empty())
+                    _curAudio->Speaker[cur_slice_index] = std::move(_datas.Speaker);
             }
         }
         cur_slice_index = ui->SvcSegmentListWidget->row(item);
-        if (n_speakers > 1 &&
-            (_curAudio->Speaker[cur_slice_index].empty() ||
-            _curAudio->Speaker[cur_slice_index].size() / n_speakers != _curAudio->F0[cur_slice_index].size()))
-            _curAudio->Speaker[cur_slice_index] = ConstructSpkMixData(n_speakers, _curAudio->Volume[cur_slice_index].size());
+        std::vector<float> speaker_mix_data;
+        if (n_speakers > 1)
+        {
+            if ((_curAudio->Speaker[cur_slice_index].empty() || _curAudio->Speaker[cur_slice_index].size() / n_speakers != _curAudio->F0[cur_slice_index].size()))
+                speaker_mix_data = ConstructSpkMixData(n_speakers, _curAudio->Volume[cur_slice_index].size(), ui->SvcCharacterSelector->currentIndex());
+            else
+                speaker_mix_data = _curAudio->Speaker[cur_slice_index];
+        }
+
         ui->SvcEditorWidget->setData(_curAudio->F0[cur_slice_index], 
             _curAudio->Volume[cur_slice_index],
-            _curAudio->Speaker[cur_slice_index],
+            speaker_mix_data,
             _curAudio->OrgAudio[cur_slice_index],
             _speakers, 48000);
     }
