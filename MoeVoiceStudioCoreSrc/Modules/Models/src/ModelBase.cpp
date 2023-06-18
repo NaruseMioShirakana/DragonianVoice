@@ -1,7 +1,9 @@
 #include "../header/ModelBase.hpp"
 #ifdef WIN32
 #include <commdlg.h>
+#ifdef MOEVSDMLPROVIDER
 #include <dml_provider_factory.h>
+#endif
 #endif
 #include <thread>
 #include <fstream>
@@ -298,7 +300,6 @@ void InferClass::OnnxModule::ChangeDevice(Device _dev)
 	memory_info = nullptr;
 	switch (_dev)
 	{
-#ifdef MOEVSCUADPROVIDER
 		case Device::CUDA:
 		{
 			const auto AvailableProviders = Ort::GetAvailableProviders();
@@ -318,7 +319,6 @@ void InferClass::OnnxModule::ChangeDevice(Device _dev)
 			memory_info = new Ort::MemoryInfo(Ort::MemoryInfo::CreateCpu(OrtAllocatorType::OrtArenaAllocator, OrtMemType::OrtMemTypeDefault));
 			break;
 		}
-#endif
 #ifdef MOEVSDMLPROVIDER
 		case Device::DML:
 		{

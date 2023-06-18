@@ -198,11 +198,9 @@ public:
 	enum class Device
 	{
 		CPU = 0,
-#ifdef MOEVSCUADPROVIDER
 		CUDA = 1,
-#endif
 #ifdef MOEVSDMLPROVIDER
-		DML = 1
+		DML = 2
 #endif
 	};
 	using callback = std::function<void(size_t, size_t)>;

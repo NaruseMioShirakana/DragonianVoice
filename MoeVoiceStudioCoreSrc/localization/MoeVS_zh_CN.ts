@@ -154,22 +154,22 @@
 <context>
     <name>MoeVSSetting</name>
     <message>
-        <location filename="../MainWindow/moevssetting.ui" line="14"/>
+        <location filename="../MainWindow/moevssetting.ui" line="26"/>
         <source>Form</source>
         <translation>设备设置</translation>
     </message>
     <message>
-        <location filename="../MainWindow/moevssetting.ui" line="22"/>
+        <location filename="../MainWindow/moevssetting.ui" line="34"/>
         <source>SettingDeviceID</source>
         <translation>设备ID</translation>
     </message>
     <message>
-        <location filename="../MainWindow/moevssetting.ui" line="32"/>
+        <location filename="../MainWindow/moevssetting.ui" line="44"/>
         <source>SettingNumThread</source>
         <translation>线程数</translation>
     </message>
     <message>
-        <location filename="../MainWindow/moevssetting.ui" line="42"/>
+        <location filename="../MainWindow/moevssetting.ui" line="54"/>
         <source>SettingProvicer</source>
         <translation>Provider</translation>
     </message>

@@ -15,8 +15,12 @@ public:
     explicit MoeVSSetting(QWidget *parent = nullptr);
     ~MoeVSSetting() override;
     void closeEvent(QCloseEvent* event) override;
+#ifdef MOEVSDMLPROVIDER
+    void DmlAddDevice() const;
+#endif
+    void CudaAddDevice() const;
 public slots:
-    static void on_SettingProvicerComboBox_currentIndexChanged(int value);
+    void on_SettingProvicerComboBox_currentIndexChanged(int value) const;
     static void on_SettingNumThreadComboBox_currentIndexChanged(int value);
     static void on_SettingDeviceIDComboBox_currentIndexChanged(int value);
 
