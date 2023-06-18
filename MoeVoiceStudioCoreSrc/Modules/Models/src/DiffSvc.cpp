@@ -707,6 +707,7 @@ std::vector<int16_t> DiffusionSvc::InferCurAudio(MoeVSProject::Params& input_aud
 				}
 				else
 				{
+					auto SvcInputNames = encoderInput;
 					std::vector<float> chara_mix;
 					if (CharaMix)
 					{
@@ -722,16 +723,17 @@ std::vector<int16_t> DiffusionSvc::InferCurAudio(MoeVSProject::Params& input_aud
 							for (int64_t index = 0; index < F0Shape[1]; ++index)
 								chara_mix.insert(chara_mix.end(), charaMap.begin(), charaMap.end());
 						}
-						inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, chara_mix.data(), chara_mix.size(), CharaMixShape, 2));
+						inputTensors[2] = (Ort::Value::CreateTensor(*memory_info, chara_mix.data(), chara_mix.size(), CharaMixShape, 2));
 					}
 					if (VolumeB)
 					{
+						SvcInputNames.emplace_back("volume");
 						VolumeData = InterpFunc(input_audio_infer.Volume[slice], long(input_audio_infer.Volume[slice].size()), long(F0Shape[1]));
 						inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, VolumeData.data(), F0Shape[1], F0Shape, 2));
 					}
 					try {
 						encTensors = encoder->Run(Ort::RunOptions{ nullptr },
-							encoderInput.data(),
+							SvcInputNames.data(),
 							inputTensors.data(),
 							inputTensors.size(),
 							encoderOutput.data(),

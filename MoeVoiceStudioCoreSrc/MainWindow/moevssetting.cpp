@@ -1,7 +1,9 @@
 #include "moevssetting.h"
 #include "ui_moevssetting.h"
 #include "ModelBase.hpp"
+#ifdef MOEVSDMLPROVIDER
 #include <DXGI.h>
+#endif
 
 MoeVSSetting::MoeVSSetting(QWidget *parent) :
     QWidget(parent),
@@ -17,11 +19,11 @@ MoeVSSetting::MoeVSSetting(QWidget *parent) :
 #endif // MOEVSCUADPROVIDER
 #ifdef MOEVSDMLPROVIDER
     ui->SettingProvicerComboBox->addItem("DML");
-#endif
+
     IDXGIFactory* pFactory;
     IDXGIAdapter* pAdapter;
     int iAdapterNum = 0;
-    HRESULT hr = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)(&pFactory));
+    const HRESULT hr = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)(&pFactory));
     if (FAILED(hr))
         return;
     while (pFactory->EnumAdapters(iAdapterNum, &pAdapter) != DXGI_ERROR_NOT_FOUND)
@@ -39,11 +41,12 @@ MoeVSSetting::MoeVSSetting(QWidget *parent) :
         fread(&InferClass::__MOESS_DEVICE, 1, sizeof(InferClass::OnnxModule::Device), _CONFIGFILE);
         fread(&InferClass::__MoeVSNumThreads, 1, sizeof(unsigned int), _CONFIGFILE);
         fread(&InferClass::__MoeVSGPUID, 1, sizeof(uint64_t), _CONFIGFILE);
-        ui->SettingNumThreadComboBox->setCurrentIndex(InferClass::__MoeVSNumThreads - 1);
-        ui->SettingDeviceIDComboBox->setCurrentIndex(InferClass::__MoeVSGPUID);
+        ui->SettingNumThreadComboBox->setCurrentIndex(int(InferClass::__MoeVSNumThreads - 1));
+        ui->SettingDeviceIDComboBox->setCurrentIndex(int(InferClass::__MoeVSGPUID));
         ui->SettingProvicerComboBox->setCurrentIndex(int(InferClass::__MOESS_DEVICE));
         fclose(_CONFIGFILE);
     }
+#endif
 }
 
 MoeVSSetting::~MoeVSSetting()

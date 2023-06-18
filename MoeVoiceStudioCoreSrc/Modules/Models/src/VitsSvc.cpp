@@ -1262,6 +1262,7 @@ std::vector<int16_t> VitsSvc::InferCurAudio(MoeVSProject::Params& input_audio_in
 
 			if (VolumeB)
 			{
+				SoVitsInput.emplace_back("vol");
 				VolumeData = InterpFunc(input_audio_infer.Volume[slice], long(input_audio_infer.Volume[slice].size()), long(F0Shape[1]));
 				inputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, VolumeData.data(), UV.size(), F0Shape, 2));
 			}

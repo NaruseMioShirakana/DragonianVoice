@@ -16,9 +16,9 @@ public:
     ~MoeVSSetting() override;
     void closeEvent(QCloseEvent* event) override;
 public slots:
-    void on_SettingProvicerComboBox_currentIndexChanged(int value);
-    void on_SettingNumThreadComboBox_currentIndexChanged(int value);
-    void on_SettingDeviceIDComboBox_currentIndexChanged(int value);
+    static void on_SettingProvicerComboBox_currentIndexChanged(int value);
+    static void on_SettingNumThreadComboBox_currentIndexChanged(int value);
+    static void on_SettingDeviceIDComboBox_currentIndexChanged(int value);
 
 private:
     Ui::MoeVSSetting *ui;
