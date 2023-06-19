@@ -2,6 +2,7 @@
 #include "header/ModelBase.hpp"
 #include "header/VitsSvc.hpp"
 #include <chrono>
+using namespace rapidjson;
 
 rapidjson::Document parseJSONFile(const std::string& filename) {
     rapidjson::Document document;
@@ -50,7 +51,9 @@ InferClass::OnnxModule* CreateModel(const InferClass::OnnxModule::callback_param
     Config.AddMember(key, value, allocator);
 
     //Progress bar
-    const InferClass::OnnxModule::callback ProgressCallback = [](size_t a, size_t b) {std::cout << std::to_string((float)a * 100.f / (float)b) << "%\n"; };
+    const InferClass::OnnxModule::callback ProgressCallback = [](size_t a, size_t b) {
+        //std::cout << std::to_string((float)a * 100.f / (float)b) << "%\n"; 
+    };
 
     const auto model = dynamic_cast<InferClass::OnnxModule*>(
         new InferClass::VitsSvc(Config, ProgressCallback, ParamsCallback)
@@ -86,6 +89,93 @@ std::string extractContent(const std::string& str, std::string& remainingStr) {
     }
 }
 
+void assignJsonValue(const rapidjson::Document& json, InferClass::InferConfigs& config) {
+    if (json.HasMember("keys")) {
+        config.keys = json["keys"].GetInt64();
+    }
+    if (json.HasMember("threshold")) {
+        config.threshold = json["threshold"].GetInt64();
+    }
+    if (json.HasMember("minLen")) {
+        config.minLen = json["minLen"].GetInt64();
+    }
+    if (json.HasMember("frame_len")) {
+        config.frame_len = json["frame_len"].GetInt64();
+    }
+    if (json.HasMember("frame_shift")) {
+        config.frame_shift = json["frame_shift"].GetInt64();
+    }
+    if (json.HasMember("pndm")) {
+        config.pndm = json["pndm"].GetInt64();
+    }
+    if (json.HasMember("step")) {
+        config.step = json["step"].GetInt64();
+    }
+    if (json.HasMember("gateThreshold")) {
+        config.gateThreshold = json["gateThreshold"].GetFloat();
+    }
+    if (json.HasMember("maxDecoderSteps")) {
+        config.maxDecoderSteps = json["maxDecoderSteps"].GetInt64();
+    }
+    if (json.HasMember("noise_scale")) {
+        config.noise_scale = json["noise_scale"].GetFloat();
+    }
+    if (json.HasMember("noise_scale_w")) {
+        config.noise_scale_w = json["noise_scale_w"].GetFloat();
+    }
+    if (json.HasMember("length_scale")) {
+        config.length_scale = json["length_scale"].GetFloat();
+    }
+    if (json.HasMember("chara")) {
+        config.chara = json["chara"].GetInt64();
+    }
+    if (json.HasMember("seed")) {
+        config.seed = json["seed"].GetInt64();
+    }
+    if (json.HasMember("emo")) {
+        config.emo = to_wide_string( json["emo"].GetString() );
+    }
+    if (json.HasMember("cp")) {
+        config.cp = json["cp"].GetBool();
+    }
+    if (json.HasMember("filter_window_len")) {
+        config.filter_window_len = json["filter_window_len"].GetUint64();
+    }
+    if (json.HasMember("index")) {
+        config.index = json["index"].GetBool();
+    }
+    if (json.HasMember("index_rate")) {
+        config.index_rate = json["index_rate"].GetFloat();
+    }
+    if (json.HasMember("kmeans_rate")) {
+        config.kmeans_rate = json["kmeans_rate"].GetFloat();
+    }
+    if (json.HasMember("rt_batch_length")) {
+        config.rt_batch_length = json["rt_batch_length"].GetDouble();
+    }
+    if (json.HasMember("rt_batch_count")) {
+        config.rt_batch_count = json["rt_batch_count"].GetUint64();
+    }
+    if (json.HasMember("rt_cross_fade_length")) {
+        config.rt_cross_fade_length = json["rt_cross_fade_length"].GetDouble();
+    }
+    if (json.HasMember("rt_th")) {
+        config.rt_th = json["rt_th"].GetInt64();
+    }
+    if (json.HasMember("chara_mix")) {
+        const Value& chara_mixArray = json["chara_mix"];
+        if (chara_mixArray.IsArray()) {
+            for (SizeType i = 0; i < chara_mixArray.Size(); i++) {
+                config.chara_mix.push_back(chara_mixArray[i].GetFloat());
+            }
+        }
+    }
+    if (json.HasMember("use_iti")) {
+        config.use_iti = json["use_iti"].GetBool();
+    }
+}
+
+
 void SetInterConfigFromJson(InferClass::InferConfigs& config, const std::string& json) {
 
     rapidjson::Document interConfigParam;
@@ -96,12 +186,13 @@ void SetInterConfigFromJson(InferClass::InferConfigs& config, const std::string&
 
         // 检查解析是否成功
         if (!interConfigParam.HasParseError()) {
-            if (interConfigParam.HasMember("keys")) {
+           /* if (interConfigParam.HasMember("keys")) {
                 config.keys = interConfigParam["keys"].GetInt64();
             }
             if (interConfigParam.HasMember("kmeans_rate")) {
                 config.kmeans_rate = interConfigParam["kmeans_rate"].GetInt64();
-            }
+            }*/
+            assignJsonValue(interConfigParam, config);
         }
     }
     catch (std::exception& e){
@@ -135,8 +226,7 @@ int main() {
     const InferClass::OnnxModule::callback_params ParamsCallback = [&configInfer]()  // 注意这里的改动
     {
         auto params = InferClass::InferConfigs();
-        params.kmeans_rate = configInfer.kmeans_rate;
-        params.keys = configInfer.keys;
+        params = configInfer;
         return params;
     };
 
