@@ -1,4 +1,5 @@
 ## 注意：关于UI相关内容请到MoeVoiceStudio分支查看，与本分支略有不同
+## 关于Cuda支持的相关问题可以前往[OnnxRuntime官方仓库](https://github.com/microsoft/onnxruntime/releases)查看
 
 # MoeVoiceStudio
 | [中文](README.md) | [English](README_en.md)
