@@ -1,5 +1,6 @@
 ## 注意：关于UI相关内容请到[MoeVoiceStudio](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudio)分支查看，与本分支略有不同
 ## 关于Cuda支持的相关问题可以前往[OnnxRuntime官方仓库](https://github.com/microsoft/onnxruntime/releases)查看
+## 经过实验，Dml会导致Onnx中一些算子得到错误的结果，故SoVits3.0和SoVits4.0不支持Dml使用
 
 # MoeVoiceStudio
 | [中文](README.md) | [English](README_en.md)
