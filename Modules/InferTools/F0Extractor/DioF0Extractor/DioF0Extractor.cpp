@@ -1,0 +1,68 @@
+﻿#include "DioF0Extractor.hpp"
+#include "dio.h"
+#include "stonemask.h"
+#include "matlabfunctions.h"
+
+MOEVSFOEXTRACTORHEADER
+DioF0Extractor::DioF0Extractor(int sampling_rate, int hop_size, int n_f0_bins, double max_f0, double min_f0):
+	BaseF0Extractor(sampling_rate, hop_size, n_f0_bins, max_f0, min_f0)
+{
+}
+
+std::vector<double> DioF0Extractor::arange(double start, double end, double step, double div)
+{
+    std::vector<double> output;
+    while (start < end)
+    {
+        output.push_back(start / div);
+        start += step;
+    }
+    return output;
+}
+
+void DioF0Extractor::InterPf0(size_t TargetLength)
+{
+    const auto f0Len = refined_f0.size();
+    if (TargetLength == f0Len) return;
+    for (size_t i = 0; i < f0Len; ++i) if (refined_f0[i] < 0.001) refined_f0[i] = NAN;
+
+    auto xi = arange(0.0, (double)f0Len * (double)TargetLength, (double)f0Len, (double)TargetLength);
+    while (xi.size() < TargetLength) xi.emplace_back(*(xi.end() - 1) + ((double)f0Len / (double)TargetLength));
+    while (xi.size() > TargetLength) xi.pop_back();
+
+	auto x0 = arange(0, (double)f0Len);
+    while (x0.size() < f0Len) x0.emplace_back(*(x0.end() - 1) + 1.);
+    while (x0.size() > f0Len) x0.pop_back();
+
+    auto raw_f0 = std::vector<double>(xi.size());
+    interp1(x0.data(), refined_f0.data(), static_cast<int>(x0.size()), xi.data(), (int)xi.size(), raw_f0.data());
+
+    for (size_t i = 0; i < xi.size(); i++) if (isnan(raw_f0[i])) raw_f0[i] = 0.0;
+    refined_f0 = std::move(raw_f0);
+}
+
+std::vector<float> DioF0Extractor::ExtractF0(const std::vector<double>& PCMData, size_t TargetLength)
+{
+    compute_f0(PCMData.data(), PCMData.size());
+    InterPf0(TargetLength);
+    std::vector<float> f0(refined_f0.size());
+    for (size_t i = 0; i < refined_f0.size(); ++i) f0[i] = (float)refined_f0[i];
+    return f0;
+}
+
+void DioF0Extractor::compute_f0(const double* PCMData, size_t PCMLen)
+{
+    DioOption Doption;
+    InitializeDioOption(&Doption);
+    Doption.f0_ceil = f0_max;
+    Doption.f0_floor = f0_min;
+    Doption.frame_period = 1000.0 * hop / fs;
+
+    const size_t f0Length = GetSamplesForDIO(int(fs), (int)PCMLen, Doption.frame_period);
+	auto temporal_positions = std::vector<double>(f0Length);
+	auto raw_f0 = std::vector<double>(f0Length);
+    refined_f0 = std::vector<double>(f0Length);
+    Dio(PCMData, (int)PCMLen, int(fs), &Doption, temporal_positions.data(), raw_f0.data());
+    StoneMask(PCMData, (int)PCMLen, int(fs), temporal_positions.data(), raw_f0.data(), (int)f0Length, refined_f0.data());
+}
+MOEVSFOEXTRACTOREND
