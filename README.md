@@ -268,6 +268,7 @@ Vec模型和Hubert模型放在Hubert文件夹下，Hifigan模型放在Hifigan文
     "Diffusion": false,
     "CharaMix": true,
     "Volume": false,
+    "SoVits2": true,
     "HiddenSize": 256,
     "Characters" : ["Taffy","Nyaru"]
 }
@@ -350,7 +351,7 @@ Vec模型和Hubert模型放在Hubert文件夹下，Hifigan模型放在Hifigan文
     "Hop" : 512,
     "Cleaner" : "",
     "Hubert": "hubert4.0",
-    "SoVits4": true,
+    "SoVits4.0V2": false,
     "Diffusion": false,
     "CharaMix": true,
     "Volume": false,
@@ -365,6 +366,7 @@ Vec模型和Hubert模型放在Hubert文件夹下，Hifigan模型放在Hifigan文
 //CharaMix：是否使用角色混合轨道
 //Volume：该模型是否有音量Emb
 //HiddenSize：Vec模型的尺寸（768/256）
+//SoVits4.0V2: 是否为SoVits4.0V2模型
 ```
     
 </details>
