@@ -1,3 +1,0 @@
-- ffmpeg
-- rapidjson
-- World
