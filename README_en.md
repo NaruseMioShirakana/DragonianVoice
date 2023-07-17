@@ -1,4 +1,4 @@
-## Note: Please refer to the MoeVoiceStudio branch for UI related content, which is slightly different from this branch.
+## Note: TTS & SVS Support：[MoeVoiceStudio](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudio) [MoeVoiceStudioCore](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudioCore).
 
 # MoeVoiceStudio
 | [Chinese](README.md) | [English](README_en.md)
