@@ -9,10 +9,10 @@ This project is a voice assistant software focused on the Otaku subculture and t
     
 - [DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
 - [VITS](https://github.com/jaywalnut310/vits)
-- [SoVits](https://github.com/innnky/so-vits-svc/tree/32k)
+- [SoVits](https://github.com/svc-develop-team/so-vits-svc)
 - [DiffSvc](https://github.com/prophesier/diff-SVC)
 - [DiffSinger](https://github.com/openvpi/DiffSinger)
-- [RVC](https://github.com/liujing04/Retrieval-based-Voice-Conversion-WebUI)
+- [RVC](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI)
 - [FishDiffusion](https://github.com/fishaudio/fish-diffusion)
     
 </details>
