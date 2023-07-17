@@ -1,6 +1,6 @@
 ## 注意：支持TTS和SVS的分支：[MoeVoiceStudio](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudio) [MoeVoiceStudioCore](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudioCore)
 ## 关于Cuda支持的相关问题可以前往[OnnxRuntime官方仓库](https://github.com/microsoft/onnxruntime/releases)查看
-## 经过实验，Dml会导致Onnx中一些算子得到错误的结果，故SoVits3.0和SoVits4.0不支持Dml使用
+## 经过实验，Dml会导致Onnx中一些算子得到错误的结果，最新的SoVits仓库中的Onnx导出已经替换了这些算子，故SoVits3.0和SoVits4.0恢复支持Dml使用，但是要使用最新（2023/7/17）版本的SoVitsOnnx导出重新导出Onnx模型
 
 # MoeVoiceStudio
 | [中文](README.md) | [English](README_en.md)
@@ -11,10 +11,10 @@
     
 - [DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
 - [VITS](https://github.com/jaywalnut310/vits)
-- [SoVits](https://github.com/innnky/so-vits-svc/tree/32k)
+- [SoVits](https://github.com/svc-develop-team/so-vits-svc)
 - [DiffSvc](https://github.com/prophesier/diff-SVC)
 - [DiffSinger](https://github.com/openvpi/DiffSinger)
-- [RVC](https://github.com/liujing04/Retrieval-based-Voice-Conversion-WebUI)
+- [RVC](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI)
 - [FishDiffusion](https://github.com/fishaudio/fish-diffusion)
     
 </details>
