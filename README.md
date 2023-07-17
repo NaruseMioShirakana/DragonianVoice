@@ -174,6 +174,8 @@ demo: [RVC命令行示例](https://github.com/NaruseMioShirakana/MoeVoiceStudio/
 - Diffusion模型使用的hifigan：`input_names`应该为`["c","f0"]`，`output_names`应该为`["audio"]`，`dynamic_axes`应当为`{"c":[0,1],"f0":[0,1],}`
 - Tacotron2使用的hifigan：`input_names`应该为`["x"]`，`output_names`应该为`["audio"]`，`dynamic_axes`应当为`{"x":[0,1],}`
 
+Vec模型和Hubert模型放在Hubert文件夹下，Hifigan模型放在Hifigan文件夹下
+
 ## 配置文件
 - 本项目标准化了模型读取模块，模型保存在Mods文件夹下的子文件夹中。`xxx.json` 为模型的配置文件，需要自行按照模板编写，同时需要自行将模型转换为Onnx。
 
