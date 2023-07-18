@@ -1,6 +1,7 @@
 ﻿
 #include <iostream>
 #include "Modules/Modules.hpp"
+#include "Modules/AvCodec/AvCodeResample.h"
 #ifdef _IOSTREAM_
 std::ostream& operator<<(std::ostream& stream, const std::wstring& str)
 {
@@ -30,23 +31,49 @@ int main()
 	MoeVSModuleManager::LoadSvcModel(
 		MJson(to_byte_string(GetCurrentFolder() + L"/Models/ShirohaRVC.json").c_str()),
 		[](size_t cur, size_t total) {std::cout << (double(cur) / double(total) * 100.) << "%\n"; },
-		0,
+		2,
 		std::thread::hardware_concurrency(),
 		0
 	);
 
 	MoeVSProjectSpace::MoeVSSvcParams Params;
 	InferTools::SlicerSettings Settings;
-	Params.F0Method = L"Harvest";
-	Settings.Threshold = 30.;
+	Params.F0Method = L"Dio";
+	Settings.SamplingRate = 40000;
+#ifdef DEBUGUSETRYCATCH
 	try
 	{
-		std::wstring Paths;
-		auto tmp = MoeVSModuleManager::GetCurSvcModel()->Inference(Paths, Params, Settings);
-		std::cout << tmp;
+#endif
+	std::wstring Paths;
+	auto TPCMData = AudioPreprocess().codec(LR"(S:\VSGIT\MoeSS - Release\Testdata\123.wav)", Settings.SamplingRate);
+	std::vector<int16_t> PCMData = { TPCMData.begin(),TPCMData.begin() + Settings.SamplingRate };
+	std::vector<int16_t> _data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
+	PCMData = { TPCMData.begin() + Settings.SamplingRate * 1,TPCMData.begin() + Settings.SamplingRate * 2 };
+	_data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
+	PCMData = { TPCMData.begin() + Settings.SamplingRate * 2,TPCMData.begin() + Settings.SamplingRate * 3 };
+	_data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
+	PCMData = { TPCMData.begin() + Settings.SamplingRate * 3,TPCMData.begin() + Settings.SamplingRate * 4 };
+	_data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
+	PCMData = { TPCMData.begin() + Settings.SamplingRate * 4,TPCMData.begin() + Settings.SamplingRate * 5 };
+	_data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
+	PCMData = { TPCMData.begin() + Settings.SamplingRate * 5,TPCMData.begin() + Settings.SamplingRate * 6 };
+	_data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
+	PCMData = { TPCMData.begin() + Settings.SamplingRate * 6,TPCMData.begin() + Settings.SamplingRate * 7 };
+	auto now = clock();
+	_data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
+	auto inferTime = double(clock() - now) / 1000.;
+	std::cout << "Infer Use Time : " << inferTime << "sec.\n";
+	PCMData = TPCMData;
+	now = clock();
+	_data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
+	inferTime = double(clock() - now) / 1000.;
+	std::cout << "Infer Use Time : " << inferTime << "sec.\n";
+#ifdef DEBUGUSETRYCATCH
 	}
 	catch (std::exception& e)
 	{
 		std::cout << e.what() << std::endl;
 	}
+#endif
+	system("pause");
 }

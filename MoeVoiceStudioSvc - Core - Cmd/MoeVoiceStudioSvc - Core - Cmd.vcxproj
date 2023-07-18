@@ -73,6 +73,9 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\World\src\world;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\OnnxRuntimeDmlProvider\build\native\include;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\MJson;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\ffmpeg-4.2.1\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\ffmpeg-4.2.1\include;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\MJson;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\OnnxRuntimeDmlProvider\build\native\include;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\World\src\world;$(IncludePath)</IncludePath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -123,15 +126,18 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;MOEVSDMLPROVIDER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\ffmpeg-4.2.1\Lib;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\OnnxRuntimeDmlProvider\runtimes\win-x64\native;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;onnxruntime.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
