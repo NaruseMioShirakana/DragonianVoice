@@ -492,11 +492,8 @@ wchar_t* PluginMain(wchar_t* input){
 ## 本地编译
 ```cxx
 git clone https://github.com/NaruseMioShirakana/MoeVoiceStudio.git
-cd MoeVoiceStudio
-mkdir build
-cd build
-cmake ../
-make .
+//自行配置OnnxRuntime和FFMPEG的Dll
+//使用VisualStudio构建
 ```
 
 ## 依赖列表
