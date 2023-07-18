@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{7a5aa3a6-7488-4be9-93c3-c0aa0e39219e}</ProjectGuid>
+    <RootNamespace>MoeVoiceStudioSvcCoreCmd</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\World\src\world;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\OnnxRuntimeDmlProvider\build\native\include;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\MJson;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\ffmpeg-4.2.1\include;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;MOEVSDMLPROVIDER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\ffmpeg-4.2.1\Lib;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\OnnxRuntimeDmlProvider\runtimes\win-x64\native;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;onnxruntime.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Lib\MJson\yyjson.c" />
+    <ClCompile Include="..\Lib\World\src\cheaptrick.cpp" />
+    <ClCompile Include="..\Lib\World\src\codec.cpp" />
+    <ClCompile Include="..\Lib\World\src\common.cpp" />
+    <ClCompile Include="..\Lib\World\src\d4c.cpp" />
+    <ClCompile Include="..\Lib\World\src\dio.cpp" />
+    <ClCompile Include="..\Lib\World\src\fft.cpp" />
+    <ClCompile Include="..\Lib\World\src\harvest.cpp" />
+    <ClCompile Include="..\Lib\World\src\matlabfunctions.cpp" />
+    <ClCompile Include="..\Lib\World\src\stonemask.cpp" />
+    <ClCompile Include="..\Lib\World\src\synthesis.cpp" />
+    <ClCompile Include="..\Lib\World\src\synthesisrealtime.cpp" />
+    <ClCompile Include="..\Lib\World\tools\audioio.cpp" />
+    <ClCompile Include="..\Lib\World\tools\parameterio.cpp" />
+    <ClCompile Include="Modules\DataStruct\KDTree.cpp" />
+    <ClCompile Include="Modules\InferTools\Cluster\MoeVSBaseCluster.cpp" />
+    <ClCompile Include="Modules\InferTools\Cluster\MoeVSClusterManager.cpp" />
+    <ClCompile Include="Modules\InferTools\Cluster\MoeVSKmeansCluster.cpp" />
+    <ClCompile Include="Modules\InferTools\F0Extractor\BaseF0Extractor\BaseF0Extractor.cpp" />
+    <ClCompile Include="Modules\InferTools\F0Extractor\DioF0Extractor\DioF0Extractor.cpp" />
+    <ClCompile Include="Modules\InferTools\F0Extractor\F0ExtractorManager.cpp" />
+    <ClCompile Include="Modules\InferTools\F0Extractor\HarvestF0Extractor\HarvestF0Extractor.cpp" />
+    <ClCompile Include="Modules\InferTools\inferTools.cpp" />
+    <ClCompile Include="Modules\InferTools\Sampler\MoeVSBaseSampler.cpp" />
+    <ClCompile Include="Modules\InferTools\Sampler\MoeVSSamplerManager.cpp" />
+    <ClCompile Include="Modules\InferTools\Sampler\MoeVSSamplers.cpp" />
+    <ClCompile Include="Modules\InferTools\TensorExtractor\MoeVoiceStudioTensorExtractor.cpp" />
+    <ClCompile Include="Modules\InferTools\TensorExtractor\MoeVSCoreTensorExtractor.cpp" />
+    <ClCompile Include="Modules\InferTools\TensorExtractor\TensorExtractorManager.cpp" />
+    <ClCompile Include="Modules\Logger\MoeSSLogger.cpp" />
+    <ClCompile Include="Modules\Models\src\DiffSvc.cpp" />
+    <ClCompile Include="Modules\Models\src\ModelBase.cpp" />
+    <ClCompile Include="Modules\Models\src\MoeVSProject.cpp" />
+    <ClCompile Include="Modules\Models\src\SVC.cpp" />
+    <ClCompile Include="Modules\Models\src\VitsSvc.cpp" />
+    <ClCompile Include="Modules\Modules.cpp" />
+    <ClCompile Include="MoeVoiceStudioSvc - Core - Cmd.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Lib\MJson\MJson.h" />
+    <ClInclude Include="..\Lib\MJson\yyjson.h" />
+    <ClInclude Include="..\Lib\World\src\world\cheaptrick.h" />
+    <ClInclude Include="..\Lib\World\src\world\codec.h" />
+    <ClInclude Include="..\Lib\World\src\world\common.h" />
+    <ClInclude Include="..\Lib\World\src\world\constantnumbers.h" />
+    <ClInclude Include="..\Lib\World\src\world\d4c.h" />
+    <ClInclude Include="..\Lib\World\src\world\dio.h" />
+    <ClInclude Include="..\Lib\World\src\world\fft.h" />
+    <ClInclude Include="..\Lib\World\src\world\harvest.h" />
+    <ClInclude Include="..\Lib\World\src\world\macrodefinitions.h" />
+    <ClInclude Include="..\Lib\World\src\world\matlabfunctions.h" />
+    <ClInclude Include="..\Lib\World\src\world\stonemask.h" />
+    <ClInclude Include="..\Lib\World\src\world\synthesis.h" />
+    <ClInclude Include="..\Lib\World\src\world\synthesisrealtime.h" />
+    <ClInclude Include="..\Lib\World\tools\audioio.h" />
+    <ClInclude Include="..\Lib\World\tools\parameterio.h" />
+    <ClInclude Include="Modules\AvCodec\AvCodeResample.h" />
+    <ClInclude Include="Modules\DataStruct\KDTree.hpp" />
+    <ClInclude Include="Modules\InferTools\Cluster\MoeVSBaseCluster.hpp" />
+    <ClInclude Include="Modules\InferTools\Cluster\MoeVSClusterManager.hpp" />
+    <ClInclude Include="Modules\InferTools\Cluster\MoeVSKmeansCluster.hpp" />
+    <ClInclude Include="Modules\InferTools\F0Extractor\BaseF0Extractor\BaseF0Extractor.hpp" />
+    <ClInclude Include="Modules\InferTools\F0Extractor\DioF0Extractor\DioF0Extractor.hpp" />
+    <ClInclude Include="Modules\InferTools\F0Extractor\F0ExtractorManager.hpp" />
+    <ClInclude Include="Modules\InferTools\F0Extractor\HarvestF0Extractor\HarvestF0Extractor.hpp" />
+    <ClInclude Include="Modules\InferTools\inferTools.hpp" />
+    <ClInclude Include="Modules\InferTools\Sampler\MoeVSBaseSampler.hpp" />
+    <ClInclude Include="Modules\InferTools\Sampler\MoeVSSamplerManager.hpp" />
+    <ClInclude Include="Modules\InferTools\Sampler\MoeVSSamplers.hpp" />
+    <ClInclude Include="Modules\InferTools\TensorExtractor\MoeVoiceStudioTensorExtractor.hpp" />
+    <ClInclude Include="Modules\InferTools\TensorExtractor\MoeVSCoreTensorExtractor.hpp" />
+    <ClInclude Include="Modules\InferTools\TensorExtractor\TensorExtractorManager.hpp" />
+    <ClInclude Include="Modules\Logger\MoeSSLogger.hpp" />
+    <ClInclude Include="Modules\Models\header\DiffSvc.hpp" />
+    <ClInclude Include="Modules\Models\header\ModelBase.hpp" />
+    <ClInclude Include="Modules\Models\header\MoeVSProject.hpp" />
+    <ClInclude Include="Modules\Models\header\SVC.hpp" />
+    <ClInclude Include="Modules\Models\header\VitsSvc.hpp" />
+    <ClInclude Include="Modules\Modules.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
