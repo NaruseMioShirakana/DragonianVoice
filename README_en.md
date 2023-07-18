@@ -501,11 +501,8 @@ wchar_t* PluginMain(wchar_t* input){
 ## Build
 ```cxx
 git clone https://github.com/NaruseMioShirakana/MoeVoiceStudio.git
-cd MoeVoiceStudio
-mkdir build
-cd build
-cmake ../
-make .
+//Place OnnxRuntime.dll and FFMPEG's Dll in the correct folder 
+//Build With VisualStudio
 ```
 
 ## List of dependencies
