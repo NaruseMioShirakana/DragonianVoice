@@ -163,6 +163,7 @@
     <ClCompile Include="Modules\InferTools\F0Extractor\DioF0Extractor\DioF0Extractor.cpp" />
     <ClCompile Include="Modules\InferTools\F0Extractor\F0ExtractorManager.cpp" />
     <ClCompile Include="Modules\InferTools\F0Extractor\HarvestF0Extractor\HarvestF0Extractor.cpp" />
+    <ClCompile Include="Modules\InferTools\F0Extractor\NetF0Predictors\NetF0Predictors.cpp" />
     <ClCompile Include="Modules\InferTools\inferTools.cpp" />
     <ClCompile Include="Modules\InferTools\Sampler\MoeVSBaseSampler.cpp" />
     <ClCompile Include="Modules\InferTools\Sampler\MoeVSSamplerManager.cpp" />
@@ -171,6 +172,7 @@
     <ClCompile Include="Modules\InferTools\TensorExtractor\MoeVSCoreTensorExtractor.cpp" />
     <ClCompile Include="Modules\InferTools\TensorExtractor\TensorExtractorManager.cpp" />
     <ClCompile Include="Modules\Logger\MoeSSLogger.cpp" />
+    <ClCompile Include="Modules\Models\EnvManager.cpp" />
     <ClCompile Include="Modules\Models\src\DiffSvc.cpp" />
     <ClCompile Include="Modules\Models\src\ModelBase.cpp" />
     <ClCompile Include="Modules\Models\src\MoeVSProject.cpp" />
@@ -206,6 +208,7 @@
     <ClInclude Include="Modules\InferTools\F0Extractor\DioF0Extractor\DioF0Extractor.hpp" />
     <ClInclude Include="Modules\InferTools\F0Extractor\F0ExtractorManager.hpp" />
     <ClInclude Include="Modules\InferTools\F0Extractor\HarvestF0Extractor\HarvestF0Extractor.hpp" />
+    <ClInclude Include="Modules\InferTools\F0Extractor\NetF0Predictors\NetF0Predictors.hpp" />
     <ClInclude Include="Modules\InferTools\inferTools.hpp" />
     <ClInclude Include="Modules\InferTools\Sampler\MoeVSBaseSampler.hpp" />
     <ClInclude Include="Modules\InferTools\Sampler\MoeVSSamplerManager.hpp" />
@@ -214,6 +217,7 @@
     <ClInclude Include="Modules\InferTools\TensorExtractor\MoeVSCoreTensorExtractor.hpp" />
     <ClInclude Include="Modules\InferTools\TensorExtractor\TensorExtractorManager.hpp" />
     <ClInclude Include="Modules\Logger\MoeSSLogger.hpp" />
+    <ClInclude Include="Modules\Models\EnvManager.hpp" />
     <ClInclude Include="Modules\Models\header\DiffSvc.hpp" />
     <ClInclude Include="Modules\Models\header\ModelBase.hpp" />
     <ClInclude Include="Modules\Models\header\MoeVSProject.hpp" />

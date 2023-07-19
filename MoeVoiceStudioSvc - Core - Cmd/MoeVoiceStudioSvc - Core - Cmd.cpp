@@ -30,7 +30,7 @@ int main()
 	try
 	{
 		MoeVSModuleManager::LoadSvcModel(
-			MJson(to_byte_string(GetCurrentFolder() + L"/Models/DiffusionSvc.json").c_str()),
+			MJson(to_byte_string(GetCurrentFolder() + L"/Models/ShirohaRVC.json").c_str()),
 			[](size_t cur, size_t total)
 			{
 				//std::cout << (double(cur) / double(total) * 100.) << "%\n";
@@ -52,7 +52,7 @@ int main()
 	Params.Step = 100;
 	Params.Pndm = 5;
 	InferTools::SlicerSettings Settings;
-	Params.F0Method = L"Dio";
+	Params.F0Method = L"RMVPE";
 	Settings.SamplingRate = 40000;
 #ifdef DEBUGUSETRYCATCH
 	try
@@ -60,6 +60,7 @@ int main()
 #endif
 	std::wstring Paths;
 	auto TPCMData = AudioPreprocess().codec(LR"(S:\VSGIT\MoeSS - Release\Testdata\123.wav)", Settings.SamplingRate);
+	//MoeVSModuleManager::GetCurSvcModel()->InferPCMData(TPCMData, Settings.SamplingRate, Params);
 	std::vector<int16_t> PCMData = { TPCMData.begin(),TPCMData.begin() + Settings.SamplingRate };
 	std::vector<int16_t> _data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
 	PCMData = { TPCMData.begin() + Settings.SamplingRate * 1,TPCMData.begin() + Settings.SamplingRate * 2 };
@@ -78,6 +79,22 @@ int main()
 	auto inferTime = double(clock() - now) / 1000.;
 	std::cout << "Infer Use Time : " << inferTime << "sec.\n";
 	PCMData = TPCMData;
+	now = clock();
+	_data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
+	inferTime = double(clock() - now) / 1000.;
+	std::cout << "Infer Use Time : " << inferTime << "sec.\n";
+	now = clock();
+	_data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
+	inferTime = double(clock() - now) / 1000.;
+	std::cout << "Infer Use Time : " << inferTime << "sec.\n";
+	now = clock();
+	_data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
+	inferTime = double(clock() - now) / 1000.;
+	std::cout << "Infer Use Time : " << inferTime << "sec.\n";
+	now = clock();
+	_data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
+	inferTime = double(clock() - now) / 1000.;
+	std::cout << "Infer Use Time : " << inferTime << "sec.\n";
 	now = clock();
 	_data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
 	inferTime = double(clock() - now) / 1000.;

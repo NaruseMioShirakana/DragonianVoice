@@ -7,6 +7,7 @@
 #include "InferTools/F0Extractor/HarvestF0Extractor/HarvestF0Extractor.hpp"
 #include "InferTools/Sampler/MoeVSSamplerManager.hpp"
 #include "InferTools/Sampler/MoeVSSamplers.hpp"
+#include "InferTools/F0Extractor/NetF0Predictors/NetF0Predictors.hpp"
 
 
 #define MoeVSRegisterF0Constructor(__RegisterName, __ClassName) MoeVSF0Extractor::RegisterF0Extractor(__RegisterName,   \
@@ -51,6 +52,7 @@ namespace MoeVSModuleManager
 	{
 		MoeVSRegisterF0Constructor(L"Dio", DioF0Extractor);
 		MoeVSRegisterF0Constructor(L"Harvest", HarvestF0Extractor);
+		MoeVSRegisterF0Constructor(L"RMVPE", RMVPEF0Extractor);
 		MoeVSRegisterTensorConstructor(L"SoVits2.0", SoVits2TensorExtractor);
 		MoeVSRegisterTensorConstructor(L"SoVits3.0", SoVits3TensorExtractor);
 		MoeVSRegisterTensorConstructor(L"SoVits4.0", SoVits4TensorExtractor);
