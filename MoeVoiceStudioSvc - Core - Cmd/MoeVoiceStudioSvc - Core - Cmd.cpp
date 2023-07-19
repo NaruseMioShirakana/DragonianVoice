@@ -23,20 +23,34 @@ std::ostream& operator<<(std::ostream& stream, std::vector<T>& vec)
 }
 #endif
 
-
 int main()
 {
 	MoeVSModuleManager::MoeVoiceStudioCoreInitSetup();
 
-	MoeVSModuleManager::LoadSvcModel(
-		MJson(to_byte_string(GetCurrentFolder() + L"/Models/ShirohaRVC.json").c_str()),
-		[](size_t cur, size_t total) {std::cout << (double(cur) / double(total) * 100.) << "%\n"; },
-		2,
-		std::thread::hardware_concurrency(),
-		0
-	);
+	try
+	{
+		MoeVSModuleManager::LoadSvcModel(
+			MJson(to_byte_string(GetCurrentFolder() + L"/Models/DiffusionSvc.json").c_str()),
+			[](size_t cur, size_t total)
+			{
+				//std::cout << (double(cur) / double(total) * 100.) << "%\n";
+			},
+			1,
+			8,
+			0
+			);
+	}
+	catch (std::exception& e)
+	{
+		std::cout << e.what();
+		return 0;
+	}
+	
 
 	MoeVSProjectSpace::MoeVSSvcParams Params;
+	Params.Sampler = L"DDim";
+	Params.Step = 100;
+	Params.Pndm = 5;
 	InferTools::SlicerSettings Settings;
 	Params.F0Method = L"Dio";
 	Settings.SamplingRate = 40000;
@@ -71,6 +85,10 @@ int main()
 #ifdef DEBUGUSETRYCATCH
 	}
 	catch (std::exception& e)
+	{
+		std::cout << e.what() << std::endl;
+	}
+	catch (Ort::Exception& e)
 	{
 		std::cout << e.what() << std::endl;
 	}
