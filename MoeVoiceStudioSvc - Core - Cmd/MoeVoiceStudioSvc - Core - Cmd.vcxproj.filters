@@ -204,6 +204,12 @@
     <ClCompile Include="Modules\InferTools\TensorExtractor\MoeVSCoreTensorExtractor.cpp">
       <Filter>源文件\Modules\InferTools\TensorExtractor</Filter>
     </ClCompile>
+    <ClCompile Include="Modules\Models\EnvManager.cpp">
+      <Filter>源文件\Modules\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\InferTools\F0Extractor\NetF0Predictors\NetF0Predictors.cpp">
+      <Filter>源文件\Modules\InferTools\F0Extractor</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Lib\World\src\world\cheaptrick.h">
@@ -325,6 +331,12 @@
     </ClInclude>
     <ClInclude Include="Modules\InferTools\TensorExtractor\TensorExtractorManager.hpp">
       <Filter>头文件\Modules\InferTools\TensorExtractor</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Models\EnvManager.hpp">
+      <Filter>头文件\Modules\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\InferTools\F0Extractor\NetF0Predictors\NetF0Predictors.hpp">
+      <Filter>头文件\Modules\InferTools\F0Extractor</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

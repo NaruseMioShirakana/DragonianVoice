@@ -1,6 +1,6 @@
-/**
+﻿/**
  * FileName: NetF0Predictors.hpp
- * Note: MoeVoiceStudioCore �ٷ�F0��ȡ�㷨 Net
+ * Note: MoeVoiceStudioCore 官方F0提取算法 Net
  *
  * Copyright (C) 2022-2023 NaruseMioShirakana (shirakanamio@foxmail.com)
  *
@@ -59,6 +59,22 @@ public:
 private:
 	std::vector<const char*> InputNames = { "waveform", "threshold" };
 	std::vector<const char*> OutputNames = { "f0", "uv" };
+	std::vector<double> refined_f0;
+};
+
+class MELPEF0Extractor : public BaseF0Extractor
+{
+public:
+	MELPEF0Extractor(int sampling_rate, int hop_size, int n_f0_bins = 256, double max_f0 = 1100.0, double min_f0 = 50.0);
+
+	~MELPEF0Extractor() override = default;
+
+	void InterPf0(size_t TargetLength);
+
+	std::vector<float> ExtractF0(const std::vector<double>& PCMData, size_t TargetLength) override;
+private:
+	std::vector<const char*> InputNames = { "waveform"};
+	std::vector<const char*> OutputNames = { "f0" };
 	std::vector<double> refined_f0;
 };
 
