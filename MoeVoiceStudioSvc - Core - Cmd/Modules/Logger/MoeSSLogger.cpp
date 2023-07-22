@@ -1,4 +1,5 @@
 ﻿#include "MoeSSLogger.hpp"
+#include <iostream>
 #include "../StringPreprocess.hpp"
 #include <windows.h>
 
@@ -94,12 +95,16 @@ namespace MoeSSLogger
 	{
 		if (log_file)
 			fprintf(log_file, "%s\n", to_byte_string(format).c_str());
+		else
+			fprintf(stdout, "%s\n", to_byte_string(format).c_str());
 	}
 
 	void Logger::log(const char* format) const
 	{
 		if (log_file)
 			fprintf(log_file, "%s\n", format);
+		else
+			fprintf(stdout, "%s\n", format);
 	}
 
 	void Logger::error(const std::wstring& format) const
