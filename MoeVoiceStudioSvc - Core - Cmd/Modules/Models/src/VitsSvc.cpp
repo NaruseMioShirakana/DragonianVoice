@@ -7,11 +7,24 @@
 #include <regex>
 
 MoeVoiceStudioCoreHeader
+void VitsSvc::Destory()
+{
+	delete hubert;
+	hubert = nullptr;
+
+	delete VitsSvcModel;
+	VitsSvcModel = nullptr;
+
+	delete shallow_diffusion;
+	shallow_diffusion = nullptr;
+	delete stft_operator;
+	stft_operator = nullptr;
+}
+
 VitsSvc::~VitsSvc()
 {
 	logger.log(L"[Info] unloading VitsSvc Models");
-	delete VitsSvcModel;
-	VitsSvcModel = nullptr;
+	Destory();
 	logger.log(L"[Info] VitsSvc Models unloaded");
 }
 
@@ -120,10 +133,7 @@ VitsSvc::VitsSvc(const MJson& _Config, const ProgressCallback& _ProgressCallback
 	}
 	catch (Ort::Exception& _exception)
 	{
-		delete VitsSvcModel;
-		VitsSvcModel = nullptr;
-		delete hubert;
-		hubert = nullptr;
+		Destory();
 		throw std::exception(_exception.what());
 	}
 
@@ -133,9 +143,41 @@ VitsSvc::VitsSvc(const MJson& _Config, const ProgressCallback& _ProgressCallback
 	if (_Config["TensorExtractor"].IsString())
 		VitsSvcVersion = to_wide_string(_Config["TensorExtractor"].GetString());
 
+	if (_Config["ShallowDiffusion"].IsString())
+	{
+		const std::string ShallowDiffusionConf = to_byte_string(GetCurrentFolder()) + "/Models/" + _Config["ShallowDiffusion"].GetString() + ".json";
+		try
+		{
+			shallow_diffusion = new DiffusionSvc(
+				ShallowDiffusionConf.c_str(),
+				[](size_t, size_t) {},
+				ExecutionProvider_,
+				DeviceID_,
+				ThreadCount_
+			);
+			stft_operator = new Ort::Session(*env, (GetCurrentFolder() + L"/MelOps.onnx").c_str(), *session_options);
+		}
+		catch (std::exception& e)
+		{
+			delete shallow_diffusion;
+			shallow_diffusion = nullptr;
+			delete stft_operator;
+			stft_operator = nullptr;
+			logger.error(e.what());
+		}
+	}
+
 	MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::Others _others_param;
 	_others_param.Memory = *memory_info;
-	_TensorExtractor = GetTensorExtractor(VitsSvcVersion, 48000, _samplingRate, HopSize, EnableCharaMix, EnableVolume, HiddenUnitKDims, SpeakerCount, _others_param);
+	try
+	{
+		_TensorExtractor = GetTensorExtractor(VitsSvcVersion, 48000, _samplingRate, HopSize, EnableCharaMix, EnableVolume, HiddenUnitKDims, SpeakerCount, _others_param);
+	}
+	catch(std::exception& e)
+	{
+		Destory();
+		throw std::exception(e.what());
+	}
 }
 
 //已弃用（旧MoeSS的推理函数）
@@ -594,7 +636,7 @@ std::vector<Ort::Value> VitsSvc::InferSliceTensor(const MoeVSProjectSpace::MoeVS
 
 std::vector<int16_t> VitsSvc::SliceInference(const MoeVSProjectSpace::MoeVSAudioSlice& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const
 {
-	logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L'\"');
+	logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Start!");
 	std::vector<int16_t> _data;
 	size_t total_audio_size = 0;
 	for (const auto& data_size : _Slice.OrgLen)
@@ -606,7 +648,18 @@ std::vector<int16_t> VitsSvc::SliceInference(const MoeVSProjectSpace::MoeVSAudio
 	{
 		if(_Slice.IsNotMute[slice])
 		{
+			const auto InferDurTime = clock();
 			auto RawWav = InferTools::InterpResample(_Slice.Audio[slice], 48000, 16000, 32768.0f);
+			const auto src_audio_length = RawWav.size();
+			bool NeedPadding = false;
+			if(_cur_execution_provider == ExecutionProviders::CUDA)
+			{
+				NeedPadding = RawWav.size() % 16000;
+				const size_t WavPaddedSize = RawWav.size() / 16000 + 1;
+				if (NeedPadding)
+					RawWav.resize(WavPaddedSize * 16000, 0.f);
+			}
+
 			const int64_t HubertInputShape[3] = { 1i64,1i64,(int64_t)RawWav.size() };
 			std::vector<Ort::Value> HubertInputTensors, HubertOutPuts;
 			HubertInputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, RawWav.data(), RawWav.size(), HubertInputShape, 3));
@@ -625,15 +678,15 @@ std::vector<int16_t> VitsSvc::SliceInference(const MoeVSProjectSpace::MoeVSAudio
 			const auto HubertSize = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetElementCount();
 			const auto HubertOutPutData = HubertOutPuts[0].GetTensorMutableData<float>();
 			auto HubertOutPutShape = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetShape();
-			HubertInputTensors.clear();
 			if (HubertOutPutShape[2] != HiddenUnitKDims)
 				throw std::exception("HiddenUnitKDims UnMatch");
 
 			std::vector srcHiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
 
+			const auto max_cluster_size = int64_t((size_t)HubertOutPutShape[1] * src_audio_length / RawWav.size());
 			if (!EnableCharaMix && EnableCluster && _InferParams.ClusterRate > 0.001f)
 			{
-				for (int64_t indexs = 0; indexs < HubertOutPutShape[1]; ++indexs)
+				for (int64_t indexs = 0; indexs < max_cluster_size; ++indexs)
 				{
 					const auto curbeg = srcHiddenUnits.data() + indexs * HubertOutPutShape[2];
 					const auto curend = srcHiddenUnits.data() + (indexs + 1) * HubertOutPutShape[2];
@@ -650,7 +703,34 @@ std::vector<int16_t> VitsSvc::SliceInference(const MoeVSProjectSpace::MoeVSAudio
 			_Inference_Params.DDSPNoiseScale = _InferParams.DDSPNoiseScale;
 			_Inference_Params.Seed = int(_InferParams.Seed);
 			_Inference_Params.upKeys = _InferParams.Keys;
-			const auto InputTensors = _TensorExtractor->Extract(srcHiddenUnits, _Slice.F0[slice], _Slice.Volume[slice], _Slice.Speaker[slice], _Inference_Params);
+
+			MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::Inputs InputTensors;
+			std::vector<std::vector<float>> CUDASpeaker;
+			std::vector<float> CUDAVolume, CUDAF0;
+
+			if(_cur_execution_provider == ExecutionProviders::CUDA && NeedPadding)
+			{
+				CUDAF0 = _Slice.F0[slice];
+				CUDAVolume = _Slice.Volume[slice];
+				CUDASpeaker = _Slice.Speaker[slice];
+				const auto src_src_audio_length = _Slice.Audio[slice].size();
+				const size_t WavPaddedSize = ((src_src_audio_length / 48000) + 1) * 48000;
+				const size_t AudioPadSize = WavPaddedSize - src_src_audio_length;
+				const size_t PaddedF0Size = CUDAF0.size() + (CUDAF0.size() * AudioPadSize / src_src_audio_length);
+
+				if (!CUDAF0.empty()) CUDAF0.resize(PaddedF0Size, 0.f);
+				if (!CUDAVolume.empty()) CUDAVolume.resize(PaddedF0Size, 0.f);
+				for (auto iSpeaker : CUDASpeaker)
+				{
+					if (!iSpeaker.empty())
+						iSpeaker.resize(PaddedF0Size, 0.f);
+				}
+				_Inference_Params.AudioSize = WavPaddedSize;
+				InputTensors = _TensorExtractor->Extract(srcHiddenUnits, CUDAF0, CUDAVolume, CUDASpeaker, _Inference_Params);
+			}
+			else
+				InputTensors = _TensorExtractor->Extract(srcHiddenUnits, _Slice.F0[slice], _Slice.Volume[slice], _Slice.Speaker[slice], _Inference_Params);
+			
 
 			std::vector<Ort::Value> finaOut;
 			try
@@ -667,20 +747,39 @@ std::vector<int16_t> VitsSvc::SliceInference(const MoeVSProjectSpace::MoeVSAudio
 				throw std::exception((std::string("Locate: VitsSvc\n") + e.what()).c_str());
 			}
 
-			const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();
 			const auto dstWavLen = (_Slice.OrgLen[slice] * int64_t(_samplingRate)) / 48000;
-			std::vector<int16_t> TempVecWav(dstWavLen, 0);
-			if (shapeOut[2] < dstWavLen)
+			if(shallow_diffusion && stft_operator)
 			{
-				for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
-					TempVecWav[bbb] = static_cast<int16_t>(finaOut[0].GetTensorData<float>()[bbb] * 32768.0f);
+				auto PCMAudioBegin = finaOut[0].GetTensorData<float>();
+				auto PCMAudioEnd = PCMAudioBegin + finaOut[0].GetTensorTypeAndShapeInfo().GetElementCount();
+				auto MelSpec = MelExtractor(PCMAudioBegin, PCMAudioEnd);
+				auto ShallowParam = _InferParams;
+				ShallowParam.SrcSamplingRate = _samplingRate;
+				auto ShallowDiffusionOutput = shallow_diffusion->ShallowDiffusionInference(
+					RawWav,
+					ShallowParam,
+					std::move(MelSpec[0]),
+					NeedPadding ? CUDAF0 : _Slice.F0[slice],
+					NeedPadding ? CUDAVolume : _Slice.Volume[slice],
+					NeedPadding ? CUDASpeaker : _Slice.Speaker[slice]
+				);
+				ShallowDiffusionOutput.resize(dstWavLen, 0);
+				_data.insert(_data.end(), ShallowDiffusionOutput.begin(), ShallowDiffusionOutput.end());
 			}
 			else
 			{
-				for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
-					TempVecWav[bbb] = static_cast<int16_t>(finaOut[0].GetTensorData<float>()[bbb] * 32768.0f);
+				const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();
+				std::vector<int16_t> TempVecWav = std::vector<int16_t>(dstWavLen, 0);
+				if (shapeOut[2] < dstWavLen)
+					for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
+						TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
+				else
+					for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
+						TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
+				_data.insert(_data.end(), TempVecWav.data(), TempVecWav.data() + (dstWavLen));
 			}
-			_data.insert(_data.end(), TempVecWav.data(), TempVecWav.data() + (dstWavLen));
+
+			logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Segment[" + std::to_wstring(slice) + L"] Finished! Segment Use Time: " + std::to_wstring(clock() - InferDurTime) + L"ms, Segment Duration: " + std::to_wstring((size_t)_Slice.OrgLen[slice] * 1000ull / 48000ull) + L"ms");
 		}
 		else
 		{
@@ -690,6 +789,7 @@ std::vector<int16_t> VitsSvc::SliceInference(const MoeVSProjectSpace::MoeVSAudio
 			memset(data, 0, int64_t(len) * 2);
 			_data.insert(_data.end(), data, data + len);
 			delete[] data;
+			logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Jump Empty Segment[" + std::to_wstring(slice) + L"]!");
 		}
 		_callback(++process, _Slice.F0.size());
 	}
@@ -709,6 +809,7 @@ std::vector<std::wstring> VitsSvc::Inference(std::wstring& _Paths,
 		auto PCMData = AudioPreprocess().codec(path, 48000);
 		auto SlicePos = SliceAudio(PCMData, _SlicerSettings);
 		auto Audio = GetAudioSlice(PCMData, SlicePos, _SlicerSettings);
+		Audio.Path = path;
 		PreProcessAudio(Audio);
 		std::vector<int16_t> _data = SliceInference(Audio, _InferParams);
 
@@ -733,7 +834,7 @@ std::vector<std::wstring> VitsSvc::Inference(std::wstring& _Paths,
 		else
 			OutFolder += L".wav";
 		AudioFolders.emplace_back(OutFolder);
-		InferTools::Wav(_samplingRate, long(_data.size() * 2), _data.data()).Writef(OutFolder);
+		InferTools::Wav::WritePCMData(_samplingRate, 1, _data, OutFolder);
 	}
 	return AudioFolders;
 }
@@ -935,16 +1036,41 @@ std::vector<int16_t> VitsSvc::InferPCMData(const std::vector<int16_t>& PCMData, 
 	const auto dstWavLen = int64_t(PCMData.size());
 	std::vector<int16_t> TempVecWav(dstWavLen, 0);
 	if (shapeOut[2] < dstWavLen)
-	{
 		for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
-			TempVecWav[bbb] = static_cast<int16_t>(finaOut[0].GetTensorData<float>()[bbb] * 32768.0f);
-	}
+			TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
 	else
-	{
 		for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
-			TempVecWav[bbb] = static_cast<int16_t>(finaOut[0].GetTensorData<float>()[bbb] * 32768.0f);
-	}
+			TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
 	return TempVecWav;
+}
+
+std::vector<Ort::Value> VitsSvc::MelExtractor(const float* PCMAudioBegin, const float* PCMAudioEnd) const
+{
+	std::vector<float> _SRAudio{PCMAudioBegin, PCMAudioEnd};
+	_SRAudio = InferTools::InterpResample(_SRAudio, _samplingRate, 16000, 1.f);
+	const auto _MelLength = int64_t(_SRAudio.size() * shallow_diffusion->GetSamplingRate() / 16000ull / shallow_diffusion->GetHopSize());
+	const auto _SpecLength = (int64_t)ceil(double(_SRAudio.size()) / 16000. * 100.);
+	auto Alignment = _TensorExtractor->GetAligments(_MelLength, _SpecLength);
+	Alignment.resize(_MelLength);
+	std::vector<Ort::Value> AudioTensors;
+	const int64_t AudioInputShape[] = { 1,1,int64_t(_SRAudio.size()) };
+	const int64_t AligShape[] = { 1,_MelLength };
+	AudioTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, _SRAudio.data(), _SRAudio.size(), AudioInputShape, 3));
+	AudioTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, Alignment.data(), Alignment.size(), AligShape, 2));
+	try
+	{
+		return stft_operator->Run(Ort::RunOptions{ nullptr },
+			StftInput.data(),
+			AudioTensors.data(),
+			AudioTensors.size(),
+			StftOutput.data(),
+			StftOutput.size()
+		);
+	}
+	catch (Ort::Exception& e)
+	{
+		throw std::exception((std::string("Locate: ShallowDiffusionStftOperator\n") + e.what()).c_str());
+	}
 }
 
 #ifdef WIN32

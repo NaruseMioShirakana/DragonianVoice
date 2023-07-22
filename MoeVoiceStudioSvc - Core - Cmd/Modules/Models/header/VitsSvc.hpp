@@ -28,6 +28,7 @@
 #include "../../AvCodec/Recorder.h"
 #endif
 #endif
+#include "DiffSvc.hpp"
 
 MoeVoiceStudioCoreHeader
 
@@ -39,6 +40,8 @@ public:
         unsigned DeviceID_ = 0, unsigned ThreadCount_ = 0);
 
 	~VitsSvc() override;
+
+    void Destory();
 
     [[nodiscard]] std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVSAudioSlice& _Slice,
         const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const override;
@@ -52,6 +55,8 @@ public:
 
     [[nodiscard]] std::vector<int16_t> InferPCMData(const std::vector<int16_t>& PCMData, long srcSr, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const override;
 
+    [[nodiscard]] std::vector<Ort::Value> MelExtractor(const float* PCMAudioBegin, const float* PCMAudioEnd) const;
+
 #ifdef WIN32
 #ifdef MoeVSMui
     void StartRT(Mui::Window::UIWindowBasic* window, const MoeVSProjectSpace::MoeVSSvcParams& _Params);
@@ -60,12 +65,15 @@ public:
 #endif
 private:
     Ort::Session* VitsSvcModel = nullptr;
-
     std::wstring VitsSvcVersion = L"SoVits4.0";
 
     const std::vector<const char*> soVitsOutput = { "audio" };
     const std::vector<const char*> soVitsInput = { "hidden_unit", "lengths", "pitch", "sid" };
     const std::vector<const char*> RVCInput = { "phone", "phone_lengths", "pitch", "pitchf", "ds", "rnd" };
+    const std::vector<const char*> StftOutput = { "mel" };
+    const std::vector<const char*> StftInput = { "waveform", "aligment"};
+    DiffusionSvc* shallow_diffusion = nullptr;
+    Ort::Session* stft_operator = nullptr;
 #ifdef WIN32
 #ifdef MoeVSMui
     bool RTSTAT = false;

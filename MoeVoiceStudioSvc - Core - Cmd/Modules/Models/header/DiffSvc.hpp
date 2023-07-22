@@ -33,26 +33,36 @@ public:
 
 	~DiffusionSvc() override;
 
+    void Destory();
+
     [[nodiscard]] std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVSAudioSlice& _Slice,
         const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const override;
 
     [[nodiscard]] std::vector<std::wstring> Inference(std::wstring& _Paths, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams,
         const InferTools::SlicerSettings& _SlicerSettings) const override;
 
-    [[nodiscard]] std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVSAudioSliceRef& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const override;
-
     [[nodiscard]] std::vector<int16_t> InferPCMData(const std::vector<int16_t>& PCMData, long srcSr, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const override;
 
+    [[nodiscard]] std::vector<int16_t> ShallowDiffusionInference(
+		std::vector<float>& _16KAudioHubert,
+        const MoeVSProjectSpace::MoeVSSvcParams& _InferParams,
+        Ort::Value&& _Mel,
+        const std::vector<float>& _SrcF0,
+        const std::vector<float>& _SrcVolume,
+        const std::vector<std::vector<float>>& _SrcSpeakerMap
+    ) const;
+
 private:
-    Ort::Session* diffSvc = nullptr;
     Ort::Session* nsfHifigan = nullptr;
-    Ort::Session* naive = nullptr;
 
     Ort::Session* encoder = nullptr;
     Ort::Session* denoise = nullptr;
     Ort::Session* pred = nullptr;
-    Ort::Session* alpha = nullptr;
     Ort::Session* after = nullptr;
+    Ort::Session* alpha = nullptr;
+    Ort::Session* naive = nullptr;
+
+    Ort::Session* diffSvc = nullptr;
 
     int64_t melBins = 128;
     int64_t Pndms = 100;

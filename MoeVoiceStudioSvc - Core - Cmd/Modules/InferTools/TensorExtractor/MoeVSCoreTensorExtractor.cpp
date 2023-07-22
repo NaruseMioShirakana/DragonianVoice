@@ -453,9 +453,10 @@ MoeVoiceStudioTensorExtractor::Inputs DiffSvcTensorExtractor::Extract(const std:
 	SvcTensors.Data.HiddenUnitShape = { 1, HubertLen, int64_t(_HiddenSize) };
 
 	SvcTensors.Data.HiddenUnit = HiddenUnit;
-	SvcTensors.Data.F0 = GetInterpedF0log(InferTools::InterpFunc(F0, long(F0.size()), long(SvcTensors.Data.FrameShape[1])), true);
+	SvcTensors.Data.F0 = InferTools::InterpFunc(F0, long(F0.size()), long(SvcTensors.Data.FrameShape[1]));
 	for (auto& it : SvcTensors.Data.F0)
 		it *= (float)pow(2.0, static_cast<double>(params.upKeys) / 12.0);
+	SvcTensors.Data.F0 = GetInterpedF0log(SvcTensors.Data.F0, true);
 	SvcTensors.Data.Alignment = GetAligments(SvcTensors.Data.FrameShape[1], HubertLen);
 	SvcTensors.Data.Speaker[0] = params.Chara;
 

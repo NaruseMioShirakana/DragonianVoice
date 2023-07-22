@@ -1,4 +1,4 @@
-#include "NetF0Predictors.hpp"
+﻿#include "NetF0Predictors.hpp"
 #include <dml_provider_factory.h>
 #include "matlabfunctions.h"
 #include "../DioF0Extractor/DioF0Extractor.hpp"
@@ -130,6 +130,8 @@ void NetF0Class::BuildDMLEnv(unsigned Did)
 void NetF0Class::LoadModel(const std::wstring& path)
 {
 	Destory();
+	if (!moevsenv::GetGlobalMoeVSEnv().IsEnabled())
+		return;
 	NetF0Env = moevsenv::GetGlobalMoeVSEnv().GetEnv();
 	Memory = moevsenv::GetGlobalMoeVSEnv().GetMemoryInfo();
 	NetF0Options = moevsenv::GetGlobalMoeVSEnv().GetSessionOptions();
@@ -166,14 +168,38 @@ RMVPEF0Extractor::RMVPEF0Extractor(int sampling_rate, int hop_size, int n_f0_bin
 		RMVPECORE->LoadModel(L"RMVPE.onnx");
 }
 
+double average(const double* begin, const double* end)
+{
+	const auto mp = double(end - begin);
+	double sum = 0.;
+	while (begin != end)
+		sum += *(begin++);
+	return sum / mp;
+}
+
 std::vector<float> RMVPEF0Extractor::ExtractF0(const std::vector<double>& PCMData, size_t TargetLength)
 {
 	if (!RMVPECORE->Model)
 		return DioF0Extractor((int)fs, (int)hop, (int)f0_bin, f0_max, f0_min).ExtractF0(PCMData, TargetLength);
 
-	std::vector<float> pcm(PCMData.size());
-	for (size_t i = 0; i < PCMData.size(); ++i)
-		pcm[i] = (float)PCMData[i];
+	const double step = double(fs) / 16000.;
+	const auto window_len = (size_t)round(step);
+	const auto half_window_len = window_len / 2;
+	const auto f0_size = size_t((double)PCMData.size() / step);
+	const auto pcm_idx_size = PCMData.size() - 2;
+	std::vector pcm(f0_size, 0.f);
+	auto idx = double(half_window_len + 1);
+	for (size_t i = 0; i < f0_size; ++i)
+	{
+		const auto index = size_t(round(idx));
+		if(index + half_window_len > pcm_idx_size)
+			break;
+		if (half_window_len == 0)
+			pcm[i] = (float)PCMData[index];
+		else
+			pcm[i] = (float)average(&PCMData[index - half_window_len], &PCMData[index + half_window_len]);
+		idx += step;
+	}
 	std::vector<Ort::Value> Tensors;
 	const int64_t pcm_shape[] = { 1, (int64_t)pcm.size() };
 	constexpr int64_t one_shape[] = { 1 };
@@ -189,11 +215,12 @@ std::vector<float> RMVPEF0Extractor::ExtractF0(const std::vector<double>& PCMDat
 		OutputNames.size());
 
 	const auto osize = out[0].GetTensorTypeAndShapeInfo().GetElementCount();
+	const auto of0 = out[0].GetTensorData<float>();
 	refined_f0 = std::vector<double>(osize);
-	for (size_t i = 0; i < osize; ++i) refined_f0[i] = (double)out[0].GetTensorData<float>()[i];
+	for (size_t i = 0; i < osize; ++i) refined_f0[i] = ((of0[i] > 0.001f) ? (double)out[0].GetTensorData<float>()[i] : NAN);
 	InterPf0(TargetLength);
 	std::vector<float> finaF0(refined_f0.size());
-	for (size_t i = 0; i < refined_f0.size(); ++i) finaF0[i] = (float)refined_f0[i];
+	for (size_t i = 0; i < refined_f0.size(); ++i) finaF0[i] = isnan(refined_f0[i]) ? 0 : (float)refined_f0[i];
 	return finaF0;
 }
 

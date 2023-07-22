@@ -202,6 +202,7 @@ protected:
 	bool EnableVolume = false;
 
 	MoeVoiceStudioCluster::MoeVSCluster Cluster;
+	MoeVoiceStudioCluster::MoeVSCluster Index;
 	int64_t ClusterCenterSize = 10000;
 	bool EnableCluster = false;
 	bool EnableIndex = false;

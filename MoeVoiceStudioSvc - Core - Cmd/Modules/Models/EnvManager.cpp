@@ -1,4 +1,4 @@
-#include "EnvManager.hpp"
+﻿#include "EnvManager.hpp"
 #ifdef _WIN32
 #ifdef MOEVSDMLPROVIDER
 #include <dml_provider_factory.h>
@@ -7,8 +7,24 @@
 #include <thread>
 #include "../Logger/MoeSSLogger.hpp"
 #include "../InferTools/F0Extractor/NetF0Predictors/NetF0Predictors.hpp"
-
+#include "../Modules.hpp"
 MoeVoiceStudioCoreEnvManagerHeader
+
+const char* logger_id = "MoeVoiceStudioCore";
+
+void MoeVSOrtLoggingFn(void* param, OrtLoggingLevel severity, const char* category, const char* logid, const char* code_location,
+	const char* message)
+{
+	std::string ort_message = "[";
+	ort_message += category;
+	ort_message += "; In ";
+	ort_message += code_location;
+	ort_message += "; By";
+	ort_message += logger_id;
+	ort_message += "] ";
+	ort_message += message;
+	logger.log(ort_message.c_str());
+}
 
 void MoeVoiceStudioEnv::Destory()
 {
@@ -20,11 +36,20 @@ void MoeVoiceStudioEnv::Destory()
 	GlobalOrtSessionOptions = nullptr;
 	GlobalOrtEnv = nullptr;
 	GlobalOrtMemoryInfo = nullptr;
+
+	if (cuda_option_v2)
+		Ort::GetApi().ReleaseCUDAProviderOptions(cuda_option_v2);
+	cuda_option_v2 = nullptr;
 	logger.log(L"[Info] Complete!");
 }
 
 void MoeVoiceStudioEnv::Load(unsigned ThreadCount, unsigned DeviceID, unsigned Provider)
 {
+	if (((Provider != CurProvider) ||
+		(Provider == 0 && ThreadCount != CurThreadCount) ||
+		((Provider == 1 || Provider == 2) && DeviceID != CurDeviceID)) &&
+		MoeVSModuleManager::GetCurSvcModel())
+		throw std::exception("A Model Has Been Loaded, You Cannot Change Env When A Model Has Been Loaded");
 	try
 	{
 		if (Provider != CurProvider)
@@ -42,7 +67,7 @@ void MoeVoiceStudioEnv::Load(unsigned ThreadCount, unsigned DeviceID, unsigned P
 		CurDeviceID = unsigned(-1);
 		CurProvider = unsigned(-1);
 		logger.log(to_wide_string(e.what()));
-		throw e;
+		throw std::exception(e.what());
 	}
 }
 
@@ -62,13 +87,47 @@ void MoeVoiceStudioEnv::Create(unsigned ThreadCount_, unsigned DeviceID_, unsign
 					ret = false;
 			if (ret)
 				throw std::exception("CUDA Provider Not Found");
+			GlobalOrtSessionOptions = new Ort::SessionOptions;
+
+#ifdef MoeVSCUDAProviderV1
 			OrtCUDAProviderOptions cuda_option;
 			cuda_option.device_id = int(DeviceID_);
-			GlobalOrtSessionOptions = new Ort::SessionOptions;
-			GlobalOrtEnv = new Ort::Env(ORT_LOGGING_LEVEL_ERROR, "OnnxModel");
+			cuda_option.do_copy_in_default_stream = false;
 			GlobalOrtSessionOptions->AppendExecutionProvider_CUDA(cuda_option);
-			GlobalOrtSessionOptions->SetGraphOptimizationLevel(ORT_ENABLE_BASIC);
-			GlobalOrtSessionOptions->SetIntraOpNumThreads(1);
+#else
+			const OrtApi& ortApi = Ort::GetApi();
+			if (cuda_option_v2)
+				ortApi.ReleaseCUDAProviderOptions(cuda_option_v2);
+			ortApi.CreateCUDAProviderOptions(&cuda_option_v2);
+			const std::vector keys{
+				"device_id",
+				"gpu_mem_limit",
+				"arena_extend_strategy",
+				"cudnn_conv_algo_search",
+				"do_copy_in_default_stream",
+				"cudnn_conv_use_max_workspace",
+				"cudnn_conv1d_pad_to_nc1d",
+				"enable_cuda_graph",
+				"enable_skip_layer_norm_strict_mode"
+			};
+			const std::vector values{
+				std::to_string(DeviceID_).c_str(),
+				"2147483648",
+				"kNextPowerOfTwo",
+				"EXHAUSTIVE",
+				"1",
+				"1",
+				"1",
+				"0",
+				"0"
+			};
+			ortApi.UpdateCUDAProviderOptions(cuda_option_v2, keys.data(), values.data(), keys.size());
+			GlobalOrtSessionOptions->AppendExecutionProvider_CUDA_V2(*cuda_option_v2);
+			//ortApi.ReleaseCUDAProviderOptions(cuda_option_v2);
+#endif
+			GlobalOrtEnv = new Ort::Env(ORT_LOGGING_LEVEL_WARNING, logger_id, MoeVSOrtLoggingFn, nullptr);
+			GlobalOrtSessionOptions->SetGraphOptimizationLevel(ORT_ENABLE_ALL);
+			GlobalOrtSessionOptions->SetIntraOpNumThreads((int)std::thread::hardware_concurrency());
 			GlobalOrtMemoryInfo = new Ort::MemoryInfo(Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault));
 			CurDeviceID = DeviceID_;
 			break;
@@ -86,13 +145,13 @@ void MoeVoiceStudioEnv::Create(unsigned ThreadCount_, unsigned DeviceID_, unsign
 			const OrtApi& ortApi = Ort::GetApi();
 			const OrtDmlApi* ortDmlApi = nullptr;
 			ortApi.GetExecutionProviderApi("DML", ORT_API_VERSION, reinterpret_cast<const void**>(&ortDmlApi));
-
-			const Ort::ThreadingOptions threadingOptions;
-			GlobalOrtEnv = new Ort::Env(threadingOptions, ORT_LOGGING_LEVEL_ERROR, "");
+			Ort::ThreadingOptions threading_options;
+			threading_options.SetGlobalInterOpNumThreads((int)std::thread::hardware_concurrency());
+			GlobalOrtEnv = new Ort::Env(threading_options, MoeVSOrtLoggingFn, nullptr, ORT_LOGGING_LEVEL_WARNING, logger_id);
 			GlobalOrtEnv->DisableTelemetryEvents();
 			GlobalOrtSessionOptions = new Ort::SessionOptions;
 			ortDmlApi->SessionOptionsAppendExecutionProvider_DML(*GlobalOrtSessionOptions, int(DeviceID_));
-			GlobalOrtSessionOptions->SetGraphOptimizationLevel(ORT_ENABLE_BASIC);
+			GlobalOrtSessionOptions->SetGraphOptimizationLevel(ORT_ENABLE_ALL);
 			GlobalOrtSessionOptions->DisablePerSessionThreads();
 			GlobalOrtSessionOptions->SetExecutionMode(ORT_SEQUENTIAL);
 			GlobalOrtSessionOptions->DisableMemPattern();
@@ -106,7 +165,7 @@ void MoeVoiceStudioEnv::Create(unsigned ThreadCount_, unsigned DeviceID_, unsign
 			if (ThreadCount_ == 0)
 				ThreadCount_ = std::thread::hardware_concurrency();
 			GlobalOrtSessionOptions = new Ort::SessionOptions;
-			GlobalOrtEnv = new Ort::Env(ORT_LOGGING_LEVEL_ERROR, "OnnxModel");
+			GlobalOrtEnv = new Ort::Env(ORT_LOGGING_LEVEL_WARNING, logger_id, MoeVSOrtLoggingFn, nullptr);
 			GlobalOrtSessionOptions->SetIntraOpNumThreads(static_cast<int>(ThreadCount_));
 			GlobalOrtSessionOptions->SetGraphOptimizationLevel(ORT_ENABLE_ALL);
 			GlobalOrtMemoryInfo = new Ort::MemoryInfo(Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault));

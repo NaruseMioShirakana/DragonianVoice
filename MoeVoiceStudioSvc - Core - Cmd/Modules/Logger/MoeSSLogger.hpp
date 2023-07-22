@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <string>
 #include "../StringPreprocess.hpp"
+#include <filesystem>
 #define __MOEVS_DEBUG_MESSAGE(msg) __MOEVS_DEBUG_INFO(__FILE__, __LINE__, msg);
 #define logger MoeSSLogger::GetLogger()
 inline std::string __MOEVS_DEBUG_INFO(const char* filename, int line, const char* msg)
@@ -19,8 +20,14 @@ namespace MoeSSLogger
 	{
 	public:
 		Logger();
+		~Logger();
 		void log(const std::wstring&) const;
+		void log(const char*) const;
 		void error(const std::wstring&) const;
+		void error(const char*) const;
+	private:
+		std::filesystem::path cur_log_dir, logpath, errorpath;
+		FILE* log_file = nullptr,* error_file = nullptr;
 	};
 
 	Logger& GetLogger();

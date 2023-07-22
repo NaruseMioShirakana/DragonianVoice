@@ -10,10 +10,8 @@ SingingVoiceConversion::SingingVoiceConversion(const ExecutionProviders& Executi
 
 SingingVoiceConversion::~SingingVoiceConversion()
 {
-	logger.log(L"[Info] unloading Encoder");
 	delete hubert;
 	hubert = nullptr;
-	logger.log(L"[Info] Encoder unloaded");
 }
 
 std::vector<std::wstring> SingingVoiceConversion::Inference(std::wstring& _Paths,

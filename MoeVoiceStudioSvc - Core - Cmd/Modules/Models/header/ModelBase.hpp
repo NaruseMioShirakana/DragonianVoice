@@ -101,6 +101,14 @@ public:
 		return _samplingRate;
 	}
 
+	static float Clamp(float in, float min = -1.f, float max = 1.f)
+	{
+		if (in > max)
+			return max;
+		if (in < min)
+			return min;
+		return in;
+	}
 protected:
 	//采样率
 	long _samplingRate = 22050;
@@ -108,7 +116,7 @@ protected:
 	Ort::Env* env = nullptr;
 	Ort::SessionOptions* session_options = nullptr;
 	Ort::MemoryInfo* memory_info = nullptr;
-
+	ExecutionProviders _cur_execution_provider = ExecutionProviders::CPU;
 	ProgressCallback _callback;
 
 	std::vector<std::wstring> __NAME__CLASS__ = { L"MoeVoiceStudioModule" };

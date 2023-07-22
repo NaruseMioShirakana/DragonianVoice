@@ -139,6 +139,19 @@ public:
 		fclose(FOut);
 		FOut = nullptr;
 	}
+
+	static void WritePCMData(int samplingrate, int channel, const std::vector<int16_t>& PCMDATA, const std::wstring& filepath)
+	{
+		const WAV_HEADER TmpHeader(long(36 + 2 * PCMDATA.size()), 16, 1, short(channel), samplingrate, samplingrate * 2 * channel, short(2 * channel), short(16), long(2 * PCMDATA.size()));
+		FILE* FOut = nullptr;
+		_wfopen_s(&FOut, filepath.c_str(), L"wb");
+		if (!FOut) return;
+		fwrite(&TmpHeader, 1, sizeof(TmpHeader), FOut);
+		fwrite(PCMDATA.data(), 1, PCMDATA.size() * 2, FOut);
+		fclose(FOut);
+		FOut = nullptr;
+	}
+
 private:
 	WAV_HEADER header;
 	char* Data;

@@ -63,12 +63,33 @@ namespace MoeVSProjectSpace
         const std::vector<int16_t>& Audio;
         const std::vector<float>& F0;
         const std::vector<float>& Volume;
-        const std::vector<float> Mel;
         const std::vector<std::vector<float>>& Speaker;
         bool IsNotMute;
         long OrgLen;
         const std::wstring& Path;
-        MoeVSAudioSliceRef(const std::vector<int16_t>& audio, const std::vector<float>& f0, const std::vector<float>& volume, const std::vector<std::vector<float>>& speaker, bool isnotmute, long orglen, const std::wstring& path) :Audio(audio), F0(f0), Volume(volume), Speaker(speaker), IsNotMute(isnotmute), OrgLen(orglen), Path(path) {}
+        size_t Slice = 0;
+        void* Mel = nullptr;
+        MoeVSAudioSliceRef(
+            const std::vector<int16_t>& audio,
+            const std::vector<float>& f0,
+            const std::vector<float>& volume,
+            const std::vector<std::vector<float>>& speaker,
+            bool isnotmute,
+            long orglen,
+            const std::wstring& path,
+            size_t sli,
+            void* mel_tensor_ptr = nullptr
+        ) :
+            Audio(audio),
+            F0(f0),
+            Volume(volume),
+            Speaker(speaker),
+            IsNotMute(isnotmute),
+            OrgLen(orglen),
+            Path(path),
+            Slice(sli),
+            Mel(mel_tensor_ptr)
+        {}
     };
 
 	struct MoeVSSvcParams

@@ -9,7 +9,6 @@
 #include "InferTools/Sampler/MoeVSSamplers.hpp"
 #include "InferTools/F0Extractor/NetF0Predictors/NetF0Predictors.hpp"
 
-
 #define MoeVSRegisterF0Constructor(__RegisterName, __ClassName) MoeVSF0Extractor::RegisterF0Extractor(__RegisterName,   \
 	[](int32_t sampling_rate, int32_t hop_size,																			\
 	int32_t n_f0_bins, double max_f0, double min_f0)																	\
