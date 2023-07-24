@@ -95,12 +95,16 @@ namespace MoeSSLogger
 	{
 		if (log_file)
 			fprintf_s(log_file, "%s\n", to_byte_string(format).c_str());
+		else
+			fprintf_s(stdout, "%s\n", to_byte_string(format).c_str());
 	}
 
 	void Logger::log(const char* format) const
 	{
 		if (log_file)
 			fprintf_s(log_file, "%s\n", format);
+		else
+			fprintf_s(stdout, "%s\n", format);
 	}
 
 	void Logger::error(const std::wstring& format) const
