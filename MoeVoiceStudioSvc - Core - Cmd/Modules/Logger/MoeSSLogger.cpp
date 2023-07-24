@@ -36,16 +36,19 @@ namespace MoeSSLogger
 
 	Logger::~Logger()
 	{
+#ifndef MoeVoiceStudioCommandLineProg
 		if (log_file)
 			fclose(log_file);
 		if (error_file)
 			fclose(error_file);
 		log_file = nullptr;
 		error_file = nullptr;
+#endif
 	}
 
 	Logger::Logger()
 	{
+#ifndef MoeVoiceStudioCommandLineProg
 		const std::wstring LogPath = GetCurrentFolder() + L"/log";
 		const std::filesystem::path logger_path(LogPath);
 		if (!exists(logger_path))
@@ -89,38 +92,51 @@ namespace MoeSSLogger
 			_wfopen_s(&log_file, logpath.c_str(), L"w");
 			_wfopen_s(&error_file, errorpath.c_str(), L"w");
 		}
+#endif
 	}
 
 	void Logger::log(const std::wstring& format) const
 	{
+#ifndef MoeVoiceStudioCommandLineProg
 		if (log_file)
 			fprintf_s(log_file, "%s\n", to_byte_string(format).c_str());
-		else
-			fprintf_s(stdout, "%s\n", to_byte_string(format).c_str());
+#else
+		fprintf_s(stdout, "%s\n", to_byte_string(format).c_str());
+#endif
 	}
 
 	void Logger::log(const char* format) const
 	{
+#ifndef MoeVoiceStudioCommandLineProg
 		if (log_file)
 			fprintf_s(log_file, "%s\n", format);
-		else
-			fprintf_s(stdout, "%s\n", format);
+#else
+		fprintf_s(stdout, "%s\n", format);
+#endif
 	}
 
 	void Logger::error(const std::wstring& format) const
 	{
+#ifndef MoeVoiceStudioCommandLineProg
 		if (log_file)
 			fprintf(log_file, "[ERROR]%s\n", to_byte_string(format).c_str());
 		if (error_file)
 			fprintf(error_file, "[ERROR]%s\n", to_byte_string(format).c_str());
+#else
+		fprintf(stdout, "[ERROR]%s\n", to_byte_string(format).c_str());
+#endif
 	}
 
 	void Logger::error(const char* format) const
 	{
+#ifndef MoeVoiceStudioCommandLineProg
 		if (log_file)
 			fprintf(log_file, "[ERROR]%s\n", format);
 		if (error_file)
 			fprintf(error_file, "[ERROR]%s\n", format);
+#else
+		fprintf(stdout, "[ERROR]%s\n", format);
+#endif
 	}
 
 	Logger& GetLogger()
