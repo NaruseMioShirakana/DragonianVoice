@@ -1,11 +1,17 @@
-## 注意：支持TTS和SVS的分支：[MoeVoiceStudio](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudio) [MoeVoiceStudioCore](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudioCore)
-## 关于Cuda支持的相关问题可以前往[OnnxRuntime官方仓库](https://github.com/microsoft/onnxruntime/releases)查看
-## 经过实验，Dml会导致Onnx中一些算子得到错误的结果，最新的SoVits仓库中的Onnx导出已经替换了这些算子，故SoVits3.0和SoVits4.0恢复支持Dml使用，但是要使用最新（2023/7/17）版本的SoVitsOnnx导出重新导出Onnx模型
+<div align="center">
 
 # MoeVoiceStudio
-| [中文](README.md) | [English](README_en.md)
+[中文](README.md) | [English](README_en.md)
 
 本项目是专注于二次元亚文化圈，面向动漫爱好者的语音辅助软件。
+
+</div>
+
+> 注意：支持TTS和SVS的分支：[MoeVoiceStudio](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudio) [MoeVoiceStudioCore](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudioCore)
+
+> 关于Cuda支持的相关问题可以前往[OnnxRuntime官方仓库](https://github.com/microsoft/onnxruntime/releases)查看
+
+> 经过实验，Dml会导致Onnx中一些算子得到错误的结果，最新的SoVits仓库中的Onnx导出已经替换了这些算子，故SoVits3.0和SoVits4.0恢复支持Dml使用，但是要使用最新（2023/7/17）版本的SoVitsOnnx导出重新导出Onnx模型
 
 <details><summary><b>支持的Net：</b></summary>
     
@@ -16,7 +22,9 @@
 - [DiffSinger](https://github.com/openvpi/DiffSinger)
 - [RVC](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI)
 - [FishDiffusion](https://github.com/fishaudio/fish-diffusion)
-    
+- [FCPE](https://github.com/CNChTu/MelPE)
+- [RMVPE](https://github.com/yxlllc/RMVPE)
+
 </details>
 
 ## 目录
@@ -175,6 +183,7 @@ demo: [RVC命令行示例](https://github.com/NaruseMioShirakana/MoeVoiceStudio/
 - Tacotron2使用的hifigan：`input_names`应该为`["x"]`，`output_names`应该为`["audio"]`，`dynamic_axes`应当为`{"x":[0,1],}`
 
 Vec模型和Hubert模型放在Hubert文件夹下，Hifigan模型放在Hifigan文件夹下
+如需使用FCPE或RMVPE这两个F0预测器，则需要在根目录创建F0Predictor文件夹并将onnx模型放置在其中
 
 ## 配置文件
 - 本项目标准化了模型读取模块，模型保存在Mods文件夹下的子文件夹中。`xxx.json` 为模型的配置文件，需要自行按照模板编写，同时需要自行将模型转换为Onnx。
@@ -269,7 +278,9 @@ Vec模型和Hubert模型放在Hubert文件夹下，Hifigan模型放在Hifigan文
     "CharaMix": true,
     "Volume": false,
     "SoVits2": true,
+    "ShallowDiffusion" : "NyaruTaffy"
     "HiddenSize": 256,
+    "Cluster": "Index"
     "Characters" : ["Taffy","Nyaru"]
 }
 //Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
@@ -278,8 +289,10 @@ Vec模型和Hubert模型放在Hubert文件夹下，Hifigan模型放在Hifigan文
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
 //Diffusion：是否为DDSP仓库下的扩散模型
 //CharaMix：是否使用角色混合轨道
+//ShallowDiffusion：SoVits浅扩散模型，须填写ShallowDiffusion模型配置文件名（不带后缀和完整路径），小显存或内存下速度巨慢，效果未知，请根据实际情况决定是否使用）
 //Volume：该模型是否有音量Emb
 //HiddenSize：Vec模型的尺寸（768/256）
+//Cluster：聚类类型，包括"KMeans"和"Index"，KMeans需要前往SoVits仓库将KMeans文件导出为可用格式，放置到模型文件夹；Index同理，需要前往SoVits仓库导出为可用格式（如果是RVC的单角色Index只需要改名为Index-0.index）然后放置到模型文件夹下（有几个角色就有几个Index文件）
 ```
 </details>
 <details><summary>SoVits_3.0_32k:</summary>
@@ -294,10 +307,12 @@ Vec模型和Hubert模型放在Hubert文件夹下，Hifigan模型放在Hifigan文
     "Cleaner" : "",
     "Hubert": "hubert",
     "SoVits3": true,
+    "ShallowDiffusion" : "NyaruTaffy"
     "Diffusion": false,
     "CharaMix": true,
     "Volume": false,
     "HiddenSize": 256,
+    "Cluster": "KMeans"
     "Characters" : ["Taffy","Nyaru"]
 }
 //Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
@@ -305,9 +320,11 @@ Vec模型和Hubert模型放在Hubert文件夹下，Hifigan模型放在Hifigan文
 //Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
 //Diffusion：是否为DDSP仓库下的扩散模型
+//ShallowDiffusion：SoVits浅扩散模型，须填写ShallowDiffusion模型配置文件名（不带后缀和完整路径），小显存或内存下速度巨慢，效果未知，请根据实际情况决定是否使用）
 //CharaMix：是否使用角色混合轨道
 //Volume：该模型是否有音量Emb
 //HiddenSize：Vec模型的尺寸（768/256）
+//Cluster：聚类类型，包括"KMeans"和"Index"，KMeans需要前往SoVits仓库将KMeans文件导出为可用格式，放置到模型文件夹；Index同理，需要前往SoVits仓库导出为可用格式（如果是RVC的单角色Index只需要改名为Index-0.index）然后放置到模型文件夹下（有几个角色就有几个Index文件）
 ```
     
 </details>
@@ -323,10 +340,12 @@ Vec模型和Hubert模型放在Hubert文件夹下，Hifigan模型放在Hifigan文
     "Cleaner" : "",
     "Hubert": "hubert",
     "SoVits3": true,
+    "ShallowDiffusion" : "NyaruTaffy"
     "Diffusion": false,
     "CharaMix": true,
     "Volume": false,
     "HiddenSize": 256,
+    "Cluster": "KMeans"
     "Characters" : ["Taffy","Nyaru"]
 }
 //Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
@@ -334,9 +353,11 @@ Vec模型和Hubert模型放在Hubert文件夹下，Hifigan模型放在Hifigan文
 //Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
 //Diffusion：是否为DDSP仓库下的扩散模型
+//ShallowDiffusion：SoVits浅扩散模型，须填写ShallowDiffusion模型配置文件名（不带后缀和完整路径），小显存或内存下速度巨慢，效果未知，请根据实际情况决定是否使用）
 //CharaMix：是否使用角色混合轨道
 //Volume：该模型是否有音量Emb
 //HiddenSize：Vec模型的尺寸（768/256）
+//Cluster：聚类类型，包括"KMeans"和"Index"，KMeans需要前往SoVits仓库将KMeans文件导出为可用格式，放置到模型文件夹；Index同理，需要前往SoVits仓库导出为可用格式（如果是RVC的单角色Index只需要改名为Index-0.index）然后放置到模型文件夹下（有几个角色就有几个Index文件）
 ```
     
 </details>
@@ -352,10 +373,12 @@ Vec模型和Hubert模型放在Hubert文件夹下，Hifigan模型放在Hifigan文
     "Cleaner" : "",
     "Hubert": "hubert4.0",
     "SoVits4.0V2": false,
-    "Diffusion": false,
-    "CharaMix": true,
-    "Volume": false,
-    "HiddenSize": 256,
+    "ShallowDiffusion" : "NyaruTaffy"
+    "Diffusion" : false,
+    "CharaMix" : true,
+    "Volume" : false,
+    "HiddenSize" : 256,
+    "Cluster" : "KMeans"
     "Characters" : ["Taffy","Nyaru"]
 }
 //Hop：模型的HopLength，不知道HopLength是啥的建议多看几个视频了解了解音频的基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
@@ -363,9 +386,11 @@ Vec模型和Hubert模型放在Hubert文件夹下，Hifigan模型放在Hifigan文
 //Hubert：Hubert模型名，必须填且必须将在前置模型中下载到的Hubert放置到Hubert文件夹
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
 //Diffusion：是否为DDSP仓库下的扩散模型
+//ShallowDiffusion：SoVits浅扩散模型，须填写ShallowDiffusion模型配置文件名（不带后缀和完整路径），小显存或内存下速度巨慢，效果未知，请根据实际情况决定是否使用）
 //CharaMix：是否使用角色混合轨道
 //Volume：该模型是否有音量Emb
 //HiddenSize：Vec模型的尺寸（768/256）
+//Cluster：聚类类型，包括"KMeans"和"Index"，KMeans需要前往SoVits仓库将KMeans文件导出为可用格式，放置到模型文件夹；Index同理，需要前往SoVits仓库导出为可用格式（如果是RVC的单角色Index只需要改名为Index-0.index）然后放置到模型文件夹下（有几个角色就有几个Index文件）
 //SoVits4.0V2: 是否为SoVits4.0V2模型
 ```
     
