@@ -1,5 +1,7 @@
 ﻿#include "inferTools.hpp"
-
+#ifdef MoeVoiceStudioAvxAcc
+#include <immintrin.h>
+#endif
 InferTools::Wav::Wav(const wchar_t* Path) :header(WAV_HEADER()) {
     char buf[1024];
     FILE* stream;
@@ -229,3 +231,125 @@ std::vector<float> InferTools::mean_filter(const std::vector<float>& vec, size_t
 
     return result;
 }
+
+#ifdef MoeVoiceStudioAvxAcc
+InferTools::FloatTensorWrapper& InferTools::FloatTensorWrapper::operator+=(const FloatTensorWrapper& _right)
+{
+    if (_data_size != _right._data_size)
+        throw std::exception("Vector Size MisMatch");
+    const size_t num_avx2_elements = _data_size / 8;
+    for (size_t i = 0; i < num_avx2_elements; i++) {
+        const __m256 a_avx2 = _mm256_load_ps(&_data_ptr[i * 8]);
+        const __m256 b_avx2 = _mm256_load_ps(&_right[i * 8]);
+        const __m256 result_avx2 = _mm256_add_ps(a_avx2, b_avx2);
+        _mm256_store_ps(&_data_ptr[i * 8], result_avx2);
+    }
+    for (size_t i = num_avx2_elements * 8; i < _data_size; ++i)
+        _data_ptr[i] += _right[i];
+    return *this;
+}
+
+InferTools::FloatTensorWrapper& InferTools::FloatTensorWrapper::operator-=(const FloatTensorWrapper& _right)
+{
+    if (_data_size != _right._data_size)
+        throw std::exception("Vector Size MisMatch");
+    const size_t num_avx2_elements = _data_size / 8;
+    for (size_t i = 0; i < num_avx2_elements; i++) {
+        const __m256 a_avx2 = _mm256_load_ps(&_data_ptr[i * 8]);
+        const __m256 b_avx2 = _mm256_load_ps(&_right[i * 8]);
+        const __m256 result_avx2 = _mm256_sub_ps(a_avx2, b_avx2);
+        _mm256_store_ps(&_data_ptr[i * 8], result_avx2);
+    }
+    for (size_t i = num_avx2_elements * 8; i < _data_size; ++i)
+        _data_ptr[i] -= _right[i];
+    return *this;
+}
+
+InferTools::FloatTensorWrapper& InferTools::FloatTensorWrapper::operator*=(const FloatTensorWrapper& _right)
+{
+    if (_data_size != _right._data_size)
+        throw std::exception("Vector Size MisMatch");
+    const size_t num_avx2_elements = _data_size / 8;
+    for (size_t i = 0; i < num_avx2_elements; i++) {
+        const __m256 a_avx2 = _mm256_load_ps(&_data_ptr[i * 8]);
+        const __m256 b_avx2 = _mm256_load_ps(&_right[i * 8]);
+        const __m256 result_avx2 = _mm256_mul_ps(a_avx2, b_avx2);
+        _mm256_store_ps(&_data_ptr[i * 8], result_avx2);
+    }
+    for (size_t i = num_avx2_elements * 8; i < _data_size; ++i)
+        _data_ptr[i] *= _right[i];
+    return *this;
+}
+
+InferTools::FloatTensorWrapper& InferTools::FloatTensorWrapper::operator/=(const FloatTensorWrapper& _right)
+{
+    if (_data_size != _right._data_size)
+        throw std::exception("Vector Size MisMatch");
+    const size_t num_avx2_elements = _data_size / 8;
+    for (size_t i = 0; i < num_avx2_elements; i++) {
+        const __m256 a_avx2 = _mm256_load_ps(&_data_ptr[i * 8]);
+        const __m256 b_avx2 = _mm256_load_ps(&_right[i * 8]);
+        const __m256 result_avx2 = _mm256_div_ps(a_avx2, b_avx2);
+        _mm256_store_ps(&_data_ptr[i * 8], result_avx2);
+    }
+    for (size_t i = num_avx2_elements * 8; i < _data_size; ++i)
+        _data_ptr[i] /= _right[i];
+    return *this;
+}
+
+InferTools::FloatTensorWrapper& InferTools::FloatTensorWrapper::operator+=(float _right)
+{
+    const size_t num_avx2_elements = _data_size / 8;
+    const __m256 value_avx2 = _mm256_set1_ps(_right);
+    for (size_t i = 0; i < num_avx2_elements; ++i) {
+        const __m256 vec_avx2 = _mm256_loadu_ps(&_data_ptr[i * 8]);
+        const __m256 result_avx2 = _mm256_add_ps(vec_avx2, value_avx2);
+        _mm256_storeu_ps(&_data_ptr[i * 8], result_avx2);
+    }
+    for (size_t i = num_avx2_elements * 8; i < _data_size; ++i)
+        _data_ptr[i] += _right;
+    return *this;
+}
+
+InferTools::FloatTensorWrapper& InferTools::FloatTensorWrapper::operator-=(float _right)
+{
+    const size_t num_avx2_elements = _data_size / 8;
+    const __m256 value_avx2 = _mm256_set1_ps(_right);
+    for (size_t i = 0; i < num_avx2_elements; ++i) {
+        const __m256 vec_avx2 = _mm256_loadu_ps(&_data_ptr[i * 8]);
+        const __m256 result_avx2 = _mm256_sub_ps(vec_avx2, value_avx2);
+        _mm256_storeu_ps(&_data_ptr[i * 8], result_avx2);
+    }
+    for (size_t i = num_avx2_elements * 8; i < _data_size; ++i)
+        _data_ptr[i] -= _right;
+    return *this;
+}
+
+InferTools::FloatTensorWrapper& InferTools::FloatTensorWrapper::operator*=(float _right)
+{
+    const size_t num_avx2_elements = _data_size / 8;
+    const __m256 value_avx2 = _mm256_set1_ps(_right);
+    for (size_t i = 0; i < num_avx2_elements; ++i) {
+        const __m256 vec_avx2 = _mm256_loadu_ps(&_data_ptr[i * 8]);
+        const __m256 result_avx2 = _mm256_mul_ps(vec_avx2, value_avx2);
+        _mm256_storeu_ps(&_data_ptr[i * 8], result_avx2);
+    }
+    for (size_t i = num_avx2_elements * 8; i < _data_size; ++i)
+        _data_ptr[i] *= _right;
+    return *this;
+}
+
+InferTools::FloatTensorWrapper& InferTools::FloatTensorWrapper::operator/=(float _right)
+{
+    const size_t num_avx2_elements = _data_size / 8;
+    const __m256 value_avx2 = _mm256_set1_ps(_right);
+    for (size_t i = 0; i < num_avx2_elements; ++i) {
+        const __m256 vec_avx2 = _mm256_loadu_ps(&_data_ptr[i * 8]);
+        const __m256 result_avx2 = _mm256_div_ps(vec_avx2, value_avx2);
+        _mm256_storeu_ps(&_data_ptr[i * 8], result_avx2);
+    }
+    for (size_t i = num_avx2_elements * 8; i < _data_size; ++i)
+        _data_ptr[i] /= _right;
+    return *this;
+}
+#endif

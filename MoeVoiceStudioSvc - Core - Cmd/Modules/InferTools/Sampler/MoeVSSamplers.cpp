@@ -1,6 +1,7 @@
 ﻿#include "MoeVSSamplers.hpp"
 #include <deque>
 #include <random>
+#include "../inferTools.hpp"
 
 MoeVoiceStudioSamplerHeader
 	PndmSampler::PndmSampler(Ort::Session* alpha, Ort::Session* dfn, Ort::Session* pred, int64_t Mel_Bins, const ProgressCallback& _ProgressCallback, Ort::MemoryInfo* memory) :
@@ -209,11 +210,21 @@ std::vector<Ort::Value> DDimSampler::Sample(std::vector<Ort::Value>& Tensors, in
 		{
 			throw std::exception((std::string("Locate: denoise\n") + e1.what()).c_str());
 		}
-		const auto x = DenoiseIn[0].GetTensorData<float>();
+		const auto x = DenoiseIn[0].GetTensorMutableData<float>();
 		const auto noise_pred = DenoiseOut[0].GetTensorMutableData<float>();
 		const auto noise_size = DenoiseOut[0].GetTensorTypeAndShapeInfo().GetElementCount();
+		const auto sq_aprev = sqrt(a_prev);
+		const auto sq_at = sqrt(a_t);
+		const auto np_m_op = (sqrt((1 - a_prev) / a_prev) - sqrt((1 - a_t) / a_t));
+#ifndef MoeVoiceStudioAvxAcc
 		for (size_t i = 0; i < noise_size; ++i)
-			noise_pred[i] = sqrt(a_prev) * (x[i] / sqrt(a_t) + (sqrt((1 - a_prev) / a_prev) - sqrt((1 - a_t) / a_t)) * noise_pred[i]);
+			noise_pred[i] = (x[i] / sq_at + (sqrt((1 - a_prev) / a_prev) - sqrt((1 - a_t) / a_t)) * noise_pred[i]) * sq_aprev;
+#else
+		InferTools::FloatTensorWrapper XWrapper(x, noise_size);
+		InferTools::FloatTensorWrapper PredWrapper(noise_pred, noise_size);
+		XWrapper /= sq_at;
+		((PredWrapper *= np_m_op) += XWrapper) *= sq_aprev;
+#endif
 		DenoiseIn[0] = std::move(DenoiseOut[0]);
 		_callback(++Process, 1);
 	}

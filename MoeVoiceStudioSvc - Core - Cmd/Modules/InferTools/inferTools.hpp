@@ -265,4 +265,36 @@ static std::vector<T> InterpFunc(const std::vector<T>& Data, long src, long dst)
 	}
 	return Data;
 }
+#ifdef MoeVoiceStudioAvxAcc
+class FloatTensorWrapper
+{
+public:
+	FloatTensorWrapper() = delete;
+	~FloatTensorWrapper() { _data_ptr = nullptr; }
+	FloatTensorWrapper(float* const data_p, size_t _size) : _data_ptr(data_p), _data_size(_size) {}
+	FloatTensorWrapper(const FloatTensorWrapper& _copy) = delete;
+	FloatTensorWrapper& operator=(const FloatTensorWrapper&) = delete;
+	FloatTensorWrapper(FloatTensorWrapper&& _move) noexcept:_data_ptr(_move._data_ptr), _data_size(_move._data_size) {}
+	FloatTensorWrapper& operator=(FloatTensorWrapper&& _move) noexcept
+	{
+		_data_ptr = _move._data_ptr;
+		_data_size = _move._data_size;
+		return *this;
+	}
+	template<typename T>
+	static const T& Min(const T& a, const T& b) { return (a > b) ? b : a; }
+	float& operator[](size_t index) const { return *(_data_ptr + Min(index, _data_size)); }
+	FloatTensorWrapper& operator+=(const FloatTensorWrapper& _right);
+	FloatTensorWrapper& operator-=(const FloatTensorWrapper& _right);
+	FloatTensorWrapper& operator*=(const FloatTensorWrapper& _right);
+	FloatTensorWrapper& operator/=(const FloatTensorWrapper& _right);
+	FloatTensorWrapper& operator+=(float _right);
+	FloatTensorWrapper& operator-=(float _right);
+	FloatTensorWrapper& operator*=(float _right);
+	FloatTensorWrapper& operator/=(float _right);
+private:
+	float* _data_ptr = nullptr;
+	size_t _data_size = 0;
+};
+#endif
 MOEVSINFERTOOLSEND
