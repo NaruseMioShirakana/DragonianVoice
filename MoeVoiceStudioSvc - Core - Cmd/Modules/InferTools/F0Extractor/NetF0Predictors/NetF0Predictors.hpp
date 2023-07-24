@@ -78,10 +78,6 @@ private:
 	std::vector<double> refined_f0;
 };
 
-NetF0Class* GetRMVPE();
-
-NetF0Class* GetMELPE();
-
 void EmptyCache();
 
 MOEVSFOEXTRACTOREND

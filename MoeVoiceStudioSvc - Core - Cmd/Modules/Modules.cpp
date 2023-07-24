@@ -8,6 +8,12 @@
 #include "InferTools/Sampler/MoeVSSamplerManager.hpp"
 #include "InferTools/Sampler/MoeVSSamplers.hpp"
 #include "InferTools/F0Extractor/NetF0Predictors/NetF0Predictors.hpp"
+#ifdef MoeVoiceStudioIndexCluster
+#ifdef max
+#undef max
+#endif
+#include "InferTools/Cluster/MoeVSIndexCluster.hpp"
+#endif
 
 #define MoeVSRegisterF0Constructor(__RegisterName, __ClassName) MoeVSF0Extractor::RegisterF0Extractor(__RegisterName,   \
 	[](int32_t sampling_rate, int32_t hop_size,																			\
@@ -61,6 +67,9 @@ namespace MoeVSModuleManager
 		MoeVSRegisterTensorConstructor(L"DiffSvc", DiffSvcTensorExtractor);
 		MoeVSRegisterTensorConstructor(L"DiffusionSvc", DiffusionSvcTensorExtractor);
 		MoeVSRegisterCluster(L"KMeans", KMeansCluster);
+#ifdef MoeVoiceStudioIndexCluster
+		MoeVSRegisterCluster(L"Index", IndexCluster);
+#endif
 		MoeVSRegisterSampler(L"Pndm", PndmSampler);
 		MoeVSRegisterSampler(L"DDim", DDimSampler);
 	}

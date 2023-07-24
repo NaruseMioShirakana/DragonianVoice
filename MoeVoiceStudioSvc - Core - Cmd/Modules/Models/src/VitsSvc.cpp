@@ -41,10 +41,10 @@ VitsSvc::VitsSvc(const MJson& _Config, const ProgressCallback& _ProgressCallback
 	if (!_Config["Folder"].IsString())
 		throw std::exception("[Error] Field \"folder\" (Model Folder) Must Be String");
 	const auto _folder = to_wide_string(_Config["Folder"].GetString());
-	const auto K_means_folder = GetCurrentFolder() + L"\\Models\\" + _folder + L"\\" + L"kmeans.npy";
+	const auto cluster_folder = GetCurrentFolder() + L"/Models/" + _folder;
 	if (_folder.empty())
 		throw std::exception("[Error] Field \"folder\" (Model Folder) Can Not Be Empty");
-	const std::wstring _path = GetCurrentFolder() + L"\\Models\\" + _folder + L"\\" + _folder;
+	const std::wstring _path = GetCurrentFolder() + L"/Models/" + _folder + L"/" + _folder;
 
 	if (_Config["Hubert"].IsNull())
 		throw std::exception("[Error] Missing field \"Hubert\" (Hubert Folder)");
@@ -97,14 +97,23 @@ VitsSvc::VitsSvc(const MJson& _Config, const ProgressCallback& _ProgressCallback
 	else
 		EnableCharaMix = _Config["CharaMix"].GetBool();
 
-	if(_waccess(K_means_folder.c_str(), 0) != -1)
+	if(_Config["Cluster"].IsString())
 	{
-		EnableCluster = true;
+		const auto clus = to_wide_string(_Config["Cluster"].GetString());
 		if (!(_Config["KMeansLength"].IsInt() || _Config["KMeansLength"].IsInt64()))
 			logger.log(L"[Warn] Missing Field \"KMeansLength\", Use Default Value (10000)");
 		else
 			ClusterCenterSize = _Config["KMeansLength"].GetInt();
-		Cluster = MoeVoiceStudioCluster::GetMoeVSCluster(L"KMeans", K_means_folder, HiddenUnitKDims, ClusterCenterSize);
+		try
+		{
+			Cluster = MoeVoiceStudioCluster::GetMoeVSCluster(clus, cluster_folder, HiddenUnitKDims, ClusterCenterSize);
+			EnableCluster = true;
+		}
+		catch (std::exception& e)
+		{
+			logger.error(e.what());
+			EnableCluster = false;
+		}
 	}
 
 	if(HopSize < 1)
@@ -124,7 +133,7 @@ VitsSvc::VitsSvc(const MJson& _Config, const ProgressCallback& _ProgressCallback
 	try
 	{
 		logger.log(L"[Info] loading VitsSvcModel Models");
-		hubert = new Ort::Session(*env, (GetCurrentFolder() + L"\\hubert\\" + HuPath + L".onnx").c_str(), *session_options);
+		hubert = new Ort::Session(*env, (GetCurrentFolder() + L"/hubert/" + HuPath + L".onnx").c_str(), *session_options);
 		if (VitsSvcVersion == L"RVC")
 			VitsSvcModel = new Ort::Session(*env, (_path + L"_RVC.onnx").c_str(), *session_options);
 		else
@@ -684,16 +693,11 @@ std::vector<int16_t> VitsSvc::SliceInference(const MoeVSProjectSpace::MoeVSAudio
 			std::vector srcHiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
 
 			const auto max_cluster_size = int64_t((size_t)HubertOutPutShape[1] * src_audio_length / RawWav.size());
-			if (!EnableCharaMix && EnableCluster && _InferParams.ClusterRate > 0.001f)
+			if (EnableCluster && _InferParams.ClusterRate > 0.001f)
 			{
-				for (int64_t indexs = 0; indexs < max_cluster_size; ++indexs)
-				{
-					const auto curbeg = srcHiddenUnits.data() + indexs * HubertOutPutShape[2];
-					const auto curend = srcHiddenUnits.data() + (indexs + 1) * HubertOutPutShape[2];
-					const auto hu = Cluster->find({ curbeg ,curend }, long(_InferParams.SpeakerId));
-					for (int64_t ind = 0; ind < HubertOutPutShape[2]; ++ind)
-						*(curbeg + ind) = *(curbeg + ind) * (1.f - _InferParams.ClusterRate) + hu[ind] * _InferParams.ClusterRate;
-				}
+				const auto pts = Cluster->find(srcHiddenUnits.data(), long(_InferParams.SpeakerId), max_cluster_size);
+				for (int64_t indexs = 0; indexs < max_cluster_size * HiddenUnitKDims; ++indexs)
+					srcHiddenUnits[indexs] = srcHiddenUnits[indexs] * (1.f - _InferParams.ClusterRate) + pts[indexs] * _InferParams.ClusterRate;
 			}
 
 			MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::InferParams _Inference_Params;
@@ -748,7 +752,7 @@ std::vector<int16_t> VitsSvc::SliceInference(const MoeVSProjectSpace::MoeVSAudio
 			}
 
 			const auto dstWavLen = (_Slice.OrgLen[slice] * int64_t(_samplingRate)) / 48000;
-			if(shallow_diffusion && stft_operator)
+			if(shallow_diffusion && stft_operator && _InferParams.UseShallowDiffusion)
 			{
 				auto PCMAudioBegin = finaOut[0].GetTensorData<float>();
 				auto PCMAudioEnd = PCMAudioBegin + finaOut[0].GetTensorTypeAndShapeInfo().GetElementCount();
@@ -876,14 +880,10 @@ std::vector<int16_t> VitsSvc::InferPCMData(const std::vector<int16_t>& PCMData, 
 
 	if (EnableCluster && _InferParams.ClusterRate > 0.001f)
 	{
-		for (int64_t indexs = 0; indexs < HubertOutPutShape[1]; ++indexs)
-		{
-			const auto curbeg = srcHiddenUnits.data() + indexs * HubertOutPutShape[2];
-			const auto curend = srcHiddenUnits.data() + (indexs + 1) * HubertOutPutShape[2];
-			const auto hu = Cluster->find({ curbeg ,curend }, long(charEmb));
-			for (int64_t ind = 0; ind < HubertOutPutShape[2]; ++ind)
-				*(curbeg + ind) = *(curbeg + ind) * (1.f - _InferParams.ClusterRate) + hu[ind] * _InferParams.ClusterRate;
-		}
+		const auto clus_size = HubertOutPutShape[1];
+		const auto pts = Cluster->find(srcHiddenUnits.data(), long(charEmb), clus_size);
+		for (size_t indexs = 0; indexs < srcHiddenUnits.size(); ++indexs)
+			srcHiddenUnits[indexs] = srcHiddenUnits[indexs] * (1.f - _InferParams.ClusterRate) + pts[indexs] * _InferParams.ClusterRate;
 	}
 
 	const auto HubertLen = int64_t(HubertSize) / HiddenUnitKDims;

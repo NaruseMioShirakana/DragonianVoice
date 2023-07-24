@@ -109,6 +109,7 @@ namespace MoeVSProjectSpace
 		int64_t HopSize = 320;
 		int64_t SpkCount = 2;
         uint64_t SrcSamplingRate = 48000;
+        bool UseShallowDiffusion = false;
 	};
 
     struct ParamsOffset

@@ -86,25 +86,21 @@ namespace MoeSSLogger
 			errorpath = cur_log_dir;
 			errorpath.append("error.txt");
 
-			_wfreopen_s(&log_file, logpath.c_str(), L"w", stdout);
-			_wfreopen_s(&error_file, errorpath.c_str(), L"w", stderr);
+			_wfopen_s(&log_file, logpath.c_str(), L"w");
+			_wfopen_s(&error_file, errorpath.c_str(), L"w");
 		}
 	}
 
 	void Logger::log(const std::wstring& format) const
 	{
 		if (log_file)
-			fprintf(log_file, "%s\n", to_byte_string(format).c_str());
-		else
-			fprintf(stdout, "%s\n", to_byte_string(format).c_str());
+			fprintf_s(log_file, "%s\n", to_byte_string(format).c_str());
 	}
 
 	void Logger::log(const char* format) const
 	{
 		if (log_file)
-			fprintf(log_file, "%s\n", format);
-		else
-			fprintf(stdout, "%s\n", format);
+			fprintf_s(log_file, "%s\n", format);
 	}
 
 	void Logger::error(const std::wstring& format) const

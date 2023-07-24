@@ -147,30 +147,16 @@ void NetF0Class::LoadModel(const std::wstring& path)
 	}
 }
 
-NetF0Class* RMVPECORE;
-NetF0Class* MELPECORE;
-
-NetF0Class* GetRMVPE()
-{
-	return RMVPECORE;
-}
-NetF0Class* GetMELPE()
-{
-	return MELPECORE;
-}
+NetF0Class RMVPECORE;
+NetF0Class MELPECORE;
 
 RMVPEF0Extractor::RMVPEF0Extractor(int sampling_rate, int hop_size, int n_f0_bins, double max_f0, double min_f0) :
 	BaseF0Extractor(sampling_rate, hop_size, n_f0_bins, max_f0, min_f0)
 {
-	if (MELPECORE)
-	{
-		delete MELPECORE;
-		MELPECORE = nullptr;
-	}
-	if (!RMVPECORE)
-		RMVPECORE = new NetF0Class;
-	if (!RMVPECORE->Model)
-		RMVPECORE->LoadModel(L"RMVPE.onnx");
+	if (MELPECORE.Model)
+		MELPECORE.Destory();
+	if (!RMVPECORE.Model)
+		RMVPECORE.LoadModel(L"RMVPE.onnx");
 }
 
 double average(const double* begin, const double* end)
@@ -184,7 +170,7 @@ double average(const double* begin, const double* end)
 
 std::vector<float> RMVPEF0Extractor::ExtractF0(const std::vector<double>& PCMData, size_t TargetLength)
 {
-	if (!RMVPECORE->Model)
+	if (!RMVPECORE.Model)
 		return DioF0Extractor((int)fs, (int)hop, (int)f0_bin, f0_max, f0_min).ExtractF0(PCMData, TargetLength);
 
 	const double step = double(fs) / 16000.;
@@ -209,10 +195,10 @@ std::vector<float> RMVPEF0Extractor::ExtractF0(const std::vector<double>& PCMDat
 	const int64_t pcm_shape[] = { 1, (int64_t)pcm.size() };
 	constexpr int64_t one_shape[] = { 1 };
 	float threshold[] = { 0.03f };
-	Tensors.emplace_back(Ort::Value::CreateTensor(*RMVPECORE->Memory, pcm.data(), pcm.size(), pcm_shape, 2));
-	Tensors.emplace_back(Ort::Value::CreateTensor(*RMVPECORE->Memory, threshold, 1, one_shape, 1));
+	Tensors.emplace_back(Ort::Value::CreateTensor(*RMVPECORE.Memory, pcm.data(), pcm.size(), pcm_shape, 2));
+	Tensors.emplace_back(Ort::Value::CreateTensor(*RMVPECORE.Memory, threshold, 1, one_shape, 1));
 
-	const auto out = RMVPECORE->Model->Run(Ort::RunOptions{ nullptr },
+	const auto out = RMVPECORE.Model->Run(Ort::RunOptions{ nullptr },
 		InputNames.data(),
 		Tensors.data(),
 		Tensors.size(),
@@ -257,15 +243,10 @@ void RMVPEF0Extractor::InterPf0(size_t TargetLength)
 MELPEF0Extractor::MELPEF0Extractor(int sampling_rate, int hop_size, int n_f0_bins, double max_f0, double min_f0) :
 	BaseF0Extractor(sampling_rate, hop_size, n_f0_bins, max_f0, min_f0)
 {
-	if (RMVPECORE)
-	{
-		delete RMVPECORE;
-		RMVPECORE = nullptr;
-	}
-	if (!MELPECORE)
-		MELPECORE = new NetF0Class;
-	if (!MELPECORE->Model)
-		MELPECORE->LoadModel(L"MELPE.onnx");
+	if (RMVPECORE.Model)
+		RMVPECORE.Destory();
+	if (!MELPECORE.Model)
+		MELPECORE.LoadModel(L"MELPE.onnx");
 }
 
 void MELPEF0Extractor::InterPf0(size_t TargetLength)
@@ -295,7 +276,7 @@ void MELPEF0Extractor::InterPf0(size_t TargetLength)
 
 std::vector<float> MELPEF0Extractor::ExtractF0(const std::vector<double>& PCMData, size_t TargetLength)
 {
-	if (!MELPECORE->Model)
+	if (!MELPECORE.Model)
 		return DioF0Extractor((int)fs, (int)hop, (int)f0_bin, f0_max, f0_min).ExtractF0(PCMData, TargetLength);
 
 	const double step = double(fs) / 16000.;
@@ -318,9 +299,9 @@ std::vector<float> MELPEF0Extractor::ExtractF0(const std::vector<double>& PCMDat
 	}
 	std::vector<Ort::Value> Tensors;
 	const int64_t pcm_shape[] = { 1, (int64_t)pcm.size() };
-	Tensors.emplace_back(Ort::Value::CreateTensor(*MELPECORE->Memory, pcm.data(), pcm.size(), pcm_shape, 2));
+	Tensors.emplace_back(Ort::Value::CreateTensor(*MELPECORE.Memory, pcm.data(), pcm.size(), pcm_shape, 2));
 
-	const auto out = MELPECORE->Model->Run(Ort::RunOptions{ nullptr },
+	const auto out = MELPECORE.Model->Run(Ort::RunOptions{ nullptr },
 		InputNames.data(),
 		Tensors.data(),
 		Tensors.size(),
@@ -339,10 +320,8 @@ std::vector<float> MELPEF0Extractor::ExtractF0(const std::vector<double>& PCMDat
 
 void EmptyCache()
 {
-	if (RMVPECORE)
-		RMVPECORE->Destory();
-	if (MELPECORE)
-		MELPECORE->Destory();
+	RMVPECORE.Destory();
+	MELPECORE.Destory();
 }
 
 MOEVSFOEXTRACTOREND

@@ -56,8 +56,8 @@ DiffusionSvc::DiffusionSvc(const MJson& _Config, const ProgressCallback& _Progre
 	const auto _folder = to_wide_string(_Config["Folder"].GetString());
 	if (_folder.empty())
 		throw std::exception("[Error] Field \"folder\" (Model Folder) Can Not Be Empty");
-	const std::wstring _path = GetCurrentFolder() + L"\\Models\\" + _folder + L"\\" + _folder;
-
+	const std::wstring _path = GetCurrentFolder() + L"/Models/" + _folder + L"/" + _folder;
+	const auto cluster_folder = GetCurrentFolder() + L"/Models/" + _folder;
 	if (_Config["Hubert"].IsNull())
 		throw std::exception("[Error] Missing field \"Hubert\" (Hubert Folder)");
 	if (!_Config["Hubert"].IsString())
@@ -126,12 +126,31 @@ DiffusionSvc::DiffusionSvc(const MJson& _Config, const ProgressCallback& _Progre
 
 	_callback = _ProgressCallback;
 
+	if (_Config["Cluster"].IsString())
+	{
+		const auto clus = to_wide_string(_Config["Cluster"].GetString());
+		if (!(_Config["KMeansLength"].IsInt() || _Config["KMeansLength"].IsInt64()))
+			logger.log(L"[Warn] Missing Field \"KMeansLength\", Use Default Value (10000)");
+		else
+			ClusterCenterSize = _Config["KMeansLength"].GetInt();
+		try
+		{
+			Cluster = MoeVoiceStudioCluster::GetMoeVSCluster(clus, cluster_folder, HiddenUnitKDims, ClusterCenterSize);
+			EnableCluster = true;
+		}
+		catch (std::exception& e)
+		{
+			logger.error(e.what());
+			EnableCluster = false;
+		}
+	}
+
 	//LoadModels
 	try
 	{
 		logger.log(L"[Info] loading DiffSvc Models");
-		hubert = new Ort::Session(*env, (GetCurrentFolder() + L"\\hubert\\" + HuPath + L".onnx").c_str(), *session_options);
-		nsfHifigan = new Ort::Session(*env, (GetCurrentFolder() + L"\\hifigan\\" + HifiganPath + L".onnx").c_str(), *session_options);
+		hubert = new Ort::Session(*env, (GetCurrentFolder() + L"/hubert/" + HuPath + L".onnx").c_str(), *session_options);
+		nsfHifigan = new Ort::Session(*env, (GetCurrentFolder() + L"/hifigan/" + HifiganPath + L".onnx").c_str(), *session_options);
 		if (_waccess((_path + L"_encoder.onnx").c_str(), 0) != -1)
 		{
 			encoder = new Ort::Session(*env, (_path + L"_encoder.onnx").c_str(), *session_options);
@@ -240,16 +259,11 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVS
 			std::vector srcHiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
 
 			const auto max_cluster_size = int64_t((size_t)HubertOutPutShape[1] * src_audio_length / RawWav.size());
-			if (!EnableCharaMix && EnableCluster && _InferParams.ClusterRate > 0.001f)
+			if (EnableCluster && _InferParams.ClusterRate > 0.001f)
 			{
-				for (int64_t indexs = 0; indexs < max_cluster_size; ++indexs)
-				{
-					const auto curbeg = srcHiddenUnits.data() + indexs * HubertOutPutShape[2];
-					const auto curend = srcHiddenUnits.data() + (indexs + 1) * HubertOutPutShape[2];
-					const auto hu = Cluster->find({ curbeg ,curend }, long(_InferParams.SpeakerId));
-					for (int64_t ind = 0; ind < HubertOutPutShape[2]; ++ind)
-						*(curbeg + ind) = *(curbeg + ind) * (1.f - _InferParams.ClusterRate) + hu[ind] * _InferParams.ClusterRate;
-				}
+				const auto pts = Cluster->find(srcHiddenUnits.data(), long(_InferParams.SpeakerId), max_cluster_size);
+				for (int64_t indexs = 0; indexs < max_cluster_size * HiddenUnitKDims; ++indexs)
+					srcHiddenUnits[indexs] = srcHiddenUnits[indexs] * (1.f - _InferParams.ClusterRate) + pts[indexs] * _InferParams.ClusterRate;
 			}
 			std::vector<Ort::Value> finaOut;
 			std::vector<Ort::Value> DiffOut;
@@ -428,15 +442,11 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVS
 			const auto dstWavLen = (_Slice.OrgLen[slice] * int64_t(_samplingRate)) / 48000;
 			std::vector<int16_t> TempVecWav(dstWavLen, 0);
 			if (shapeOut[2] < dstWavLen)
-			{
 				for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
-					TempVecWav[bbb] = static_cast<int16_t>(finaOut[0].GetTensorData<float>()[bbb] * 32768.0f);
-			}
+					TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.f);
 			else
-			{
 				for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
-					TempVecWav[bbb] = static_cast<int16_t>(finaOut[0].GetTensorData<float>()[bbb] * 32768.0f);
-			}
+					TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.f);
 			_data.insert(_data.end(), TempVecWav.data(), TempVecWav.data() + (dstWavLen));
 			logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Segment[" + std::to_wstring(slice) + L"] Finished! Segment Use Time: " + std::to_wstring(clock() - InferDurTime) + L"ms, Segment Duration: " + std::to_wstring((size_t)_Slice.OrgLen[slice] * 1000ull / 48000ull) + L"ms");
 		}
@@ -547,14 +557,10 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 
 	if (EnableCluster && _InferParams.ClusterRate > 0.001f)
 	{
-		for (int64_t indexs = 0; indexs < HubertOutPutShape[1]; ++indexs)
-		{
-			const auto curbeg = HiddenUnits.data() + indexs * HubertOutPutShape[2];
-			const auto curend = HiddenUnits.data() + (indexs + 1) * HubertOutPutShape[2];
-			const auto hu = Cluster->find({ curbeg ,curend }, long(charEmb));
-			for (int64_t ind = 0; ind < HubertOutPutShape[2]; ++ind)
-				*(curbeg + ind) = *(curbeg + ind) * (1.f - _InferParams.ClusterRate) + hu[ind] * _InferParams.ClusterRate;
-		}
+		const auto clus_size = HubertOutPutShape[1];
+		const auto pts = Cluster->find(HiddenUnits.data(), long(charEmb), clus_size);
+		for (size_t indexs = 0; indexs < HiddenUnits.size(); ++indexs)
+			HiddenUnits[indexs] = HiddenUnits[indexs] * (1.f - _InferParams.ClusterRate) + pts[indexs] * _InferParams.ClusterRate;
 	}
 
 	const auto HubertLen = int64_t(HubertSize) / HiddenUnitKDims;
@@ -726,15 +732,11 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 	const auto dstWavLen = (int64_t)PCMData.size();
 	std::vector<int16_t> TempVecWav(dstWavLen, 0);
 	if (shapeOut[2] < dstWavLen)
-	{
 		for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
-			TempVecWav[bbb] = static_cast<int16_t>(finaOut[0].GetTensorData<float>()[bbb] * 32768.0f);
-	}
+			TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.f);
 	else
-	{
 		for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
-			TempVecWav[bbb] = static_cast<int16_t>(finaOut[0].GetTensorData<float>()[bbb] * 32768.0f);
-	}
+			TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.f);
 	TempVecWav.resize(dstWavLen);
 	return TempVecWav;
 }
@@ -896,7 +898,7 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	std::vector<int16_t> OutData;
 	OutData.reserve(OutTmpData.size());
 	for (const auto& dat : OutTmpData)
-		OutData.emplace_back(int16_t(dat * 32767.f));
+		OutData.emplace_back(int16_t(Clamp(dat) * 32766.f));
 	return OutData;
 }
 

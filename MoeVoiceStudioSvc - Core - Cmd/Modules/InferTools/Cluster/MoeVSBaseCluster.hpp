@@ -26,7 +26,8 @@
 #define MoeVoiceStudioClusterEnd }
 
 MoeVoiceStudioClusterHeader
-	class MoeVoiceStudioBaseCluster
+
+class MoeVoiceStudioBaseCluster
 {
 public:
 	MoeVoiceStudioBaseCluster() = default;
@@ -35,10 +36,11 @@ public:
 	/**
 	 * \brief 查找聚类最邻近点
 	 * \param point 待查找的点
-	 * \param chara 角色ID
+	 * \param sid 角色ID
+	 * \param n_points 点数
 	 * \return 查找到的最邻近点
 	 */
-	virtual std::vector<float> find(const std::vector<float>& point, long chara);
+	virtual std::vector<float> find(float* point, long sid, int64_t n_points = 1);
 };
 
 MoeVoiceStudioClusterEnd

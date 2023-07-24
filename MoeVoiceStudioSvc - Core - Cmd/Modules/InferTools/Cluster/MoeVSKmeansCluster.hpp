@@ -32,9 +32,10 @@ public:
 	KMeansCluster() = delete;
 	~KMeansCluster() override = default;
 	KMeansCluster(const std::wstring& _path, size_t hidden_size, size_t KmeansLen);
-	std::vector<float> find(const std::vector<float>& point, long chara) override;
+	std::vector<float> find(float* point, long sid, int64_t n_points = 1) override;
 private:
 	std::vector<KDTree> _tree;
+	size_t dims = 0;
 };
 
 MoeVoiceStudioClusterEnd
