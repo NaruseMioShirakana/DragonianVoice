@@ -56,12 +56,16 @@ std::vector<float> IndexClusterCore::find(const float* points, faiss::idx_t n_po
 		float sum = 0.f;                                                       // dis_vec[i] / sum = pGetVec(idx_vec[i])
 		for (faiss::idx_t spt = 0; spt < n_searched_points; ++spt)             // result_pt = GetVec(idx_vec[i])
 		{
+			if(idx_vec[spt] < 0)
+				continue;
 			dis_vec[spt] = (1 / dis_vec[spt]) * (1 / dis_vec[spt]);
 			sum += dis_vec[spt];
 		}
 		if (sum == 0.f) sum = 1.f;
 		for (faiss::idx_t spt = 0; spt < n_searched_points; ++spt)
 		{
+			if (idx_vec[spt] < 0)
+				continue;
 			const auto sedpt = GetVec(idx_vec[spt]);
 			const auto pcnt = (dis_vec[spt] / sum);
 			for (faiss::idx_t sptp = 0; sptp < Dim; ++sptp)

@@ -50,7 +50,7 @@ int main()
 	MoeVSProjectSpace::MoeVSSvcParams Params;
 	Params.Sampler = L"DDim";
 	Params.Step = 100;
-	Params.Pndm = 5;
+	Params.Pndm = 10;
 	InferTools::SlicerSettings Settings;
 	Params.F0Method = L"RMVPE";
 	Settings.SamplingRate = 40000;
@@ -77,6 +77,18 @@ int main()
 	auto now = clock();
 	_data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
 	auto inferTime = double(clock() - now) / 1000.;
+	std::cout << "Infer Use Time : " << inferTime << "sec.\n";
+	now = clock();
+	_data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
+	inferTime = double(clock() - now) / 1000.;
+	std::cout << "Infer Use Time : " << inferTime << "sec.\n";
+	now = clock();
+	_data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
+	inferTime = double(clock() - now) / 1000.;
+	std::cout << "Infer Use Time : " << inferTime << "sec.\n";
+	now = clock();
+	_data = MoeVSModuleManager::GetCurSvcModel()->InferPCMData(PCMData, Settings.SamplingRate, Params);
+	inferTime = double(clock() - now) / 1000.;
 	std::cout << "Infer Use Time : " << inferTime << "sec.\n";
 	PCMData = TPCMData;
 	now = clock();
