@@ -275,9 +275,8 @@ Vec模型和Hubert模型放在Hubert文件夹下，Hifigan模型放在Hifigan文
     "Cleaner" : "",
     "Hubert": "hubert4.0",
     "Diffusion": false,
-    "CharaMix": true,
+    "CharaMix": false,
     "Volume": false,
-    "SoVits2": true,
     "ShallowDiffusion" : "NyaruTaffy"
     "HiddenSize": 256,
     "Cluster": "Index"
