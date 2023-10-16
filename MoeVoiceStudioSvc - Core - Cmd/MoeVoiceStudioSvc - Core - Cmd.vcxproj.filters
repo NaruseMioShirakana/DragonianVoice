@@ -91,6 +91,12 @@
     <Filter Include="头文件\Modules\InferTools\Cluster">
       <UniqueIdentifier>{7cc7c826-511c-434d-a057-362c82a3da04}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\LibDLVoiceCodec">
+      <UniqueIdentifier>{0d30c1a5-5cc4-4016-976f-f0c388871d59}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\LibDLVoiceCodec">
+      <UniqueIdentifier>{9cdc3e22-5d4a-4a08-a1cd-57dd5c657e2c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MoeVoiceStudioSvc - Core - Cmd.cpp">
@@ -209,6 +215,12 @@
     </ClCompile>
     <ClCompile Include="Modules\InferTools\F0Extractor\NetF0Predictors\NetF0Predictors.cpp">
       <Filter>源文件\Modules\InferTools\F0Extractor</Filter>
+    </ClCompile>
+    <ClCompile Include="LibDLVoiceCodec\base.cpp">
+      <Filter>源文件\LibDLVoiceCodec</Filter>
+    </ClCompile>
+    <ClCompile Include="LibDLVoiceCodec\value.cpp">
+      <Filter>源文件\LibDLVoiceCodec</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -337,6 +349,12 @@
     </ClInclude>
     <ClInclude Include="Modules\InferTools\F0Extractor\NetF0Predictors\NetF0Predictors.hpp">
       <Filter>头文件\Modules\InferTools\F0Extractor</Filter>
+    </ClInclude>
+    <ClInclude Include="LibDLVoiceCodec\base.h">
+      <Filter>头文件\LibDLVoiceCodec</Filter>
+    </ClInclude>
+    <ClInclude Include="LibDLVoiceCodec\value.h">
+      <Filter>头文件\LibDLVoiceCodec</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

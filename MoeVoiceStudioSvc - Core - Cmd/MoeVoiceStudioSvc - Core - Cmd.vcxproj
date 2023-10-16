@@ -71,10 +71,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\World\src\world;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\OnnxRuntimeDmlProvider\build\native\include;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\MJson;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\ffmpeg-4.2.1\include;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Lib\World\src\world;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\build\native\include;$(SolutionDir)Lib\MJson;$(SolutionDir)Lib\ffmpeg-4.2.1\include;$(SolutionDir)Lib\openblas\include;$(SolutionDir)Lib\faiss;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\ffmpeg-4.2.1\include;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\MJson;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\OnnxRuntimeDmlProvider\build\native\include;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\World\src\world;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Lib\ffmpeg-4.2.1\include;$(SolutionDir)Lib\MJson;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\build\native\include;$(SolutionDir)Lib\World\src\world;$(SolutionDir)Lib\openblas\include;$(SolutionDir)Lib\faiss;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -108,7 +108,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;MOEVSDMLPROVIDER;MoeVoiceStudioCommandLineProg;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;MOEVSDMLPROVIDER;MoeVoiceStudioCommandLineProg;MoeVoiceStudioIndexCluster;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
@@ -116,7 +116,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\ffmpeg-4.2.1\Lib;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\OnnxRuntimeDmlProvider\runtimes\win-x64\native;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Lib\ffmpeg-4.2.1\Lib;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\runtimes\win-x64\native;$(SolutionDir)Lib\openblas\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;onnxruntime.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -136,7 +136,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\ffmpeg-4.2.1\Lib;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\Lib\OnnxRuntimeDmlProvider\runtimes\win-x64\native;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Lib\ffmpeg-4.2.1\Lib;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\runtimes\win-x64\native;$(SolutionDir)Lib\openblas\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;onnxruntime.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
@@ -155,6 +155,8 @@
     <ClCompile Include="..\Lib\World\src\synthesisrealtime.cpp" />
     <ClCompile Include="..\Lib\World\tools\audioio.cpp" />
     <ClCompile Include="..\Lib\World\tools\parameterio.cpp" />
+    <ClCompile Include="LibDLVoiceCodec\base.cpp" />
+    <ClCompile Include="LibDLVoiceCodec\value.cpp" />
     <ClCompile Include="Modules\DataStruct\KDTree.cpp" />
     <ClCompile Include="Modules\InferTools\Cluster\MoeVSBaseCluster.cpp" />
     <ClCompile Include="Modules\InferTools\Cluster\MoeVSClusterManager.cpp" />
@@ -199,6 +201,8 @@
     <ClInclude Include="..\Lib\World\src\world\synthesisrealtime.h" />
     <ClInclude Include="..\Lib\World\tools\audioio.h" />
     <ClInclude Include="..\Lib\World\tools\parameterio.h" />
+    <ClInclude Include="LibDLVoiceCodec\base.h" />
+    <ClInclude Include="LibDLVoiceCodec\value.h" />
     <ClInclude Include="Modules\AvCodec\AvCodeResample.h" />
     <ClInclude Include="Modules\DataStruct\KDTree.hpp" />
     <ClInclude Include="Modules\InferTools\Cluster\MoeVSBaseCluster.hpp" />

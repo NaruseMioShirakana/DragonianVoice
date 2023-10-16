@@ -728,16 +728,10 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 		throw std::exception((std::string("Locate: Nsf\n") + e3.what()).c_str());
 	}
 
-	const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();
-	const auto dstWavLen = (int64_t)PCMData.size();
+	const auto dstWavLen = finaOut[0].GetTensorTypeAndShapeInfo().GetShape()[2];
 	std::vector<int16_t> TempVecWav(dstWavLen, 0);
-	if (shapeOut[2] < dstWavLen)
-		for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
-			TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.f);
-	else
-		for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
-			TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.f);
-	TempVecWav.resize(dstWavLen);
+	for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
+		TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
 	return TempVecWav;
 }
 

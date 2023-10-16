@@ -4,12 +4,10 @@ namespace MoeVSProjectSpace
 {
     MoeVSProject::MoeVSProject(const std::wstring& _path)
     {
-        FILE* project_file = nullptr;
-        _wfopen_s(&project_file, _path.c_str(), L"rb");
-        if (!project_file)
+        FileWrapper project_file(_path.c_str(), L"rb");
+        if (!project_file.IsOpen())
             throw std::exception("File Doesn't Exists");
         fseek(project_file, 0, SEEK_SET);
-
 
         if (fread(&moevs_proj_header_, 1, sizeof(Header), project_file) != sizeof(Header))
             throw std::exception("Unexpected EOF");
@@ -39,7 +37,7 @@ namespace MoeVSProjectSpace
                 throw std::exception("Unrecognized File");
 
 
-            //HiddenUnit
+            //Audio
             if (_datas.Header.OrgAudioOffsetPosSize != 0) {
                 _datas.Offset.OrgAudio = std::vector<size_type>(_datas.Header.OrgAudioOffsetPosSize);
                 _n_bytes = sizeof(size_type) * _datas.Header.OrgAudioOffsetPosSize;
@@ -150,7 +148,6 @@ namespace MoeVSProjectSpace
 
             data_.emplace_back(std::move(_datas));
         }
-        fclose(project_file);
     }
 
     MoeVSProject::MoeVSProject(const std::vector<MoeVSAudioSlice>& _params)
@@ -184,12 +181,14 @@ namespace MoeVSProjectSpace
             if (!i.Speaker.empty())
             {
                 for (const auto& Speaker : i.Speaker)
+                    if (Speaker.size() > _data.Header.NSpeaker)
+                        _data.Header.NSpeaker = Speaker.size();
+                for (auto& Speaker : i.Speaker)
                 {
                     size_t size__ = 0;
                     for (const auto& spkk : Speaker)
                         size__ += spkk.size();
                     _data.Offset.Speaker.push_back(size__);
-                    _data.Header.NSpeaker = Speaker.size();
                 }
                 _data.Header.CharacterOffsetPosSize = _data.Offset.Speaker.size();
             }

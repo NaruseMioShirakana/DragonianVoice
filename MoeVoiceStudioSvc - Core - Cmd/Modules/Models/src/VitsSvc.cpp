@@ -1032,15 +1032,10 @@ std::vector<int16_t> VitsSvc::InferPCMData(const std::vector<int16_t>& PCMData, 
 		soVitsOutput.data(),
 		soVitsOutput.size());
 
-	const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();
-	const auto dstWavLen = int64_t(PCMData.size());
+	const auto dstWavLen = finaOut[0].GetTensorTypeAndShapeInfo().GetShape()[2];
 	std::vector<int16_t> TempVecWav(dstWavLen, 0);
-	if (shapeOut[2] < dstWavLen)
-		for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
-			TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
-	else
-		for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
-			TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
+	for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
+		TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
 	return TempVecWav;
 }
 

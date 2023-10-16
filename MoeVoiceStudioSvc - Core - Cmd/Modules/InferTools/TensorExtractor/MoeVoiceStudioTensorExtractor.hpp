@@ -165,6 +165,9 @@ public:
 
 	//获取正确的角色混合数据
 	[[nodiscard]] std::vector<float> GetCurrectSpkMixData(const std::vector<std::vector<float>>& _input, size_t dst_len, int64_t curspk) const;
+
+	//获取正确的角色混合数据
+	[[nodiscard]] static std::vector<float> GetSpkMixData(const std::vector<std::vector<float>>& _input, size_t dst_len, size_t spk_count);
 protected:
 	uint64_t _NSpeaker = 1;
 	uint64_t _SrcSamplingRate = 32000;

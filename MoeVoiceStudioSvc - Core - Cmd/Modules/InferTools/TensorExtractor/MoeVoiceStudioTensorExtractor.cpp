@@ -66,6 +66,42 @@ std::vector<float> MoeVoiceStudioTensorExtractor::GetCurrectSpkMixData(const std
 	return mixData;
 }
 
+std::vector<float> MoeVoiceStudioTensorExtractor::GetSpkMixData(const std::vector<std::vector<float>>& _input, size_t dst_len, size_t spk_count)
+{
+	std::vector<float> mixData;
+	mixData.reserve(spk_count * dst_len);
+	if (_input.empty())
+	{
+		std::vector<float> LenData(spk_count, 0.0);
+		LenData[0] = 1.0;
+		for (size_t i = 0; i < dst_len; ++i)
+			mixData.insert(mixData.end(), LenData.begin(), LenData.end());
+	}
+	else
+	{
+		std::vector<std::vector<float>> _spkMap;
+		for (size_t i = 0; i < _input.size() && i < spk_count; ++i)
+			_spkMap.emplace_back(InferTools::InterpFunc(_input[i], long(_input[i].size()), long(dst_len)));
+		LinearCombination(_spkMap, 0);
+		const auto curnspk = _input.size();
+		if (curnspk < spk_count)
+		{
+			std::vector<float> LenData(spk_count - curnspk, 0.0);
+			for (size_t i = 0; i < dst_len; ++i)
+			{
+				for (size_t j = 0; j < curnspk; ++j)
+					mixData.emplace_back(_spkMap[j][i]);
+				mixData.insert(mixData.end(), LenData.begin(), LenData.end());
+			}
+		}
+		else
+			for (size_t i = 0; i < dst_len; ++i)
+				for (size_t j = 0; j < spk_count; ++j)
+					mixData.emplace_back(_spkMap[j][i]);
+	}
+	return mixData;
+}
+
 std::vector<int64_t> MoeVoiceStudioTensorExtractor::GetNSFF0(const std::vector<float>& F0) const
 {
 	const auto f0Len = F0.size();

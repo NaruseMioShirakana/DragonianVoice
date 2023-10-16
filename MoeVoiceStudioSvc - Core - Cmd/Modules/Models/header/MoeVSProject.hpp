@@ -25,6 +25,32 @@
 #include "../../StringPreprocess.hpp"
 namespace MoeVSProjectSpace
 {
+    class FileWrapper
+    {
+    public:
+        FileWrapper() = delete;
+        FileWrapper(const wchar_t* _path, const wchar_t* _mode)
+        {
+            _wfopen_s(&file_, _path, _mode);
+        }
+        ~FileWrapper()
+        {
+            if (file_)
+                fclose(file_);
+            file_ = nullptr;
+        }
+        operator FILE*() const
+    	{
+            return file_;
+        }
+        [[nodiscard]] bool IsOpen() const
+        {
+            return file_;
+        }
+    private:
+        FILE* file_ = nullptr;
+    };
+
     using size_type = size_t;
 
     template <typename T = float>
@@ -106,10 +132,12 @@ namespace MoeVSProjectSpace
 		std::wstring Sampler = L"Pndm"; //采样器
 		std::wstring F0Method = L"Dio";                    //F0提取算法
 		int64_t SpeakerId = 0;
-		int64_t HopSize = 320;
-		int64_t SpkCount = 2;
         uint64_t SrcSamplingRate = 48000;
         bool UseShallowDiffusion = false;
+        int64_t SpkCount = 2;
+        //RTInfer
+        int64_t RTSampleSize = 44100;
+        int64_t CrossFadeLength = 320;
 	};
 
     struct ParamsOffset
