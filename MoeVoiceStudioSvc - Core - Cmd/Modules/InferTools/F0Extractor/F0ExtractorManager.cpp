@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include "../../Logger/MoeSSLogger.hpp"
 
-MOEVSFOEXTRACTORHEADER
+MoeVoiceStudioF0ExtractorHeader
 std::map<std::wstring, GetF0ExtractorFn> RegisteredF0Extractors;
 
 F0Extractor GetF0Extractor(const std::wstring& _name,
@@ -38,4 +38,4 @@ std::vector<std::wstring> GetF0ExtractorList()
 	return F0ExtractorsVec;
 }
 
-MOEVSFOEXTRACTOREND
+MoeVoiceStudioF0ExtractorEnd

@@ -22,6 +22,7 @@
 #pragma once
 #include "Models/header/VitsSvc.hpp"
 #include "Models/header/DiffSvc.hpp"
+#include "Models/header/Vits.hpp"
 
 namespace MoeVSModuleManager
 {

@@ -83,13 +83,13 @@ public:
 
 	/**
 	 * \brief 输入路径推理
-	 * \param _Paths 路径，多个路径使用换行符隔开
+	 * \param _Datas [路径，多个路径使用换行符隔开, 推理文本]
 	 * \param _InferParams 推理参数
 	 * \param _SlicerSettings 切片机配置
 	 * \return 输出路径
 	 */
-	[[nodiscard]] virtual std::vector<std::wstring> Inference(std::wstring& _Paths,
-	                                                          const MoeVSProjectSpace::MoeVSSvcParams& _InferParams,
+	[[nodiscard]] virtual std::vector<std::wstring> Inference(std::wstring& _Datas,
+	                                                          const MoeVSProjectSpace::MoeVSParams& _InferParams,
 	                                                          const InferTools::SlicerSettings& _SlicerSettings) const;
 
 	/**

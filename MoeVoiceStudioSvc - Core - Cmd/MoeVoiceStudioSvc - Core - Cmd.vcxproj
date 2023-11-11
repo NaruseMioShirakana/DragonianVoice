@@ -112,6 +112,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -130,6 +131,7 @@
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -156,16 +158,19 @@
     <ClCompile Include="..\Lib\World\tools\audioio.cpp" />
     <ClCompile Include="..\Lib\World\tools\parameterio.cpp" />
     <ClCompile Include="LibDLVoiceCodec\base.cpp" />
+    <ClCompile Include="LibDLVoiceCodec\operator.cpp" />
     <ClCompile Include="LibDLVoiceCodec\value.cpp" />
     <ClCompile Include="Modules\DataStruct\KDTree.cpp" />
     <ClCompile Include="Modules\InferTools\Cluster\MoeVSBaseCluster.cpp" />
     <ClCompile Include="Modules\InferTools\Cluster\MoeVSClusterManager.cpp" />
+    <ClCompile Include="Modules\InferTools\Cluster\MoeVSIndexCluster.cpp" />
     <ClCompile Include="Modules\InferTools\Cluster\MoeVSKmeansCluster.cpp" />
     <ClCompile Include="Modules\InferTools\F0Extractor\BaseF0Extractor\BaseF0Extractor.cpp" />
     <ClCompile Include="Modules\InferTools\F0Extractor\DioF0Extractor\DioF0Extractor.cpp" />
     <ClCompile Include="Modules\InferTools\F0Extractor\F0ExtractorManager.cpp" />
     <ClCompile Include="Modules\InferTools\F0Extractor\HarvestF0Extractor\HarvestF0Extractor.cpp" />
     <ClCompile Include="Modules\InferTools\F0Extractor\NetF0Predictors\NetF0Predictors.cpp" />
+    <ClCompile Include="Modules\InferTools\G2P\MoeVSG2P.cpp" />
     <ClCompile Include="Modules\InferTools\inferTools.cpp" />
     <ClCompile Include="Modules\InferTools\Sampler\MoeVSBaseSampler.cpp" />
     <ClCompile Include="Modules\InferTools\Sampler\MoeVSSamplerManager.cpp" />
@@ -179,6 +184,8 @@
     <ClCompile Include="Modules\Models\src\ModelBase.cpp" />
     <ClCompile Include="Modules\Models\src\MoeVSProject.cpp" />
     <ClCompile Include="Modules\Models\src\SVC.cpp" />
+    <ClCompile Include="Modules\Models\src\TTS.cpp" />
+    <ClCompile Include="Modules\Models\src\Vits.cpp" />
     <ClCompile Include="Modules\Models\src\VitsSvc.cpp" />
     <ClCompile Include="Modules\Modules.cpp" />
     <ClCompile Include="MoeVoiceStudioSvc - Core - Cmd.cpp" />
@@ -202,17 +209,20 @@
     <ClInclude Include="..\Lib\World\tools\audioio.h" />
     <ClInclude Include="..\Lib\World\tools\parameterio.h" />
     <ClInclude Include="LibDLVoiceCodec\base.h" />
+    <ClInclude Include="LibDLVoiceCodec\operator.h" />
     <ClInclude Include="LibDLVoiceCodec\value.h" />
     <ClInclude Include="Modules\AvCodec\AvCodeResample.h" />
     <ClInclude Include="Modules\DataStruct\KDTree.hpp" />
     <ClInclude Include="Modules\InferTools\Cluster\MoeVSBaseCluster.hpp" />
     <ClInclude Include="Modules\InferTools\Cluster\MoeVSClusterManager.hpp" />
+    <ClInclude Include="Modules\InferTools\Cluster\MoeVSIndexCluster.hpp" />
     <ClInclude Include="Modules\InferTools\Cluster\MoeVSKmeansCluster.hpp" />
     <ClInclude Include="Modules\InferTools\F0Extractor\BaseF0Extractor\BaseF0Extractor.hpp" />
     <ClInclude Include="Modules\InferTools\F0Extractor\DioF0Extractor\DioF0Extractor.hpp" />
     <ClInclude Include="Modules\InferTools\F0Extractor\F0ExtractorManager.hpp" />
     <ClInclude Include="Modules\InferTools\F0Extractor\HarvestF0Extractor\HarvestF0Extractor.hpp" />
     <ClInclude Include="Modules\InferTools\F0Extractor\NetF0Predictors\NetF0Predictors.hpp" />
+    <ClInclude Include="Modules\InferTools\G2P\MoeVSG2P.hpp" />
     <ClInclude Include="Modules\InferTools\inferTools.hpp" />
     <ClInclude Include="Modules\InferTools\Sampler\MoeVSBaseSampler.hpp" />
     <ClInclude Include="Modules\InferTools\Sampler\MoeVSSamplerManager.hpp" />
@@ -226,6 +236,9 @@
     <ClInclude Include="Modules\Models\header\ModelBase.hpp" />
     <ClInclude Include="Modules\Models\header\MoeVSProject.hpp" />
     <ClInclude Include="Modules\Models\header\SVC.hpp" />
+    <ClInclude Include="Modules\Models\header\Tacotron.hpp" />
+    <ClInclude Include="Modules\Models\header\TTS.hpp" />
+    <ClInclude Include="Modules\Models\header\Vits.hpp" />
     <ClInclude Include="Modules\Models\header\VitsSvc.hpp" />
     <ClInclude Include="Modules\Modules.hpp" />
   </ItemGroup>

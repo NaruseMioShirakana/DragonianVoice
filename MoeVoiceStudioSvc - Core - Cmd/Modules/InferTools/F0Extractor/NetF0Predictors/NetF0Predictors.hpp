@@ -23,7 +23,7 @@
 #include "../BaseF0Extractor/BaseF0Extractor.hpp"
 #include <onnxruntime_cxx_api.h>
 
-MOEVSFOEXTRACTORHEADER
+MoeVoiceStudioF0ExtractorHeader
 
 class NetF0Class
 {
@@ -80,4 +80,4 @@ private:
 
 void EmptyCache();
 
-MOEVSFOEXTRACTOREND
+MoeVoiceStudioF0ExtractorEnd

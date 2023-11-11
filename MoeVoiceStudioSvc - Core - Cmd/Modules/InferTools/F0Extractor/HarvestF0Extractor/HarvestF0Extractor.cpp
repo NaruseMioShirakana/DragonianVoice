@@ -3,7 +3,7 @@
 #include "harvest.h"
 #include "stonemask.h"
 
-MOEVSFOEXTRACTORHEADER
+MoeVoiceStudioF0ExtractorHeader
 	HarvestF0Extractor::HarvestF0Extractor(int sampling_rate, int hop_size, int n_f0_bins, double max_f0, double min_f0):
 	BaseF0Extractor(sampling_rate, hop_size, n_f0_bins, max_f0, min_f0)
 {
@@ -58,4 +58,4 @@ void HarvestF0Extractor::compute_f0(const double* PCMData, size_t PCMLen)
     Harvest(PCMData, (int)PCMLen, int(fs), &Doption, temporal_positions.data(), raw_f0.data());
     StoneMask(PCMData, (int)PCMLen, int(fs), temporal_positions.data(), raw_f0.data(), (int)f0Length, refined_f0.data());
 }
-MOEVSFOEXTRACTOREND
+MoeVoiceStudioF0ExtractorEnd

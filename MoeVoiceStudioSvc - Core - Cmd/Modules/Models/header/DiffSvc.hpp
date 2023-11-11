@@ -20,6 +20,7 @@
 */
 
 #pragma once
+#include <map>
 #include "SVC.hpp"
 
 MoeVoiceStudioCoreHeader
@@ -30,6 +31,19 @@ public:
     DiffusionSvc(const MJson& _Config, const ProgressCallback& _ProgressCallback,
         ExecutionProviders ExecutionProvider_ = ExecutionProviders::CPU,
         unsigned DeviceID_ = 0, unsigned ThreadCount_ = 0);
+
+    /**
+     * \brief 加载DiffSvc模型
+     * \param _PathDict 路径，Key分别为["Hubert", "Hifigan", "Encoder", "DenoiseFn", "NoisePredictor", "AfterProcess", "DiffSvc", "Naive", "Alphas"]，其中"DiffSvc"、"Naive"、"Alphas"为可选项
+     * \param _Config 配置Json
+     * \param _ProgressCallback 进度条回调函数
+     * \param ExecutionProvider_ Provider
+     * \param DeviceID_ GPU设备ID
+     * \param ThreadCount_ 线程数
+     */
+    DiffusionSvc(const std::map<std::string,std::wstring>& _PathDict, const MJson& _Config, const ProgressCallback& _ProgressCallback,
+                 ExecutionProviders ExecutionProvider_ = ExecutionProviders::CPU,
+                 unsigned DeviceID_ = 0, unsigned ThreadCount_ = 0);
 
 	~DiffusionSvc() override;
 

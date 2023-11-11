@@ -23,10 +23,10 @@
 #include <cstdint>
 #include <vector>
 #include <string>
-#define MOEVSFOEXTRACTORHEADER namespace MoeVSF0Extractor{
-#define MOEVSFOEXTRACTOREND }
+#define MoeVoiceStudioF0ExtractorHeader namespace MoeVSF0Extractor{
+#define MoeVoiceStudioF0ExtractorEnd }
 
-MOEVSFOEXTRACTORHEADER
+MoeVoiceStudioF0ExtractorHeader
 #define __NAME__MOEVS(x) std::wstring ClassName = (x)
 class BaseF0Extractor
 {
@@ -82,4 +82,4 @@ protected:
 	double f0_mel_max;
 };
 #undef __NAME__MOEVS
-MOEVSFOEXTRACTOREND
+MoeVoiceStudioF0ExtractorEnd

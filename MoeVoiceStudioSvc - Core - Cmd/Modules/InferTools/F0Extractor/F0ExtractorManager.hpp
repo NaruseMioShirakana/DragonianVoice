@@ -23,7 +23,7 @@
 #include "BaseF0Extractor/BaseF0Extractor.hpp"
 #include <functional>
 
-MOEVSFOEXTRACTORHEADER
+MoeVoiceStudioF0ExtractorHeader
 
 class F0Extractor
 {
@@ -81,4 +81,4 @@ F0Extractor GetF0Extractor(const std::wstring& _name,
 
 std::vector<std::wstring> GetF0ExtractorList();
 
-MOEVSFOEXTRACTOREND
+MoeVoiceStudioF0ExtractorEnd

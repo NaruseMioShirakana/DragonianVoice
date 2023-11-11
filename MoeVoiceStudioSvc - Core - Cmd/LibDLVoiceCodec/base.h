@@ -3,6 +3,7 @@
 #include <string>
 #include <cassert>
 #include <iostream>
+#include <unordered_map>
 #define LibDLVoiceCodecBegin namespace libdlvcodec {
 #define LibDLVoiceCodecEnd }
 #define LIBDVCND [[nodiscard]]
@@ -23,6 +24,12 @@ using uint8 = uint8_t;
 using uint16 = uint16_t;
 using uint32 = uint32_t;
 using uint64 = uint64_t;
+
+class TensorView;
+class Tensor;
+
+const std::unordered_map<std::string, size_t> __Dtype {{"int8", 1}, { "int16", 2 }, { "int32", 4 }, { "int64", 8 },
+	{ "float8", 1 }, { "float16", 2 }, { "bfloat16", 2 }, { "float32", 4 }, { "float64", 8 }, { "bool", 1 } };
 
 template<typename T>
 class BaseAllocator
@@ -54,12 +61,16 @@ public:
 	{
 		data_ = allocator_.allocate(_Count * 2);
 		size_ = _Count;
+		this_ = data_ + _Count;
+		end_ = data_ + _Count * 2;
 	}
 
 	MResource(size_t _Count, Type _Value)
 	{
 		data_ = allocator_.allocate(_Count * 2);
 		size_ = _Count;
+		this_ = data_ + _Count;
+		end_ = data_ + _Count * 2;
 		auto _ptr = data_;
 		const auto _end = data_ + size_;
 		while (_ptr != _end)
@@ -73,12 +84,16 @@ public:
 	{
 		data_ = _Ptr;
 		size_ = _Size;
+		this_ = data_ + _Size;
+		end_ = data_ + _Size;
 	}
 
 	MResource(const MResource& _Left)
 	{
 		size_ = _Left.size_;
-		data_ = allocator_.allocate(_Left.size_);
+		data_ = allocator_.allocate(_Left.capacity());
+		this_ = data_ + size_;
+		end_ = data_ + _Left.capacity();
 		auto _ptr = data_, _ptrl = _Left.data_;
 		const auto _end = data_ + size_;
 		while (_ptr != _end)
@@ -93,6 +108,8 @@ public:
 	{
 		size_ = _Right.size_;
 		data_ = _Right.data_;
+		this_ = _Right.this_;
+		end_ = _Right.end_;
 		_Right.size_ = 0ull;
 		_Right.data_ = nullptr;
 	}
@@ -118,7 +135,7 @@ public:
 
 	LIBDVCND ptr_t end() const
 	{
-		return data_ + size_;
+		return this_;
 	}
 
 	ptr_t release()
@@ -134,12 +151,37 @@ public:
 		return *(data_ + _Index);
 	}
 
+	template<typename __Ty>
+	reference at(size_t _Index) const
+	{
+		assert(_Index * sizeof(__Ty) < size_);
+		return *((__Ty*)data_ + _Index);
+	}
+
+	reference at(size_t _Index) const
+	{
+		assert(_Index < size_);
+		return *(data_ + _Index);
+	}
+
+	LIBDVCND size_t size() const
+	{
+		return size_;
+	}
+
+	LIBDVCND size_t capacity() const
+	{
+		return end_ - data_;
+	}
+
 	MResource& operator=(const MResource& _Left)
 	{
 		if (&_Left == this)
 			return *this;
 		size_ = _Left.size_;
-		data_ = allocator_.allocate(_Left.size_);
+		data_ = allocator_.allocate(_Left.capacity());
+		this_ = data_ + size_;
+		end_ = data_ + _Left.capacity();
 		auto _ptr = data_, _ptrl = _Left.data_;
 		const auto _end = data_ + size_;
 		while (_ptr != _end)
@@ -155,12 +197,16 @@ public:
 	{
 		size_ = _Right.size_;
 		data_ = _Right.data_;
+		this_ = _Right.this_;
+		end_ = _Right.end_;
 		_Right.size_ = 0ull;
 		_Right.data_ = nullptr;
 		return *this;
 	}
 protected:
 	ptr_t data_ = nullptr;
+	ptr_t this_ = nullptr;
+	ptr_t end_ = nullptr;
 	size_t size_ = 0ull;
 	Allocator allocator_;
 };

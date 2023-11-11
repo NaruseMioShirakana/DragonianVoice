@@ -22,7 +22,7 @@
 #pragma once
 #include "../BaseF0Extractor/BaseF0Extractor.hpp"
 
-MOEVSFOEXTRACTORHEADER
+MoeVoiceStudioF0ExtractorHeader
 class HarvestF0Extractor : public BaseF0Extractor
 {
 public:
@@ -39,4 +39,4 @@ public:
 private:
 	std::vector<double> refined_f0;
 };
-MOEVSFOEXTRACTOREND
+MoeVoiceStudioF0ExtractorEnd

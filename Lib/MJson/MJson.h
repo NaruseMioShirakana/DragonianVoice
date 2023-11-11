@@ -130,7 +130,8 @@ public:
 	{
 		if (!IsArray() && !IsString())
 			return true;
-		const auto _max = yyjson_arr_size(_Ptr);
+		auto _max = yyjson_arr_size(_Ptr);
+		if (IsString()) _max = yyjson_get_len(_Ptr);
 		return !_max;
 	}
 	[[nodiscard]] size_t GetMemberCount() const
@@ -148,6 +149,10 @@ public:
 		}
 		return ret;
 	}
+	[[nodiscard]] bool HasMember(const std::string& _key) const
+	{
+		return yyjson_obj_get(_Ptr, _key.c_str());
+	}
 private:
 	yyjson_val* _Ptr = nullptr;
 };
@@ -159,6 +164,16 @@ public:
 	MJson(const char* _path)
 	{
 		_document = yyjson_read_file(_path, YYJSON_READ_NOFLAG, nullptr, nullptr);
+		if (!_document)
+			throw std::exception("Json Parse Error !");
+		root = yyjson_doc_get_root(_document);
+	}
+	MJson(const std::string& _data, bool _read_from_string)
+	{
+		if (_read_from_string)
+			_document = yyjson_read(_data.c_str(), _data.length(), YYJSON_READ_NOFLAG);
+		else
+			_document = yyjson_read_file(_data.c_str(), YYJSON_READ_NOFLAG, nullptr, nullptr);
 		if (!_document)
 			throw std::exception("Json Parse Error !");
 		root = yyjson_doc_get_root(_document);

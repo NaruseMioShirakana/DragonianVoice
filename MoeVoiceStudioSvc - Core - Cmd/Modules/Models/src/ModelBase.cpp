@@ -84,8 +84,8 @@ std::vector<std::wstring> MoeVoiceStudioModule::GetOpenFileNameMoeVS()
 #endif
 }
 
-std::vector<std::wstring> MoeVoiceStudioModule::Inference(std::wstring& _Paths,
-	const MoeVSProjectSpace::MoeVSSvcParams& _InferParams,
+std::vector<std::wstring> MoeVoiceStudioModule::Inference(std::wstring& _Datas,
+	const MoeVSProjectSpace::MoeVSParams& _InferParams,
 	const InferTools::SlicerSettings& _SlicerSettings) const
 {
 	MoeVSNotImplementedError;

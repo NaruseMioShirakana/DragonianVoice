@@ -97,6 +97,24 @@
     <Filter Include="头文件\LibDLVoiceCodec">
       <UniqueIdentifier>{9cdc3e22-5d4a-4a08-a1cd-57dd5c657e2c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\Modules\InferTools\G2P">
+      <UniqueIdentifier>{c016ee4a-744e-431d-8bad-ac18310fb098}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Modules\InferTools\G2P">
+      <UniqueIdentifier>{b5a33287-5ba2-45ae-9135-5a8e3da3d93f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Modules\Models\SVC">
+      <UniqueIdentifier>{3c32c0a2-b610-47d9-ab2b-ab37e9741903}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Modules\Models\TTS">
+      <UniqueIdentifier>{2971f642-2c62-4b10-ad90-8cb65bcc99a0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Modules\Models\TTS">
+      <UniqueIdentifier>{02644a09-1bb9-48df-9364-1ea5177de68b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Modules\Models\SVC">
+      <UniqueIdentifier>{e1a1babf-b512-4926-9870-160cf546636a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MoeVoiceStudioSvc - Core - Cmd.cpp">
@@ -146,18 +164,6 @@
     </ClCompile>
     <ClCompile Include="..\Lib\MJson\yyjson.c">
       <Filter>源文件\Lib\Json</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\Models\src\MoeVSProject.cpp">
-      <Filter>源文件\Modules\Models</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\Models\src\SVC.cpp">
-      <Filter>源文件\Modules\Models</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\Models\src\VitsSvc.cpp">
-      <Filter>源文件\Modules\Models</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\Models\src\DiffSvc.cpp">
-      <Filter>源文件\Modules\Models</Filter>
     </ClCompile>
     <ClCompile Include="Modules\Models\src\ModelBase.cpp">
       <Filter>源文件\Modules\Models</Filter>
@@ -222,6 +228,33 @@
     <ClCompile Include="LibDLVoiceCodec\value.cpp">
       <Filter>源文件\LibDLVoiceCodec</Filter>
     </ClCompile>
+    <ClCompile Include="LibDLVoiceCodec\operator.cpp">
+      <Filter>源文件\LibDLVoiceCodec</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\InferTools\Cluster\MoeVSIndexCluster.cpp">
+      <Filter>源文件\Modules\InferTools\Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\InferTools\G2P\MoeVSG2P.cpp">
+      <Filter>源文件\Modules\InferTools\G2P</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Models\src\SVC.cpp">
+      <Filter>源文件\Modules\Models\SVC</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Models\src\DiffSvc.cpp">
+      <Filter>源文件\Modules\Models\SVC</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Models\src\VitsSvc.cpp">
+      <Filter>源文件\Modules\Models\SVC</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Models\src\MoeVSProject.cpp">
+      <Filter>源文件\Modules\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Models\src\TTS.cpp">
+      <Filter>源文件\Modules\Models\TTS</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Models\src\Vits.cpp">
+      <Filter>源文件\Modules\Models\TTS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Lib\World\src\world\cheaptrick.h">
@@ -279,15 +312,6 @@
       <Filter>头文件\Lib\Json</Filter>
     </ClInclude>
     <ClInclude Include="Modules\Models\header\MoeVSProject.hpp">
-      <Filter>头文件\Modules\Models</Filter>
-    </ClInclude>
-    <ClInclude Include="Modules\Models\header\SVC.hpp">
-      <Filter>头文件\Modules\Models</Filter>
-    </ClInclude>
-    <ClInclude Include="Modules\Models\header\VitsSvc.hpp">
-      <Filter>头文件\Modules\Models</Filter>
-    </ClInclude>
-    <ClInclude Include="Modules\Models\header\DiffSvc.hpp">
       <Filter>头文件\Modules\Models</Filter>
     </ClInclude>
     <ClInclude Include="Modules\Models\header\ModelBase.hpp">
@@ -355,6 +379,33 @@
     </ClInclude>
     <ClInclude Include="LibDLVoiceCodec\value.h">
       <Filter>头文件\LibDLVoiceCodec</Filter>
+    </ClInclude>
+    <ClInclude Include="LibDLVoiceCodec\operator.h">
+      <Filter>头文件\LibDLVoiceCodec</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\InferTools\Cluster\MoeVSIndexCluster.hpp">
+      <Filter>头文件\Modules\InferTools\Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\InferTools\G2P\MoeVSG2P.hpp">
+      <Filter>头文件\Modules\InferTools\G2P</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Models\header\Tacotron.hpp">
+      <Filter>头文件\Modules\Models\TTS</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Models\header\TTS.hpp">
+      <Filter>头文件\Modules\Models\TTS</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Models\header\Vits.hpp">
+      <Filter>头文件\Modules\Models\TTS</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Models\header\DiffSvc.hpp">
+      <Filter>头文件\Modules\Models\SVC</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Models\header\SVC.hpp">
+      <Filter>头文件\Modules\Models\SVC</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Models\header\VitsSvc.hpp">
+      <Filter>头文件\Modules\Models\SVC</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

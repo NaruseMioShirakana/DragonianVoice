@@ -72,6 +72,13 @@ namespace MoeVSModuleManager
 #endif
 		MoeVSRegisterSampler(L"Pndm", PndmSampler);
 		MoeVSRegisterSampler(L"DDim", DDimSampler);
+		const auto BasicCleanerDir = GetCurrentFolder() + L"/G2P/BasicCleaner.dll";
+		if (_waccess(BasicCleanerDir.c_str(), 0) != -1)
+		{
+			const auto Cleaner = MoeVSG2P::GetDefCleaner();
+			Cleaner->loadG2p(BasicCleanerDir);
+			Cleaner->GetCleaner().LoadDict(GetCurrentFolder() + L"/G2P");
+		}
 	}
 
 	MoeVoiceStudioCore::SingingVoiceConversion* GetCurSvcModel()

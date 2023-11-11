@@ -118,27 +118,71 @@ namespace MoeVSProjectSpace
         {}
     };
 
-	struct MoeVSSvcParams
+	struct MoeVSParams
 	{
+        //通用
+        float NoiseScale = 0.3f;                           //噪声修正因子          0-10
+        int64_t Seed = 52468;                              //种子
+        int64_t SpeakerId = 0;                             //角色ID
+        uint64_t SrcSamplingRate = 48000;                  //源采样率
+        int64_t SpkCount = 2;                              //模型角色数
+
+        //SVC
 		float IndexRate = 0.f;                             //索引比               0-1
 		float ClusterRate = 0.f;                           //聚类比               0-1
-		float NoiseScale = 0.3f;                           //噪声规模             0-10
-		float DDSPNoiseScale = 0.8f;                        //DDSP噪声规模         0-10
-		int64_t Seed = 52468;                              //种子
+		float DDSPNoiseScale = 0.8f;                       //DDSP噪声修正因子      0-10
 		float Keys = 0.f;                                  //升降调               -64-64
 		size_t MeanWindowLength = 2;                       //均值滤波器窗口大小     1-20
 		size_t Pndm = 100;                                 //Diffusion加速倍数    2-200
 		size_t Step = 1000;                                //Diffusion总步数      200-1000
-		std::wstring Sampler = L"Pndm"; //采样器
+		std::wstring Sampler = L"Pndm";                    //Diffusion采样器
 		std::wstring F0Method = L"Dio";                    //F0提取算法
-		int64_t SpeakerId = 0;
-        uint64_t SrcSamplingRate = 48000;
-        bool UseShallowDiffusion = false;
-        int64_t SpkCount = 2;
-        //RTInfer
+        bool UseShallowDiffusion = false;                  //使用浅扩散
+
+        //SVCRTInfer
         int64_t RTSampleSize = 44100;
         int64_t CrossFadeLength = 320;
+
+        //TTS
+        std::vector<float> SpeakerMix;                     //角色混合比例
+        float LengthScale = 1.0f;                          //时长修正因子
+        float DurationPredictorNoiseScale = 0.3f;          //随机时长预测器噪声修正因子
+        float FactorDpSdp = 0.3f;                          //随机时长预测器与时长预测器混合比例
+        float GateThreshold = 0.66666f;                    //Tacotron2解码器EOS阈值
+        int64_t MaxDecodeStep = 2000;                      //Tacotron2最大解码步数
+        std::vector<std::wstring> EmotionPrompt;           //情感标记
+        std::wstring PlaceHolderSymbol = L"|";             //音素分隔符
+        float RestTime = 0.5f;                             //停顿时间，为负数则直接断开音频并创建新音频
+        int64_t Language = 0;                              //语言序列
+        std::wstring AdditionalInfo;                       //G2P额外信息
 	};
+
+	struct MoeVSTTSSeq
+	{
+        std::wstring SeqStr;
+        std::vector<std::wstring> Seq;                     //音素序列
+        std::vector<int64_t> Tones;                        //音调序列
+        std::vector<int64_t> Durations;                    //时长序列
+        std::vector<int64_t> Language;                     //语言序列
+        std::vector<float> SpeakerMix;                     //角色混合比例
+
+        std::vector<std::wstring> EmotionPrompt;           //情感标记
+        std::wstring PlaceHolderSymbol = L"|";             //音素分隔符
+        float NoiseScale = 0.3f;                           //噪声修正因子             0-10
+        float LengthScale = 1.0f;                          //时长修正因子
+        float DurationPredictorNoiseScale = 0.3f;          //随机时长预测器噪声修正因子
+        float FactorDpSdp = 0.3f;                          //随机时长预测器与时长预测器混合比例
+        float GateThreshold = 0.66666f;                    //Tacotron2解码器EOS阈值
+        int64_t MaxDecodeStep = 2000;                      //Tacotron2最大解码步数
+        int64_t Seed = 52468;                              //种子
+        int64_t SpeakerId = 0;                             //角色ID
+        float RestTime = 0.5f;                             //停顿时间，为负数则直接断开音频并创建新音频
+        int64_t TotLang = 0;
+        std::wstring AdditionalInfo;                       //G2P额外信息
+	};
+
+    using MoeVSSvcParams = MoeVSParams;
+    using MoeVSTTSParams = MoeVSParams;
 
     struct ParamsOffset
     {

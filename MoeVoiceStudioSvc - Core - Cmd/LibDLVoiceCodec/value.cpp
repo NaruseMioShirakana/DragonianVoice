@@ -1,7 +1,6 @@
 #include "value.h"
 
 LibDLVoiceCodecBegin
-
 Value& Value::load(const std::wstring& _Path)
 {
 	FileWrapper file;
@@ -86,7 +85,7 @@ void Value::saveData(FileWrapper& _File)
 	LibDLVoiceCodecThrow("Not implemented error!");
 }
 
-void Tensor::loadData(WeightDict& _Dict)
+void TensorData::loadData(WeightDict& _Dict)
 {
 	const auto res = _Dict.find(RegName_);
 	if (res != _Dict.end())
@@ -95,15 +94,101 @@ void Tensor::loadData(WeightDict& _Dict)
 		size_t TotalSize = 1;
 		for (const auto i : Shape_)
 			TotalSize *= i;
-		if (TotalSize * sizeof(DType) != res->second.Size)
+		if (TotalSize * __Dtype.at(Type_) != res->second.Size)
 			LibDLVoiceCodecThrow("Expected size does not match actual size!");
 		Data_ = std::move(res->second.Data);
+		DataPtr_ = Data_.data();
 	}
 }
 
-void Tensor::saveData(FileWrapper& _File)
+void TensorData::saveData(FileWrapper& _File)
 {
 
+}
+
+TensorView TensorData::operator[](int64_t index) const
+{
+	if (index < 0)
+	{
+		if (index < -Shape_[0])
+			LibDLVoiceCodecThrow("Index Out Of Range");
+		index += Shape_[0];
+		std::vector<int64> NewShape{Shape_.begin() + 1, Shape_.end()};
+		if (NewShape.empty())
+			NewShape.emplace_back(1);
+		return { std::move(NewShape)  ,DataPtr_ + index * (step() * __Dtype.at(Type_)) };
+	}
+	if (index > Shape_[0])
+		LibDLVoiceCodecThrow("Index Out Of Range");
+	std::vector<int64> NewShape{Shape_.begin() + 1, Shape_.end()};
+	if (NewShape.empty())
+		NewShape.emplace_back(1);
+	return { std::move(NewShape)  ,DataPtr_ + index * (step() * __Dtype.at(Type_)) };
+}
+
+template <typename _TypeName>
+TensorData& TensorData::operator=(const _TypeName& _Val)
+{
+	assert(sizeof(_TypeName) == __Dtype.at(Type_));
+	if(Type_ == "int8")
+	{
+		auto it = begin<int8>();
+		const auto en = end<int8>();
+		while (it != en)
+			*(it++) = (int8)_Val;
+	}
+	else if(Type_ == "int16")
+	{
+		auto it = begin<int16>();
+		const auto en = end<int16>();
+		while (it != en)
+			*(it++) = (int16)_Val;
+	}
+	else if (Type_ == "int32")
+	{
+		auto it = begin<int32>();
+		const auto en = end<int32>();
+		while (it != en)
+			*(it++) = (int32)_Val;
+	}
+	else if (Type_ == "int64")
+	{
+		auto it = begin<int64>();
+		const auto en = end<int64>();
+		while (it != en)
+			*(it++) = (int64)_Val;
+	}
+	else if (Type_ == "float8")
+	{
+	}
+	else if (Type_ == "float16")
+	{
+	}
+	else if (Type_ == "bfloat16")
+	{
+	}
+	else if (Type_ == "float32")
+	{
+		auto it = begin<float32>();
+		const auto en = end<float32>();
+		while (it != en)
+			*(it++) = (float32)_Val;
+	}
+	else if (Type_ == "float64")
+	{
+		auto it = begin<float64>();
+		const auto en = end<float64>();
+		while (it != en)
+			*(it++) = (float64)_Val;
+	}
+	else
+	{
+		auto it = begin<bool>();
+		const auto en = end<bool>();
+		while (it != en)
+			*(it++) = (bool)_Val;
+	}
+	return *this;
 }
 
 void Module::loadData(WeightDict& _Dict)
@@ -122,4 +207,127 @@ void Module::saveData(FileWrapper& _File)
 	}
 }
 
+Tensor::Tensor(const std::initializer_list<int64_t>& _Shape, const std::string& _Dtype, const std::string& _Name, bool _TensorLayer)
+{
+	if (__Dtype.find(_Dtype) == __Dtype.end())
+		LibDLVoiceCodecThrow("DType Not Recognized");
+	Shape_ = _Shape;
+	size_t TotalSize = 1;
+	for (const auto i : Shape_)
+		TotalSize *= i;
+	Data_ = MResource<byte>(__Dtype.at(_Dtype) * TotalSize);
+	RegName_ = _Name;
+	TensorLayer_ = _TensorLayer;
+	DataPtr_ = Data_.data();
+	Type_ = _Dtype;
+}
+
+Tensor::Tensor(const std::vector<int64_t>& _Shape, const std::string& _Dtype, const std::string& _Name, bool _TensorLayer)
+{
+	if (__Dtype.find(_Dtype) == __Dtype.end())
+		LibDLVoiceCodecThrow("DType Not Recognized");
+	Shape_ = _Shape;
+	size_t TotalSize = 1;
+	for (const auto i : Shape_)
+		TotalSize *= i;
+	Data_ = MResource<byte>(__Dtype.at(_Dtype) * TotalSize);
+	RegName_ = _Name;
+	TensorLayer_ = _TensorLayer;
+	DataPtr_ = Data_.data();
+	Type_ = _Dtype;
+}
+
+Tensor::Tensor(const Tensor& _Left)
+{
+	Shape_ = _Left.Shape_;
+	size_t TotalSize = 1;
+	for (const auto i : Shape_)
+		TotalSize *= i;
+	Data_ = MResource<byte>(__Dtype.at(_Left.Type_) * TotalSize);
+	RegName_ = _Left.RegName_;
+	TensorLayer_ = _Left.TensorLayer_;
+	DataPtr_ = Data_.data();
+	Type_ = _Left.Type_;
+}
+
+Tensor::Tensor(Tensor&& _Right) noexcept
+{
+	Shape_ = _Right.Shape_;
+	Data_ = std::move(_Right.Data_);
+	DataPtr_ = Data_.data();
+	TensorLayer_ = _Right.TensorLayer_;
+	Type_ = _Right.Type_;
+	RegName_ = _Right.RegName_;
+}
+
+Tensor& Tensor::operator=(const Tensor& _Left)
+{
+	if (&_Left == this)
+		return *this;
+	Shape_ = _Left.Shape_;
+	size_t TotalSize = 1;
+	for (const auto i : Shape_)
+		TotalSize *= i;
+	Data_ = MResource<byte>(__Dtype.at(_Left.Type_) * TotalSize);
+	RegName_ = _Left.RegName_;
+	TensorLayer_ = _Left.TensorLayer_;
+	DataPtr_ = Data_.data();
+	Type_ = _Left.Type_;
+	return *this;
+}
+
+Tensor& Tensor::operator=(Tensor&& _Right) noexcept
+{
+	Shape_ = _Right.Shape_;
+	Data_ = std::move(_Right.Data_);
+	DataPtr_ = Data_.data();
+	TensorLayer_ = _Right.TensorLayer_;
+	Type_ = _Right.Type_;
+	RegName_ = _Right.RegName_;
+	return *this;
+}
+
+Tensor Tensor::zeros(const std::initializer_list<int64_t>& _Shape, const std::string& _Dtype, const std::string& _Name, bool _TensorLayer)
+{
+	Tensor Output{ _Shape ,_Dtype, _Name, _TensorLayer };
+	memset(Output.Data_.data(), 0, Output.Data_.size());
+	return Output;
+}
+
+Tensor Tensor::zeros_like(const Tensor& _O, bool _TensorLayer)
+{
+	Tensor Output{ _O.shape() ,_O.dtype(), _O.RegName_, _TensorLayer };
+	memset(Output.Data_.data(), 0, Output.Data_.size());
+	return Output;
+}
+
+Tensor Tensor::ones(const std::initializer_list<int64_t>& _Shape, const std::string& _Dtype, const std::string& _Name, bool _TensorLayer)
+{
+	return {};
+}
+
+Tensor Tensor::ones_like(const Tensor& _O, bool _TensorLayer)
+{
+	return {};
+}
+
+Tensor Tensor::rand(const std::initializer_list<int64_t>& _Shape, int _Seed, const std::string& _Dtype, const std::string& _Name, bool _TensorLayer)
+{
+	return {};
+}
+
+Tensor Tensor::rand_like(const Tensor& _O, int _Seed, bool _TensorLayer)
+{
+	return {};
+}
+
+Tensor Tensor::randn(const std::initializer_list<int64_t>& _Shape, int _Seed, const std::string& _Dtype, const std::string& _Name, bool _TensorLayer)
+{
+	return {};
+}
+
+Tensor Tensor::randn_like(const Tensor& _O, int _Seed, bool _TensorLayer)
+{
+	return {};
+}
 LibDLVoiceCodecEnd

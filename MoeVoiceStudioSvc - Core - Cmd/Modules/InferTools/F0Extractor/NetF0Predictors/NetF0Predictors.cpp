@@ -10,7 +10,7 @@
 #error
 #endif
 
-MOEVSFOEXTRACTORHEADER
+MoeVoiceStudioF0ExtractorHeader
 
 NetF0Class::NetF0Class()
 #ifdef INITF0NETPREDICTOR
@@ -324,4 +324,4 @@ void EmptyCache()
 	MELPECORE.Destory();
 }
 
-MOEVSFOEXTRACTOREND
+MoeVoiceStudioF0ExtractorEnd
