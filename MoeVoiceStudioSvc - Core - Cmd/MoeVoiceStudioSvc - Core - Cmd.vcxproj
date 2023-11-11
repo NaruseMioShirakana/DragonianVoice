@@ -242,6 +242,10 @@
     <ClInclude Include="Modules\Models\header\VitsSvc.hpp" />
     <ClInclude Include="Modules\Modules.hpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md" />
+    <None Include="..\README_en.md" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

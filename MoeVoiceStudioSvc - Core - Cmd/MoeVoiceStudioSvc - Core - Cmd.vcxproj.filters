@@ -408,4 +408,12 @@
       <Filter>头文件\Modules\Models\SVC</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="..\README_en.md">
+      <Filter>资源文件</Filter>
+    </None>
+  </ItemGroup>
 </Project>

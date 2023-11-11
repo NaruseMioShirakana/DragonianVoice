@@ -7,7 +7,7 @@
 
 </div>
 
-> 注意：支持TTS和SVS的分支：[MoeVoiceStudio](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudio) [MoeVoiceStudioCore](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudioCore)
+> 注意：支持SVS的分支：[MoeVoiceStudio](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudio) [MoeVoiceStudioCore](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudioCore)
 
 > 关于Cuda支持的相关问题可以前往[OnnxRuntime官方仓库](https://github.com/microsoft/onnxruntime/releases)查看
 
@@ -450,6 +450,161 @@ Vec模型和Hubert模型放在Hubert文件夹下，Hifigan模型放在Hifigan文
 //Hifigan：Hifigan模型名，必须填且必须将在前置模型中下载到的singer_nsf_hifigan放置到hifigan文件夹
 //Characters：如果是多角色模型必须填写为你的角色名称组成的列表，如果是单角色模型可以不填
 //MelBins：模型的MelBins，不知道MelBins是啥的建议多看几个视频了解了解梅尔基础知识，这一项在SoVits中必须填。（数值必须为你训练时的数值，可以在你训练模型时候的配置文件里看到）
+```
+
+</details>
+<details><summary>BertVits:</summary>
+    
+```jsonc
+{
+    "Folder": "HimenoSena",
+    "Name": "HimenoSena",
+    "Type": "BertVits",
+    "Symbol": [
+        "_",
+        "AA",
+        "E",
+        "EE",
+        "En",
+        "N",
+        "OO",
+        "V",
+        "a",
+        "a:",
+        "aa",
+        "ae",
+        "ah",
+        "ai",
+        "an",
+        "ang",
+        "ao",
+        "aw",
+        "ay",
+        "b",
+        "by",
+        "c",
+        "ch",
+        "d",
+        "dh",
+        "dy",
+        "e",
+        "e:",
+        "eh",
+        "ei",
+        "en",
+        "eng",
+        "er",
+        "ey",
+        "f",
+        "g",
+        "gy",
+        "h",
+        "hh",
+        "hy",
+        "i",
+        "i0",
+        "i:",
+        "ia",
+        "ian",
+        "iang",
+        "iao",
+        "ie",
+        "ih",
+        "in",
+        "ing",
+        "iong",
+        "ir",
+        "iu",
+        "iy",
+        "j",
+        "jh",
+        "k",
+        "ky",
+        "l",
+        "m",
+        "my",
+        "n",
+        "ng",
+        "ny",
+        "o",
+        "o:",
+        "ong",
+        "ou",
+        "ow",
+        "oy",
+        "p",
+        "py",
+        "q",
+        "r",
+        "ry",
+        "s",
+        "sh",
+        "t",
+        "th",
+        "ts",
+        "ty",
+        "u",
+        "u:",
+        "ua",
+        "uai",
+        "uan",
+        "uang",
+        "uh",
+        "ui",
+        "un",
+        "uo",
+        "uw",
+        "v",
+        "van",
+        "ve",
+        "vn",
+        "w",
+        "x",
+        "y",
+        "z",
+        "zh",
+        "zy",
+        "!",
+        "?",
+        "\u2026",
+        ",",
+        ".",
+        "'",
+        "-",
+        "SP",
+        "UNK"
+    ],
+    "Cleaner": "",
+    "Rate": 44100,
+    "CharaMix": true,
+    "Characters": [
+        "\u56fd\u89c1\u83dc\u5b50",
+        "\u59ec\u91ce\u661f\u594f",
+        "\u65b0\u5802\u5f69\u97f3",
+        "\u56db\u6761\u51db\u9999",
+        "\u5c0f\u97a0\u7531\u4f9d"
+    ],
+    "LanguageMap": {
+        "ZH": [
+            0,
+            0
+        ],
+        "JP": [
+            1,
+            6
+        ],
+        "EN": [
+            2,
+            8
+        ]
+    },
+    "Dict": "BasicDict",
+    "BertPath": [
+        "chinese-roberta-wwm-ext-large",
+        "deberta-v2-large-japanese",
+        "bert-base-japanese-v3"
+    ]
+}
 ```
     
 </details>
