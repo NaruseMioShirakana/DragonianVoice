@@ -680,6 +680,11 @@ git clone https://github.com/NaruseMioShirakana/MoeVoiceStudio.git
 - [FFmpeg](https://ffmpeg.org/)
 - [World](https://github.com/JeremyCCHsu/Python-Wrapper-for-World-Vocoder)
 - [rapidJson](https://github.com/Tencent/rapidjson)
+- [mecab](https://github.com/taku910/mecab)
+- [yyjson](https://github.com/ibireme/yyjson)
+- [onnxruntime](https://github.com/microsoft/onnxruntime)
+- [faiss](https://github.com/facebookresearch/faiss)
+- [中文词典](https://www.zdic.net/)
 
 ## 📚 相关法规
 
@@ -717,3 +722,4 @@ MoeSS使用的图像素材来源于：
 <a href="https://github.com/NaruseMioShirakana/MoeSS/graphs/contributors" target="_blank">
   <img src="https://contrib.rocks/image?repo=NaruseMioShirakana/MoeSS" />
 </a>
+
