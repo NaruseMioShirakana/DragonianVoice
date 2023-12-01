@@ -260,4 +260,36 @@ namespace MoeVSProjectSpace
         }
         fclose(project_file);
     }
+
+    std::wstring MoeVSTTSSeq::Serialization() const
+    {
+        std::wstring rtn = L"\t{\n";
+        if (SeqStr.empty())
+            return L"";
+        rtn += L"\t\t\"Tokens\": \"" + SeqStr + L"\",\n";
+        rtn += L"\t\t\"Seq\": " + wstring_vector_to_string(Seq) + L",\n";
+        rtn += L"\t\t\"Tones\": " + vector_to_string(Tones) + L",\n";
+        rtn += L"\t\t\"Durations\": " + vector_to_string(Durations) + L",\n";
+        rtn += L"\t\t\"Language\": " + (LangstrSeq.empty() ? vector_to_string(Language) : string_vector_to_string(LangstrSeq)) + L",\n";
+        rtn += L"\t\t\"SpeakerMix\": " + vector_to_string(SpeakerMix) + L",\n";
+        rtn += L"\t\t\"EmotionPrompt\": " + wstring_vector_to_string(EmotionPrompt) + L",\n";
+        rtn += L"\t\t\"NoiseScale\": " + std::to_wstring(NoiseScale) + L",\n";
+        rtn += L"\t\t\"LengthScale\": " + std::to_wstring(LengthScale) + L",\n";
+        rtn += L"\t\t\"DurationPredictorNoiseScale\": " + std::to_wstring(DurationPredictorNoiseScale) + L",\n";
+        rtn += L"\t\t\"FactorDpSdp\": " + std::to_wstring(FactorDpSdp) + L",\n";
+        rtn += L"\t\t\"GateThreshold\": " + std::to_wstring(GateThreshold) + L",\n";
+        rtn += L"\t\t\"MaxDecodeStep\": " + std::to_wstring(MaxDecodeStep) + L",\n";
+        rtn += L"\t\t\"Seed\": " + std::to_wstring(Seed) + L",\n";
+        rtn += L"\t\t\"SpeakerId\": " + std::to_wstring(SpeakerId) + L",\n";
+        rtn += L"\t\t\"RestTime\": " + std::to_wstring(RestTime) + L",\n";
+        rtn += L"\t\t\"PlaceHolderSymbol\": \"" + PlaceHolderSymbol + L"\",\n";
+        rtn += L"\t\t\"LanguageID\": \"" + to_wide_string(Langstr) + L"\",\n";
+        rtn += L"\t\t\"G2PAdditionalInfo\": \"" + AdditionalInfo + L"\"\n\t}";
+        return rtn;
+    }
+
+    bool MoeVSTTSSeq::operator==(const MoeVSTTSSeq& right) const
+    {
+        return Serialization() == right.Serialization();
+    }
 }

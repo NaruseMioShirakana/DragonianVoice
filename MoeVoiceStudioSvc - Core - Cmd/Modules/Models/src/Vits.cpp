@@ -1,7 +1,14 @@
-#include "../header/Vits.hpp"
+﻿#include "../header/Vits.hpp"
 #include <random>
 
 MoeVoiceStudioCoreHeader
+
+bool BertEnabled = false;
+
+void SetBertEnabled(bool cond)
+{
+	BertEnabled = cond;
+}
 
 Vits::~Vits()
 {
@@ -86,9 +93,10 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 	}
 
 	Cleaner = MoeVSG2P::GetDefCleaner();
-	if (_PathDict.find("Dict") != _PathDict.end())
-		if (_waccess(_PathDict.at("Dict").c_str(), 0) != -1)
-			Cleaner->loadDict(_PathDict.at("Dict"));
+	if (_PathDict.find("Dict") != _PathDict.end() && (_waccess(_PathDict.at("Dict").c_str(), 0) != -1))
+		Cleaner->loadDict(_PathDict.at("Dict"));
+	else
+		Cleaner->loadDict(L"");
 
 	if (_Config.HasMember("LanguageMap") && !_Config["LanguageMap"].IsNull())
 		for (const auto& CMember : _Config["LanguageMap"].GetMemberArray())
@@ -100,7 +108,7 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 		EncoderInputNames.emplace_back("x_lengths");
 	if (UseTone)
 		EncoderInputNames.emplace_back("t");
-	if(Emotion)
+	if (Emotion)
 		EncoderInputNames.emplace_back("emotion");
 	if (UseLanguage)
 		EncoderInputNames.emplace_back("language");
@@ -206,9 +214,9 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 		}
 		for(const auto& Path : _BertPaths)
 		{
+			Ort::Session* SessionBert = nullptr;
 			if (_waccess(Path.c_str(), 0) != -1)
 			{
-				Ort::Session* SessionBert = nullptr;
 				try
 				{
 					SessionBert = new Ort::Session(*env, (Path + L"/model.onnx").c_str(), *session_options);
@@ -219,7 +227,6 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 					delete SessionBert;
 					SessionBert = nullptr;
 				}
-				sessionBert.emplace_back(SessionBert);
 				if (_waccess((Path + L"/Tokenizer.json").c_str(), 0) != -1)
 				{
 					Tokenizers.emplace_back(Path + L"/Tokenizer.json");
@@ -228,6 +235,7 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 				else if (SessionBert)
 					throw std::exception("Bert Must Have a Tokenizer");
 			}
+			sessionBert.emplace_back(SessionBert);
 		}
 	}
 
@@ -330,7 +338,7 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 			if (Symbols.find(it) != Symbols.end())
 				TextSeq.push_back(Symbols.at(it));
 			else
-				TextSeq.push_back(int64_t(size_t(IntRandFn(gen)) % Symbols.size()));
+				TextSeq.push_back(0);
 		}
 		if (AddBlank)
 			TextSeq.push_back(0);
@@ -369,14 +377,17 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 		std::vector LanguageIn(TextSeq.size(), Seq.TotLang);
 		if(UseLanguage)
 		{
-			if (LanguageIn.size() == Seq.Tones.size())
-				LanguageIn = Seq.Tones;
-			else if (AddBlank && LanguageIn.size() == Seq.Tones.size() * 2 + 1)
+			if (LanguageIn.size() == Seq.Language.size())
+				LanguageIn = Seq.Language;
+			else if (AddBlank && LanguageIn.size() == Seq.Language.size() * 2 + 1)
 				for (size_t i = 1; i < LanguageIn.size(); i += 2)
-					LanguageIn[i] = Seq.Tones[i / 2];
-			else if (LanguageIn.size() * 2 + 1 == Seq.Tones.size())
-				for (size_t i = 1; i < Seq.Tones.size(); i += 2)
-					LanguageIn[i / 2] = Seq.Tones[i];
+				{
+					LanguageIn[i] = Seq.Language[i / 2];
+					LanguageIn[i - 1] = Seq.Language[i / 2];
+				}
+			else if (LanguageIn.size() * 2 + 1 == Seq.Language.size())
+				for (size_t i = 1; i < Seq.Language.size(); i += 2)
+					LanguageIn[i / 2] = Seq.Language[i];
 			EncoderInputs.push_back(Ort::Value::CreateTensor(
 				*memory_info, LanguageIn.data(), TextSeqLength[0], TextSeqShape, 2));
 		}
@@ -387,8 +398,8 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 			for (size_t IndexOfBert = 0; IndexOfBert < sessionBert.size(); ++IndexOfBert)
 			{
 				auto& BertData = BertVecs[IndexOfBert];
-				if (sessionBert[IndexOfBert] && (IndexOfBert == size_t(Seq.TotLang) ||
-					(IndexOfBert != size_t(Seq.TotLang) && sessionBert.size() == 1)))
+				if ((sessionBert[IndexOfBert] && (IndexOfBert == size_t(Seq.TotLang) ||
+					(IndexOfBert != size_t(Seq.TotLang) && sessionBert.size() == 1))) && BertEnabled)
 				{
 					auto input_ids = Tokenizers[IndexOfBert](TextNormalize(Seq.SeqStr, Seq.TotLang));
 					std::vector<int64_t> attention_mask(input_ids.size(), 1), token_type_ids(input_ids.size(), 0);
@@ -396,24 +407,36 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 					std::vector<Ort::Value> AttentionInput, AttentionOutput;
 					AttentionInput.emplace_back(Ort::Value::CreateTensor(
 						*memory_info, input_ids.data(), input_ids.size(), AttentionShape, 2));
-					AttentionInput.emplace_back(Ort::Value::CreateTensor(
-						*memory_info, attention_mask.data(), attention_mask.size(), AttentionShape, 2));
+					if (sessionBert[IndexOfBert]->GetInputCount() == 3)
+						AttentionInput.emplace_back(Ort::Value::CreateTensor(*memory_info, attention_mask.data(), attention_mask.size(), AttentionShape, 2));
 					AttentionInput.emplace_back(Ort::Value::CreateTensor(
 						*memory_info, token_type_ids.data(), token_type_ids.size(), AttentionShape, 2));
 					try
 					{
-						AttentionOutput = sessionBert[IndexOfBert]->Run(Ort::RunOptions{ nullptr },
-							BertInputNames.data(),
-							AttentionInput.data(),
-							3,
-							BertOutputNames.data(),
-							1);
+						if(sessionBert[IndexOfBert]->GetInputCount() == 3)
+						{
+							AttentionOutput = sessionBert[IndexOfBert]->Run(Ort::RunOptions{ nullptr },
+							   BertInputNames.data(),
+							   AttentionInput.data(),
+							   3,
+							   BertOutputNames.data(),
+							   1);
+						}
+						else
+						{
+							AttentionOutput = sessionBert[IndexOfBert]->Run(Ort::RunOptions{ nullptr },
+								BertInputNames2.data(),
+								AttentionInput.data(),
+								2,
+								BertOutputNames.data(),
+								1);
+						}
 					}
 					catch (Ort::Exception& e)
 					{
 						throw std::exception((std::string("Locate: Bert\n") + e.what()).c_str());
 					}
-					const auto AligmentMartix = GetAligments(BertShape[0], AttentionOutput[0].GetTensorTypeAndShapeInfo().GetShape()[0]);
+					const auto AligmentMartix = AligPhoneAttn(Seq.Langstr, Seq.Seq, AttentionOutput[0].GetTensorTypeAndShapeInfo().GetShape()[0]);
 					const auto AttnData = AttentionOutput[0].GetTensorData<float>();
 					for (int64_t IndexOfSrcVector = 0; IndexOfSrcVector < TextSeqLength[0]; ++IndexOfSrcVector)
 						memcpy(BertData.data() + IndexOfSrcVector * 1024, AttnData + AligmentMartix[IndexOfSrcVector] * 1024, 1024 * sizeof(float));

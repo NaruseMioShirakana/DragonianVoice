@@ -1,6 +1,6 @@
-/**
+ï»¿/**
  * FileName: TTS.hpp
- * Note: MoeVoiceStudioCore TTS»ùÀà
+ * Note: MoeVoiceStudioCore TTSåŸºç±»
  *
  * Copyright (C) 2022-2023 NaruseMioShirakana (shirakanamio@foxmail.com)
  *
@@ -90,12 +90,19 @@ public:
 
 	[[nodiscard]] std::vector<MoeVSProjectSpace::MoeVSTTSSeq> GetInputSeqs(const MJson& _Input, const MoeVSProjectSpace::MoeVSParams& _InitParams) const;
 
+	std::vector<MoeVSProjectSpace::MoeVSTTSSeq>& SpecializeInputSeqs(std::vector<MoeVSProjectSpace::MoeVSTTSSeq>& _Seq);
+
+	[[nodiscard]] static std::vector<MoeVSProjectSpace::MoeVSTTSSeq> GetInputSeqsStatic(const MJson& _Input, const MoeVSProjectSpace::MoeVSParams& _InitParams);
+
 	static std::vector<std::vector<bool>> generatePath(float* duration, size_t durationSize, size_t maskSize);
 
 	[[nodiscard]] std::vector<float> GetEmotionVector(const std::vector<std::wstring>& src) const;
 
 	[[nodiscard]] std::vector<std::vector<int16_t>> Inference(const std::wstring& _Seq,
 		const MoeVSProjectSpace::MoeVSParams& _InferParams = MoeVSProjectSpace::MoeVSParams()) const;
+
+	[[nodiscard]] std::vector<std::wstring> Inference(const std::wstring& _Seq,
+		const MoeVSProjectSpace::MoeVSParams& _InferParams, bool T) const;
 
 	[[nodiscard]] std::vector<std::vector<int16_t>> Inference(const MJson& _Inputs,
 		const MoeVSProjectSpace::MoeVSParams& _InferParams = MoeVSProjectSpace::MoeVSParams()) const;
@@ -121,6 +128,8 @@ public:
 			return Iter->second;
 		return 0;
 	}
+
+	[[nodiscard]] std::vector<size_t> AligPhoneAttn(const std::string& LanguageStr, const std::vector<std::wstring>& PhoneSeq, size_t BertSize) const;
 
 	static int64_t find_max_idx(const std::vector<float>& inp)
 	{

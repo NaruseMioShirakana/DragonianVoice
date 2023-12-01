@@ -1,6 +1,6 @@
-/**
+ï»¿/**
  * FileName: Vits.hpp
- * Note: MoeVoiceStudioCore VitsÄ£ÐÍÀà
+ * Note: MoeVoiceStudioCore Vitsæ¨¡åž‹ç±»
  *
  * Copyright (C) 2022-2023 NaruseMioShirakana (shirakanamio@foxmail.com)
  *
@@ -23,6 +23,8 @@
 #include "TTS.hpp"
 
 MoeVoiceStudioCoreHeader
+
+void SetBertEnabled(bool cond);
 
 class Vits : public TextToSpeech
 {
@@ -101,6 +103,7 @@ private:
     const std::vector<const char*> EmbiddingOutputNames = { "g" };
 
     const std::vector<const char*> BertInputNames = { "input_ids", "attention_mask", "token_type_ids" };
+    const std::vector<const char*> BertInputNames2 = { "input_ids", "token_type_ids" };
     const std::vector<const char*> BertOutputNames = { "last_hidden_state" };
 };
 

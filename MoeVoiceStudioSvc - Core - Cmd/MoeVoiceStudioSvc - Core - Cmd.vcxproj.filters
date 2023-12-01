@@ -407,6 +407,9 @@
     <ClInclude Include="Modules\Models\header\VitsSvc.hpp">
       <Filter>头文件\Modules\Models\SVC</Filter>
     </ClInclude>
+    <ClInclude Include="Modules\StringPreprocess.hpp">
+      <Filter>头文件\Modules\Models</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md">

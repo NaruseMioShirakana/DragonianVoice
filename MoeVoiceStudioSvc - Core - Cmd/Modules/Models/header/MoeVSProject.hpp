@@ -159,7 +159,9 @@ namespace MoeVSProjectSpace
 
 	struct MoeVSTTSSeq
 	{
-        std::wstring SeqStr;
+        std::wstring SeqStr, TempStr;
+        std::string Langstr;
+        std::vector<std::string> LangstrSeq;
         std::vector<std::wstring> Seq;                     //音素序列
         std::vector<int64_t> Tones;                        //音调序列
         std::vector<int64_t> Durations;                    //时长序列
@@ -179,6 +181,10 @@ namespace MoeVSProjectSpace
         float RestTime = 0.5f;                             //停顿时间，为负数则直接断开音频并创建新音频
         int64_t TotLang = 0;
         std::wstring AdditionalInfo;                       //G2P额外信息
+
+        [[nodiscard]] std::wstring Serialization() const;
+
+        bool operator==(const MoeVSTTSSeq& right) const;
 	};
 
     using MoeVSSvcParams = MoeVSParams;

@@ -241,6 +241,7 @@
     <ClInclude Include="Modules\Models\header\Vits.hpp" />
     <ClInclude Include="Modules\Models\header\VitsSvc.hpp" />
     <ClInclude Include="Modules\Modules.hpp" />
+    <ClInclude Include="Modules\StringPreprocess.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />
