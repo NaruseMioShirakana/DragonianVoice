@@ -43,6 +43,14 @@ public:
         ExecutionProviders ExecutionProvider_ = ExecutionProviders::CPU,
         unsigned DeviceID_ = 0, unsigned ThreadCount_ = 0);
 
+    void load(
+        const std::map<std::string, std::wstring>& _PathDict,
+        const MJson& _Config, const ProgressCallback& _ProgressCallback,
+        ExecutionProviders ExecutionProvider_,
+        unsigned DeviceID_, unsigned ThreadCount_,
+        bool MoeVoiceStudioFrontEnd = false
+    );
+
 	~VitsSvc() override;
 
     void Destory();

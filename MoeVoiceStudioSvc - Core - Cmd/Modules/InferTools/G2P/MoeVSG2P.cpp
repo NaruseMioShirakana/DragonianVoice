@@ -149,6 +149,11 @@ void MoeVoiceStudioG2PApi::unLoad()
 
 void MVSDict::GetDict(const std::wstring& path)
 {
+	if (path.empty())
+	{
+		_Dict.clear();
+		return;
+	}
 	PlaceholderSymbol = L"|";
 	std::string phoneInfo, phoneInfoAll;
 	std::ifstream phonefile(path.c_str());
@@ -211,6 +216,11 @@ std::vector<std::wstring> MVSDict::DictReplace(const std::wstring& input, const 
 		else
 			_output.emplace_back(Key);
 	}
+
+	for (int64_t i = int64_t(_output.size()) - 1; i >= 0; --i)
+		if (_output[i].empty())
+			_output.erase(_output.begin() + i);
+
 	return _output;
 }
 

@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include "yyjson.h"
 #include <vector>
 class MJsonValue
@@ -66,19 +67,19 @@ public:
 	}
 	[[nodiscard]] int GetInt() const
 	{
-		return yyjson_get_int(_Ptr);
+		return int(yyjson_get_num(_Ptr));
 	}
 	[[nodiscard]] int64_t GetInt64() const
 	{
-		return yyjson_get_sint(_Ptr);
+		return int64_t(yyjson_get_num(_Ptr));
 	}
 	[[nodiscard]] float GetFloat() const
 	{
-		return float(yyjson_get_real(_Ptr));
+		return float(yyjson_get_num(_Ptr));
 	}
 	[[nodiscard]] double GetDouble() const 
 	{
-		return yyjson_get_real(_Ptr);
+		return yyjson_get_num(_Ptr);
 	}
 	[[nodiscard]] std::string GetString() const
 	{
@@ -281,19 +282,19 @@ public:
 	}
 	[[nodiscard]] int GetInt() const
 	{
-		return yyjson_get_int(root);
+		return int(yyjson_get_num(root));
 	}
 	[[nodiscard]] int64_t GetInt64() const
 	{
-		return yyjson_get_sint(root);
+		return int64_t(yyjson_get_num(root));
 	}
 	[[nodiscard]] float GetFloat() const
 	{
-		return float(yyjson_get_real(root));
+		return float(yyjson_get_num(root));
 	}
 	[[nodiscard]] double GetDouble() const
 	{
-		return yyjson_get_real(root);
+		return yyjson_get_num(root);
 	}
 	[[nodiscard]] std::string GetString() const
 	{

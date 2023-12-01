@@ -45,6 +45,39 @@ int main()
 
 	MoeVSModuleManager::MoeVoiceStudioCoreInitSetup();
 
+	try
+	{
+		MoeVSModuleManager::LoadSvcModel(
+			MJson(to_byte_string(GetCurrentFolder() + L"/Models/crs.json").c_str()),
+			[](size_t cur, size_t total)
+			{
+				//std::cout << (double(cur) / double(total) * 100.) << "%\n";
+			},
+			0,
+			8,
+			0
+			);
+	}
+	catch (std::exception& e)
+	{
+		std::cout << e.what();
+		return 0;
+	}
+
+	MoeVSProjectSpace::MoeVSSvcParams Params;
+	Params.Sampler = L"DDim";
+	Params.Step = 100;
+	Params.Pndm = 5;
+	InferTools::SlicerSettings Settings;
+	Params.F0Method = L"Dio";
+	Settings.SamplingRate = MoeVSModuleManager::GetCurSvcModel()->GetSamplingRate();
+	Params.Keys = 0;
+	std::wstring Paths;
+
+	MoeVSModuleManager::GetCurSvcModel()->Inference(Paths, Params, Settings);
+
+	return 0;
+
 	const MJson Config(to_byte_string(GetCurrentFolder() + L"/Models/HimenoSena.json").c_str());  //改为模型配置路径（相对exe）
 	const MoeVoiceStudioCore::MoeVoiceStudioModule::ProgressCallback ProCallback = [](size_t cur, size_t total)
 	{

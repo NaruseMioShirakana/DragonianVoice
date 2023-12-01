@@ -1,6 +1,6 @@
-/**
+﻿/**
  * FileName: MoeVSG2P.hpp
- * Note: MoeVoiceStudioCore G2P���ֵ䣨TTS�ã�
+ * Note: MoeVoiceStudioCore G2P及字典（TTS用）
  *
  * Copyright (C) 2022-2023 NaruseMioShirakana (shirakanamio@foxmail.com)
  *

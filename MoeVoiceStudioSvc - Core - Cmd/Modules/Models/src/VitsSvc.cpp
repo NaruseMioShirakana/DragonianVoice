@@ -54,139 +54,22 @@ VitsSvc::VitsSvc(const MJson& _Config, const ProgressCallback& _ProgressCallback
 	if (HuPath.empty())
 		throw std::exception("[Error] Field \"Hubert\" (Hubert Folder) Can Not Be Empty");
 
-	//Check SamplingRate
-	if (_Config["Rate"].IsNull())
-		throw std::exception("[Error] Missing field \"Rate\" (SamplingRate)");
-	if (_Config["Rate"].IsInt() || _Config["Rate"].IsInt64())
-		_samplingRate = _Config["Rate"].GetInt();
-	else
-		throw std::exception("[Error] Field \"Rate\" (SamplingRate) Must Be Int/Int64");
-
-	logger.log(L"[Info] Current Sampling Rate is" + std::to_wstring(_samplingRate));
-
-	if (!_Config["SoVits3"].IsNull() && _Config["SoVits3"].GetBool())
-		VitsSvcVersion = L"SoVits3.0";
-	else if (!_Config["SoVits2"].IsNull() && _Config["SoVits2"].GetBool())
-		VitsSvcVersion = L"SoVits2.0";
-	else if (!_Config["SoVits2.0"].IsNull() && _Config["SoVits2.0"].GetBool())
-		VitsSvcVersion = L"SoVits2.0";
-	else if (!_Config["SoVits3.0"].IsNull() && _Config["SoVits3.0"].GetBool())
-		VitsSvcVersion = L"SoVits3.0";
-	else if (_Config["Type"].GetString() == std::string("RVC"))
-		VitsSvcVersion = L"RVC";
-
-	if (!_Config["SoVits4.0V2"].IsNull() && _Config["SoVits4.0V2"].GetBool())
-		VitsSvcVersion = L"SoVits4.0-DDSP";
-	
-#ifdef MOEVSDMLPROVIDER
-	if (ExecutionProvider_ == ExecutionProviders::DML && VitsSvcVersion == L"SoVits4.0-DDSP")
-		throw std::exception("[Error] DirectXMl Not Support SoVits4.0V2, Please Use Cuda Or Cpu");
-#endif
-
-	if(!(_Config["Hop"].IsInt() || _Config["Hop"].IsInt64()))
-		throw std::exception("[Error] Hop Must Exist And Must Be Int");
-	HopSize = _Config["Hop"].GetInt();
-
-	if (!(_Config["HiddenSize"].IsInt() || _Config["HiddenSize"].IsInt64()))
-		logger.log(L"[Warn] Missing Field \"HiddenSize\", Use Default Value (256)");
-	else
-		HiddenUnitKDims = _Config["HiddenSize"].GetInt();
-
-	if (!_Config["CharaMix"].IsBool())
-		logger.log(L"[Warn] Missing Field \"CharaMix\", Use Default Value (False)");
-	else
-		EnableCharaMix = _Config["CharaMix"].GetBool();
-
-	if(_Config["Cluster"].IsString())
-	{
-		const auto clus = to_wide_string(_Config["Cluster"].GetString());
-		if (!(_Config["KMeansLength"].IsInt() || _Config["KMeansLength"].IsInt64()))
-			logger.log(L"[Warn] Missing Field \"KMeansLength\", Use Default Value (10000)");
-		else
-			ClusterCenterSize = _Config["KMeansLength"].GetInt();
-		try
-		{
-			Cluster = MoeVoiceStudioCluster::GetMoeVSCluster(clus, cluster_folder, HiddenUnitKDims, ClusterCenterSize);
-			EnableCluster = true;
-		}
-		catch (std::exception& e)
-		{
-			logger.error(e.what());
-			EnableCluster = false;
-		}
-	}
-
-	if(HopSize < 1)
-		throw std::exception("[Error] Hop Must > 0");
-
-	if (_Config["Volume"].IsBool())
-		EnableVolume = _Config["Volume"].GetBool();
-	else
-		logger.log(L"[Warn] Missing Field \"Volume\", Use Default Value (False)");
-
-	if (_Config["Characters"].IsArray())
-		SpeakerCount = int64_t(_Config["Characters"].Size());
-
-	_callback = _ProgressCallback;
-
-	//LoadModels
-	try
-	{
-		logger.log(L"[Info] loading VitsSvcModel Models");
-		hubert = new Ort::Session(*env, (GetCurrentFolder() + L"/hubert/" + HuPath + L".onnx").c_str(), *session_options);
-		if (VitsSvcVersion == L"RVC")
-			VitsSvcModel = new Ort::Session(*env, (_path + L"_RVC.onnx").c_str(), *session_options);
-		else
-			VitsSvcModel = new Ort::Session(*env, (_path + L"_SoVits.onnx").c_str(), *session_options);
-		logger.log(L"[Info] VitsSvcModel Models loaded");
-	}
-	catch (Ort::Exception& _exception)
-	{
-		Destory();
-		throw std::exception(_exception.what());
-	}
-
-	if (VitsSvcModel->GetInputCount() == 4 && VitsSvcVersion != L"SoVits3.0")
-		VitsSvcVersion = L"SoVits2.0";
-
-	if (_Config["TensorExtractor"].IsString())
-		VitsSvcVersion = to_wide_string(_Config["TensorExtractor"].GetString());
-
+	std::map<std::string, std::wstring> _PathDict;
+	_PathDict["Cluster"] = cluster_folder;
+	_PathDict["Hubert"] = (GetCurrentFolder() + L"/hubert/" + HuPath + L".onnx");
+	_PathDict["RVC"] = (_path + L"_RVC.onnx");
+	_PathDict["SoVits"] = (_path + L"_SoVits.onnx");
 	if (_Config["ShallowDiffusion"].IsString())
 	{
-		const std::string ShallowDiffusionConf = to_byte_string(GetCurrentFolder()) + "/Models/" + _Config["ShallowDiffusion"].GetString() + ".json";
-		try
-		{
-			shallow_diffusion = new DiffusionSvc(
-				ShallowDiffusionConf.c_str(),
-				[](size_t, size_t) {},
-				ExecutionProvider_,
-				DeviceID_,
-				ThreadCount_
-			);
-			stft_operator = new Ort::Session(*env, (GetCurrentFolder() + L"/MelOps.onnx").c_str(), *session_options);
-		}
-		catch (std::exception& e)
-		{
-			delete shallow_diffusion;
-			shallow_diffusion = nullptr;
-			delete stft_operator;
-			stft_operator = nullptr;
-			logger.error(e.what());
-		}
+		const std::wstring ShallowDiffusionConf = GetCurrentFolder() + L"/Models/" + to_wide_string(_Config["ShallowDiffusion"].GetString()) + L".json";
+		_PathDict["ShallowDiffusionConfig"] = ShallowDiffusionConf;
+		if (_Config["MelOperator"].IsString())
+			_PathDict["MelOperator"] = GetCurrentFolder() + L"/MelOps" + to_wide_string(_Config["MelOperator"].GetString()) + L".onnx";
+		else
+			_PathDict["MelOperator"] = GetCurrentFolder() + L"/MelOps.onnx";
 	}
 
-	MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::Others _others_param;
-	_others_param.Memory = *memory_info;
-	try
-	{
-		_TensorExtractor = GetTensorExtractor(VitsSvcVersion, 48000, _samplingRate, HopSize, EnableCharaMix, EnableVolume, HiddenUnitKDims, SpeakerCount, _others_param);
-	}
-	catch(std::exception& e)
-	{
-		Destory();
-		throw std::exception(e.what());
-	}
+	load(_PathDict, _Config, _ProgressCallback, ExecutionProvider_, DeviceID_, ThreadCount_, true);
 }
 
 VitsSvc::VitsSvc(const std::map<std::string, std::wstring>& _PathDict, const MJson& _Config, const ProgressCallback& _ProgressCallback,
@@ -195,6 +78,11 @@ VitsSvc::VitsSvc(const std::map<std::string, std::wstring>& _PathDict, const MJs
 	SingingVoiceConversion(ExecutionProvider_, DeviceID_, ThreadCount_)
 {
 	MoeVSClassName(L"MoeVoiceStudioVitsSingingVoiceConversion");
+	load(_PathDict, _Config, _ProgressCallback, ExecutionProvider_, DeviceID_, ThreadCount_, false);
+}
+
+void VitsSvc::load(const std::map<std::string, std::wstring>& _PathDict, const MJson& _Config, const ProgressCallback& _ProgressCallback, ExecutionProviders ExecutionProvider_, unsigned DeviceID_, unsigned ThreadCount_, bool MoeVoiceStudioFrontEnd)
+{
 
 	//Check SamplingRate
 	if (_Config["Rate"].IsNull())
@@ -216,6 +104,7 @@ VitsSvc::VitsSvc(const std::map<std::string, std::wstring>& _PathDict, const MJs
 		VitsSvcVersion = L"SoVits3.0";
 	else if (_Config["Type"].GetString() == std::string("RVC"))
 		VitsSvcVersion = L"RVC";
+
 	if (!_Config["SoVits4.0V2"].IsNull() && _Config["SoVits4.0V2"].GetBool())
 		VitsSvcVersion = L"SoVits4.0-DDSP";
 
@@ -298,15 +187,28 @@ VitsSvc::VitsSvc(const std::map<std::string, std::wstring>& _PathDict, const MJs
 		const std::string ShallowDiffusionConf = to_byte_string(GetCurrentFolder()) + "/Models/" + _Config["ShallowDiffusion"].GetString() + ".json";
 		try
 		{
-			shallow_diffusion = new DiffusionSvc(
-				_PathDict,
-				to_byte_string(_PathDict.at("ShallowDiffusionConfig")).c_str(),
-				[](size_t, size_t) {},
-				ExecutionProvider_,
-				DeviceID_,
-				ThreadCount_
-			);
-			stft_operator = new Ort::Session(*env, _PathDict.at("MelOperators").c_str(), *session_options);
+			if(MoeVoiceStudioFrontEnd)
+			{
+				shallow_diffusion = new DiffusionSvc(
+					to_byte_string(_PathDict.at("ShallowDiffusionConfig")).c_str(),
+					[](size_t, size_t) {},
+					ExecutionProvider_,
+					DeviceID_,
+					ThreadCount_
+				);
+			}
+			else
+			{
+				shallow_diffusion = new DiffusionSvc(
+					_PathDict,
+					to_byte_string(_PathDict.at("ShallowDiffusionConfig")).c_str(),
+					[](size_t, size_t) {},
+					ExecutionProvider_,
+					DeviceID_,
+					ThreadCount_
+				);
+			}
+			stft_operator = new Ort::Session(*env, _PathDict.at("MelOperator").c_str(), *session_options);
 		}
 		catch (std::exception& e)
 		{

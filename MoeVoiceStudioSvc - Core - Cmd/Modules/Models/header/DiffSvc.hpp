@@ -24,7 +24,9 @@
 #include "SVC.hpp"
 
 MoeVoiceStudioCoreHeader
-
+/**
+ * \brief DiffSvc模型
+ */
 class DiffusionSvc : public SingingVoiceConversion
 {
 public:

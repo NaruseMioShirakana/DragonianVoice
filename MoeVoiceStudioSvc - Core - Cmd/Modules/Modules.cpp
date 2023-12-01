@@ -51,10 +51,14 @@
 
 namespace MoeVSModuleManager
 {
+	bool MoeVoiceStudioCoreInitStat = false;
+
 	MoeVoiceStudioCore::SingingVoiceConversion* CurSvcModel = nullptr;
 
 	void MoeVoiceStudioCoreInitSetup()
 	{
+		if (MoeVoiceStudioCoreInitStat)
+			return;
 		MoeVSRegisterF0Constructor(L"Dio", DioF0Extractor);
 		MoeVSRegisterF0Constructor(L"Harvest", HarvestF0Extractor);
 		MoeVSRegisterF0Constructor(L"RMVPE", RMVPEF0Extractor);
@@ -79,6 +83,7 @@ namespace MoeVSModuleManager
 			Cleaner->loadG2p(BasicCleanerDir);
 			Cleaner->GetCleaner().LoadDict(GetCurrentFolder() + L"/G2P");
 		}
+		MoeVoiceStudioCoreInitStat = true;
 	}
 
 	MoeVoiceStudioCore::SingingVoiceConversion* GetCurSvcModel()
