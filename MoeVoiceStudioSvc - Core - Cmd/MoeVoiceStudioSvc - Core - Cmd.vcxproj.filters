@@ -408,7 +408,7 @@
       <Filter>头文件\Modules\Models\SVC</Filter>
     </ClInclude>
     <ClInclude Include="Modules\StringPreprocess.hpp">
-      <Filter>头文件\Modules\Models</Filter>
+      <Filter>头文件\Modules</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
