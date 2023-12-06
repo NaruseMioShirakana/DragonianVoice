@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include "../../StringPreprocess.hpp"
+#include "MJson.h"
 namespace MoeVSProjectSpace
 {
     class FileWrapper
@@ -146,28 +147,37 @@ namespace MoeVSProjectSpace
         //TTS
         std::vector<float> SpeakerMix;                     //角色混合比例
         float LengthScale = 1.0f;                          //时长修正因子
-        float DurationPredictorNoiseScale = 0.3f;          //随机时长预测器噪声修正因子
-        float FactorDpSdp = 0.3f;                          //随机时长预测器与时长预测器混合比例
+        float DurationPredictorNoiseScale = 0.8f;          //随机时长预测器噪声修正因子
+        float FactorDpSdp = 0.f;                           //随机时长预测器与时长预测器混合比例
         float GateThreshold = 0.66666f;                    //Tacotron2解码器EOS阈值
         int64_t MaxDecodeStep = 2000;                      //Tacotron2最大解码步数
         std::vector<std::wstring> EmotionPrompt;           //情感标记
         std::wstring PlaceHolderSymbol = L"|";             //音素分隔符
         float RestTime = 0.5f;                             //停顿时间，为负数则直接断开音频并创建新音频
-        int64_t Language = 0;                              //语言序列
+        std::string LanguageSymbol = "JP";                 //语言
         std::wstring AdditionalInfo;                       //G2P额外信息
+        std::wstring SpeakerName = L"0";                   //角色名
 	};
 
-	struct MoeVSTTSSeq
-	{
-        std::wstring SeqStr, TempStr;
-        std::string Langstr;
-        std::vector<std::string> LangstrSeq;
-        std::vector<std::wstring> Seq;                     //音素序列
+    struct MoeVSTTSToken
+    {
+        std::wstring Text;                                 //输入文本
+        std::vector<std::wstring> Phonemes;                //音素序列
         std::vector<int64_t> Tones;                        //音调序列
         std::vector<int64_t> Durations;                    //时长序列
-        std::vector<int64_t> Language;                     //语言序列
-        std::vector<float> SpeakerMix;                     //角色混合比例
+        std::vector<std::string> Language;                 //语言序列
 
+        MoeVSTTSToken() = default;
+        MoeVSTTSToken(const MJsonValue& _JsonDocument, const MoeVSParams& _InitParams);
+
+        [[nodiscard]] std::wstring Serialization() const;
+    };
+
+    struct MoeVSTTSSeq
+    {
+        std::wstring TextSeq;
+        std::vector<MoeVSTTSToken> SlicedTokens;
+        std::vector<float> SpeakerMix;                     //角色混合比例
         std::vector<std::wstring> EmotionPrompt;           //情感标记
         std::wstring PlaceHolderSymbol = L"|";             //音素分隔符
         float NoiseScale = 0.3f;                           //噪声修正因子             0-10
@@ -177,15 +187,18 @@ namespace MoeVSProjectSpace
         float GateThreshold = 0.66666f;                    //Tacotron2解码器EOS阈值
         int64_t MaxDecodeStep = 2000;                      //Tacotron2最大解码步数
         int64_t Seed = 52468;                              //种子
-        int64_t SpeakerId = 0;                             //角色ID
         float RestTime = 0.5f;                             //停顿时间，为负数则直接断开音频并创建新音频
-        int64_t TotLang = 0;
+        std::string LanguageSymbol = "ZH";                 //语言标记
+        std::wstring SpeakerName = L"0";                   //角色或名称ID
         std::wstring AdditionalInfo;                       //G2P额外信息
+
+        MoeVSTTSSeq() = default;
+        MoeVSTTSSeq(const MJsonValue& _JsonDocument, const MoeVSParams& _InitParams);
 
         [[nodiscard]] std::wstring Serialization() const;
 
         bool operator==(const MoeVSTTSSeq& right) const;
-	};
+    };
 
     using MoeVSSvcParams = MoeVSParams;
     using MoeVSTTSParams = MoeVSParams;

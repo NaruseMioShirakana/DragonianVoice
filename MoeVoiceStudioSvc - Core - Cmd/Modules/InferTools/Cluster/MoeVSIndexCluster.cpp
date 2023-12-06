@@ -87,7 +87,7 @@ IndexCluster::IndexCluster(const std::wstring& _path, size_t hidden_size, size_t
 		Indexs.emplace_back(IndexPath.string().c_str());
 	}
 	if (Indexs.empty())
-		throw std::exception("Index Is Empty");
+		LibDLVoiceCodecThrow("Index Is Empty");
 }
 
 std::vector<float> IndexCluster::find(float* point, long sid, int64_t n_points)

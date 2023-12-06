@@ -45,7 +45,7 @@ public:
 		char** Data = nullptr;
 		size_t Size = 0;
 	};
-	using funTy = const wchar_t* (*)(const wchar_t*, const wchar_t*, const wchar_t*, int64_t);
+	using funTy = const wchar_t* (*)(const wchar_t*, const wchar_t*, const wchar_t*, const char*);
 	using freTy = void (*)();
 	using vocabFn = void* (*)(const wchar_t*);
 	using loadFn = void (*)(const wchar_t*);
@@ -60,7 +60,7 @@ public:
 	}
 	[[nodiscard]] SplitData GetSplitWords(const std::wstring& inputLen) const;
 	[[nodiscard]] std::wstring functionAPI(const std::wstring& inputLen, const std::wstring& placeholderSymbol,
-		const std::wstring& extraInfo, int64_t languageID) const;
+		const std::wstring& extraInfo, const std::string& languageID) const;
 	MoeVoiceStudioG2PApi(const MoeVoiceStudioG2PApi&) = delete;
 	MoeVoiceStudioG2PApi(MoeVoiceStudioG2PApi&&) = delete;
 	MoeVoiceStudioG2PApi& operator=(MoeVoiceStudioG2PApi&& move) noexcept;
@@ -69,7 +69,7 @@ public:
 	void LoadDict(const std::wstring& Path) const;
 private:
 #ifdef WIN32
-	const wchar_t*(*func)(const wchar_t*, const wchar_t*, const wchar_t*, int64_t) = nullptr;
+	const wchar_t*(*func)(const wchar_t*, const wchar_t*, const wchar_t*, const char*) = nullptr;
 	void (*frel)() = nullptr;
 	void* (*getvocab)(const wchar_t*) = nullptr;
 	void (*vocabrel)() = nullptr;
@@ -157,7 +157,7 @@ public:
 	}
 
 	[[nodiscard]] std::wstring G2p(const std::wstring& _text, const std::wstring& placeholderSymbol,
-		const std::wstring& extraInfo, int64_t languageID) const
+		const std::wstring& extraInfo, std::string languageID) const
 	{
 		return _G2p.functionAPI(_text, placeholderSymbol, extraInfo, languageID);
 	}
@@ -226,9 +226,10 @@ public:
 	{
 		return Cleaner;
 	}
-	[[nodiscard]] std::vector<TokenizerType> WordPieceMethod(const std::wstring& Seq, size_t MaxWordLength = 25, TokenizerMethod Method = TokenizerMethod::Left) const;
-	[[nodiscard]] std::vector<TokenizerType> UnigramMethod(const std::wstring& Seq, size_t MaxWordLength = 25, TokenizerMethod Method = TokenizerMethod::Left) const;
-	std::vector<TokenizerType> operator()(const std::wstring& Seq, size_t MaxWordLength = 25, TokenizerMethod Method = TokenizerMethod::Left) const;
+	[[nodiscard]] std::vector<std::wstring> WordPieceMethod(const std::wstring& Seq, size_t MaxWordLength = 25, TokenizerMethod Method = TokenizerMethod::Left) const;
+	[[nodiscard]] std::vector<std::wstring> UnigramMethod(const std::wstring& Seq, size_t MaxWordLength = 25, TokenizerMethod Method = TokenizerMethod::Left) const;
+	std::vector<TokenizerType> operator()(const std::vector<std::wstring>& Seq) const;
+	[[nodiscard]] std::vector<std::wstring> Tokenize(const std::wstring& Seq, size_t MaxWordLength = 25, TokenizerMethod Method = TokenizerMethod::Left) const;
 	[[nodiscard]] std::vector<std::wstring> SplitWithPlugin(const std::vector<std::wstring>& _Inputs) const;
 	static std::vector<std::wstring> SplitString(const std::wstring& _InputRef, const std::wregex& _SignRegex);
 private:

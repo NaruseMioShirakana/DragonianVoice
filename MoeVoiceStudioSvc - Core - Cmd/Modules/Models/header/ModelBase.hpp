@@ -32,7 +32,7 @@
 
 #define MoeVoiceStudioCoreHeader namespace MoeVoiceStudioCore{
 #define MoeVoiceStudioCoreEnd }
-#define MoeVSNotImplementedError throw std::exception("NotImplementedError")
+#define MoeVSNotImplementedError LibDLVoiceCodecThrow("NotImplementedError")
 #define MoeVSClassName(__Moe__VSClassName) __NAME__CLASS__.emplace_back((__Moe__VSClassName))
 #define MoeVSMaxPath 1024
 static std::wstring GetCurrentFolder(const std::wstring& defualt = L"")

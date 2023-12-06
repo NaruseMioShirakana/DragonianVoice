@@ -4,6 +4,7 @@
 #include "../DioF0Extractor/DioF0Extractor.hpp"
 #include "../../../Logger/MoeSSLogger.hpp"
 #include "../../../Models/EnvManager.hpp"
+#include "../../inferTools.hpp"
 #ifdef _WIN32
 #include <DXGI.h>
 #else
@@ -91,7 +92,7 @@ void NetF0Class::BuildCUDAEnv(unsigned Did)
 		if (it.find("CUDA") != std::string::npos)
 			ret = false;
 	if (ret)
-		throw std::exception("CUDA Provider Not Found");
+		LibDLVoiceCodecThrow("CUDA Provider Not Found");
 	OrtCUDAProviderOptions cuda_option;
 	cuda_option.device_id = int(Did);
 	NetF0Options = new Ort::SessionOptions;
@@ -111,7 +112,7 @@ void NetF0Class::BuildDMLEnv(unsigned Did)
 		if (it.find("Dml") != std::string::npos)
 			ret = it;
 	if (ret.empty())
-		throw std::exception("DML Provider Not Found");
+		LibDLVoiceCodecThrow("DML Provider Not Found");
 	const OrtApi& ortApi = Ort::GetApi();
 	const OrtDmlApi* ortDmlApi = nullptr;
 	ortApi.GetExecutionProviderApi("DML", ORT_API_VERSION, reinterpret_cast<const void**>(&ortDmlApi));

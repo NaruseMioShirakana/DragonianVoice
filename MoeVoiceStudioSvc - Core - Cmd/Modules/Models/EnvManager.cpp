@@ -49,7 +49,7 @@ void MoeVoiceStudioEnv::Load(unsigned ThreadCount, unsigned DeviceID, unsigned P
 		(Provider == 0 && ThreadCount != CurThreadCount) ||
 		((Provider == 1 || Provider == 2) && DeviceID != CurDeviceID)) &&
 		MoeVSModuleManager::GetCurSvcModel())
-		throw std::exception("A Model Has Been Loaded, You Cannot Change Env When A Model Has Been Loaded");
+		LibDLVoiceCodecThrow("A Model Has Been Loaded, You Cannot Change Env When A Model Has Been Loaded");
 	try
 	{
 		if (Provider != CurProvider)
@@ -67,7 +67,7 @@ void MoeVoiceStudioEnv::Load(unsigned ThreadCount, unsigned DeviceID, unsigned P
 		CurDeviceID = unsigned(-1);
 		CurProvider = unsigned(-1);
 		logger.log(to_wide_string(e.what()));
-		throw std::exception(e.what());
+		LibDLVoiceCodecThrow(e.what());
 	}
 }
 
@@ -86,7 +86,7 @@ void MoeVoiceStudioEnv::Create(unsigned ThreadCount_, unsigned DeviceID_, unsign
 				if (it.find("CUDA") != std::string::npos)
 					ret = false;
 			if (ret)
-				throw std::exception("CUDA Provider Not Found");
+				LibDLVoiceCodecThrow("CUDA Provider Not Found");
 			GlobalOrtSessionOptions = new Ort::SessionOptions;
 
 #ifdef MoeVSCUDAProviderV1
@@ -141,7 +141,7 @@ void MoeVoiceStudioEnv::Create(unsigned ThreadCount_, unsigned DeviceID_, unsign
 				if (it.find("Dml") != std::string::npos)
 					ret = it;
 			if (ret.empty())
-				throw std::exception("DML Provider Not Found");
+				LibDLVoiceCodecThrow("DML Provider Not Found");
 			const OrtApi& ortApi = Ort::GetApi();
 			const OrtDmlApi* ortDmlApi = nullptr;
 			ortApi.GetExecutionProviderApi("DML", ORT_API_VERSION, reinterpret_cast<const void**>(&ortDmlApi));

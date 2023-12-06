@@ -40,7 +40,7 @@ public:
 		emofile = nullptr;
 		_wfopen_s(&emofile, path.c_str(), L"r");
 		if (!emofile)
-			throw std::exception("emoFile not exists");
+			LibDLVoiceCodecThrow("emoFile not exists")
 	}
 	~EmoLoader()
 	{
@@ -61,7 +61,7 @@ public:
 		emofile = nullptr;
 		_wfopen_s(&emofile, path.c_str(), L"rb");
 		if (!emofile)
-			throw std::exception("emoFile not exists");
+			LibDLVoiceCodecThrow("emoFile not exists")
 	}
 	std::vector<float> operator[](long index) const
 	{
@@ -73,9 +73,9 @@ public:
 			const auto bufread = fread_s(buffer, 4096, 1, 4096, emofile);
 			if (bufread == 4096)
 				return { buf ,buf + 1024 };
-			throw std::exception("emo index out of range");
+			LibDLVoiceCodecThrow("emo index out of range")
 		}
-		throw std::exception("emo file not opened");
+		LibDLVoiceCodecThrow("emo file not opened")
 	}
 private:
 	FILE* emofile = nullptr;
@@ -90,7 +90,7 @@ public:
 
 	[[nodiscard]] std::vector<MoeVSProjectSpace::MoeVSTTSSeq> GetInputSeqs(const MJson& _Input, const MoeVSProjectSpace::MoeVSParams& _InitParams) const;
 
-	std::vector<MoeVSProjectSpace::MoeVSTTSSeq>& SpecializeInputSeqs(std::vector<MoeVSProjectSpace::MoeVSTTSSeq>& _Seq);
+	std::vector<MoeVSProjectSpace::MoeVSTTSSeq>& SpecializeInputSeqs(std::vector<MoeVSProjectSpace::MoeVSTTSSeq>& _Seq) const;
 
 	[[nodiscard]] static std::vector<MoeVSProjectSpace::MoeVSTTSSeq> GetInputSeqsStatic(const MJson& _Input, const MoeVSProjectSpace::MoeVSParams& _InitParams);
 
@@ -164,9 +164,15 @@ public:
 		for (auto& i : _data)
 			i /= Sum;
 	}
+
+	MoeVSG2P::Tokenizer& GetTokenizer(const std::string& LanguageId)
+	{
+		return Tokenizers[LanguageMap.at(LanguageId)];
+	}
 protected:
 	DurationCallback CustomDurationCallback;
 	int64_t SpeakerCount = 1;
+	std::unordered_map<std::wstring, int64_t> SpeakerMap;
 	std::map<std::string, int64_t> LanguageMap = { {"ZH", 0}, {"JP", 1}, {"EN", 2} };
 	std::map<std::string, int64_t> LanguageTones = { {"ZH", 0}, {"JP", 0}, {"EN", 0} };
 	std::vector<MoeVSG2P::Tokenizer> Tokenizers;

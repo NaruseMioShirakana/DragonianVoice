@@ -1,9 +1,11 @@
 ﻿#include "../header/Vits.hpp"
+#include "../../InferTools/inferTools.hpp"
 #include <random>
 
 MoeVoiceStudioCoreHeader
 
 bool BertEnabled = false;
+std::unordered_map<std::wstring ,Ort::Session*> sessionBert;
 
 void SetBertEnabled(bool cond)
 {
@@ -25,13 +27,13 @@ Vits::Vits(const MJson& _Config, const ProgressCallback& _ProgressCallback,
 {
 	//Check Folder
 	if (_Config["Folder"].IsNull())
-		throw std::exception("[Error] Missing field \"folder\" (Model Folder)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"folder\" (Model Folder)")
 	if (!_Config["Folder"].IsString())
-		throw std::exception("[Error] Field \"folder\" (Model Folder) Must Be String");
+		LibDLVoiceCodecThrow("[Error] Field \"folder\" (Model Folder) Must Be String")
 	const auto _folder = to_wide_string(_Config["Folder"].GetString());
 	if (_folder.empty())
-		throw std::exception("[Error] Field \"folder\" (Model Folder) Can Not Be Empty");
-	const std::wstring _path = GetCurrentFolder() + L"\\Models\\" + _folder + L"\\" + _folder;
+		LibDLVoiceCodecThrow("[Error] Field \"folder\" (Model Folder) Can Not Be Empty")
+	const std::wstring _path = GetCurrentFolder() + L"/Models/" + _folder + L"/" + _folder;
 
 	std::map<std::string, std::wstring> _PathDict;
 
@@ -40,8 +42,8 @@ Vits::Vits(const MJson& _Config, const ProgressCallback& _ProgressCallback,
 		const auto emoStringload = to_wide_string(_Config["EmotionalPath"].GetString());
 		if(!emoStringload.empty())
 		{
-			_PathDict["EmotionalPath"] = GetCurrentFolder() + L"\\emotion\\" + emoStringload + L".npy";
-			_PathDict["EmotionalDictPath"] = GetCurrentFolder() + L"\\emotion\\" + emoStringload + L".json";
+			_PathDict["EmotionalPath"] = GetCurrentFolder() + L"/emotion/" + emoStringload + L".npy";
+			_PathDict["EmotionalDictPath"] = GetCurrentFolder() + L"/emotion/" + emoStringload + L".json";
 		}
 	}
 
@@ -74,9 +76,9 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 	const DurationCallback& _DurationCallback, const std::vector<std::wstring>& _BertPaths)
 {
 	if (_Config["Type"].IsNull())
-		throw std::exception("[Error] Missing field \"Type\" (ModelType)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"Type\" (ModelType)")
 	if (!_Config["Type"].IsString())
-		throw std::exception("[Error] Field \"Type\" (ModelType) Must Be String");
+		LibDLVoiceCodecThrow("[Error] Field \"Type\" (ModelType) Must Be String")
 	VitsType = _Config["Type"].GetString();
 	if (VitsType == "Pits")
 	{
@@ -115,17 +117,17 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 
 	//Check SamplingRate
 	if (_Config["Rate"].IsNull())
-		throw std::exception("[Error] Missing field \"Rate\" (SamplingRate)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"Rate\" (SamplingRate)")
 	if (_Config["Rate"].IsInt() || _Config["Rate"].IsInt64())
 		_samplingRate = _Config["Rate"].GetInt();
 	else
-		throw std::exception("[Error] Field \"Rate\" (SamplingRate) Must Be Int/Int64");
+		LibDLVoiceCodecThrow("[Error] Field \"Rate\" (SamplingRate) Must Be Int/Int64")
 
 	logger.log(L"[Info] Current Sampling Rate is" + std::to_wstring(_samplingRate));
 
 	//Check Symbol
 	if (!_Config.HasMember("Symbol") || _Config["Symbol"].IsNull())
-		throw std::exception("[Error] Missing field \"Symbol\" (PhSymbol)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"Symbol\" (PhSymbol)")
 	if (_Config.HasMember("AddBlank") && !_Config["AddBlank"].IsNull())
 		AddBlank = _Config["AddBlank"].GetBool();
 	else
@@ -137,21 +139,21 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 	{
 		logger.log(L"[Info] Use Phs");
 		if (_Config["Symbol"].Empty())
-			throw std::exception("[Error] Field \"Symbol\" (PhSymbol) Can Not Be Empty");
+			LibDLVoiceCodecThrow("[Error] Field \"Symbol\" (PhSymbol) Can Not Be Empty")
 		const auto SymbolArr = _Config["Symbol"].GetArray();
 		if (!SymbolArr[0].IsString())
-			throw std::exception("[Error] Field \"Symbol\" (PhSymbol) Must Be Array<String> or String");
+			LibDLVoiceCodecThrow("[Error] Field \"Symbol\" (PhSymbol) Must Be Array<String> or String")
 		for (const auto& it : SymbolArr)
 			Symbols.insert({ to_wide_string(it.GetString()), iter++ });
 	}
 	else
 	{
 		if (!_Config["Symbol"].IsString())
-			throw std::exception("[Error] Field \"Symbol\" (PhSymbol) Must Be Array<String> or String");
+			LibDLVoiceCodecThrow("[Error] Field \"Symbol\" (PhSymbol) Must Be Array<String> or String")
 		logger.log(L"[Info] Use Symbols");
 		const std::wstring SymbolsStr = to_wide_string(_Config["Symbol"].GetString());
 		if (SymbolsStr.empty())
-			throw std::exception("[Error] Field \"Symbol\" (PhSymbol) Can Not Be Empty");
+			LibDLVoiceCodecThrow("[Error] Field \"Symbol\" (PhSymbol) Can Not Be Empty")
 		for (size_t i = 0; i < SymbolsStr.length(); ++i)
 			Symbols.insert({ SymbolsStr.substr(i,1) , iter++ });
 	}
@@ -182,12 +184,17 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 	}
 
 	if (_Config.HasMember("Characters") && _Config["Characters"].IsArray())
+	{
 		SpeakerCount = (int64_t)_Config["Characters"].Size();
+		int64_t SpkIdx = 0;
+		for (const auto& iterator : _Config["Characters"].GetArray())
+			SpeakerMap[to_wide_string(iterator.GetString())] = SpkIdx++;
+	}
 
 	if(UseLanguage)
 	{
 		if (_Config["LanguageMap"].IsNull() || !_Config.HasMember("LanguageMap"))
-			throw std::exception("[Error] Missing field \"LanguageMap\" (LanguageMap)");
+			LibDLVoiceCodecThrow("[Error] Missing field \"LanguageMap\" (LanguageMap)")
 		for(const auto& Item : _Config["LanguageMap"].GetMemberArray())
 		{
 			if (!Item.second.IsArray())
@@ -202,6 +209,19 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 
 	if (UseBert)
 	{
+		if (sessionBert.size() > _BertPaths.size())
+			sessionBert.clear();
+
+		if (_Config.HasMember("BertPath") && _Config["BertPath"].IsArray() && !_Config["BertPath"].Empty())
+		{
+			for (const auto& BPH : _Config["BertPath"].GetArray())
+			{
+				const auto BertPath = to_wide_string(BPH.GetString());
+				if (!BertPath.empty())
+					BertNamesIdx.emplace_back(BertPath);
+			}
+		}
+
 		if (LanguageMap.size() != _BertPaths.size())
 			EncoderInputNames.emplace_back("bert");
 		else
@@ -233,9 +253,9 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 					Tokenizers.back().BondCleaner(Cleaner);
 				}
 				else if (SessionBert)
-					throw std::exception("Bert Must Have a Tokenizer");
+					LibDLVoiceCodecThrow("Bert Must Have a Tokenizer")
 			}
-			sessionBert.emplace_back(SessionBert);
+			sessionBert[Path.substr(Path.rfind(L'/') + 1)] = SessionBert;
 		}
 	}
 
@@ -268,7 +288,7 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 		if (!sessionDp && !sessionSdp)
 		{
 			destory();
-			throw std::exception("You must have a duration predictor");
+			LibDLVoiceCodecThrow("You must have a duration predictor")
 		}
 
 		logger.log(L"[Info] Vits Models loaded");
@@ -276,7 +296,7 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 	catch (Ort::Exception& _exception)
 	{
 		destory();
-		throw std::exception(_exception.what());
+		LibDLVoiceCodecThrow(_exception.what())
 	}
 
 	if (sessionEmb)
@@ -310,8 +330,93 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 	for(const auto& Seq : _Input)
 	{
 		_callback(proc++, _Input.size());
-		if(Seq.Seq.empty())
+		auto CurLanguageIdx = _atoi64(Seq.LanguageSymbol.c_str());
+		if (LanguageMap.find(Seq.LanguageSymbol) != LanguageMap.end())
+			CurLanguageIdx = LanguageMap.at(Seq.LanguageSymbol);
+		std::vector<std::wstring> PhonemeSeq, TokenSeq;
+		std::vector<int64_t> ToneSeq;
+		std::vector<int64_t> LanguageSeq;
+		std::vector<int64_t> DurationSeq;
+		std::vector<size_t> BertAligSeq;
+		bool HasBertSeq = false;
+		if (AddBlank)
+			BertAligSeq.emplace_back(0);
+
+		if(!Seq.SlicedTokens.empty())
+		{
+			size_t TokensIndex = 1;
+			for(const auto& iter : Seq.SlicedTokens)
+			{
+				if (iter.Text.empty())
+				{
+					logger.log("[Info] Skip Empty Slice");
+					continue;
+				}
+				TokenSeq.emplace_back(iter.Text);
+				if (iter.Text == L"[CLS]")
+					continue;
+				if (iter.Text == L"[SEP]")
+					break;
+				std::vector<std::wstring> const* PhonemesPtr;
+				std::vector<std::wstring> TempPhonemes;
+				if (iter.Phonemes.empty())
+				{
+					auto TempText = iter.Text;
+					if (TempText == L"[UNK]")
+						TempPhonemes = { L"[UNK]" };
+					else
+					{
+						if (TempText.find(L"##") == 0)
+							TempText = TempText.substr(2);
+						if (TempText.find(L'▁') == 0)
+							TempText = TempText.substr(1);
+						TempPhonemes = Cleaner->DictReplace(Cleaner->G2p(TempText, Seq.PlaceHolderSymbol, Seq.AdditionalInfo, Seq.LanguageSymbol), Seq.PlaceHolderSymbol);
+					}
+					PhonemesPtr = &TempPhonemes;
+				}
+				else
+					PhonemesPtr = &iter.Phonemes;
+
+				PhonemeSeq.insert(PhonemeSeq.end(), PhonemesPtr->begin(), PhonemesPtr->end());
+				if (PhonemesPtr->size() == iter.Language.size())
+					for (const auto& langstr : iter.Language)
+						LanguageSeq.emplace_back(LanguageMap.find(langstr) != LanguageMap.end() ? LanguageMap.at(langstr) : _atoi64(langstr.c_str()));
+				else
+					LanguageSeq.insert(LanguageSeq.end(), PhonemesPtr->size(), CurLanguageIdx);
+				if (PhonemesPtr->size() == iter.Durations.size())
+					DurationSeq.insert(DurationSeq.end(), iter.Durations.begin(), iter.Durations.end());
+				if (PhonemesPtr->size() == iter.Tones.size())
+					ToneSeq.insert(ToneSeq.end(), iter.Tones.begin(), iter.Tones.end());
+				else
+					ToneSeq.insert(ToneSeq.end(), PhonemesPtr->size(), LanguageTones.at(Seq.LanguageSymbol));
+				for (size_t idxl = 0; idxl < PhonemesPtr->size(); ++idxl)
+				{
+					BertAligSeq.emplace_back(TokensIndex);
+					if (AddBlank)
+						BertAligSeq.emplace_back(TokensIndex);
+				}
+				++TokensIndex;
+			}
+			if ((AddBlank && BertAligSeq.size() == PhonemeSeq.size() * 2 + 1) || (!AddBlank && BertAligSeq.size() == PhonemeSeq.size()))
+				HasBertSeq = true;
+		}
+		else if (!Seq.TextSeq.empty())
+		{
+			PhonemeSeq = Cleaner->DictReplace(Cleaner->G2p(Seq.TextSeq, Seq.PlaceHolderSymbol, Seq.AdditionalInfo, Seq.LanguageSymbol), Seq.PlaceHolderSymbol);
+			LanguageSeq = std::vector(PhonemeSeq.size(), CurLanguageIdx);
+			ToneSeq = std::vector(PhonemeSeq.size(), LanguageTones.at(Seq.LanguageSymbol));
+		}
+		else
+		{
+			logger.log("[Info] Skip Empty TextSeq");
 			continue;
+		}
+
+		if(PhonemeSeq.empty())
+		{
+			logger.log("[Info] Skip Empty TextSeq");
+			continue;
+		}
 
 		if (!_Audio[0].empty())
 		{
@@ -327,11 +432,10 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 
 		std::mt19937 gen(static_cast<unsigned int>(Seq.Seed));
 		std::normal_distribution FloatRandFn(0.f, 1.f);
-		std::uniform_int_distribution IntRandFn(0, RAND_MAX);
 
 		std::vector<int64_t> TextSeq;
-		TextSeq.reserve(Seq.Seq.size() * 4 + 4);
-		for (const auto& it : Seq.Seq)
+		TextSeq.reserve(PhonemeSeq.size() * 4 + 4);
+		for (const auto& it : PhonemeSeq)
 		{
 			if (AddBlank)
 				TextSeq.push_back(0);
@@ -363,31 +467,31 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 		std::vector ToneIn(TextSeq.size(), 0i64);
 		if(UseTone)
 		{
-			if (ToneIn.size() == Seq.Tones.size())
-				ToneIn = Seq.Tones;
-			else if (AddBlank && ToneIn.size() == Seq.Tones.size() * 2 + 1)
+			if (ToneIn.size() == ToneSeq.size())
+				ToneIn = ToneSeq;
+			else if (AddBlank && ToneIn.size() == ToneSeq.size() * 2 + 1)
 				for (size_t i = 1; i < ToneIn.size(); i += 2)
-					ToneIn[i] = Seq.Tones[i / 2];
-			else if (ToneIn.size() * 2 + 1 == Seq.Tones.size())
-				for (size_t i = 1; i < Seq.Tones.size(); i += 2)
-					ToneIn[i / 2] = Seq.Tones[i];
+					ToneIn[i] = ToneSeq[i / 2];
+			else if (ToneIn.size() * 2 + 1 == ToneSeq.size())
+				for (size_t i = 1; i < ToneSeq.size(); i += 2)
+					ToneIn[i / 2] = ToneSeq[i];
 			EncoderInputs.push_back(Ort::Value::CreateTensor(
 				*memory_info, ToneIn.data(), TextSeqLength[0], TextSeqShape, 2));
 		}
-		std::vector LanguageIn(TextSeq.size(), Seq.TotLang);
+		std::vector LanguageIn(TextSeq.size(), CurLanguageIdx);
 		if(UseLanguage)
 		{
-			if (LanguageIn.size() == Seq.Language.size())
-				LanguageIn = Seq.Language;
-			else if (AddBlank && LanguageIn.size() == Seq.Language.size() * 2 + 1)
+			if (LanguageIn.size() == LanguageSeq.size())
+				LanguageIn = LanguageSeq;
+			else if (AddBlank && LanguageIn.size() == LanguageSeq.size() * 2 + 1)
 				for (size_t i = 1; i < LanguageIn.size(); i += 2)
 				{
-					LanguageIn[i] = Seq.Language[i / 2];
-					LanguageIn[i - 1] = Seq.Language[i / 2];
+					LanguageIn[i] = LanguageSeq[i / 2];
+					LanguageIn[i - 1] = LanguageSeq[i / 2];
 				}
-			else if (LanguageIn.size() * 2 + 1 == Seq.Language.size())
-				for (size_t i = 1; i < Seq.Language.size(); i += 2)
-					LanguageIn[i / 2] = Seq.Language[i];
+			else if (LanguageIn.size() * 2 + 1 == LanguageSeq.size())
+				for (size_t i = 1; i < LanguageSeq.size(); i += 2)
+					LanguageIn[i / 2] = LanguageSeq[i];
 			EncoderInputs.push_back(Ort::Value::CreateTensor(
 				*memory_info, LanguageIn.data(), TextSeqLength[0], TextSeqShape, 2));
 		}
@@ -398,48 +502,58 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 			for (size_t IndexOfBert = 0; IndexOfBert < sessionBert.size(); ++IndexOfBert)
 			{
 				auto& BertData = BertVecs[IndexOfBert];
-				if ((sessionBert[IndexOfBert] && (IndexOfBert == size_t(Seq.TotLang) ||
-					(IndexOfBert != size_t(Seq.TotLang) && sessionBert.size() == 1))) && BertEnabled)
+				const auto CurBertSession = sessionBert[BertNamesIdx[IndexOfBert]];
+				if ((CurBertSession && (IndexOfBert == size_t(CurLanguageIdx) ||
+					(IndexOfBert != size_t(CurLanguageIdx) && sessionBert.size() == 1))) &&
+					BertEnabled && HasBertSeq)
 				{
-					auto input_ids = Tokenizers[IndexOfBert](TextNormalize(Seq.SeqStr, Seq.TotLang));
+					auto input_ids = Tokenizers[IndexOfBert](TokenSeq);
 					std::vector<int64_t> attention_mask(input_ids.size(), 1), token_type_ids(input_ids.size(), 0);
 					int64_t AttentionShape[2] = { 1, (int64_t)input_ids.size() };
 					std::vector<Ort::Value> AttentionInput, AttentionOutput;
 					AttentionInput.emplace_back(Ort::Value::CreateTensor(
 						*memory_info, input_ids.data(), input_ids.size(), AttentionShape, 2));
-					if (sessionBert[IndexOfBert]->GetInputCount() == 3)
+					if (CurBertSession->GetInputCount() == 3)
 						AttentionInput.emplace_back(Ort::Value::CreateTensor(*memory_info, attention_mask.data(), attention_mask.size(), AttentionShape, 2));
 					AttentionInput.emplace_back(Ort::Value::CreateTensor(
 						*memory_info, token_type_ids.data(), token_type_ids.size(), AttentionShape, 2));
 					try
 					{
-						if(sessionBert[IndexOfBert]->GetInputCount() == 3)
+						if(CurBertSession->GetInputCount() == 3)
 						{
-							AttentionOutput = sessionBert[IndexOfBert]->Run(Ort::RunOptions{ nullptr },
+							AttentionOutput = CurBertSession->Run(Ort::RunOptions{ nullptr },
 							   BertInputNames.data(),
 							   AttentionInput.data(),
 							   3,
 							   BertOutputNames.data(),
 							   1);
 						}
-						else
+						else if (CurBertSession->GetInputCount() == 2)
 						{
-							AttentionOutput = sessionBert[IndexOfBert]->Run(Ort::RunOptions{ nullptr },
+							AttentionOutput = CurBertSession->Run(Ort::RunOptions{ nullptr },
 								BertInputNames2.data(),
 								AttentionInput.data(),
 								2,
 								BertOutputNames.data(),
 								1);
 						}
+						else
+						{
+							AttentionOutput = CurBertSession->Run(Ort::RunOptions{ nullptr },
+								BertInputNames3.data(),
+								AttentionInput.data(),
+								1,
+								BertOutputNames.data(),
+								1);
+						}
 					}
 					catch (Ort::Exception& e)
 					{
-						throw std::exception((std::string("Locate: Bert\n") + e.what()).c_str());
+						LibDLVoiceCodecThrow((std::string("Locate: Bert\n") + e.what()))
 					}
-					const auto AligmentMartix = AligPhoneAttn(Seq.Langstr, Seq.Seq, AttentionOutput[0].GetTensorTypeAndShapeInfo().GetShape()[0]);
 					const auto AttnData = AttentionOutput[0].GetTensorData<float>();
 					for (int64_t IndexOfSrcVector = 0; IndexOfSrcVector < TextSeqLength[0]; ++IndexOfSrcVector)
-						memcpy(BertData.data() + IndexOfSrcVector * 1024, AttnData + AligmentMartix[IndexOfSrcVector] * 1024, 1024 * sizeof(float));
+						memcpy(BertData.data() + IndexOfSrcVector * 1024, AttnData + BertAligSeq[IndexOfSrcVector] * 1024, 1024 * sizeof(float));
 				}
 				EncoderInputs.emplace_back(Ort::Value::CreateTensor(
 					*memory_info, BertData.data(), BertData.size(), BertShape, 2));
@@ -480,7 +594,7 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 					}
 					catch (Ort::Exception& e)
 					{
-						throw std::exception((std::string("Locate: emb\n") + e.what()).c_str());
+						LibDLVoiceCodecThrow((std::string("Locate: emb\n") + e.what()))
 					}
 					const auto GOutCount = EmbiddingOutput[0].GetTensorTypeAndShapeInfo().GetElementCount();
 					if (GOutShape.empty())
@@ -501,7 +615,7 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 			{
 				std::vector<Ort::Value> EmbiddingInput;
 				std::vector<Ort::Value> EmbiddingOutput;
-				int64_t Character[1] = { Seq.SpeakerId };
+				int64_t Character[1] = { SpeakerMap.find(Seq.SpeakerName) != SpeakerMap.end() ? SpeakerMap.at(Seq.SpeakerName) : _wtoi64(Seq.SpeakerName.c_str()) };
 				EmbiddingInput.push_back(Ort::Value::CreateTensor(
 					*memory_info, Character, 1, LengthShape, 1));
 				try
@@ -515,7 +629,7 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 				}
 				catch (Ort::Exception& e)
 				{
-					throw std::exception((std::string("Locate: emb\n") + e.what()).c_str());
+					LibDLVoiceCodecThrow((std::string("Locate: emb\n") + e.what()))
 				}
 				const auto GOutCount = EmbiddingOutput[0].GetTensorTypeAndShapeInfo().GetElementCount();
 				GEmbidding = std::vector(EmbiddingOutput[0].GetTensorData<float>(), EmbiddingOutput[0].GetTensorData<float>() + GOutCount);
@@ -537,7 +651,7 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 		}
 		catch (Ort::Exception& e)
 		{
-			throw std::exception((std::string("Locate: enc_p\n") + e.what()).c_str());
+			LibDLVoiceCodecThrow((std::string("Locate: enc_p\n") + e.what()))
 		}
 
 		std::vector<float>
@@ -549,7 +663,7 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 
 		std::vector w_ceil(TextSeqLength[0], 1.f);
 		bool enable_dp = false;
-		if (Seq.Durations.size() == w_ceil.size() || Seq.Durations.size() == w_ceil.size() / 2)
+		if (DurationSeq.size() == w_ceil.size() || DurationSeq.size() == w_ceil.size() / 2)
 			enable_dp = true;
 		
 		const int64_t zinputShape[3] = { xshape[0],2,xshape[2] };
@@ -578,7 +692,7 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 			}
 			catch (Ort::Exception& e)
 			{
-				throw std::exception((std::string("Locate: dp\n") + e.what()).c_str());
+				LibDLVoiceCodecThrow((std::string("Locate: dp\n") + e.what()))
 			}
 			const auto w_data = StochasticDurationPredictorOutput[0].GetTensorMutableData<float>();
 			const auto w_data_length = StochasticDurationPredictorOutput[0].GetTensorTypeAndShapeInfo().GetElementCount();
@@ -607,7 +721,7 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 			}
 			catch (Ort::Exception& e)
 			{
-				throw std::exception((std::string("Locate: dp\n") + e.what()).c_str());
+				LibDLVoiceCodecThrow((std::string("Locate: dp\n") + e.what()))
 			}
 			const auto w_data = DurationPredictorOutput[0].GetTensorMutableData<float>();
 			const auto w_data_length = DurationPredictorOutput[0].GetTensorTypeAndShapeInfo().GetElementCount();
@@ -622,12 +736,12 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 		}
 		if(enable_dp)
 		{
-			if (Seq.Durations.size() == TextSeq.size())
+			if (DurationSeq.size() == TextSeq.size())
 				for (size_t i = 0; i < w_ceil.size(); ++i)
-					w_ceil[i] = float(Seq.Durations[i]);
-			else if (AddBlank && Seq.Durations.size() == TextSeq.size() / 2ull)
-				for (size_t i = 0; i < Seq.Durations.size(); ++i)
-					w_ceil[1 + i * 2] = float(Seq.Durations[i]);
+					w_ceil[i] = float(DurationSeq[i]);
+			else if (AddBlank && DurationSeq.size() == TextSeq.size() / 2ull)
+				for (size_t i = 0; i < DurationSeq.size(); ++i)
+					w_ceil[1 + i * 2] = float(DurationSeq[i]);
 		}
 		CustomDurationCallback(w_ceil);
 		const auto maskSize = x_mask.size();
@@ -684,7 +798,7 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 		}
 		catch (Ort::Exception& e)
 		{
-			throw std::exception((std::string("Locate: dec & flow\n") + e.what()).c_str());
+			LibDLVoiceCodecThrow((std::string("Locate: dec & flow\n") + e.what()))
 		}
 		FlowDecInputs[0] = std::move(FlowDecOutputs[0]);
 		if (sessionEmb)
@@ -702,7 +816,7 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 		}
 		catch (Ort::Exception& e)
 		{
-			throw std::exception((std::string("Locate: dec & flow\n") + e.what()).c_str());
+			LibDLVoiceCodecThrow((std::string("Locate: dec & flow\n") + e.what()))
 		}
 		const auto shapeOut = FlowDecOutputs[0].GetTensorTypeAndShapeInfo().GetShape();
 		const auto outData = FlowDecOutputs[0].GetTensorData<float>();

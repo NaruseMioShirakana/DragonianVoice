@@ -78,7 +78,7 @@ std::vector<std::wstring> MoeVoiceStudioModule::GetOpenFileNameMoeVS()
 		}
 	}
 	if(OFNLIST.empty())
-		throw std::exception("Please Select Files");
+		LibDLVoiceCodecThrow("Please Select Files");
 	return OFNLIST;
 #else
 #endif
@@ -159,7 +159,7 @@ void OnnxModule::ChangeDevice(Device _dev)
 				if (it.find("CUDA") != std::string::npos)
 					ret = false;
 			if (ret)
-				throw std::exception("CUDA Provider Not Found");
+				LibDLVoiceCodecThrow("CUDA Provider Not Found");
 			OrtCUDAProviderOptions cuda_option;
 			cuda_option.device_id = int(__MoeVSGPUID);
 			session_options = new Ort::SessionOptions;
@@ -179,7 +179,7 @@ void OnnxModule::ChangeDevice(Device _dev)
 				if (it.find("Dml") != std::string::npos)
 					ret = it;
 			if (ret.empty())
-				throw std::exception("DML Provider Not Found");
+				LibDLVoiceCodecThrow("DML Provider Not Found");
 			const OrtApi& ortApi = Ort::GetApi();
 			const OrtDmlApi* ortDmlApi = nullptr;
 			ortApi.GetExecutionProviderApi("DML", ORT_API_VERSION, reinterpret_cast<const void**>(&ortDmlApi));

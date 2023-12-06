@@ -1,10 +1,10 @@
 ﻿#include "MoeVSG2P.hpp"
 #include "MJson.h"
 #include "../../StringPreprocess.hpp"
+#include "../../InferTools/inferTools.hpp"
 #include <fstream>
 
 MoeVoiceStudioG2PHeader
-
 std::wregex SignRegex(L"[!@#$%^&*()_+\\-=`~,./;'\\[\\]<>?:\"{}|\\\\。？！，、；：“”‘’『』「」（）〔〕【】─…·—～《》〈〉]+");
 std::wregex WordRegex(L"[^!@#$%^&*()_+\\-=`~,./;'\\[\\]<>?:\"{}|\\\\。？！，、；：“”‘’『』「」（）〔〕【】─…·—～《》〈〉]+");
 std::wregex BlankRegex(L"[ ]+");
@@ -119,11 +119,11 @@ char MoeVoiceStudioG2PApi::Load(const std::wstring& PluginName)
 }
 
 std::wstring MoeVoiceStudioG2PApi::functionAPI(const std::wstring& inputLen, const std::wstring& placeholderSymbol,
-	const std::wstring& extraInfo, int64_t languageID) const
+	const std::wstring& extraInfo, const std::string& languageID) const
 {
 	if (func)
 	{
-		const auto tmp = func(inputLen.c_str(), placeholderSymbol.c_str(), extraInfo.c_str(), languageID);
+		const auto tmp = func(inputLen.c_str(), placeholderSymbol.c_str(), extraInfo.c_str(), languageID.c_str());
 		std::wstring ret = tmp;
 		return ret;
 	}
@@ -158,14 +158,14 @@ void MVSDict::GetDict(const std::wstring& path)
 	std::string phoneInfo, phoneInfoAll;
 	std::ifstream phonefile(path.c_str());
 	if (!phonefile.is_open())
-		throw std::exception("phone file not found");
+		LibDLVoiceCodecThrow("phone file not found")
 	while (std::getline(phonefile, phoneInfo))
 		phoneInfoAll += phoneInfo;
 	phonefile.close();
 	MJson PhoneJson;
 	PhoneJson.Parse(phoneInfoAll);
 	if (PhoneJson.HasParseError())
-		throw std::exception("json file error");
+		LibDLVoiceCodecThrow("json file error")
 	for (const auto& itr : PhoneJson.GetMemberArray())
 	{
 		std::wstring Key = to_wide_string(itr.first);
@@ -246,7 +246,7 @@ void Tokenizer::load(const std::wstring& _Path)
 		_VocabJson["Type"].Empty() ||
 		!_VocabJson["ContinuingSubwordPrefix"].IsString() ||
 		!_VocabJson["Type"].IsString())
-		throw std::exception("Vocab.json Error");
+		LibDLVoiceCodecThrow("Vocab.json Error")
 	const std::string Type = _VocabJson["Type"].GetString();
 	if (Type == "Unigram") Model = TokenizerModel::Unigram;
 	Symbol = to_wide_string(_VocabJson["ContinuingSubwordPrefix"].GetString());
@@ -295,14 +295,13 @@ void Tokenizer::loadDict(const std::wstring& _Path) const
 		Cleaner->loadDict(_Path);
 }
 
-std::vector<Tokenizer::TokenizerType> Tokenizer::UnigramMethod(const std::wstring& Seq, size_t MaxWordLength, TokenizerMethod Method) const
+std::vector<std::wstring> Tokenizer::UnigramMethod(const std::wstring& Seq, size_t MaxWordLength, TokenizerMethod Method) const
 {
 	if (Seq.empty())
 		return {};
 	//auto SeqVector = SplitString(Seq, SignRegex);
-	std::vector<TokenizerType> Tokens;
-	Tokens.emplace_back(Vocab.at(L"[CLS]"));
-	const auto UNKId = Vocab.at(L"[UNK]");
+	std::vector<std::wstring> Tokens;
+	Tokens.emplace_back(L"[CLS]");
 	std::wstring SeqWord = Seq;
 	if (Method == TokenizerMethod::Left)
 	{
@@ -319,7 +318,7 @@ std::vector<Tokenizer::TokenizerType> Tokenizer::UnigramMethod(const std::wstrin
 					const auto SearchResult = Vocab.find(Symbol + SeqWord.substr(0, SearchLength - SubVal));
 					if (SearchResult != Vocab.end())
 					{
-						Tokens.emplace_back(SearchResult->second);
+						Tokens.emplace_back(SearchResult->first);
 						SeqWord = SeqWord.substr(SearchLength - SubVal);
 						FirstTime = false;
 						break;
@@ -328,7 +327,7 @@ std::vector<Tokenizer::TokenizerType> Tokenizer::UnigramMethod(const std::wstrin
 				const auto SearchResult = Vocab.find(SeqWord.substr(0, SearchLength));
 				if (SearchResult != Vocab.end())
 				{
-					Tokens.emplace_back(SearchResult->second);
+					Tokens.emplace_back(SearchResult->first);
 					SeqWord = SeqWord.substr(SearchLength);
 					if (FirstTime) FirstTime = false;
 					break;
@@ -341,31 +340,30 @@ std::vector<Tokenizer::TokenizerType> Tokenizer::UnigramMethod(const std::wstrin
 					{
 						const auto SearchR = Vocab.find(SearchRes->second);
 						if (SearchR != Vocab.end())
-							Tokens.emplace_back(SearchR->second);
+							Tokens.emplace_back(SearchR->first);
 						SeqWord = SeqWord.substr(1);
 						break;
 					}
-					if (Tokens.empty() || Tokens.back() != UNKId)
-						Tokens.emplace_back(UNKId);
+					if (Tokens.empty() || Tokens.back() != L"[UNK]")
+						Tokens.emplace_back(SubStr);
 					SeqWord = SeqWord.substr(1);
 				}
 			}
 		}
 	}
 	else
-		throw std::exception("NotImplementedError");
-	Tokens.emplace_back(Vocab.at(L"[SEP]"));
+		LibDLVoiceCodecThrow("NotImplementedError")
+	Tokens.emplace_back(L"[SEP]");
 	return Tokens;
 }
 
-std::vector<Tokenizer::TokenizerType> Tokenizer::WordPieceMethod(const std::wstring& Seq, size_t MaxWordLength, TokenizerMethod Method) const
+std::vector<std::wstring> Tokenizer::WordPieceMethod(const std::wstring& Seq, size_t MaxWordLength, TokenizerMethod Method) const
 {
 	if (Seq.empty())
 		return {};
 	auto SeqVector = SplitString(Seq, SignRegex);
-	std::vector<TokenizerType> Tokens;
-	Tokens.emplace_back(Vocab.at(L"[CLS]"));
-	const auto UNKId = Vocab.at(L"[UNK]");
+	std::vector<std::wstring> Tokens;
+	Tokens.emplace_back(L"[CLS]");
 	if (Method == TokenizerMethod::Left)
 	{
 		for (auto& SeqWord : SeqVector)
@@ -377,9 +375,9 @@ std::vector<Tokenizer::TokenizerType> Tokenizer::WordPieceMethod(const std::wstr
 				{
 					const auto SearchResult = Vocab.find(SeqWord.substr(0, 1));
 					if (SearchResult != Vocab.end())
-						Tokens.emplace_back(SearchResult->second);
+						Tokens.emplace_back(SearchResult->first);
 					else
-						Tokens.emplace_back(UNKId);
+						Tokens.emplace_back(SeqWord.substr(0, 1));
 					SeqWord = SeqWord.substr(1);
 					continue;
 				}
@@ -393,7 +391,7 @@ std::vector<Tokenizer::TokenizerType> Tokenizer::WordPieceMethod(const std::wstr
 						const auto SearchResult = Vocab.find(Symbol + SeqWord.substr(0, SearchLength - SubVal));
 						if (SearchResult != Vocab.end())
 						{
-							Tokens.emplace_back(SearchResult->second);
+							Tokens.emplace_back(SearchResult->first);
 							SeqWord = SeqWord.substr(SearchLength - SubVal);
 							break;
 						}
@@ -401,7 +399,7 @@ std::vector<Tokenizer::TokenizerType> Tokenizer::WordPieceMethod(const std::wstr
 					const auto SearchResult = Vocab.find(SeqWord.substr(0, SearchLength));
 					if (SearchResult != Vocab.end())
 					{
-						Tokens.emplace_back(SearchResult->second);
+						Tokens.emplace_back(SearchResult->first);
 						SeqWord = SeqWord.substr(SearchLength);
 						if (FirstTime) FirstTime = false;
 						break;
@@ -414,12 +412,12 @@ std::vector<Tokenizer::TokenizerType> Tokenizer::WordPieceMethod(const std::wstr
 						{
 							const auto SearchR = Vocab.find(SearchRes->second);
 							if (SearchR != Vocab.end())
-								Tokens.emplace_back(SearchR->second);
+								Tokens.emplace_back(SearchR->first);
 							SeqWord = SeqWord.substr(1);
 							break;
 						}
-						if (Tokens.empty() || Tokens.back() != UNKId)
-							Tokens.emplace_back(UNKId);
+						if (Tokens.empty() || Tokens.back() != L"[UNK]")
+							Tokens.emplace_back(SubStr);
 						SeqWord = SeqWord.substr(1);
 					}
 				}
@@ -427,12 +425,27 @@ std::vector<Tokenizer::TokenizerType> Tokenizer::WordPieceMethod(const std::wstr
 		}
 	}
 	else
-		throw std::exception("NotImplementedError");
-	Tokens.emplace_back(Vocab.at(L"[SEP]"));
+		LibDLVoiceCodecThrow("NotImplementedError")
+	Tokens.emplace_back(L"[SEP]");
 	return Tokens;
 }
 
-std::vector<Tokenizer::TokenizerType> Tokenizer::operator()(const std::wstring& Seq, size_t MaxWordLength, TokenizerMethod Method) const
+std::vector<Tokenizer::TokenizerType> Tokenizer::operator()(const std::vector<std::wstring>& Seq) const
+{
+	std::vector<TokenizerType> Tokens;
+	const auto UNKID = Vocab.at(L"[UNK]");
+	for (const auto& iter : Seq)
+	{
+		const auto res = Vocab.find(iter);
+		if (res != Vocab.end())
+			Tokens.emplace_back(res->second);
+		else if(Tokens.empty() || Tokens.back() != UNKID)
+			Tokens.emplace_back(UNKID);
+	}
+	return Tokens;
+}
+
+std::vector<std::wstring> Tokenizer::Tokenize(const std::wstring& Seq, size_t MaxWordLength, TokenizerMethod Method) const
 {
 	if (Model == TokenizerModel::WordPiece)
 		return WordPieceMethod(Seq, MaxWordLength, Method);

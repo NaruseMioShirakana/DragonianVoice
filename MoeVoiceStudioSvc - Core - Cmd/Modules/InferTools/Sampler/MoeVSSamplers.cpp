@@ -47,7 +47,7 @@ std::vector<Ort::Value> PndmSampler::Sample(std::vector<Ort::Value>& Tensors, in
 			}
 			catch (Ort::Exception& e1)
 			{
-				throw std::exception((std::string("Locate: denoise\n") + e1.what()).c_str());
+				LibDLVoiceCodecThrow((std::string("Locate: denoise\n") + e1.what()).c_str());
 			}
 
 			noiseList.emplace_back(std::vector<float>(DenoiseOut[0].GetTensorData<float>(),
@@ -70,7 +70,7 @@ std::vector<Ort::Value> PndmSampler::Sample(std::vector<Ort::Value>& Tensors, in
 			}
 			catch (Ort::Exception& e1)
 			{
-				throw std::exception((std::string("Locate: pred\n") + e1.what()).c_str());
+				LibDLVoiceCodecThrow((std::string("Locate: pred\n") + e1.what()).c_str());
 			}
 			DenoiseIn[0] = std::move(PredOut[0]); // x_pred
 			DenoiseIn[1] = std::move(PredIn[3]); // time_prev
@@ -86,7 +86,7 @@ std::vector<Ort::Value> PndmSampler::Sample(std::vector<Ort::Value>& Tensors, in
 			}
 			catch (Ort::Exception& e1)
 			{
-				throw std::exception((std::string("Locate: denoise\n") + e1.what()).c_str());
+				LibDLVoiceCodecThrow((std::string("Locate: denoise\n") + e1.what()).c_str());
 			}
 			auto noise_pred_prev = DenoiseOut[0].GetTensorMutableData<float>();
 			for (const auto it : noiseList[0])
@@ -113,7 +113,7 @@ std::vector<Ort::Value> PndmSampler::Sample(std::vector<Ort::Value>& Tensors, in
 			}
 			catch (Ort::Exception& e1)
 			{
-				throw std::exception((std::string("Locate: denoise\n") + e1.what()).c_str());
+				LibDLVoiceCodecThrow((std::string("Locate: denoise\n") + e1.what()).c_str());
 			}
 			if (noiseList.size() < 4)
 				noiseList.emplace_back(std::vector<float>(DenoiseOut[0].GetTensorData<float>(), DenoiseOut[0].GetTensorData<float>() + DenoiseOut[0].GetTensorTypeAndShapeInfo().GetElementCount()));
@@ -148,7 +148,7 @@ std::vector<Ort::Value> PndmSampler::Sample(std::vector<Ort::Value>& Tensors, in
 		}
 		catch (Ort::Exception& e1)
 		{
-			throw std::exception((std::string("Locate: pred\n") + e1.what()).c_str());
+			LibDLVoiceCodecThrow((std::string("Locate: pred\n") + e1.what()).c_str());
 		}
 		_callback(++Process, 1);
 	}
@@ -195,7 +195,7 @@ std::vector<Ort::Value> DDimSampler::Sample(std::vector<Ort::Value>& Tensors, in
 		}
 		catch (Ort::Exception& e1)
 		{
-			throw std::exception((std::string("Locate: alphas\n") + e1.what()).c_str());
+			LibDLVoiceCodecThrow((std::string("Locate: alphas\n") + e1.what()).c_str());
 		}
 		try
 		{
@@ -208,7 +208,7 @@ std::vector<Ort::Value> DDimSampler::Sample(std::vector<Ort::Value>& Tensors, in
 		}
 		catch (Ort::Exception& e1)
 		{
-			throw std::exception((std::string("Locate: denoise\n") + e1.what()).c_str());
+			LibDLVoiceCodecThrow((std::string("Locate: denoise\n") + e1.what()).c_str());
 		}
 		const auto x = DenoiseIn[0].GetTensorMutableData<float>();
 		const auto noise_pred = DenoiseOut[0].GetTensorMutableData<float>();

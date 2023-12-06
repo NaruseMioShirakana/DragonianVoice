@@ -1,4 +1,5 @@
 ﻿#include "MoeVSKmeansCluster.hpp"
+#include "../inferTools.hpp"
 
 std::vector<float> MoeVoiceStudioCluster::KMeansCluster::find(float* point, long sid, int64_t n_points)
 {
@@ -22,7 +23,7 @@ MoeVoiceStudioCluster::KMeansCluster::KMeansCluster(const std::wstring& _path, s
 	FILE* file = nullptr;
 	_wfopen_s(&file, (_path + L"/KMeans.npy").c_str(), L"rb");
 	if (!file)
-		throw std::exception("KMeansFileNotExist");
+		LibDLVoiceCodecThrow("KMeansFileNotExist");
 	constexpr long idx = 128;
 	fseek(file, idx, SEEK_SET);
 	std::vector<float> tmpData(hidden_size);

@@ -1,6 +1,7 @@
 ﻿#include "BaseF0Extractor.hpp"
 #include <map>
 #include "../../../Logger/MoeSSLogger.hpp"
+#include "../../inferTools.hpp"
 
 MoeVSF0Extractor::BaseF0Extractor::BaseF0Extractor(int sampling_rate, int hop_size, int n_f0_bins, double max_f0, double min_f0) :
 	fs(sampling_rate),
@@ -26,7 +27,7 @@ std::vector<double> MoeVSF0Extractor::BaseF0Extractor::arange(double start, doub
 
 std::vector<float> MoeVSF0Extractor::BaseF0Extractor::ExtractF0(const std::vector<double>& PCMData, size_t TargetLength)
 {
-	throw std::exception("NotImplementedError");
+	LibDLVoiceCodecThrow("NotImplementedError");
 }
 
 std::vector<float> MoeVSF0Extractor::BaseF0Extractor::ExtractF0(const std::vector<float>& PCMData, size_t TargetLength)

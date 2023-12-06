@@ -37,22 +37,22 @@ VitsSvc::VitsSvc(const MJson& _Config, const ProgressCallback& _ProgressCallback
 
 	//Check Folder
 	if (_Config["Folder"].IsNull())
-		throw std::exception("[Error] Missing field \"folder\" (Model Folder)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"folder\" (Model Folder)");
 	if (!_Config["Folder"].IsString())
-		throw std::exception("[Error] Field \"folder\" (Model Folder) Must Be String");
+		LibDLVoiceCodecThrow("[Error] Field \"folder\" (Model Folder) Must Be String");
 	const auto _folder = to_wide_string(_Config["Folder"].GetString());
 	const auto cluster_folder = GetCurrentFolder() + L"/Models/" + _folder;
 	if (_folder.empty())
-		throw std::exception("[Error] Field \"folder\" (Model Folder) Can Not Be Empty");
+		LibDLVoiceCodecThrow("[Error] Field \"folder\" (Model Folder) Can Not Be Empty");
 	const std::wstring _path = GetCurrentFolder() + L"/Models/" + _folder + L"/" + _folder;
 
 	if (_Config["Hubert"].IsNull())
-		throw std::exception("[Error] Missing field \"Hubert\" (Hubert Folder)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"Hubert\" (Hubert Folder)");
 	if (!_Config["Hubert"].IsString())
-		throw std::exception("[Error] Field \"Hubert\" (Hubert Folder) Must Be String");
+		LibDLVoiceCodecThrow("[Error] Field \"Hubert\" (Hubert Folder) Must Be String");
 	const std::wstring HuPath = to_wide_string(_Config["Hubert"].GetString());
 	if (HuPath.empty())
-		throw std::exception("[Error] Field \"Hubert\" (Hubert Folder) Can Not Be Empty");
+		LibDLVoiceCodecThrow("[Error] Field \"Hubert\" (Hubert Folder) Can Not Be Empty");
 
 	std::map<std::string, std::wstring> _PathDict;
 	_PathDict["Cluster"] = cluster_folder;
@@ -86,11 +86,11 @@ void VitsSvc::load(const std::map<std::string, std::wstring>& _PathDict, const M
 
 	//Check SamplingRate
 	if (_Config["Rate"].IsNull())
-		throw std::exception("[Error] Missing field \"Rate\" (SamplingRate)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"Rate\" (SamplingRate)");
 	if (_Config["Rate"].IsInt() || _Config["Rate"].IsInt64())
 		_samplingRate = _Config["Rate"].GetInt();
 	else
-		throw std::exception("[Error] Field \"Rate\" (SamplingRate) Must Be Int/Int64");
+		LibDLVoiceCodecThrow("[Error] Field \"Rate\" (SamplingRate) Must Be Int/Int64");
 
 	logger.log(L"[Info] Current Sampling Rate is" + std::to_wstring(_samplingRate));
 
@@ -110,11 +110,11 @@ void VitsSvc::load(const std::map<std::string, std::wstring>& _PathDict, const M
 
 #ifdef MOEVSDMLPROVIDER
 	if (ExecutionProvider_ == ExecutionProviders::DML && VitsSvcVersion == L"SoVits4.0-DDSP")
-		throw std::exception("[Error] DirectXMl Not Support SoVits4.0V2, Please Use Cuda Or Cpu");
+		LibDLVoiceCodecThrow("[Error] DirectXMl Not Support SoVits4.0V2, Please Use Cuda Or Cpu");
 #endif
 
 	if (!(_Config["Hop"].IsInt() || _Config["Hop"].IsInt64()))
-		throw std::exception("[Error] Hop Must Exist And Must Be Int");
+		LibDLVoiceCodecThrow("[Error] Hop Must Exist And Must Be Int");
 	HopSize = _Config["Hop"].GetInt();
 
 	if (!(_Config["HiddenSize"].IsInt() || _Config["HiddenSize"].IsInt64()))
@@ -147,7 +147,7 @@ void VitsSvc::load(const std::map<std::string, std::wstring>& _PathDict, const M
 	}
 
 	if (HopSize < 1)
-		throw std::exception("[Error] Hop Must > 0");
+		LibDLVoiceCodecThrow("[Error] Hop Must > 0");
 
 	if (_Config["Volume"].IsBool())
 		EnableVolume = _Config["Volume"].GetBool();
@@ -173,7 +173,7 @@ void VitsSvc::load(const std::map<std::string, std::wstring>& _PathDict, const M
 	catch (Ort::Exception& _exception)
 	{
 		Destory();
-		throw std::exception(_exception.what());
+		LibDLVoiceCodecThrow(_exception.what());
 	}
 
 	if (VitsSvcModel->GetInputCount() == 4 && VitsSvcVersion != L"SoVits3.0")
@@ -229,7 +229,7 @@ void VitsSvc::load(const std::map<std::string, std::wstring>& _PathDict, const M
 	catch (std::exception& e)
 	{
 		Destory();
-		throw std::exception(e.what());
+		LibDLVoiceCodecThrow(e.what());
 	}
 }
 
@@ -240,9 +240,9 @@ std::vector<int16_t> VitsSvc::InferBatch() const
 	std::wstring RawPath;
 	int ret = InsertMessageToEmptyEditBox(RawPath);
 	if (ret == -1)
-		throw std::exception("TTS Does Not Support Automatic Completion");
+		LibDLVoiceCodecThrow("TTS Does Not Support Automatic Completion");
 	if (ret == -2)
-		throw std::exception("Please Select Files");
+		LibDLVoiceCodecThrow("Please Select Files");
 	RawPath += L'\n';
 	std::vector<std::wstring> _Lens = CutLens(RawPath);
 	const auto params = _get_init_params();
@@ -290,7 +290,7 @@ std::vector<int16_t> VitsSvc::InferBatch() const
 		auto info = cutWav(RawWav, threshold, minLen, static_cast<unsigned short>(frame_len), static_cast<unsigned short>(frame_shift));
 		for (size_t i = 1; i < info.cutOffset.size(); ++i)
 			if ((info.cutOffset[i] - info.cutOffset[i - 1]) / RawWav.getHeader().bytesPerSec > 90)
-				throw std::exception("Reached max slice length, please change slicer param");
+				LibDLVoiceCodecThrow("Reached max slice length, please change slicer param");
 
 		const auto LenFactor = ((double)16000 / (double)_samplingRate);
 		_callback(proc, info.cutTag.size());
@@ -330,7 +330,7 @@ std::vector<int16_t> VitsSvc::InferBatch() const
 				}
 				catch (Ort::Exception& e)
 				{
-					throw std::exception((std::string("Locate: hubert\n") + e.what()).c_str());
+					LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()).c_str());
 				}
 				auto hubertOutData = hubertOut[0].GetTensorMutableData<float>();
 				auto hubertOutLen = hubertOut[0].GetTensorTypeAndShapeInfo().GetElementCount();
@@ -364,7 +364,7 @@ std::vector<int16_t> VitsSvc::InferBatch() const
 						inputPitch2 = featureInput.GetF0AndOtherInput3(source.data(), (long long)len, (long long)hubertOutShape[1], (long long)tran);
 					}
 					else
-						throw std::exception("SoVits3.0 Only Support Sr: 48K,32K");
+						LibDLVoiceCodecThrow("SoVits3.0 Only Support Sr: 48K,32K");
 				}
 				else if (SV4)
 				{
@@ -453,7 +453,7 @@ std::vector<int16_t> VitsSvc::InferBatch() const
 				}
 				catch (Ort::Exception& e)
 				{
-					throw std::exception((std::string("Locate: sovits\n") + e.what()).c_str());
+					LibDLVoiceCodecThrow((std::string("Locate: sovits\n") + e.what()).c_str());
 				}
 
 				const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();
@@ -519,14 +519,14 @@ std::vector<Ort::Value> VitsSvc::InferSliceTensor(const MoeVSProjectSpace::MoeVS
 	}
 	catch (Ort::Exception& e)
 	{
-		throw std::exception((std::string("Locate: hubert\n") + e.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()).c_str());
 	}
 	auto HubertSize = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetElementCount();
 	auto HubertOutPutData = HubertOutPuts[0].GetTensorMutableData<float>();
 	auto HubertOutPutShape = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetShape();
 	HubertInputTensors.clear();
 	if (HubertOutPutShape[2] != HiddenUnitKDims)
-		throw std::exception("HiddenUnitKDims UnMatch");
+		LibDLVoiceCodecThrow("HiddenUnitKDims UnMatch");
 
 	std::vector srcHiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
 
@@ -726,13 +726,13 @@ std::vector<int16_t> VitsSvc::SliceInference(const MoeVSProjectSpace::MoeVSAudio
 			}
 			catch (Ort::Exception& e)
 			{
-				throw std::exception((std::string("Locate: hubert\n") + e.what()).c_str());
+				LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()).c_str());
 			}
 			const auto HubertSize = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetElementCount();
 			const auto HubertOutPutData = HubertOutPuts[0].GetTensorMutableData<float>();
 			auto HubertOutPutShape = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetShape();
 			if (HubertOutPutShape[2] != HiddenUnitKDims)
-				throw std::exception("HiddenUnitKDims UnMatch");
+				LibDLVoiceCodecThrow("HiddenUnitKDims UnMatch");
 
 			std::vector srcHiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
 
@@ -792,7 +792,7 @@ std::vector<int16_t> VitsSvc::SliceInference(const MoeVSProjectSpace::MoeVSAudio
 			}
 			catch (Ort::Exception& e)
 			{
-				throw std::exception((std::string("Locate: VitsSvc\n") + e.what()).c_str());
+				LibDLVoiceCodecThrow((std::string("Locate: VitsSvc\n") + e.what()).c_str());
 			}
 
 			const auto dstWavLen = (_Slice.OrgLen[slice] * int64_t(_samplingRate)) / 48000;
@@ -911,14 +911,14 @@ std::vector<int16_t> VitsSvc::InferPCMData(const std::vector<int16_t>& PCMData, 
 	}
 	catch (Ort::Exception& e)
 	{
-		throw std::exception((std::string("Locate: hubert\n") + e.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()).c_str());
 	}
 	auto HubertSize = hubertOut[0].GetTensorTypeAndShapeInfo().GetElementCount();
 	auto HubertOutPutData = hubertOut[0].GetTensorMutableData<float>();
 	auto HubertOutPutShape = hubertOut[0].GetTensorTypeAndShapeInfo().GetShape();
 	inputTensorshu.clear();
 	if (HubertOutPutShape[2] != HiddenUnitKDims)
-		throw std::exception("HiddenUnitKDims UnMatch");
+		LibDLVoiceCodecThrow("HiddenUnitKDims UnMatch");
 
 	std::vector srcHiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
 
@@ -1108,7 +1108,7 @@ std::vector<Ort::Value> VitsSvc::MelExtractor(const float* PCMAudioBegin, const 
 	}
 	catch (Ort::Exception& e)
 	{
-		throw std::exception((std::string("Locate: ShallowDiffusionStftOperator\n") + e.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: ShallowDiffusionStftOperator\n") + e.what()).c_str());
 	}
 }
 
@@ -1207,7 +1207,7 @@ void VitsSvc::StartRT(Mui::Window::UIWindowBasic* window, const MoeVSProjectSpac
 						outputBuffer.clear();
 						rawInputBuffer.clear();
 						rawOutputBuffer.clear();
-						throw std::exception(e.what());
+						LibDLVoiceCodecThrow(e.what());
 					}
 				}
 				if (inputBuffer.size() > 100)

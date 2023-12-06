@@ -50,53 +50,53 @@ DiffusionSvc::DiffusionSvc(const MJson& _Config, const ProgressCallback& _Progre
 
 	//Check Folder
 	if (_Config["Folder"].IsNull())
-		throw std::exception("[Error] Missing field \"folder\" (Model Folder)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"folder\" (Model Folder)");
 	if (!_Config["Folder"].IsString())
-		throw std::exception("[Error] Field \"folder\" (Model Folder) Must Be String");
+		LibDLVoiceCodecThrow("[Error] Field \"folder\" (Model Folder) Must Be String");
 	const auto _folder = to_wide_string(_Config["Folder"].GetString());
 	if (_folder.empty())
-		throw std::exception("[Error] Field \"folder\" (Model Folder) Can Not Be Empty");
+		LibDLVoiceCodecThrow("[Error] Field \"folder\" (Model Folder) Can Not Be Empty");
 	const std::wstring _path = GetCurrentFolder() + L"/Models/" + _folder + L"/" + _folder;
 	const auto cluster_folder = GetCurrentFolder() + L"/Models/" + _folder;
 	if (_Config["Hubert"].IsNull())
-		throw std::exception("[Error] Missing field \"Hubert\" (Hubert Folder)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"Hubert\" (Hubert Folder)");
 	if (!_Config["Hubert"].IsString())
-		throw std::exception("[Error] Field \"Hubert\" (Hubert Folder) Must Be String");
+		LibDLVoiceCodecThrow("[Error] Field \"Hubert\" (Hubert Folder) Must Be String");
 	const std::wstring HuPath = to_wide_string(_Config["Hubert"].GetString());
 	if (HuPath.empty())
-		throw std::exception("[Error] Field \"Hubert\" (Hubert Folder) Can Not Be Empty");
+		LibDLVoiceCodecThrow("[Error] Field \"Hubert\" (Hubert Folder) Can Not Be Empty");
 
 	if (_Config["Hifigan"].IsNull())
-		throw std::exception("[Error] Missing field \"Hifigan\" (Hifigan Folder)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"Hifigan\" (Hifigan Folder)");
 	if (!_Config["Hifigan"].IsString())
-		throw std::exception("[Error] Field \"Hifigan\" (Hifigan Folder) Must Be String");
+		LibDLVoiceCodecThrow("[Error] Field \"Hifigan\" (Hifigan Folder) Must Be String");
 	const std::wstring HifiganPath = to_wide_string(_Config["Hifigan"].GetString());
 	if (HifiganPath.empty())
-		throw std::exception("[Error] Field \"Hifigan\" (Hifigan Folder) Can Not Be Empty");
+		LibDLVoiceCodecThrow("[Error] Field \"Hifigan\" (Hifigan Folder) Can Not Be Empty");
 
 	//Check SamplingRate
 	if (_Config["Rate"].IsNull())
-		throw std::exception("[Error] Missing field \"Rate\" (SamplingRate)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"Rate\" (SamplingRate)");
 	if (_Config["Rate"].IsInt() || _Config["Rate"].IsInt64())
 		_samplingRate = _Config["Rate"].GetInt();
 	else
-		throw std::exception("[Error] Field \"Rate\" (SamplingRate) Must Be Int/Int64");
+		LibDLVoiceCodecThrow("[Error] Field \"Rate\" (SamplingRate) Must Be Int/Int64");
 
 	logger.log(L"[Info] Current Sampling Rate is" + std::to_wstring(_samplingRate));
 
 	if (_Config["MelBins"].IsNull())
-		throw std::exception("[Error] Missing field \"MelBins\" (MelBins)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"MelBins\" (MelBins)");
 	if (_Config["MelBins"].IsInt() || _Config["MelBins"].IsInt64())
 		melBins = _Config["MelBins"].GetInt();
 	else
-		throw std::exception("[Error] Field \"MelBins\" (MelBins) Must Be Int/Int64");
+		LibDLVoiceCodecThrow("[Error] Field \"MelBins\" (MelBins) Must Be Int/Int64");
 
 	if (!(_Config["Hop"].IsInt() || _Config["Hop"].IsInt64()))
-		throw std::exception("[Error] Hop Must Be Int");
+		LibDLVoiceCodecThrow("[Error] Hop Must Be Int");
 	HopSize = _Config["Hop"].GetInt();
 
 	if (HopSize < 1)
-		throw std::exception("[Error] Hop Must > 0");
+		LibDLVoiceCodecThrow("[Error] Hop Must > 0");
 
 	if (!(_Config["HiddenSize"].IsInt() || _Config["HiddenSize"].IsInt64()))
 		logger.log(L"[Warn] Missing Field \"HiddenSize\", Use Default Value (256)");
@@ -171,7 +171,7 @@ DiffusionSvc::DiffusionSvc(const MJson& _Config, const ProgressCallback& _Progre
 	catch (Ort::Exception& _exception)
 	{
 		Destory();
-		throw std::exception(_exception.what());
+		LibDLVoiceCodecThrow(_exception.what());
 	}
 
 	if (_Config["TensorExtractor"].IsString())
@@ -190,7 +190,7 @@ DiffusionSvc::DiffusionSvc(const MJson& _Config, const ProgressCallback& _Progre
 	catch (std::exception& e)
 	{
 		Destory();
-		throw std::exception(e.what());
+		LibDLVoiceCodecThrow(e.what());
 	}
 }
 
@@ -203,27 +203,27 @@ DiffusionSvc::DiffusionSvc(const std::map<std::string, std::wstring>& _PathDict,
 
 	//Check SamplingRate
 	if (_Config["Rate"].IsNull())
-		throw std::exception("[Error] Missing field \"Rate\" (SamplingRate)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"Rate\" (SamplingRate)");
 	if (_Config["Rate"].IsInt() || _Config["Rate"].IsInt64())
 		_samplingRate = _Config["Rate"].GetInt();
 	else
-		throw std::exception("[Error] Field \"Rate\" (SamplingRate) Must Be Int/Int64");
+		LibDLVoiceCodecThrow("[Error] Field \"Rate\" (SamplingRate) Must Be Int/Int64");
 
 	logger.log(L"[Info] Current Sampling Rate is" + std::to_wstring(_samplingRate));
 
 	if (_Config["MelBins"].IsNull())
-		throw std::exception("[Error] Missing field \"MelBins\" (MelBins)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"MelBins\" (MelBins)");
 	if (_Config["MelBins"].IsInt() || _Config["MelBins"].IsInt64())
 		melBins = _Config["MelBins"].GetInt();
 	else
-		throw std::exception("[Error] Field \"MelBins\" (MelBins) Must Be Int/Int64");
+		LibDLVoiceCodecThrow("[Error] Field \"MelBins\" (MelBins) Must Be Int/Int64");
 
 	if (!(_Config["Hop"].IsInt() || _Config["Hop"].IsInt64()))
-		throw std::exception("[Error] Hop Must Be Int");
+		LibDLVoiceCodecThrow("[Error] Hop Must Be Int");
 	HopSize = _Config["Hop"].GetInt();
 
 	if (HopSize < 1)
-		throw std::exception("[Error] Hop Must > 0");
+		LibDLVoiceCodecThrow("[Error] Hop Must > 0");
 
 	if (!(_Config["HiddenSize"].IsInt() || _Config["HiddenSize"].IsInt64()))
 		logger.log(L"[Warn] Missing Field \"HiddenSize\", Use Default Value (256)");
@@ -298,7 +298,7 @@ DiffusionSvc::DiffusionSvc(const std::map<std::string, std::wstring>& _PathDict,
 	catch (Ort::Exception& _exception)
 	{
 		Destory();
-		throw std::exception(_exception.what());
+		LibDLVoiceCodecThrow(_exception.what());
 	}
 
 	if (_Config["TensorExtractor"].IsString())
@@ -317,7 +317,7 @@ DiffusionSvc::DiffusionSvc(const std::map<std::string, std::wstring>& _PathDict,
 	catch (std::exception& e)
 	{
 		Destory();
-		throw std::exception(e.what());
+		LibDLVoiceCodecThrow(e.what());
 	}
 }
 
@@ -374,14 +374,14 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVS
 			}
 			catch (Ort::Exception& e)
 			{
-				throw std::exception((std::string("Locate: hubert\n") + e.what()).c_str());
+				LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()).c_str());
 			}
 			const auto HubertSize = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetElementCount();
 			const auto HubertOutPutData = HubertOutPuts[0].GetTensorMutableData<float>();
 			auto HubertOutPutShape = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetShape();
 			HubertInputTensors.clear();
 			if (HubertOutPutShape[2] != HiddenUnitKDims)
-				throw std::exception("HiddenUnitKDims UnMatch");
+				LibDLVoiceCodecThrow("HiddenUnitKDims UnMatch");
 
 			std::vector srcHiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
 
@@ -438,7 +438,7 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVS
 				}
 				catch (Ort::Exception& e2)
 				{
-					throw std::exception((std::string("Locate: Diff\n") + e2.what()).c_str());
+					LibDLVoiceCodecThrow((std::string("Locate: Diff\n") + e2.what()).c_str());
 				}
 				try
 				{
@@ -451,7 +451,7 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVS
 				}
 				catch (Ort::Exception& e3)
 				{
-					throw std::exception((std::string("Locate: Nsf\n") + e3.what()).c_str());
+					LibDLVoiceCodecThrow((std::string("Locate: Nsf\n") + e3.what()).c_str());
 				}
 			}
 			else
@@ -500,7 +500,7 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVS
 				}
 				catch (Ort::Exception& e1)
 				{
-					throw std::exception((std::string("Locate: encoder\n") + e1.what()).c_str());
+					LibDLVoiceCodecThrow((std::string("Locate: encoder\n") + e1.what()).c_str());
 				}
 				if (EncoderOut.size() == 1)
 					EncoderOut.emplace_back(Ort::Value::CreateTensor(*memory_info, InputTensors.Data.F0.data(), InputTensors.Data.FrameShape[1], InputTensors.Data.FrameShape.data(), 2));
@@ -529,7 +529,7 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVS
 					}
 					catch (Ort::Exception& e1)
 					{
-						throw std::exception((std::string("Locate: naive\n") + e1.what()).c_str());
+						LibDLVoiceCodecThrow((std::string("Locate: naive\n") + e1.what()).c_str());
 					}
 					DenoiseInTensors.emplace_back(std::move(NaiveOut[0]));
 				}
@@ -547,7 +547,7 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVS
 				}
 				catch (Ort::Exception& e1)
 				{
-					throw std::exception((std::string("Locate: pred\n") + e1.what()).c_str());
+					LibDLVoiceCodecThrow((std::string("Locate: pred\n") + e1.what()).c_str());
 				}
 
 				DiffOut.emplace_back(std::move(EncoderOut[1]));
@@ -562,7 +562,7 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVS
 				}
 				catch (Ort::Exception& e3)
 				{
-					throw std::exception((std::string("Locate: Nsf\n") + e3.what()).c_str());
+					LibDLVoiceCodecThrow((std::string("Locate: Nsf\n") + e3.what()).c_str());
 				}
 			}
 			const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();
@@ -671,14 +671,14 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 	}
 	catch (Ort::Exception& e)
 	{
-		throw std::exception((std::string("Locate: hubert\n") + e.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()).c_str());
 	}
 	const auto HubertSize = hubertOut[0].GetTensorTypeAndShapeInfo().GetElementCount();
 	const auto HubertOutPutData = hubertOut[0].GetTensorMutableData<float>();
 	const auto HubertOutPutShape = hubertOut[0].GetTensorTypeAndShapeInfo().GetShape();
 	inputTensorshu.clear();
 	if (HubertOutPutShape[2] != HiddenUnitKDims)
-		throw std::exception("HiddenUnitKDims UnMatch");
+		LibDLVoiceCodecThrow("HiddenUnitKDims UnMatch");
 
 	std::vector HiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
 
@@ -787,7 +787,7 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 	}
 	catch (Ort::Exception& e1)
 	{
-		throw std::exception((std::string("Locate: encoder\n") + e1.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: encoder\n") + e1.what()).c_str());
 	}
 	EncoderOut.emplace_back(Ort::Value::CreateTensor(*memory_info, F0Data.data(), F0Shape[1], F0Shape, 2));
 
@@ -815,7 +815,7 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 		}
 		catch (Ort::Exception& e1)
 		{
-			throw std::exception((std::string("Locate: naive\n") + e1.what()).c_str());
+			LibDLVoiceCodecThrow((std::string("Locate: naive\n") + e1.what()).c_str());
 		}
 		DenoiseInTensors.emplace_back(std::move(NaiveOut[0]));
 	}
@@ -837,7 +837,7 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 	}
 	catch (Ort::Exception& e1)
 	{
-		throw std::exception((std::string("Locate: pred\n") + e1.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: pred\n") + e1.what()).c_str());
 	}
 
 	DiffOut.emplace_back(std::move(EncoderOut[1]));
@@ -852,7 +852,7 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 	}
 	catch (Ort::Exception& e3)
 	{
-		throw std::exception((std::string("Locate: Nsf\n") + e3.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: Nsf\n") + e3.what()).c_str());
 	}
 
 	const auto dstWavLen = finaOut[0].GetTensorTypeAndShapeInfo().GetShape()[2];
@@ -872,7 +872,7 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 ) const
 {
 	if (diffSvc || DiffSvcVersion != L"DiffusionSvc")
-		throw std::exception("ShallowDiffusion Only Support DiffusionSvc Model");
+		LibDLVoiceCodecThrow("ShallowDiffusion Only Support DiffusionSvc Model");
 	std::vector<const char*> InputNamesEncoder;
 	const int64_t _Mel_Size = _Mel.GetTensorTypeAndShapeInfo().GetShape()[3];
 
@@ -889,7 +889,7 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	}
 	catch (Ort::Exception& e)
 	{
-		throw std::exception((std::string("Locate: hubert\n") + e.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()).c_str());
 	}
 
 	const auto HubertLength = HubertOutputTensors[0].GetTensorTypeAndShapeInfo().GetShape()[1];
@@ -971,7 +971,7 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	}
 	catch (Ort::Exception& e1)
 	{
-		throw std::exception((std::string("Locate: encoder\n") + e1.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: encoder\n") + e1.what()).c_str());
 	}
 
 	std::vector<Ort::Value> DenoiseInTensors;
@@ -993,7 +993,7 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	}
 	catch (Ort::Exception& e1)
 	{
-		throw std::exception((std::string("Locate: pred\n") + e1.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: pred\n") + e1.what()).c_str());
 	}
 
 	DiffOut.emplace_back(std::move(EncoderTensors[2]));
@@ -1008,7 +1008,7 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	}
 	catch (Ort::Exception& e3)
 	{
-		throw std::exception((std::string("Locate: Nsf\n") + e3.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: Nsf\n") + e3.what()).c_str());
 	}
 
 	const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();

@@ -1,4 +1,5 @@
 ﻿#include "../header/MoeVSProject.hpp"
+#include "../../InferTools/inferTools.hpp"
 
 namespace MoeVSProjectSpace
 {
@@ -6,20 +7,20 @@ namespace MoeVSProjectSpace
     {
         FileWrapper project_file(_path.c_str(), L"rb");
         if (!project_file.IsOpen())
-            throw std::exception("File Doesn't Exists");
+            LibDLVoiceCodecThrow("File Doesn't Exists")
         fseek(project_file, 0, SEEK_SET);
 
         if (fread(&moevs_proj_header_, 1, sizeof(Header), project_file) != sizeof(Header))
-            throw std::exception("Unexpected EOF");
+            LibDLVoiceCodecThrow("Unexpected EOF")
         if (!(moevs_proj_header_.ChunkSymbol[0] == 'M' && moevs_proj_header_.ChunkSymbol[1] == 'O' && moevs_proj_header_.ChunkSymbol[2] == 'E' && moevs_proj_header_.ChunkSymbol[3] == 'V' && moevs_proj_header_.ChunkSymbol[4] == 'S' && moevs_proj_header_.ChunkSymbol[5] == 'P' && moevs_proj_header_.ChunkSymbol[6] == 'R' && moevs_proj_header_.ChunkSymbol[7] == 'J'))
-            throw std::exception("Unrecognized File");
+            LibDLVoiceCodecThrow("Unrecognized File")
         if (moevs_proj_header_.DataHeaderAmount == 0)
-            throw std::exception("Empty Project");
+            LibDLVoiceCodecThrow("Empty Project")
 
 
         data_pos_ = std::vector<size_type>(moevs_proj_header_.DataHeaderAmount);
         if (fread(data_pos_.data(), 1, sizeof(size_type) * (moevs_proj_header_.DataHeaderAmount), project_file) != sizeof(size_type) * (moevs_proj_header_.DataHeaderAmount))
-            throw std::exception("Unexpected EOF");
+            LibDLVoiceCodecThrow("Unexpected EOF")
         data_chunk_begin_ = sizeof(Header) + sizeof(size_type) * (moevs_proj_header_.DataHeaderAmount);
 
 
@@ -32,9 +33,9 @@ namespace MoeVSProjectSpace
 
             //Header
             if (fread(&_datas.Header, 1, sizeof(DataHeader), project_file) != sizeof(DataHeader))
-                throw std::exception("Unexpected EOF");
+                LibDLVoiceCodecThrow("Unexpected EOF")
             if (!(_datas.Header.ChunkSymbol[0] == 'D' && _datas.Header.ChunkSymbol[1] == 'A' && _datas.Header.ChunkSymbol[2] == 'T' && _datas.Header.ChunkSymbol[3] == 'A'))
-                throw std::exception("Unrecognized File");
+                LibDLVoiceCodecThrow("Unrecognized File")
 
 
             //Audio
@@ -42,13 +43,13 @@ namespace MoeVSProjectSpace
                 _datas.Offset.OrgAudio = std::vector<size_type>(_datas.Header.OrgAudioOffsetPosSize);
                 _n_bytes = sizeof(size_type) * _datas.Header.OrgAudioOffsetPosSize;
                 if (fread(_datas.Offset.OrgAudio.data(), 1, _n_bytes, project_file) != _n_bytes)
-                    throw std::exception("Unexpected EOF");
+                    LibDLVoiceCodecThrow("Unexpected EOF")
                 for (const auto& j : _datas.Offset.OrgAudio)
                 {
                     std::vector<int16_t> hs_vector(j);
                     _n_bytes = sizeof(int16_t) * j;
                     if (fread(hs_vector.data(), 1, _n_bytes, project_file) != _n_bytes)
-                        throw std::exception("Unexpected EOF");
+                        LibDLVoiceCodecThrow("Unexpected EOF")
                     _datas.ParamData.Audio.emplace_back(std::move(hs_vector));
                 }
             }
@@ -60,13 +61,13 @@ namespace MoeVSProjectSpace
                 _datas.Offset.F0 = std::vector<size_type>(_datas.Header.F0OffsetPosSize);
                 _n_bytes = sizeof(size_type) * _datas.Header.F0OffsetPosSize;
                 if (fread(_datas.Offset.F0.data(), 1, _n_bytes, project_file) != _n_bytes)
-                    throw std::exception("Unexpected EOF");
+                    LibDLVoiceCodecThrow("Unexpected EOF")
                 for (const auto& j : _datas.Offset.F0)
                 {
                     std::vector<float> f0_vector(j);
                     _n_bytes = sizeof(float) * j;
                     if (fread(f0_vector.data(), 1, _n_bytes, project_file) != _n_bytes)
-                        throw std::exception("Unexpected EOF");
+                        LibDLVoiceCodecThrow("Unexpected EOF")
                     _datas.ParamData.F0.emplace_back(std::move(f0_vector));
                 }
             }
@@ -78,13 +79,13 @@ namespace MoeVSProjectSpace
                 _datas.Offset.Volume = std::vector<size_type>(_datas.Header.VolumeOffsetPosSize);
                 _n_bytes = sizeof(size_type) * _datas.Header.VolumeOffsetPosSize;
                 if (fread(_datas.Offset.Volume.data(), 1, _n_bytes, project_file) != _n_bytes)
-                    throw std::exception("Unexpected EOF");
+                    LibDLVoiceCodecThrow("Unexpected EOF")
                 for (const auto& j : _datas.Offset.Volume)
                 {
                     std::vector<float> Volume_vector(j);
                     _n_bytes = sizeof(float) * j;
                     if (fread(Volume_vector.data(), 1, _n_bytes, project_file) != _n_bytes)
-                        throw std::exception("Unexpected EOF");
+                        LibDLVoiceCodecThrow("Unexpected EOF")
                     _datas.ParamData.Volume.emplace_back(std::move(Volume_vector));
                 }
             }
@@ -96,13 +97,13 @@ namespace MoeVSProjectSpace
                 _datas.Offset.Speaker = std::vector<size_type>(_datas.Header.CharacterOffsetPosSize);
                 _n_bytes = sizeof(size_type) * _datas.Header.CharacterOffsetPosSize;
                 if (fread(_datas.Offset.Speaker.data(), 1, _n_bytes, project_file) != _n_bytes)
-                    throw std::exception("Unexpected EOF");
+                    LibDLVoiceCodecThrow("Unexpected EOF")
                 for (const auto& j : _datas.Offset.Speaker)
                 {
                     std::vector<float> Speaker_vector(j);
                     _n_bytes = sizeof(float) * j;
                     if (fread(Speaker_vector.data(), 1, _n_bytes, project_file) != _n_bytes)
-                        throw std::exception("Unexpected EOF");
+                        LibDLVoiceCodecThrow("Unexpected EOF")
                     std::vector<std::vector<float>> SpkVec;
                     if(!Speaker_vector.empty())
                     {
@@ -121,7 +122,7 @@ namespace MoeVSProjectSpace
                 _datas.ParamData.OrgLen = std::vector<long>(_datas.Header.OrgLenSize);
                 _n_bytes = sizeof(long) * _datas.Header.OrgLenSize;
                 if (fread(_datas.ParamData.OrgLen.data(), 1, _n_bytes, project_file) != _n_bytes)
-                    throw std::exception("Unexpected EOF");
+                    LibDLVoiceCodecThrow("Unexpected EOF")
             }
 
 
@@ -131,7 +132,7 @@ namespace MoeVSProjectSpace
                 std::vector<unsigned char> BooleanVector(_datas.Header.SymbolSize);
                 _n_bytes = _datas.Header.SymbolSize;
                 if (fread(BooleanVector.data(), 1, _n_bytes, project_file) != _n_bytes)
-                    throw std::exception("Unexpected EOF");
+                    LibDLVoiceCodecThrow("Unexpected EOF")
                 _datas.ParamData.IsNotMute = std::vector<bool>((bool*)BooleanVector.data(), (bool*)(BooleanVector.data() + BooleanVector.size()));
             }
 
@@ -142,7 +143,7 @@ namespace MoeVSProjectSpace
                 std::vector<char> PathStr(_datas.Header.PathSize);
                 _n_bytes = _datas.Header.PathSize;
                 if (fread(PathStr.data(), 1, _n_bytes, project_file) != _n_bytes)
-                    throw std::exception("Unexpected EOF");
+                    LibDLVoiceCodecThrow("Unexpected EOF")
                 _datas.ParamData.Path = to_wide_string(PathStr.data());
             }
 
@@ -213,7 +214,7 @@ namespace MoeVSProjectSpace
         FILE* project_file = nullptr;
         _wfopen_s(&project_file, _path.c_str(), L"wb");
         if (!project_file)
-            throw std::exception("Cannot Create File");
+            LibDLVoiceCodecThrow("Cannot Create File")
 
         fwrite(&moevs_proj_header_, 1, sizeof(Header), project_file);
         fwrite(data_pos_.data(), 1, data_pos_.size() * sizeof(size_type), project_file);
@@ -261,16 +262,59 @@ namespace MoeVSProjectSpace
         fclose(project_file);
     }
 
+    std::wstring MoeVSTTSToken::Serialization() const
+    {
+        if (Text.empty())
+            return L"\t\t\t{ }";
+        std::wstring rtn = L"\t\t\t{\n";
+        rtn += L"\t\t\t\t\"Text\": \"" + Text + L"\",\n";
+        rtn += L"\t\t\t\t\"Phonemes\": " + wstring_vector_to_string(Phonemes) + L",\n";
+        rtn += L"\t\t\t\t\"Tones\": " + vector_to_string(Tones) + L",\n";
+        rtn += L"\t\t\t\t\"Durations\": " + vector_to_string(Durations) + L",\n";
+        rtn += L"\t\t\t\t\"Language\": " + string_vector_to_string(Language) + L"\n\t\t\t}";
+        return rtn;
+    }
+
+    MoeVSTTSToken::MoeVSTTSToken(const MJsonValue& _JsonDocument, const MoeVSParams& _InitParams)
+    {
+        if (_JsonDocument.HasMember("Text") && _JsonDocument["Text"].IsString() && !_JsonDocument["Text"].Empty())
+            Text = to_wide_string(_JsonDocument["Text"].GetString());
+        else
+            LibDLVoiceCodecThrow("Field \"Text\" Should Not Be Empty")
+
+            if (_JsonDocument.HasMember("Phonemes") && _JsonDocument["Phonemes"].IsArray())
+                for (const auto& j : _JsonDocument["Phonemes"].GetArray())
+                    Phonemes.emplace_back(j.IsString() ? to_wide_string(j.GetString()) : L"[UNK]");
+
+        if (_JsonDocument.HasMember("Tones") && _JsonDocument["Tones"].IsArray())
+            for (const auto& j : _JsonDocument["Tones"].GetArray())
+                Tones.emplace_back(j.IsInt() ? j.GetInt() : 0);
+
+        if (_JsonDocument.HasMember("Durations") && _JsonDocument["Durations"].IsArray())
+            for (const auto& j : _JsonDocument["Durations"].GetArray())
+                Durations.emplace_back(j.IsInt() ? j.GetInt() : 0);
+
+        if (_JsonDocument.HasMember("Language") && _JsonDocument["Language"].IsArray())
+        {
+            const auto LanguageArr = _JsonDocument["Language"].GetArray();
+            if (!LanguageArr.empty() && LanguageArr[0].IsString())
+                for (const auto& j : LanguageArr)
+                    Language.emplace_back(j.GetString());
+        }
+    }
+
     std::wstring MoeVSTTSSeq::Serialization() const
     {
-        std::wstring rtn = L"\t{\n";
-        if (SeqStr.empty())
+        if (TextSeq.empty())
             return L"";
-        rtn += L"\t\t\"Tokens\": \"" + SeqStr + L"\",\n";
-        rtn += L"\t\t\"Seq\": " + wstring_vector_to_string(Seq) + L",\n";
-        rtn += L"\t\t\"Tones\": " + vector_to_string(Tones) + L",\n";
-        rtn += L"\t\t\"Durations\": " + vector_to_string(Durations) + L",\n";
-        rtn += L"\t\t\"Language\": " + (LangstrSeq.empty() ? vector_to_string(Language) : string_vector_to_string(LangstrSeq)) + L",\n";
+        std::wstring rtn = L"\t{\n";
+        rtn += L"\t\t\"TextSeq\": \"" + TextSeq + L"\",\n";
+        rtn += L"\t\t\"SlicedTokens\": [\n";
+        for (const auto& iter : SlicedTokens)
+            rtn += iter.Serialization() + L",\n";
+        if (!SlicedTokens.empty())
+            rtn.erase(rtn.end() - 2);
+        rtn += L"\t\t],\n";
         rtn += L"\t\t\"SpeakerMix\": " + vector_to_string(SpeakerMix) + L",\n";
         rtn += L"\t\t\"EmotionPrompt\": " + wstring_vector_to_string(EmotionPrompt) + L",\n";
         rtn += L"\t\t\"NoiseScale\": " + std::to_wstring(NoiseScale) + L",\n";
@@ -280,12 +324,103 @@ namespace MoeVSProjectSpace
         rtn += L"\t\t\"GateThreshold\": " + std::to_wstring(GateThreshold) + L",\n";
         rtn += L"\t\t\"MaxDecodeStep\": " + std::to_wstring(MaxDecodeStep) + L",\n";
         rtn += L"\t\t\"Seed\": " + std::to_wstring(Seed) + L",\n";
-        rtn += L"\t\t\"SpeakerId\": " + std::to_wstring(SpeakerId) + L",\n";
+        rtn += L"\t\t\"SpeakerName\": \"" + SpeakerName + L"\",\n";
         rtn += L"\t\t\"RestTime\": " + std::to_wstring(RestTime) + L",\n";
         rtn += L"\t\t\"PlaceHolderSymbol\": \"" + PlaceHolderSymbol + L"\",\n";
-        rtn += L"\t\t\"LanguageID\": \"" + to_wide_string(Langstr) + L"\",\n";
+        rtn += L"\t\t\"LanguageSymbol\": \"" + to_wide_string(LanguageSymbol) + L"\",\n";
         rtn += L"\t\t\"G2PAdditionalInfo\": \"" + AdditionalInfo + L"\"\n\t}";
         return rtn;
+    }
+
+    MoeVSTTSSeq::MoeVSTTSSeq(const MJsonValue& _JsonDocument, const MoeVSParams& _InitParams)
+    {
+        if (_JsonDocument.HasMember("LanguageSymbol") && _JsonDocument["LanguageSymbol"].IsString() && !_JsonDocument["LanguageSymbol"].Empty())
+            LanguageSymbol = _JsonDocument["LanguageSymbol"].GetString();
+        else
+            LanguageSymbol = _InitParams.LanguageSymbol;
+
+        if (_JsonDocument.HasMember("G2PAdditionalInfo") && _JsonDocument["G2PAdditionalInfo"].IsString() && !_JsonDocument["G2PAdditionalInfo"].Empty())
+            AdditionalInfo = to_wide_string(_JsonDocument["G2PAdditionalInfo"].GetString());
+        else
+            AdditionalInfo = _InitParams.AdditionalInfo;
+
+        if (_JsonDocument.HasMember("PlaceHolderSymbol") && _JsonDocument["PlaceHolderSymbol"].IsString() && !_JsonDocument["PlaceHolderSymbol"].Empty())
+            PlaceHolderSymbol = to_wide_string(_JsonDocument["PlaceHolderSymbol"].GetString());
+        else
+            PlaceHolderSymbol = _InitParams.PlaceHolderSymbol;
+
+        if (_JsonDocument.HasMember("TextSeq") && _JsonDocument["TextSeq"].IsString() && !_JsonDocument["TextSeq"].Empty())
+            TextSeq = to_wide_string(_JsonDocument["TextSeq"].GetString());
+        else
+            LibDLVoiceCodecThrow("Field \"TextSeq\" Should Not Be Empty")
+
+            if (_JsonDocument.HasMember("SlicedTokens") && _JsonDocument["SlicedTokens"].IsArray())
+            {
+                const auto TokensArrayObject = _JsonDocument["SlicedTokens"].GetArray();
+                for (const auto& iter : TokensArrayObject)
+                    SlicedTokens.emplace_back(iter, _InitParams);
+            }
+
+        if (_JsonDocument.HasMember("SpeakerMix") && _JsonDocument["SpeakerMix"].IsArray())
+            for (const auto& j : _JsonDocument["SpeakerMix"].GetArray())
+                SpeakerMix.emplace_back(j.IsFloat() ? j.GetFloat() : 0.f);
+        else
+            SpeakerMix = _InitParams.SpeakerMix;
+        if (_JsonDocument.HasMember("EmotionPrompt") && _JsonDocument["EmotionPrompt"].IsArray())
+            for (const auto& j : _JsonDocument["EmotionPrompt"].GetArray())
+                EmotionPrompt.emplace_back(j.IsString() ? to_wide_string(j.GetString()) : std::wstring());
+        else
+            EmotionPrompt = _InitParams.EmotionPrompt;
+        if (_JsonDocument.HasMember("NoiseScale") && _JsonDocument["NoiseScale"].IsFloat())
+            NoiseScale = _JsonDocument["NoiseScale"].GetFloat();
+        else
+            NoiseScale = _InitParams.NoiseScale;
+        if (_JsonDocument.HasMember("LengthScale") && _JsonDocument["LengthScale"].IsFloat())
+            LengthScale = _JsonDocument["LengthScale"].GetFloat();
+        else
+            LengthScale = _InitParams.LengthScale;
+        if (_JsonDocument.HasMember("RestTime") && _JsonDocument["RestTime"].IsFloat())
+            RestTime = _JsonDocument["RestTime"].GetFloat();
+        else
+            RestTime = _InitParams.RestTime;
+        if (_JsonDocument.HasMember("DurationPredictorNoiseScale") && _JsonDocument["DurationPredictorNoiseScale"].IsFloat())
+            DurationPredictorNoiseScale = _JsonDocument["DurationPredictorNoiseScale"].GetFloat();
+        else
+            DurationPredictorNoiseScale = _InitParams.DurationPredictorNoiseScale;
+        if (_JsonDocument.HasMember("FactorDpSdp") && _JsonDocument["FactorDpSdp"].IsFloat())
+            FactorDpSdp = _JsonDocument["FactorDpSdp"].GetFloat();
+        else
+            FactorDpSdp = _InitParams.FactorDpSdp;
+        if (_JsonDocument.HasMember("GateThreshold") && _JsonDocument["GateThreshold"].IsFloat())
+            GateThreshold = _JsonDocument["GateThreshold"].GetFloat();
+        else
+            GateThreshold = _InitParams.GateThreshold;
+        if (_JsonDocument.HasMember("MaxDecodeStep") && _JsonDocument["MaxDecodeStep"].IsFloat())
+            MaxDecodeStep = _JsonDocument["MaxDecodeStep"].GetInt();
+        else
+            MaxDecodeStep = _InitParams.MaxDecodeStep;
+        if (_JsonDocument.HasMember("Seed") && _JsonDocument["Seed"].IsInt())
+            Seed = _JsonDocument["Seed"].GetInt();
+        else
+            Seed = _InitParams.Seed;
+        if (_JsonDocument.HasMember("SpeakerName") && _JsonDocument["SpeakerName"].IsString())
+            SpeakerName = to_wide_string(_JsonDocument["SpeakerName"].GetString());
+        else
+            SpeakerName = _InitParams.SpeakerName;
+
+        if (MaxDecodeStep < 2000) MaxDecodeStep = 2000;
+        if (MaxDecodeStep > 20000) MaxDecodeStep = 20000;
+        if (GateThreshold > 0.90f) GateThreshold = 0.90f;
+        if (GateThreshold < 0.2f) GateThreshold = 0.2f;
+        if (FactorDpSdp > 1.f) FactorDpSdp = 1.f;
+        if (FactorDpSdp < 0.f) FactorDpSdp = 0.f;
+        if (NoiseScale > 10.f) NoiseScale = 10.f;
+        if (NoiseScale < 0.f) NoiseScale = 0.f;
+        if (DurationPredictorNoiseScale > 10.f) DurationPredictorNoiseScale = 10.f;
+        if (DurationPredictorNoiseScale < 0.f) DurationPredictorNoiseScale = 0.f;
+        if (RestTime > 30.f) RestTime = 30.f;
+        if (LengthScale > 10.f) LengthScale = 10.f;
+        if (LengthScale < 0.1f) LengthScale = 0.1f;
     }
 
     bool MoeVSTTSSeq::operator==(const MoeVSTTSSeq& right) const

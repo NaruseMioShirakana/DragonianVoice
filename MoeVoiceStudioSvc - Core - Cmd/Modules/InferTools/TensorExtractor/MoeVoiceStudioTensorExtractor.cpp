@@ -27,7 +27,7 @@ MoeVoiceStudioTensorExtractor::Inputs MoeVoiceStudioTensorExtractor::Extract(
 	Params params
 )
 {
-	throw std::exception("NotImplementedError");
+	LibDLVoiceCodecThrow("NotImplementedError");
 }
 
 std::vector<float> MoeVoiceStudioTensorExtractor::GetCurrectSpkMixData(const std::vector<std::vector<float>>& _input, size_t dst_len, int64_t curspk) const

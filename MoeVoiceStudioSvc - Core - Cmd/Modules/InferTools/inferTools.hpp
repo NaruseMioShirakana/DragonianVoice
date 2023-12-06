@@ -22,10 +22,21 @@
 #pragma once
 #include <fstream>
 #include <vector>
+#include <string>
 #include <functional>
 #include <matlabfunctions.h>
+#include <filesystem>
 #define MOEVSINFERTOOLSHEADER namespace InferTools {
 #define MOEVSINFERTOOLSEND }
+
+#define LibDLVoiceCodecThrow(message) { \
+	const std::string LibDlCodecThrowMessage = message;\
+	const std::string LibDlCodecThrowMessagePrefix = std::string("[In \"") + std::filesystem::path(__FILE__).filename().string() + "\" Line " + std::to_string(__LINE__) + "] "; \
+	if(LibDlCodecThrowMessage.substr(0, LibDlCodecThrowMessagePrefix.length()) != LibDlCodecThrowMessagePrefix) \
+		throw std::exception((LibDlCodecThrowMessagePrefix + LibDlCodecThrowMessage).c_str()); \
+	else \
+		throw std::exception(LibDlCodecThrowMessage.c_str()); \
+}
 
 MOEVSINFERTOOLSHEADER
 struct SlicerSettings

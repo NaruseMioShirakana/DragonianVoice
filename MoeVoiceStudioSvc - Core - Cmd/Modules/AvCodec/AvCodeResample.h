@@ -83,11 +83,11 @@ public:
         std::vector<uint8_t> outData;
         int ret = avformat_open_input(&avFormatContext, to_byte_string(path).c_str(), nullptr, nullptr);
         if (ret != 0) {
-            throw std::exception((std::string("Can't Open Audio File [ErrCode]")+std::to_string(ret)).c_str());
+            LibDLVoiceCodecThrow((std::string("Can't Open Audio File [ErrCode]")+std::to_string(ret)).c_str());
         }
         ret = avformat_find_stream_info(avFormatContext, nullptr);
         if (ret < 0) {
-            throw std::exception("Can't Get Audio Info");
+            LibDLVoiceCodecThrow("Can't Get Audio Info");
         }
         int streamIndex = 0;
         for (unsigned i = 0; i < avFormatContext->nb_streams; ++i) {
@@ -100,14 +100,14 @@ public:
         const AVCodecID avCodecId = avCodecParameters->codec_id;
         const AVCodec* avCodec = avcodec_find_decoder(avCodecId);
         if (avCodec == nullptr)
-            throw std::exception("Don't order fried rice (annoyed)");
+            LibDLVoiceCodecThrow("Don't order fried rice (annoyed)");
         if (avCodecContext == nullptr) {
-            throw std::exception("Can't Get Decoder Info");
+            LibDLVoiceCodecThrow("Can't Get Decoder Info");
         }
         avcodec_parameters_to_context(avCodecContext, avCodecParameters);
         ret = avcodec_open2(avCodecContext, avCodec, nullptr);
         if (ret < 0) {
-            throw std::exception("Can't Open Decoder");
+            LibDLVoiceCodecThrow("Can't Open Decoder");
         }
         packet = (AVPacket*)av_malloc(sizeof(AVPacket));
         const AVSampleFormat inFormat = avCodecContext->sample_fmt;
@@ -126,7 +126,7 @@ public:
             else if (head.NumOfChan == 2)
                 in_ch_layout = AV_CH_LAYOUT_STEREO;
             else
-                throw std::exception("unsupported Channel Num");
+                LibDLVoiceCodecThrow("unsupported Channel Num");
         }
         constexpr uint64_t out_ch_layout = AV_CH_LAYOUT_MONO;
         swr_alloc_set_opts(swrContext, out_ch_layout, outFormat, outSampleRate,

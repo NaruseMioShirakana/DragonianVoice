@@ -88,52 +88,83 @@ namespace MoeSSLogger
 			logpath.append("log.txt");
 			errorpath = cur_log_dir;
 			errorpath.append("error.txt");
-
-			_wfopen_s(&log_file, logpath.c_str(), L"w");
-			_wfopen_s(&error_file, errorpath.c_str(), L"w");
 		}
 #endif
 	}
 
-	void Logger::log(const std::wstring& format) const
+	void Logger::log(const std::wstring& format)
 	{
+		std::lock_guard mtx(mx);
 #ifndef MoeVoiceStudioCommandLineProg
+		_wfopen_s(&log_file, logpath.c_str(), L"a+");
 		if (log_file)
+		{
 			fprintf_s(log_file, "%s\n", to_byte_string(format).c_str());
+			fclose(log_file);
+			log_file = nullptr;
+		}
 #else
 		fprintf_s(stdout, "%s\n", to_byte_string(format).c_str());
 #endif
 	}
 
-	void Logger::log(const char* format) const
+	void Logger::log(const char* format)
 	{
+		std::lock_guard mtx(mx);
 #ifndef MoeVoiceStudioCommandLineProg
+		_wfopen_s(&log_file, logpath.c_str(), L"a+");
 		if (log_file)
+		{
 			fprintf_s(log_file, "%s\n", format);
+			fclose(log_file);
+			log_file = nullptr;
+		}
 #else
 		fprintf_s(stdout, "%s\n", format);
 #endif
 	}
 
-	void Logger::error(const std::wstring& format) const
+	void Logger::error(const std::wstring& format)
 	{
+		std::lock_guard mtx(mx);
 #ifndef MoeVoiceStudioCommandLineProg
+		_wfopen_s(&log_file, logpath.c_str(), L"a+");
+		_wfopen_s(&error_file, errorpath.c_str(), L"a+");
 		if (log_file)
+		{
 			fprintf(log_file, "[ERROR]%s\n", to_byte_string(format).c_str());
+			fclose(log_file);
+			log_file = nullptr;
+		}
 		if (error_file)
+		{
 			fprintf(error_file, "[ERROR]%s\n", to_byte_string(format).c_str());
+			fclose(error_file);
+			error_file = nullptr;
+		}
 #else
 		fprintf(stdout, "[ERROR]%s\n", to_byte_string(format).c_str());
 #endif
 	}
 
-	void Logger::error(const char* format) const
+	void Logger::error(const char* format)
 	{
+		std::lock_guard mtx(mx);
 #ifndef MoeVoiceStudioCommandLineProg
+		_wfopen_s(&log_file, logpath.c_str(), L"a+");
+		_wfopen_s(&error_file, errorpath.c_str(), L"a+");
 		if (log_file)
+		{
 			fprintf(log_file, "[ERROR]%s\n", format);
+			fclose(log_file);
+			log_file = nullptr;
+		}
 		if (error_file)
+		{
 			fprintf(error_file, "[ERROR]%s\n", format);
+			fclose(error_file);
+			error_file = nullptr;
+		}
 #else
 		fprintf(stdout, "[ERROR]%s\n", format);
 #endif

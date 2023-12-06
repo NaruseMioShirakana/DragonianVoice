@@ -1,4 +1,5 @@
 ﻿#include "inferTools.hpp"
+#include "string"
 #ifdef MoeVoiceStudioAvxAcc
 #include <immintrin.h>
 #endif
@@ -69,7 +70,7 @@ InferTools::Wav::Wav(const wchar_t* Path) :header(WAV_HEADER()) {
 
 InferTools::Wav::Wav(const Wav& input) :header(WAV_HEADER()) {
     Data = new char[(input.header.Subchunk2Size + 1)];
-    if (Data == nullptr) { throw std::exception("OOM"); }
+    if (Data == nullptr) { LibDLVoiceCodecThrow("OOM") }
     memcpy(header.RIFF, input.header.RIFF, 4);
     memcpy(header.fmt, input.header.fmt, 4);
     memcpy(header.WAVE, input.header.WAVE, 4);
@@ -236,7 +237,7 @@ std::vector<float> InferTools::mean_filter(const std::vector<float>& vec, size_t
 InferTools::FloatTensorWrapper& InferTools::FloatTensorWrapper::operator+=(const FloatTensorWrapper& _right)
 {
     if (_data_size != _right._data_size)
-        throw std::exception("Vector Size MisMatch");
+        LibDLVoiceCodecThrow("Vector Size MisMatch");
     const size_t num_avx2_elements = _data_size / 8;
     for (size_t i = 0; i < num_avx2_elements; i++) {
         const __m256 a_avx2 = _mm256_load_ps(&_data_ptr[i * 8]);
@@ -252,7 +253,7 @@ InferTools::FloatTensorWrapper& InferTools::FloatTensorWrapper::operator+=(const
 InferTools::FloatTensorWrapper& InferTools::FloatTensorWrapper::operator-=(const FloatTensorWrapper& _right)
 {
     if (_data_size != _right._data_size)
-        throw std::exception("Vector Size MisMatch");
+        LibDLVoiceCodecThrow("Vector Size MisMatch");
     const size_t num_avx2_elements = _data_size / 8;
     for (size_t i = 0; i < num_avx2_elements; i++) {
         const __m256 a_avx2 = _mm256_load_ps(&_data_ptr[i * 8]);
@@ -268,7 +269,7 @@ InferTools::FloatTensorWrapper& InferTools::FloatTensorWrapper::operator-=(const
 InferTools::FloatTensorWrapper& InferTools::FloatTensorWrapper::operator*=(const FloatTensorWrapper& _right)
 {
     if (_data_size != _right._data_size)
-        throw std::exception("Vector Size MisMatch");
+        LibDLVoiceCodecThrow("Vector Size MisMatch");
     const size_t num_avx2_elements = _data_size / 8;
     for (size_t i = 0; i < num_avx2_elements; i++) {
         const __m256 a_avx2 = _mm256_load_ps(&_data_ptr[i * 8]);
@@ -284,7 +285,7 @@ InferTools::FloatTensorWrapper& InferTools::FloatTensorWrapper::operator*=(const
 InferTools::FloatTensorWrapper& InferTools::FloatTensorWrapper::operator/=(const FloatTensorWrapper& _right)
 {
     if (_data_size != _right._data_size)
-        throw std::exception("Vector Size MisMatch");
+        LibDLVoiceCodecThrow("Vector Size MisMatch");
     const size_t num_avx2_elements = _data_size / 8;
     for (size_t i = 0; i < num_avx2_elements; i++) {
         const __m256 a_avx2 = _mm256_load_ps(&_data_ptr[i * 8]);

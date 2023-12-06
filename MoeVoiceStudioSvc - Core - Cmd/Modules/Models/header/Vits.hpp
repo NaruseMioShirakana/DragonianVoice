@@ -59,12 +59,6 @@ public:
         sessionFlow = nullptr;
         sessionEmb = nullptr;
         sessionDp = nullptr;
-        for (auto& OrtPtr : sessionBert)
-        {
-	        delete OrtPtr;
-            OrtPtr = nullptr;
-        }
-        sessionBert.clear();
     }
 
     [[nodiscard]] std::vector<std::vector<int16_t>> Inference(const std::vector<MoeVSProjectSpace::MoeVSTTSSeq>& _Input) const override;
@@ -75,14 +69,14 @@ private:
     Ort::Session* sessionEnc_p = nullptr;
     Ort::Session* sessionFlow = nullptr;
     Ort::Session* sessionEmb = nullptr;
-    std::vector<Ort::Session*> sessionBert;
-    std::vector<std::string> BertNames;
     std::string VitsType;
     bool UseTone = false;
     bool UseBert = false;
     bool UseLength = true;
     bool UseLanguage = false;
     bool EncoderG = false;
+    std::vector<std::string> BertNames;
+    std::vector<std::wstring> BertNamesIdx;
 
     std::vector<const char*> EncoderInputNames = { "x" };
     const std::vector<const char*> EncoderOutputNames = { "xout", "m_p", "logs_p", "x_mask" };
@@ -103,7 +97,8 @@ private:
     const std::vector<const char*> EmbiddingOutputNames = { "g" };
 
     const std::vector<const char*> BertInputNames = { "input_ids", "attention_mask", "token_type_ids" };
-    const std::vector<const char*> BertInputNames2 = { "input_ids", "token_type_ids" };
+    const std::vector<const char*> BertInputNames2 = { "input_ids", "attention_mask" };
+    const std::vector<const char*> BertInputNames3 = { "input_ids" };
     const std::vector<const char*> BertOutputNames = { "last_hidden_state" };
 };
 

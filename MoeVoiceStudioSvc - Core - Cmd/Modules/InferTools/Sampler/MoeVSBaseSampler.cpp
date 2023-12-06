@@ -1,5 +1,5 @@
 ﻿#include "MoeVSBaseSampler.hpp"
-
+#include "../inferTools.hpp"
 MoeVoiceStudioSamplerHeader
 
 MoeVSBaseSampler::MoeVSBaseSampler(Ort::Session* alpha, Ort::Session* dfn, Ort::Session* pred, int64_t Mel_Bins, const ProgressCallback& _ProgressCallback, Ort::MemoryInfo* memory) :
@@ -11,7 +11,7 @@ MoeVSBaseSampler::MoeVSBaseSampler(Ort::Session* alpha, Ort::Session* dfn, Ort::
 
 std::vector<Ort::Value> MoeVSBaseSampler::Sample(std::vector<Ort::Value>& Tensors, int64_t Steps, int64_t SpeedUp, float NoiseScale, int64_t Seed, size_t& Process)
 {
-	throw std::exception("NotImplementedError");
+	LibDLVoiceCodecThrow("NotImplementedError");
 }
 
 MoeVoiceStudioSamplerEnd
