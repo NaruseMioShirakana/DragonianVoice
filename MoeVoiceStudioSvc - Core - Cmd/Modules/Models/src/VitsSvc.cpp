@@ -14,11 +14,6 @@ void VitsSvc::Destory()
 
 	delete VitsSvcModel;
 	VitsSvcModel = nullptr;
-
-	delete shallow_diffusion;
-	shallow_diffusion = nullptr;
-	delete stft_operator;
-	stft_operator = nullptr;
 }
 
 VitsSvc::~VitsSvc()
@@ -181,44 +176,6 @@ void VitsSvc::load(const std::map<std::string, std::wstring>& _PathDict, const M
 
 	if (_Config["TensorExtractor"].IsString())
 		VitsSvcVersion = to_wide_string(_Config["TensorExtractor"].GetString());
-
-	if (_Config["ShallowDiffusion"].IsString())
-	{
-		const std::string ShallowDiffusionConf = to_byte_string(GetCurrentFolder()) + "/Models/" + _Config["ShallowDiffusion"].GetString() + ".json";
-		try
-		{
-			if(MoeVoiceStudioFrontEnd)
-			{
-				shallow_diffusion = new DiffusionSvc(
-					to_byte_string(_PathDict.at("ShallowDiffusionConfig")).c_str(),
-					[](size_t, size_t) {},
-					ExecutionProvider_,
-					DeviceID_,
-					ThreadCount_
-				);
-			}
-			else
-			{
-				shallow_diffusion = new DiffusionSvc(
-					_PathDict,
-					to_byte_string(_PathDict.at("ShallowDiffusionConfig")).c_str(),
-					[](size_t, size_t) {},
-					ExecutionProvider_,
-					DeviceID_,
-					ThreadCount_
-				);
-			}
-			stft_operator = new Ort::Session(*env, _PathDict.at("MelOperator").c_str(), *session_options);
-		}
-		catch (std::exception& e)
-		{
-			delete shallow_diffusion;
-			shallow_diffusion = nullptr;
-			delete stft_operator;
-			stft_operator = nullptr;
-			logger.error(e.what());
-		}
-	}
 
 	MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::Others _others_param;
 	_others_param.Memory = *memory_info;
@@ -796,7 +753,8 @@ std::vector<int16_t> VitsSvc::SliceInference(const MoeVSProjectSpace::MoeVSAudio
 			}
 
 			const auto dstWavLen = (_Slice.OrgLen[slice] * int64_t(_samplingRate)) / 48000;
-			if(shallow_diffusion && stft_operator && _InferParams.UseShallowDiffusion)
+			
+			/*if(shallow_diffusion && stft_operator && _InferParams.UseShallowDiffusion)
 			{
 				auto PCMAudioBegin = finaOut[0].GetTensorData<float>();
 				auto PCMAudioEnd = PCMAudioBegin + finaOut[0].GetTensorTypeAndShapeInfo().GetElementCount();
@@ -813,19 +771,17 @@ std::vector<int16_t> VitsSvc::SliceInference(const MoeVSProjectSpace::MoeVSAudio
 				);
 				ShallowDiffusionOutput.resize(dstWavLen, 0);
 				_data.insert(_data.end(), ShallowDiffusionOutput.begin(), ShallowDiffusionOutput.end());
-			}
+			}*/
+
+			const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();
+			std::vector<int16_t> TempVecWav = std::vector<int16_t>(dstWavLen, 0);
+			if (shapeOut[2] < dstWavLen)
+				for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
+					TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
 			else
-			{
-				const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();
-				std::vector<int16_t> TempVecWav = std::vector<int16_t>(dstWavLen, 0);
-				if (shapeOut[2] < dstWavLen)
-					for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
-						TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
-				else
-					for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
-						TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
-				_data.insert(_data.end(), TempVecWav.data(), TempVecWav.data() + (dstWavLen));
-			}
+				for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
+					TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
+			_data.insert(_data.end(), TempVecWav.data(), TempVecWav.data() + (dstWavLen));
 
 			logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Segment[" + std::to_wstring(slice) + L"] Finished! Segment Use Time: " + std::to_wstring(clock() - InferDurTime) + L"ms, Segment Duration: " + std::to_wstring((size_t)_Slice.OrgLen[slice] * 1000ull / 48000ull) + L"ms");
 		}
@@ -1083,7 +1039,7 @@ std::vector<int16_t> VitsSvc::InferPCMData(const std::vector<int16_t>& PCMData, 
 	return TempVecWav;
 }
 
-std::vector<Ort::Value> VitsSvc::MelExtractor(const float* PCMAudioBegin, const float* PCMAudioEnd) const
+/*std::vector<Ort::Value> VitsSvc::MelExtractor(const float* PCMAudioBegin, const float* PCMAudioEnd) const
 {
 	std::vector<float> _SRAudio{PCMAudioBegin, PCMAudioEnd};
 	_SRAudio = InferTools::InterpResample(_SRAudio, _samplingRate, 16000, 1.f);
@@ -1110,7 +1066,7 @@ std::vector<Ort::Value> VitsSvc::MelExtractor(const float* PCMAudioBegin, const 
 	{
 		LibDLVoiceCodecThrow((std::string("Locate: ShallowDiffusionStftOperator\n") + e.what()).c_str());
 	}
-}
+}*/
 
 #ifdef WIN32
 #ifdef MoeVSMui

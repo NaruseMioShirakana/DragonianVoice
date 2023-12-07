@@ -26,36 +26,73 @@
 
 namespace MoeVSModuleManager
 {
-	inline int64_t SamplingRate = 32000;
-	inline int64_t SpeakerCount = 0;
-
 	/**
 	 * \brief 初始化所有组件
 	 */
 	void MoeVoiceStudioCoreInitSetup();
 
 	/**
-	 * \brief 获取当前模型
+	 * \brief 获取当前VitsSvc模型
 	 * \return 当前模型的指针
 	 */
-	MoeVoiceStudioCore::SingingVoiceConversion* GetCurSvcModel();
+	MoeVoiceStudioCore::VitsSvc* GetVitsSvcModel();
+
+	/**
+	 * \brief 获取当前DiffusionSvc模型
+	 * \return 当前模型的指针
+	 */
+	MoeVoiceStudioCore::DiffusionSvc* GetDiffusionSvcModel();
 
 	/**
 	 * \brief 卸载模型
 	 */
-	void UnloadSvcModel();
+	void UnloadVitsSvcModel();
 
 	/**
-	 * \brief 载入模型
+	 * \brief 卸载模型
+	 */
+	void UnloadDiffusionSvcModel();
+
+	/**
+	 * \brief 载入VitsSvc模型
 	 * \param Config 一个MJson类的实例（配置文件的JSON）
 	 * \param Callback 进度条回调函数
 	 * \param ProviderID Provider在所有Provider中的ID（遵循Enum Class的定义）
 	 * \param NumThread CPU推理时的线程数（最好设置高一点，GPU不支持的算子可能也会Fallback到CPU）
 	 * \param DeviceID GPU设备ID
 	 */
-	void LoadSvcModel(const MJson& Config,
+	void LoadVitsSvcModel(const MJson& Config,
 		const MoeVoiceStudioCore::MoeVoiceStudioModule::ProgressCallback& Callback,
 		int ProviderID, int NumThread, int DeviceID);
+
+	/**
+	 * \brief 载入DiffusionSvc模型
+	 * \param Config 一个MJson类的实例（配置文件的JSON）
+	 * \param Callback 进度条回调函数
+	 * \param ProviderID Provider在所有Provider中的ID（遵循Enum Class的定义）
+	 * \param NumThread CPU推理时的线程数（最好设置高一点，GPU不支持的算子可能也会Fallback到CPU）
+	 * \param DeviceID GPU设备ID
+	 */
+	void LoadDiffusionSvcModel(const MJson& Config,
+		const MoeVoiceStudioCore::MoeVoiceStudioModule::ProgressCallback& Callback,
+		int ProviderID, int NumThread, int DeviceID);
+
+	/**
+	 * \brief 载入Vocoder模型
+	 * \param VocoderPath Vocoder路径
+	 */
+	void LoadVocoderModel(const std::wstring& VocoderPath);
+
+	/**
+	 * \brief 卸载Vocoder模型
+	 */
+	void UnloadVocoderModel();
+
+	/**
+	 * \brief 检查Vocoder是否可用
+	 * \return Vocoder状态
+	 */
+	bool VocoderEnabled();
 }
 
 namespace MoeVSRename

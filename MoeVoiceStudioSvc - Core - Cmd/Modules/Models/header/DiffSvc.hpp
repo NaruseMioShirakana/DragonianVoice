@@ -24,6 +24,13 @@
 #include "SVC.hpp"
 
 MoeVoiceStudioCoreHeader
+
+void LoadVocoderModel(const std::wstring& VocoderPath);
+
+void UnLoadVocoderModel();
+
+bool VocoderEnabled();
+
 /**
  * \brief DiffSvc模型
  */
@@ -47,6 +54,11 @@ public:
                  ExecutionProviders ExecutionProvider_ = ExecutionProviders::CPU,
                  unsigned DeviceID_ = 0, unsigned ThreadCount_ = 0);
 
+    void load(
+        const std::map<std::string, std::wstring>& _PathDict,
+        const MJson& _Config, const ProgressCallback& _ProgressCallback
+    );
+
 	~DiffusionSvc() override;
 
     void Destory();
@@ -69,8 +81,6 @@ public:
     ) const;
 
 private:
-    Ort::Session* nsfHifigan = nullptr;
-
     Ort::Session* encoder = nullptr;
     Ort::Session* denoise = nullptr;
     Ort::Session* pred = nullptr;

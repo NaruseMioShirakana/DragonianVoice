@@ -7,7 +7,6 @@
 #include "Modules/AvCodec/AvCodeResample.h"
 
 #include <windows.h>
-#include <Mmsystem.h>
 #pragma comment(lib, "winmm.lib") 
 
 #ifdef _IOSTREAM_

@@ -84,8 +84,7 @@ private:
     const std::vector<const char*> RVCInput = { "phone", "phone_lengths", "pitch", "pitchf", "ds", "rnd" };
     const std::vector<const char*> StftOutput = { "mel" };
     const std::vector<const char*> StftInput = { "waveform", "aligment"};
-    DiffusionSvc* shallow_diffusion = nullptr;
-    Ort::Session* stft_operator = nullptr;
+    
 #ifdef WIN32
 #ifdef MoeVSMui
     bool RTSTAT = false;

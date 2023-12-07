@@ -53,7 +53,9 @@ namespace MoeVSModuleManager
 {
 	bool MoeVoiceStudioCoreInitStat = false;
 
-	MoeVoiceStudioCore::SingingVoiceConversion* CurSvcModel = nullptr;
+	MoeVoiceStudioCore::VitsSvc* GlobalVitsSvcModel = nullptr;
+
+	MoeVoiceStudioCore::DiffusionSvc* GlobalDiffusionSvcModel = nullptr;
 
 	void MoeVoiceStudioCoreInitSetup()
 	{
@@ -86,44 +88,70 @@ namespace MoeVSModuleManager
 		MoeVoiceStudioCoreInitStat = true;
 	}
 
-	MoeVoiceStudioCore::SingingVoiceConversion* GetCurSvcModel()
+	MoeVoiceStudioCore::VitsSvc* GetVitsSvcModel()
 	{
-		return CurSvcModel;
+		return GlobalVitsSvcModel;
 	}
 
-	void UnloadSvcModel()
+	MoeVoiceStudioCore::DiffusionSvc* GetDiffusionSvcModel()
 	{
-		delete CurSvcModel;
-		CurSvcModel = nullptr;
-		SamplingRate = 32000;
-		SpeakerCount = 0;
+		return GlobalDiffusionSvcModel;
 	}
 
-	void LoadSvcModel(const MJson& Config,
+	void UnloadVitsSvcModel()
+	{
+		delete GlobalVitsSvcModel;
+		GlobalVitsSvcModel = nullptr;
+	}
+
+	void UnloadDiffusionSvcModel()
+	{
+		delete GlobalDiffusionSvcModel;
+		GlobalDiffusionSvcModel = nullptr;
+	}
+
+	void LoadVitsSvcModel(const MJson& Config,
 	                  const MoeVoiceStudioCore::MoeVoiceStudioModule::ProgressCallback& Callback,
 	                  int ProviderID, int NumThread, int DeviceID)
 	{
-		UnloadSvcModel();
+		UnloadVitsSvcModel();
 		if (Config["Type"].GetString() == "DiffSvc")
-			CurSvcModel = dynamic_cast<MoeVoiceStudioCore::SingingVoiceConversion*>(
-				new MoeVoiceStudioCore::DiffusionSvc(
-					Config, Callback,
-					MoeVoiceStudioCore::MoeVoiceStudioModule::ExecutionProviders(ProviderID),
-					DeviceID, NumThread
-				)
-				);
-		else
-		{
-			CurSvcModel = dynamic_cast<MoeVoiceStudioCore::SingingVoiceConversion*>(
-			   new MoeVoiceStudioCore::VitsSvc(
-				   Config, Callback,
-				   MoeVoiceStudioCore::MoeVoiceStudioModule::ExecutionProviders(ProviderID),
-				   DeviceID, NumThread
-			   )
-			   );
-		}
-		SamplingRate = CurSvcModel->GetSamplingRate();
-		SpeakerCount = CurSvcModel->GetSpeakerCount();
+			LibDLVoiceCodecThrow("Trying To Load Diffusion Model As VitsSvc Model!")
+
+		GlobalVitsSvcModel = new MoeVoiceStudioCore::VitsSvc(
+			Config, Callback,
+			MoeVoiceStudioCore::MoeVoiceStudioModule::ExecutionProviders(ProviderID),
+			DeviceID, NumThread
+		);
 	}
 
+	void LoadDiffusionSvcModel(const MJson& Config,
+		const MoeVoiceStudioCore::MoeVoiceStudioModule::ProgressCallback& Callback,
+		int ProviderID, int NumThread, int DeviceID)
+	{
+		UnloadDiffusionSvcModel();
+		if (Config["Type"].GetString() == "DiffSvc")
+			GlobalDiffusionSvcModel = new MoeVoiceStudioCore::DiffusionSvc(
+				Config, Callback,
+				MoeVoiceStudioCore::MoeVoiceStudioModule::ExecutionProviders(ProviderID),
+				DeviceID, NumThread
+			);
+		else
+			LibDLVoiceCodecThrow("Trying To Load VitsSvc Model As Diffusion Model!")
+	}
+
+	void LoadVocoderModel(const std::wstring& VocoderPath)
+	{
+		MoeVoiceStudioCore::LoadVocoderModel(VocoderPath);
+	}
+
+	void UnloadVocoderModel()
+	{
+		MoeVoiceStudioCore::UnLoadVocoderModel();
+	}
+
+	bool VocoderEnabled()
+	{
+		return MoeVoiceStudioCore::VocoderEnabled();
+	}
 }

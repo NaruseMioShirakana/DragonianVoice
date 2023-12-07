@@ -4,17 +4,33 @@
 #include <regex>
 #include "../../InferTools/Sampler/MoeVSSamplerManager.hpp"
 #include "../../InferTools/F0Extractor/F0ExtractorManager.hpp"
+#include "../EnvManager.hpp"
 
 MoeVoiceStudioCoreHeader
+
+Ort::Session* Vocoder = nullptr;
+
+void LoadVocoderModel(const std::wstring& VocoderPath)
+{
+	Vocoder = new Ort::Session(*moevsenv::GetGlobalMoeVSEnv().GetEnv(), VocoderPath.c_str(), *moevsenv::GetGlobalMoeVSEnv().GetSessionOptions());
+}
+
+void UnLoadVocoderModel()
+{
+	delete Vocoder;
+	Vocoder = nullptr;
+}
+
+bool VocoderEnabled()
+{
+	return Vocoder;
+}
+
 void DiffusionSvc::Destory()
 {
 	//AudioEncoder
 	delete hubert;
 	hubert = nullptr;
-
-	//VoCoder
-	delete nsfHifigan;
-	nsfHifigan = nullptr;
 
 	//DiffusionModel
 	delete encoder;      //Encoder
@@ -46,8 +62,6 @@ DiffusionSvc::DiffusionSvc(const MJson& _Config, const ProgressCallback& _Progre
 	ExecutionProviders ExecutionProvider_, unsigned DeviceID_, unsigned ThreadCount_):
 	SingingVoiceConversion(ExecutionProvider_, DeviceID_, ThreadCount_)
 {
-	MoeVSClassName(L"MoeVoiceStudioDiffSingingVoiceConversion");
-
 	//Check Folder
 	if (_Config["Folder"].IsNull())
 		LibDLVoiceCodecThrow("[Error] Missing field \"folder\" (Model Folder)");
@@ -74,130 +88,25 @@ DiffusionSvc::DiffusionSvc(const MJson& _Config, const ProgressCallback& _Progre
 	if (HifiganPath.empty())
 		LibDLVoiceCodecThrow("[Error] Field \"Hifigan\" (Hifigan Folder) Can Not Be Empty");
 
-	//Check SamplingRate
-	if (_Config["Rate"].IsNull())
-		LibDLVoiceCodecThrow("[Error] Missing field \"Rate\" (SamplingRate)");
-	if (_Config["Rate"].IsInt() || _Config["Rate"].IsInt64())
-		_samplingRate = _Config["Rate"].GetInt();
-	else
-		LibDLVoiceCodecThrow("[Error] Field \"Rate\" (SamplingRate) Must Be Int/Int64");
+	std::map<std::string, std::wstring> _PathDict;
 
-	logger.log(L"[Info] Current Sampling Rate is" + std::to_wstring(_samplingRate));
+	_PathDict["Cluster"] = cluster_folder;
+	_PathDict["Hubert"] = GetCurrentFolder() + L"/hubert/" + HuPath + L".onnx";
+	_PathDict["Encoder"] = _path + L"_encoder.onnx";
+	_PathDict["DenoiseFn"] = _path + L"_denoise.onnx";
+	_PathDict["NoisePredictor"] = _path + L"_pred.onnx";
+	_PathDict["AfterProcess"] = _path + L"_after.onnx";
+	_PathDict["Alphas"] = _path + L"_alpha.onnx";
+	_PathDict["DiffSvc"] = _path + L"_DiffSvc.onnx";
+	_PathDict["Naive"] = _path + L"_naive.onnx";
 
-	if (_Config["MelBins"].IsNull())
-		LibDLVoiceCodecThrow("[Error] Missing field \"MelBins\" (MelBins)");
-	if (_Config["MelBins"].IsInt() || _Config["MelBins"].IsInt64())
-		melBins = _Config["MelBins"].GetInt();
-	else
-		LibDLVoiceCodecThrow("[Error] Field \"MelBins\" (MelBins) Must Be Int/Int64");
-
-	if (!(_Config["Hop"].IsInt() || _Config["Hop"].IsInt64()))
-		LibDLVoiceCodecThrow("[Error] Hop Must Be Int");
-	HopSize = _Config["Hop"].GetInt();
-
-	if (HopSize < 1)
-		LibDLVoiceCodecThrow("[Error] Hop Must > 0");
-
-	if (!(_Config["HiddenSize"].IsInt() || _Config["HiddenSize"].IsInt64()))
-		logger.log(L"[Warn] Missing Field \"HiddenSize\", Use Default Value (256)");
-	else
-		HiddenUnitKDims = _Config["HiddenSize"].GetInt();
-
-	if (_Config["Characters"].IsArray())
-		SpeakerCount = (int64_t)_Config["Characters"].Size();
-
-	if (_Config["Volume"].IsBool())
-		EnableVolume = _Config["Volume"].GetBool();
-	else
-		logger.log(L"[Warn] Missing Field \"Volume\", Use Default Value (False)");
-
-	if (!_Config["CharaMix"].IsBool())
-		logger.log(L"[Warn] Missing Field \"CharaMix\", Use Default Value (False)");
-	else
-		EnableCharaMix = _Config["CharaMix"].GetBool();
-
-	if (!_Config["Diffusion"].IsBool())
-		logger.log(L"[Warn] Missing Field \"Diffusion\", Use Default Value (False)");
-	else if (_Config["Diffusion"].GetBool())
-		DiffSvcVersion = L"DiffusionSvc";
-
-	if (_Config["Pndm"].IsInt())
-		Pndms = _Config["Pndm"].GetInt();
-
-	_callback = _ProgressCallback;
-
-	if (_Config["Cluster"].IsString())
-	{
-		const auto clus = to_wide_string(_Config["Cluster"].GetString());
-		if (!(_Config["KMeansLength"].IsInt() || _Config["KMeansLength"].IsInt64()))
-			logger.log(L"[Warn] Missing Field \"KMeansLength\", Use Default Value (10000)");
-		else
-			ClusterCenterSize = _Config["KMeansLength"].GetInt();
-		try
-		{
-			Cluster = MoeVoiceStudioCluster::GetMoeVSCluster(clus, cluster_folder, HiddenUnitKDims, ClusterCenterSize);
-			EnableCluster = true;
-		}
-		catch (std::exception& e)
-		{
-			logger.error(e.what());
-			EnableCluster = false;
-		}
-	}
-
-	//LoadModels
-	try
-	{
-		logger.log(L"[Info] loading DiffSvc Models");
-		hubert = new Ort::Session(*env, (GetCurrentFolder() + L"/hubert/" + HuPath + L".onnx").c_str(), *session_options);
-		nsfHifigan = new Ort::Session(*env, (GetCurrentFolder() + L"/hifigan/" + HifiganPath + L".onnx").c_str(), *session_options);
-		if (_waccess((_path + L"_encoder.onnx").c_str(), 0) != -1)
-		{
-			encoder = new Ort::Session(*env, (_path + L"_encoder.onnx").c_str(), *session_options);
-			denoise = new Ort::Session(*env, (_path + L"_denoise.onnx").c_str(), *session_options);
-			pred = new Ort::Session(*env, (_path + L"_pred.onnx").c_str(), *session_options);
-			after = new Ort::Session(*env, (_path + L"_after.onnx").c_str(), *session_options);
-			if(_waccess((_path + L"_alpha.onnx").c_str(), 0) != -1)
-				alpha = new Ort::Session(*env, (_path + L"_alpha.onnx").c_str(), *session_options);
-		}
-		else
-			diffSvc = new Ort::Session(*env, (_path + L"_DiffSvc.onnx").c_str(), *session_options);
-
-		if(_waccess((_path + L"_naive.onnx").c_str(), 0) != -1)
-			naive = new Ort::Session(*env, (_path + L"_naive.onnx").c_str(), *session_options);
-
-		logger.log(L"[Info] DiffSvc Models loaded");
-	}
-	catch (Ort::Exception& _exception)
-	{
-		Destory();
-		LibDLVoiceCodecThrow(_exception.what());
-	}
-
-	if (_Config["TensorExtractor"].IsString())
-		DiffSvcVersion = to_wide_string(_Config["TensorExtractor"].GetString());
-
-	if (_Config["MaxStep"].IsInt())
-		MaxStep = _Config["MaxStep"].GetInt();
-
-	MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::Others _others_param;
-	_others_param.Memory = *memory_info;
-
-	try
-	{
-		_TensorExtractor = GetTensorExtractor(DiffSvcVersion, 48000, _samplingRate, HopSize, EnableCharaMix, EnableVolume, HiddenUnitKDims, SpeakerCount, _others_param);
-	}
-	catch (std::exception& e)
-	{
-		Destory();
-		LibDLVoiceCodecThrow(e.what());
-	}
+	load(_PathDict, _Config, _ProgressCallback);
 }
 
-DiffusionSvc::DiffusionSvc(const std::map<std::string, std::wstring>& _PathDict,
-	const MJson& _Config, const ProgressCallback& _ProgressCallback,
-	ExecutionProviders ExecutionProvider_, unsigned DeviceID_, unsigned ThreadCount_) :
-	SingingVoiceConversion(ExecutionProvider_, DeviceID_, ThreadCount_)
+void DiffusionSvc::load(
+	const std::map<std::string, std::wstring>& _PathDict,
+	const MJson& _Config, const ProgressCallback& _ProgressCallback
+)
 {
 	MoeVSClassName(L"MoeVoiceStudioDiffSingingVoiceConversion");
 
@@ -277,7 +186,6 @@ DiffusionSvc::DiffusionSvc(const std::map<std::string, std::wstring>& _PathDict,
 	{
 		logger.log(L"[Info] loading DiffSvc Models");
 		hubert = new Ort::Session(*env, _PathDict.at("Hubert").c_str(), *session_options);
-		nsfHifigan = new Ort::Session(*env, _PathDict.at("Hifigan").c_str(), *session_options);
 		if (_waccess(_PathDict.at("Encoder").c_str(), 0) != -1)
 		{
 			encoder = new Ort::Session(*env, _PathDict.at("Encoder").c_str(), *session_options);
@@ -319,6 +227,14 @@ DiffusionSvc::DiffusionSvc(const std::map<std::string, std::wstring>& _PathDict,
 		Destory();
 		LibDLVoiceCodecThrow(e.what());
 	}
+}
+
+DiffusionSvc::DiffusionSvc(const std::map<std::string, std::wstring>& _PathDict,
+	const MJson& _Config, const ProgressCallback& _ProgressCallback,
+	ExecutionProviders ExecutionProvider_, unsigned DeviceID_, unsigned ThreadCount_) :
+	SingingVoiceConversion(ExecutionProvider_, DeviceID_, ThreadCount_)
+{
+	load(_PathDict, _Config, _ProgressCallback);
 }
 
 std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVSAudioSlice& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const
@@ -442,7 +358,7 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVS
 				}
 				try
 				{
-					finaOut = nsfHifigan->Run(Ort::RunOptions{ nullptr },
+					finaOut = Vocoder->Run(Ort::RunOptions{ nullptr },
 						nsfInput.data(),
 						DiffOut.data(),
 						DiffOut.size(),
@@ -553,7 +469,7 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVS
 				DiffOut.emplace_back(std::move(EncoderOut[1]));
 				try
 				{
-					finaOut = nsfHifigan->Run(Ort::RunOptions{ nullptr },
+					finaOut = Vocoder->Run(Ort::RunOptions{ nullptr },
 						nsfInput.data(),
 						DiffOut.data(),
 						DiffOut.size(),
@@ -843,7 +759,7 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 	DiffOut.emplace_back(std::move(EncoderOut[1]));
 	try
 	{
-		finaOut = nsfHifigan->Run(Ort::RunOptions{ nullptr },
+		finaOut = Vocoder->Run(Ort::RunOptions{ nullptr },
 			nsfInput.data(),
 			DiffOut.data(),
 			DiffOut.size(),
@@ -999,7 +915,7 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	DiffOut.emplace_back(std::move(EncoderTensors[2]));
 	try
 	{
-		finaOut = nsfHifigan->Run(Ort::RunOptions{ nullptr },
+		finaOut = Vocoder->Run(Ort::RunOptions{ nullptr },
 			nsfInput.data(),
 			DiffOut.data(),
 			DiffOut.size(),

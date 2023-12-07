@@ -40,8 +40,8 @@ namespace MoeVSProjectSpace
                 fclose(file_);
             file_ = nullptr;
         }
-        operator FILE*() const
-    	{
+        operator FILE* () const
+        {
             return file_;
         }
         [[nodiscard]] bool IsOpen() const
@@ -55,35 +55,47 @@ namespace MoeVSProjectSpace
     using size_type = size_t;
 
     template <typename T = float>
-    size_type GetSize(const std::vector<std::vector<T>>& inp_vec)
+    size_type GetSize(const std::vector<T>& inp_vec)
     {
-        size_type _size = 0;
-        for (const auto& i : inp_vec)
-            _size += i.size() * sizeof(T);
-        return _size;
+        return inp_vec.size() * sizeof(T);
     }
 
-	struct MoeVSAudioSlice
-	{
-		std::vector<std::vector<int16_t>> Audio;
-		std::vector<std::vector<float>> F0;
-		std::vector<std::vector<float>> Volume;
-		std::vector<std::vector<std::vector<float>>> Speaker;
-		std::vector<long> OrgLen;
-		std::vector<bool> IsNotMute;
-		std::wstring Path;
-        MoeVSAudioSlice() = default;
+    struct MoeVoiceStudioSvcSlice
+    {
+        std::vector<int16_t> Audio;
+        std::vector<float> F0;
+        std::vector<float> Volume;
+        std::vector< std::vector<float>> Speaker;
+        long OrgLen = 0;
+        bool IsNotMute = false;
+        MoeVoiceStudioSvcSlice() = default;
+    };
+
+    struct MoeVoiceStudioSvcData
+    {
+        /*std::vector<std::vector<int16_t>> Audio;
+        std::vector<std::vector<float>> F0;
+        std::vector<std::vector<float>> Volume;
+        std::vector<std::vector<std::vector<float>>> Speaker;
+        std::vector<long> OrgLen;
+        std::vector<bool> IsNotMute;*/
+        std::vector<MoeVoiceStudioSvcSlice> Slices;
+        std::wstring Path;
+        MoeVoiceStudioSvcData() = default;
         [[nodiscard]] size_type Size() const
         {
             size_type _size = 0;
             const std::string bytePath = to_byte_string(Path);
-            _size += sizeof(long) * OrgLen.size() + IsNotMute.size() + bytePath.length() + 1;
-            _size += GetSize(Audio) + GetSize(F0) + GetSize(Volume);
-            for (const auto& it : Speaker)
-                _size += GetSize(it);
+            _size += sizeof(long) * Slices.size() + Slices.size() + bytePath.length() + 1;
+            for (const auto& Slice : Slices)
+            {
+                _size += GetSize(Slice.Audio) + GetSize(Slice.F0) + GetSize(Slice.Volume);
+                for (const auto& it : Slice.Speaker)
+                    _size += GetSize(it);
+            }
             return _size;
         }
-	};
+    };
 
     struct MoeVSAudioSliceRef
     {
