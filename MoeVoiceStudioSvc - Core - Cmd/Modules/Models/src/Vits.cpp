@@ -134,7 +134,7 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 		logger.log(L"[Warn] Field \"AddBlank\" Is Missing, Use Default Value");
 
 	//Load Symbol
-	int64_t iter = 0;
+	int64_t iter_symb = 0;
 	if (_Config["Symbol"].IsArray())
 	{
 		logger.log(L"[Info] Use Phs");
@@ -144,7 +144,7 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 		if (!SymbolArr[0].IsString())
 			LibDLVoiceCodecThrow("[Error] Field \"Symbol\" (PhSymbol) Must Be Array<String> or String")
 		for (const auto& it : SymbolArr)
-			Symbols.insert({ to_wide_string(it.GetString()), iter++ });
+			Symbols.insert({ to_wide_string(it.GetString()), iter_symb++ });
 	}
 	else
 	{
@@ -155,8 +155,13 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 		if (SymbolsStr.empty())
 			LibDLVoiceCodecThrow("[Error] Field \"Symbol\" (PhSymbol) Can Not Be Empty")
 		for (size_t i = 0; i < SymbolsStr.length(); ++i)
-			Symbols.insert({ SymbolsStr.substr(i,1) , iter++ });
+			Symbols.insert({ SymbolsStr.substr(i,1) , iter_symb++ });
 	}
+
+	if (_Config.HasMember("VQSize") && _Config["VQSize"].IsInt64())
+		VQCodeBookSize = _Config["VQSize"].GetInt64();
+	else
+		logger.log(L"[Warn] Field \"VQSize\" Is Missing, Use Default Value");
 
 	try
 	{
@@ -209,9 +214,6 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 
 	if (UseBert)
 	{
-		if (sessionBert.size() > _BertPaths.size())
-			sessionBert.clear();
-
 		if (_Config.HasMember("BertPath") && _Config["BertPath"].IsArray() && !_Config["BertPath"].Empty())
 		{
 			for (const auto& BPH : _Config["BertPath"].GetArray())
@@ -234,6 +236,9 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 		}
 		for(const auto& Path : _BertPaths)
 		{
+			const auto BertName = Path.substr(Path.rfind(L'/') + 1);
+			if(sessionBert.find(BertName) != sessionBert.end() && sessionBert.at(BertName) != nullptr)
+				continue;
 			Ort::Session* SessionBert = nullptr;
 			if (_waccess(Path.c_str(), 0) != -1)
 			{
@@ -255,8 +260,18 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 				else if (SessionBert)
 					LibDLVoiceCodecThrow("Bert Must Have a Tokenizer")
 			}
-			sessionBert[Path.substr(Path.rfind(L'/') + 1)] = SessionBert;
+			sessionBert[BertName] = SessionBert;
 		}
+		for (const auto& iter : sessionBert)
+			if (std::find(BertNamesIdx.begin(), BertNamesIdx.end(), iter.first) == BertNamesIdx.end())
+				delete iter.second;
+	}
+
+	if(_BertPaths.empty())
+	{
+		for (const auto& iter : sessionBert)
+			delete iter.second;
+		sessionBert.clear();
 	}
 
 	_callback = _ProgressCallback;
@@ -306,6 +321,13 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 		DpInputNames.emplace_back("g");
 		FlowInputNames.emplace_back("g");
 		DecInputNames.emplace_back("g");
+	}
+
+	if(sessionEnc_p->GetInputCount() == EncoderInputNames.size() + 2)
+	{
+		EncoderInputNames.emplace_back("vqidx");
+		EncoderInputNames.emplace_back("sid");
+		UseVQ = true;
 	}
 }
 
@@ -464,6 +486,7 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 			EncoderInputs.push_back(Ort::Value::CreateTensor(
 				*memory_info, emoVec.data(), 1024, EmotionShape, 1));
 		}
+		
 		std::vector ToneIn(TextSeq.size(), 0i64);
 		if(UseTone)
 		{
@@ -560,6 +583,9 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 			}
 		}
 
+		int64_t VQIndices[] = { 0 };
+		int64_t SidIndices[] = { SpeakerMap.find(Seq.SpeakerName) != SpeakerMap.end() ? SpeakerMap.at(Seq.SpeakerName) : _wtoi64(Seq.SpeakerName.c_str()) };
+
 		std::vector<float> GEmbidding;
 		std::vector<int64_t> GOutShape;
 		if (sessionEmb)
@@ -615,9 +641,8 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 			{
 				std::vector<Ort::Value> EmbiddingInput;
 				std::vector<Ort::Value> EmbiddingOutput;
-				int64_t Character[1] = { SpeakerMap.find(Seq.SpeakerName) != SpeakerMap.end() ? SpeakerMap.at(Seq.SpeakerName) : _wtoi64(Seq.SpeakerName.c_str()) };
 				EmbiddingInput.push_back(Ort::Value::CreateTensor(
-					*memory_info, Character, 1, LengthShape, 1));
+					*memory_info, SidIndices, 1, LengthShape, 1));
 				try
 				{
 					EmbiddingOutput = sessionEmb->Run(Ort::RunOptions{ nullptr },
@@ -638,6 +663,14 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 			}
 			if (EncoderG)
 				EncoderInputs.push_back(Ort::Value::CreateTensor(*memory_info, GEmbidding.data(), GEmbidding.size(), GOutShape.data(), 3));
+		}
+
+		if (UseVQ)
+		{
+			if (!Seq.EmotionPrompt.empty())
+				VQIndices[0] = _wtoi64(Seq.EmotionPrompt[0].c_str());
+			EncoderInputs.push_back(Ort::Value::CreateTensor(*memory_info, VQIndices, 1, LengthShape, 1));
+			EncoderInputs.push_back(Ort::Value::CreateTensor(*memory_info, SidIndices, 1, LengthShape, 1));
 		}
 
 		try

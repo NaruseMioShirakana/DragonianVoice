@@ -77,6 +77,8 @@ private:
     bool EncoderG = false;
     std::vector<std::string> BertNames;
     std::vector<std::wstring> BertNamesIdx;
+    int64_t VQCodeBookSize = 10;
+    bool UseVQ = false;
 
     std::vector<const char*> EncoderInputNames = { "x" };
     const std::vector<const char*> EncoderOutputNames = { "xout", "m_p", "logs_p", "x_mask" };
