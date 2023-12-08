@@ -76,7 +76,8 @@ public:
         std::pair<std::vector<float>, int64_t>& _Mel,
         const std::vector<float>& _SrcF0,
         const std::vector<float>& _SrcVolume,
-        const std::vector<std::vector<float>>& _SrcSpeakerMap
+        const std::vector<std::vector<float>>& _SrcSpeakerMap,
+        size_t& Process
     ) const;
 
     [[nodiscard]] int64_t GetMaxStep() const

@@ -334,11 +334,16 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVo
 			LibDLVoiceCodecThrow("HiddenUnitKDims UnMatch")
 
 		std::vector srcHiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
+		int64_t SpeakerIdx = _InferParams.SpeakerId;
+		if (SpeakerIdx >= SpeakerCount)
+			SpeakerIdx = SpeakerCount;
+		if (SpeakerIdx < 0)
+			SpeakerIdx = 0;
 
 		const auto max_cluster_size = int64_t((size_t)HubertOutPutShape[1] * src_audio_length / RawWav.size());
 		if (EnableCluster && _InferParams.ClusterRate > 0.001f)
 		{
-			const auto pts = Cluster->find(srcHiddenUnits.data(), long(_InferParams.SpeakerId), max_cluster_size);
+			const auto pts = Cluster->find(srcHiddenUnits.data(), long(SpeakerIdx), max_cluster_size);
 			for (int64_t indexs = 0; indexs < max_cluster_size * HiddenUnitKDims; ++indexs)
 				srcHiddenUnits[indexs] = srcHiddenUnits[indexs] * (1.f - _InferParams.ClusterRate) + pts[indexs] * _InferParams.ClusterRate;
 		}
@@ -358,7 +363,7 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVo
 			auto alignment = MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::GetAligments(F0Shape[1], HubertLen);
 			std::vector<Ort::Value> TensorsInp;
 
-			int64_t Chara[] = { _InferParams.SpeakerId };
+			int64_t Chara[] = { SpeakerIdx };
 
 			TensorsInp.emplace_back(Ort::Value::CreateTensor(*memory_info, srcHiddenUnits.data(), HubertSize, HiddenUnitShape, 3));
 			TensorsInp.emplace_back(Ort::Value::CreateTensor(*memory_info, alignment.data(), F0Shape[1], F0Shape, 2));
@@ -408,7 +413,7 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVo
 		{
 			MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::InferParams _Inference_Params;
 			_Inference_Params.AudioSize = _Slice.Audio.size();
-			_Inference_Params.Chara = _InferParams.SpeakerId;
+			_Inference_Params.Chara = SpeakerIdx;
 			_Inference_Params.NoiseScale = _InferParams.NoiseScale;
 			_Inference_Params.DDSPNoiseScale = _InferParams.DDSPNoiseScale;
 			_Inference_Params.Seed = int(_InferParams.Seed);
@@ -547,10 +552,15 @@ std::vector<std::wstring> DiffusionSvc::Inference(std::wstring& _Paths,
 		std::vector<int16_t> _data = SliceInference(Audio, _InferParams);
 
 		std::wstring OutFolder = GetCurrentFolder() + L"/Outputs/" + path.substr(path.rfind(L'/') + 1, path.rfind(L'.') - path.rfind(L'/') - 1);
+		int64_t SpeakerIdx = _InferParams.SpeakerId;
+		if (SpeakerIdx >= SpeakerCount)
+			SpeakerIdx = SpeakerCount;
+		if (SpeakerIdx < 0)
+			SpeakerIdx = 0;
 		OutFolder += L"-Params-(-NoiseScale=" +
 			std::to_wstring(_InferParams.NoiseScale) +
 			L"-Speaker=" +
-			(EnableCharaMix ? std::wstring(L"SpeakerMix") : std::to_wstring(_InferParams.SpeakerId)) +
+			(EnableCharaMix ? std::wstring(L"SpeakerMix") : std::to_wstring(SpeakerIdx)) +
 			L"-Seed=" +
 			std::to_wstring(_InferParams.Seed) +
 			L"-Sampler=" +
@@ -580,7 +590,11 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 		return PCMData;
 
 	auto hubertin = InferTools::InterpResample<float>(PCMData, srcSr, 16000);
-	const int64_t charEmb = _InferParams.SpeakerId;
+	int64_t SpeakerIdx = _InferParams.SpeakerId;
+	if (SpeakerIdx >= SpeakerCount)
+		SpeakerIdx = SpeakerCount;
+	if (SpeakerIdx < 0)
+		SpeakerIdx = 0;
 	std::mt19937 gen(int(_InferParams.Seed));
 	std::normal_distribution<float> normal(0, 1);
 
@@ -616,7 +630,7 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 	if (EnableCluster && _InferParams.ClusterRate > 0.001f)
 	{
 		const auto clus_size = HubertOutPutShape[1];
-		const auto pts = Cluster->find(HiddenUnits.data(), long(charEmb), clus_size);
+		const auto pts = Cluster->find(HiddenUnits.data(), long(SpeakerIdx), clus_size);
 		for (size_t indexs = 0; indexs < HiddenUnits.size(); ++indexs)
 			HiddenUnits[indexs] = HiddenUnits[indexs] * (1.f - _InferParams.ClusterRate) + pts[indexs] * _InferParams.ClusterRate;
 	}
@@ -633,7 +647,7 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 		ifo *= (float)pow(2.0, static_cast<double>(_InferParams.Keys) / 12.0);
 	F0Data = _TensorExtractor->GetInterpedF0(InferTools::InterpFunc(F0Data, long(F0Data.size()), long(F0Shape[1])));
 	std::vector<int64_t> Alignment = _TensorExtractor->GetAligments(F0Shape[1], HubertLen);
-	int64_t CharaEmb[] = { charEmb };
+	int64_t CharaEmb[] = { SpeakerIdx };
 
 	std::vector<Ort::Value> EncoderTensors;
 
@@ -685,7 +699,7 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 
 	if (EnableCharaMix)
 	{
-		SpkMap = _TensorExtractor->GetCurrectSpkMixData(std::vector<std::vector<float>>(), F0Shape[1], charEmb);
+		SpkMap = _TensorExtractor->GetCurrectSpkMixData(std::vector<std::vector<float>>(), F0Shape[1], SpeakerIdx);
 		EncoderTensors.emplace_back(Ort::Value::CreateTensor(
 			*memory_info,
 			SpkMap.data(),
@@ -799,7 +813,8 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	std::pair<std::vector<float>, int64_t>& _Mel,
 	const std::vector<float>& _SrcF0,
 	const std::vector<float>& _SrcVolume,
-	const std::vector<std::vector<float>>& _SrcSpeakerMap
+	const std::vector<std::vector<float>>& _SrcSpeakerMap,
+	size_t& Process
 ) const
 {
 	if (diffSvc || DiffSvcVersion != L"DiffusionSvc")
@@ -823,11 +838,17 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 		LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()))
 	}
 
+	int64_t SpeakerIdx = _InferParams.SpeakerId;
+	if (SpeakerIdx >= SpeakerCount)
+		SpeakerIdx = SpeakerCount;
+	if (SpeakerIdx < 0)
+		SpeakerIdx = 0;
+
 	const auto HubertLength = HubertOutputTensors[0].GetTensorTypeAndShapeInfo().GetShape()[1];
 	const int64_t FrameShape[] = { 1, _Mel_Size };
 	const int64_t CharaMixShape[] = { _Mel_Size, SpeakerCount };
 	constexpr int64_t OneShape[] = { 1 };
-	int64_t CharaEmb[] = { _InferParams.SpeakerId };
+	int64_t CharaEmb[] = { SpeakerIdx };
 
 	auto Alignment = _TensorExtractor->GetAligments(_Mel_Size, HubertLength);
 	Alignment.resize(FrameShape[1]);
@@ -911,8 +932,7 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	long long noise_shape[4] = { 1,1,melBins,_Mel_Size };
 	DenoiseInTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, _Mel.first.data(), _Mel.first.size(), noise_shape, 4));
 
-	size_t process = 0;
-	auto PredOut = MoeVSSampler::GetMoeVSSampler((!alpha ? L"Pndm" : _InferParams.Sampler), alpha, denoise, pred, melBins, [](size_t, size_t) {}, memory_info)->Sample(DenoiseInTensors, (int64_t)_InferParams.Step, (int64_t)_InferParams.Pndm, _InferParams.NoiseScale, _InferParams.Seed, process);
+	auto PredOut = MoeVSSampler::GetMoeVSSampler((!alpha ? L"Pndm" : _InferParams.Sampler), alpha, denoise, pred, melBins, [](size_t, size_t) {}, memory_info)->Sample(DenoiseInTensors, (int64_t)_InferParams.Step, (int64_t)_InferParams.Pndm, _InferParams.NoiseScale, _InferParams.Seed, Process);
 
 	std::vector<Ort::Value> DiffOut, finaOut;
 	try

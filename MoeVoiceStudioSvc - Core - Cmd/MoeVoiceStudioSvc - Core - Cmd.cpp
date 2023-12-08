@@ -44,6 +44,8 @@ int main()
 
 	MoeVSModuleManager::MoeVoiceStudioCoreInitSetup();
 
+	DlCodecStft::Mel(2048, 512, 32000, 128)(InferTools::arange(0, 1, 0.00001));
+
 	try
 	{
 		MoeVSModuleManager::LoadVitsSvcModel(

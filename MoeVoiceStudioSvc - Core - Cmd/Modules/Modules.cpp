@@ -131,6 +131,7 @@ namespace MoeVSModuleManager
 		);
 
 		VitsSamplingRate = GlobalVitsSvcModel->GetSamplingRate();
+		SamplingRate = VitsSamplingRate;
 	}
 
 	void LoadDiffusionSvcModel(const MJson& Config,
@@ -147,6 +148,10 @@ namespace MoeVSModuleManager
 			);
 		else
 			LibDLVoiceCodecThrow("Trying To Load VitsSvc Model As Diffusion Model!")
+
+		if(VocoderEnabled())
+			if (!GetVitsSvcModel() || (!GlobalDiffusionSvcModel->OldVersion() && GlobalDiffusionSvcModel->GetDiffSvcVer() == L"DiffusionSvc"))
+				SamplingRate = GlobalDiffusionSvcModel->GetSamplingRate();
 	}
 
 	void LoadVocoderModel(const std::wstring& VocoderPath)
@@ -175,7 +180,9 @@ namespace MoeVSModuleManager
 		RtnAudio.reserve(size_t(double(TotalAudioSize) * 1.5));
 
 		//VitsSteps
-		int64_t GlobalSteps = 1;
+		int64_t GlobalSteps = 0;
+		if (GlobalVitsSvcModel)
+			GlobalSteps = 1;
 
 		//DiffusionSteps
 		auto SkipDiffusionStep = (int64_t)_InferParams.Pndm;
@@ -188,7 +195,7 @@ namespace MoeVSModuleManager
 		if (SkipDiffusionStep == 0) 
 			SkipDiffusionStep = 1;
 		const auto RealDiffSteps = DiffusionTotalStep % SkipDiffusionStep ? DiffusionTotalStep / SkipDiffusionStep + 1 : DiffusionTotalStep / SkipDiffusionStep;
-		if(DiffusionModelEnabled)
+		if((DiffusionModelEnabled && !GlobalVitsSvcModel) || (DiffusionModelEnabled && ShallowDiffusionEnabled()))
 		{
 			if (GlobalDiffusionSvcModel->OldVersion())
 				GlobalSteps += 1;
@@ -200,7 +207,7 @@ namespace MoeVSModuleManager
 		const int64_t TotalSteps = GlobalSteps * int64_t(_Slice.Slices.size());
 		size_t ProgressVal = 0;
 		size_t SliceIndex = 0;
-
+		ProgessBar(0, TotalSteps);
 		for (const auto& CurSlice : _Slice.Slices)
 		{
 			const auto InferBeginTime = clock();
@@ -235,25 +242,29 @@ namespace MoeVSModuleManager
 	std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcSlice& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, size_t& _Process)
 	{
 		const bool DiffusionModelEnabled = GlobalDiffusionSvcModel && VocoderEnabled();
-		int64_t SamplingRate = VitsSamplingRate;
-		if (DiffusionModelEnabled)
+		int64_t SamplingRate_I64 = VitsSamplingRate;
+		SamplingRate = VitsSamplingRate;
+		if ((DiffusionModelEnabled && !GlobalVitsSvcModel) || (_InferParams.UseShallowDiffusion && DiffusionModelEnabled && ShallowDiffusionEnabled()))
+		{
+			SamplingRate_I64 = GlobalDiffusionSvcModel->GetSamplingRate();
 			SamplingRate = GlobalDiffusionSvcModel->GetSamplingRate();
+		}
 		if (!_Slice.IsNotMute)
-			return { size_t(_Slice.OrgLen * SamplingRate / 48000), 0i16, std::allocator<int16_t>() };
+			return { size_t(_Slice.OrgLen * SamplingRate_I64 / 48000), 0i16, std::allocator<int16_t>() };
 		std::vector<int16_t> RtnAudio;
 		RtnAudio.reserve(size_t(double(_Slice.Audio.size()) * 1.5));
 
 		if (GlobalVitsSvcModel)
 		{
 			RtnAudio = GlobalVitsSvcModel->SliceInference(_Slice, _InferParams, _Process);
-			if(DiffusionModelEnabled && !GlobalDiffusionSvcModel->OldVersion() && GlobalDiffusionSvcModel->GetDiffSvcVer() == L"DiffusionSvc")
+			if(_InferParams.UseShallowDiffusion && DiffusionModelEnabled && !GlobalDiffusionSvcModel->OldVersion() && GlobalDiffusionSvcModel->GetDiffSvcVer() == L"DiffusionSvc")
 			{
-				if (CurStftSr != SamplingRate || CurHopSize != GlobalDiffusionSvcModel->GetHopSize())
+				if (CurStftSr != SamplingRate_I64 || CurHopSize != GlobalDiffusionSvcModel->GetHopSize())
 				{
 					delete MelOperator;
-					CurStftSr = (int)SamplingRate;
+					CurStftSr = (int)SamplingRate_I64;
 					CurHopSize = GlobalDiffusionSvcModel->GetHopSize();
-					MelOperator = new DlCodecStft::Mel(1024, CurHopSize, CurStftSr, 512, (int)GlobalDiffusionSvcModel->GetMelBins());
+					MelOperator = new DlCodecStft::Mel(2048, CurHopSize, CurStftSr, (int)GlobalDiffusionSvcModel->GetMelBins());
 				}
 				const std::vector<double> TempAudio = InferTools::InterpResample(RtnAudio, (long)VitsSamplingRate, CurStftSr, 32767.);
 				auto Mel = MelOperator->operator()(TempAudio);
@@ -262,7 +273,8 @@ namespace MoeVSModuleManager
 					ShallData._16KAudio, _InferParams, Mel,
 					ShallData.NeedPadding ? ShallData.CUDAF0 : _Slice.F0,
 					ShallData.NeedPadding ? ShallData.CUDAVolume : _Slice.Volume,
-					ShallData.NeedPadding ? ShallData.CUDASpeaker : _Slice.Speaker
+					ShallData.NeedPadding ? ShallData.CUDASpeaker : _Slice.Speaker,
+					_Process
 					);
 			}
 		}
@@ -272,5 +284,11 @@ namespace MoeVSModuleManager
 			LibDLVoiceCodecThrow("You Must Load A Model To Inference!");
 
 		return RtnAudio;
+	}
+
+	bool ShallowDiffusionEnabled()
+	{
+		const bool DiffusionModelEnabled = GlobalDiffusionSvcModel && VocoderEnabled();
+		return DiffusionModelEnabled && !GlobalDiffusionSvcModel->OldVersion() && GlobalDiffusionSvcModel->GetDiffSvcVer() == L"DiffusionSvc";
 	}
 }

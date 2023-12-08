@@ -26,6 +26,9 @@
 
 namespace MoeVSModuleManager
 {
+	inline int64_t SpeakerCount = 0;
+	inline int64_t SamplingRate = 32000;
+
 	/**
 	 * \brief 初始化所有组件
 	 */
@@ -111,6 +114,8 @@ namespace MoeVSModuleManager
 	 * \return 音频
 	 */
 	std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcSlice& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, size_t& _Process);
+
+	bool ShallowDiffusionEnabled();
 }
 
 namespace MoeVSRename

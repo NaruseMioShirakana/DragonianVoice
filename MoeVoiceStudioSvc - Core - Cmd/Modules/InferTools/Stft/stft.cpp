@@ -1,12 +1,13 @@
-#include "stft.hpp"
+﻿#include "stft.hpp"
 #include "../inferTools.hpp"
 
 namespace DlCodecStft
 {
-    void HannWindow(double* data, int size) {
+    void HannWindow(std::vector<double>& Hann) {
+        const int size = int(Hann.size());
         for (int i = 0; i < size; i++) {
-            const double windowValue = 0.5 * (1 - cos(2 * STFT::PI * i / (size - 1)));
-            data[i] *= windowValue;
+            const double windowValue = 0.5 * (1 - cos(2. * STFT::PI * double(i) / (double(size) - 1.)));
+            Hann[i] *= windowValue;
         }
     }
 
@@ -57,8 +58,6 @@ namespace DlCodecStft
 
     static double mel_min = HZ2Mel(20.);
     static double mel_max = HZ2Mel(11025.);
-    static double f_min = 20.;
-    static double f_max = 11025.;
 
     STFT::STFT(int WindowSize, int HopSize, int FFTSize)
     {
@@ -70,49 +69,30 @@ namespace DlCodecStft
             FFT_SIZE = WINDOW_SIZE / 2 + 1;
     }
 
-    STFT::~STFT()
-    {
-        if (fftIn) fftw_free(fftIn);
-        if (fftOut)fftw_free(fftOut);
-        if (plan)fftw_destroy_plan(plan);
-        fftIn = nullptr;
-        fftOut = nullptr;
-        plan = nullptr;
-    }
+    STFT::~STFT() = default;
 
-    std::vector<std::vector<double>> STFT::operator()(const std::vector<double>& audioData)
+    std::vector<std::vector<double>> STFT::operator()(const std::vector<double>& audioData) const
     {
         const int NUM_FRAMES = (int(audioData.size()) - WINDOW_SIZE) / HOP_SIZE + 1;
         std::vector hannWindow(WINDOW_SIZE, 0.0);
-        fftIn = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * WINDOW_SIZE));
-        fftOut = static_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * FFT_SIZE));
-        plan = fftw_plan_dft_r2c_1d(WINDOW_SIZE, hannWindow.data(), fftOut, FFTW_ESTIMATE);
+        const auto fftOut = reinterpret_cast<fftw_complex*>(fftw_malloc(sizeof(fftw_complex) * FFT_SIZE));
+        const fftw_plan plan = fftw_plan_dft_r2c_1d(WINDOW_SIZE, hannWindow.data(), fftOut, FFTW_ESTIMATE);
         std::vector spectrogram(NUM_FRAMES, std::vector<double>(FFT_SIZE));
         for (int i = 0; i < NUM_FRAMES; i++) {
-            std::memcpy(hannWindow.data(), &audioData[size_t(i) * HOP_SIZE], size_t(sizeof(double)) * WINDOW_SIZE);
-            HannWindow(hannWindow.data(), WINDOW_SIZE);
-            //fft
-            ConvertDoubleToFloat(std::vector(hannWindow.data(), hannWindow.data() + WINDOW_SIZE), reinterpret_cast<float*>(fftIn));
+        	std::memcpy(hannWindow.data(), audioData.data() + size_t(i) * HOP_SIZE, sizeof(double) * size_t(WINDOW_SIZE));
+            HannWindow(hannWindow);
             fftw_execute(plan);
-            const auto real = reinterpret_cast<double*>(fftOut);
-            const double* imag = real + 1;
-            CalculatePowerSpectrum(real, imag, FFT_SIZE);
-            //ConvertPowerSpectrumToDecibels(real, FFT_SIZE);
             for (int j = 0; j < FFT_SIZE; j++)
-                spectrogram[i][j] = real[j];
+                spectrogram[i][j] = pow(fftOut[j][0], 2) + pow(fftOut[j][1], 2);
         }
-        fftw_free(fftIn);
-        fftw_free(fftOut);
         fftw_destroy_plan(plan);
-        fftIn = nullptr;
-        fftOut = nullptr;
-        plan = nullptr;
+        fftw_free(fftOut);
         return spectrogram;
     }
 
-    std::pair<std::vector<float>, int64_t> Mel::operator()(const std::vector<double>& audioData)
+    std::pair<std::vector<float>, int64_t> Mel::GetMel(const std::vector<double>& audioData) const
     {
-    	const auto Spec = stft(audioData);  //[frame, nfft] * [nfft, mel_bins]
+        const auto Spec = stft(audioData);  //[frame, nfft] * [nfft, mel_bins]
         std::vector Mel(MEL_SIZE * Spec.size(), 0.f);
         for (int i = 0; i < MEL_SIZE; ++i)
             for (int j = 0; j < FFT_SIZE; ++j)
@@ -121,18 +101,23 @@ namespace DlCodecStft
         return { std::move(Mel), (int64_t)Spec.size() };
     }
 
-    Mel::Mel(int WindowSize, int HopSize, int SamplingRate, int FFTSize, int MelSize) :
-        stft(WindowSize, HopSize, FFTSize)
+    std::pair<std::vector<float>, int64_t> Mel::operator()(const std::vector<double>& audioData) const
+    {
+        return GetMel(audioData);
+    }
+
+    Mel::Mel(int WindowSize, int HopSize, int SamplingRate, int MelSize) :
+        stft(WindowSize, HopSize, WindowSize / 2 + 1)
     {
         if (MelSize > 0)
             MEL_SIZE = MelSize;
-        FFT_SIZE = FFTSize;
+        FFT_SIZE = WindowSize / 2 + 1;
         sr = SamplingRate;
 
-        const int nfft = (FFTSize - 1) * 2;
+        const int nfft = (FFT_SIZE - 1) * 2;
         const double fftfreqval = 1. / (double(nfft) / double(SamplingRate));
-        auto fftfreqs = InferTools::arange(0, FFTSize + 2);
-        fftfreqs.resize(FFTSize);
+        auto fftfreqs = InferTools::arange(0, FFT_SIZE + 2);
+        fftfreqs.resize(FFT_SIZE);
         for (auto& i : fftfreqs)
             i *= fftfreqval;
 
@@ -146,22 +131,22 @@ namespace DlCodecStft
         for (auto& i : mel_f)
         {
             i = Mel2HZ(i);
-	        ramps.emplace_back(FFTSize, i);
+	        ramps.emplace_back(FFT_SIZE, i);
         }
         for (size_t i = 0; i < ramps.size(); ++i)
-            for (int j = 0; j < FFTSize; ++j)
+            for (int j = 0; j < FFT_SIZE; ++j)
                 ramps[i][j] -= fftfreqs[j];
 
         fdiff.reserve(MEL_SIZE + 2); //[MEL_SIZE + 1]
         for (size_t i = 1; i < mel_f.size(); ++i)
             fdiff.emplace_back(mel_f[i] - mel_f[i - 1]);
 
-        MelBasic = std::vector(FFTSize, std::vector<double>(MelSize));
+        MelBasic = std::vector(FFT_SIZE, std::vector<double>(MelSize));
 
         for (int i = 0; i < MelSize; ++i)
         {
             const auto enorm = 2. / (mel_f[i + 2] - mel_f[i]);
-            for (int j = 0; j < FFTSize; ++j)
+            for (int j = 0; j < FFT_SIZE; ++j)
                 MelBasic[j][i] = std::max(0., std::min(-ramps[i][j] / fdiff[i], ramps[i + 2][j] / fdiff[i + 1])) * enorm;
         }
     }

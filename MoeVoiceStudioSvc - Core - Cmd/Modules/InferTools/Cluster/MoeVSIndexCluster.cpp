@@ -1,7 +1,7 @@
 ﻿#ifdef MoeVoiceStudioIndexCluster
 #include "MoeVSIndexCluster.hpp"
 #include <filesystem>
-
+#include "../inferTools.hpp"
 MoeVoiceStudioClusterHeader
 
 IndexClusterCore::~IndexClusterCore()

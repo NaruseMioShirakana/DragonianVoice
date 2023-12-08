@@ -265,17 +265,23 @@ std::vector<int16_t> VitsSvc::SliceInference(const MoeVSProjectSpace::MoeVoiceSt
 
 		std::vector SrcHiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
 
+		int64_t SpeakerIdx = _InferParams.SpeakerId;
+		if (SpeakerIdx >= SpeakerCount)
+			SpeakerIdx = SpeakerCount;
+		if (SpeakerIdx < 0)
+			SpeakerIdx = 0;
+
 		const auto max_cluster_size = int64_t((size_t)HubertOutPutShape[1] * src_audio_length / DataForDiffusion._16KAudio.size());
 		if (EnableCluster && _InferParams.ClusterRate > 0.001f)
 		{
-			const auto pts = Cluster->find(SrcHiddenUnits.data(), long(_InferParams.SpeakerId), max_cluster_size);
+			const auto pts = Cluster->find(SrcHiddenUnits.data(), long(SpeakerIdx), max_cluster_size);
 			for (int64_t indexs = 0; indexs < max_cluster_size * HiddenUnitKDims; ++indexs)
 				SrcHiddenUnits[indexs] = SrcHiddenUnits[indexs] * (1.f - _InferParams.ClusterRate) + pts[indexs] * _InferParams.ClusterRate;
 		}
 
 		MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::InferParams _Inference_Params;
 		_Inference_Params.AudioSize = _Slice.Audio.size();
-		_Inference_Params.Chara = _InferParams.SpeakerId;
+		_Inference_Params.Chara = SpeakerIdx;
 		_Inference_Params.NoiseScale = _InferParams.NoiseScale;
 		_Inference_Params.DDSPNoiseScale = _InferParams.DDSPNoiseScale;
 		_Inference_Params.Seed = int(_InferParams.Seed);
@@ -378,10 +384,15 @@ std::vector<std::wstring> VitsSvc::Inference(std::wstring& _Paths,
 		std::vector<int16_t> _data = SliceInference(Audio, _InferParams);
 
 		std::wstring OutFolder = GetCurrentFolder() + L"/Outputs/" + path.substr(path.rfind(L'/') + 1, path.rfind(L'.') - path.rfind(L'/') - 1);
+		int64_t SpeakerIdx = _InferParams.SpeakerId;
+		if (SpeakerIdx >= SpeakerCount)
+			SpeakerIdx = SpeakerCount;
+		if (SpeakerIdx < 0)
+			SpeakerIdx = 0;
 		OutFolder += L"-Params-(-NoiseScale=" +
 			std::to_wstring(_InferParams.NoiseScale) +
 			L"-Speaker=" +
-			(EnableCharaMix ? std::wstring(L"SpeakerMix") : std::to_wstring(_InferParams.SpeakerId)) +
+			(EnableCharaMix ? std::wstring(L"SpeakerMix") : std::to_wstring(SpeakerIdx)) +
 			L"-Seed=" +
 			std::to_wstring(_InferParams.Seed) +
 			L"-F0Method=" +
@@ -407,7 +418,11 @@ std::vector<std::wstring> VitsSvc::Inference(std::wstring& _Paths,
 std::vector<int16_t> VitsSvc::InferPCMData(const std::vector<int16_t>& PCMData, long srcSr, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const
 {
 	auto hubertin = InferTools::InterpResample<float>(PCMData, srcSr, 16000);
-	int64_t charEmb = _InferParams.SpeakerId;
+	int64_t SpeakerIdx = _InferParams.SpeakerId;
+	if (SpeakerIdx >= SpeakerCount)
+		SpeakerIdx = SpeakerCount;
+	if (SpeakerIdx < 0)
+		SpeakerIdx = 0;
 	std::mt19937 gen(int(_InferParams.Seed));
 	std::normal_distribution<float> normal(0, 1);
 	float noise_scale = _InferParams.NoiseScale;
@@ -442,7 +457,7 @@ std::vector<int16_t> VitsSvc::InferPCMData(const std::vector<int16_t>& PCMData, 
 	if (EnableCluster && _InferParams.ClusterRate > 0.001f)
 	{
 		const auto clus_size = HubertOutPutShape[1];
-		const auto pts = Cluster->find(HiddenUnitsSrc.data(), long(charEmb), clus_size);
+		const auto pts = Cluster->find(HiddenUnitsSrc.data(), long(SpeakerIdx), clus_size);
 		for (size_t indexs = 0; indexs < HiddenUnitsSrc.size(); ++indexs)
 			HiddenUnitsSrc[indexs] = HiddenUnitsSrc[indexs] * (1.f - _InferParams.ClusterRate) + pts[indexs] * _InferParams.ClusterRate;
 	}
@@ -463,7 +478,7 @@ std::vector<int16_t> VitsSvc::InferPCMData(const std::vector<int16_t>& PCMData, 
 	int64_t XLength[1] = { HubertLen };
 	std::vector<int64_t> Nsff0;
 	//auto SoVitsInput = soVitsInput;
-	int64_t Chara[] = { charEmb };
+	int64_t Chara[] = { SpeakerIdx };
 	std::vector<float> charaMix;
 
 	const auto F0Extractor = MoeVSF0Extractor::GetF0Extractor(_InferParams.F0Method, _samplingRate, HopSize);
@@ -562,7 +577,7 @@ std::vector<int16_t> VitsSvc::InferPCMData(const std::vector<int16_t>& PCMData, 
 	{
 		CharaMixShape[0] = F0Shape[1];
 		std::vector charaMap(SpeakerCount, 0.f);
-		charaMap[charEmb] = 1.f;
+		charaMap[SpeakerIdx] = 1.f;
 		charaMix.reserve((SpeakerCount + 1) * F0Shape[1]);
 		for (int64_t index = 0; index < F0Shape[1]; ++index)
 			charaMix.insert(charaMix.end(), charaMap.begin(), charaMap.end());
