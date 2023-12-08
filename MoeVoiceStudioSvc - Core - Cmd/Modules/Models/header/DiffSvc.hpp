@@ -77,7 +77,8 @@ public:
         const std::vector<float>& _SrcF0,
         const std::vector<float>& _SrcVolume,
         const std::vector<std::vector<float>>& _SrcSpeakerMap,
-        size_t& Process
+        size_t& Process,
+        int64_t SrcSize
     ) const;
 
     [[nodiscard]] int64_t GetMaxStep() const
@@ -100,6 +101,8 @@ public:
         return melBins;
     }
 
+    void NormMel(std::vector<float>& MelSpec) const;
+
 private:
     Ort::Session* encoder = nullptr;
     Ort::Session* denoise = nullptr;
@@ -113,6 +116,8 @@ private:
     int64_t melBins = 128;
     int64_t Pndms = 100;
     int64_t MaxStep = 1000;
+    float SpecMin = -12;
+    float SpecMax = 2;
 
     std::wstring DiffSvcVersion = L"DiffSvc";
 

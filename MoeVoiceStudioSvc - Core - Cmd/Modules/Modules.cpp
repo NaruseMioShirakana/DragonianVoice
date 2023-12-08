@@ -256,7 +256,9 @@ namespace MoeVSModuleManager
 
 		if (GlobalVitsSvcModel)
 		{
+			auto BgnTime = clock();
 			RtnAudio = GlobalVitsSvcModel->SliceInference(_Slice, _InferParams, _Process);
+			logger.log(("[Inference] Slice Vits Use Time " + std::to_string(clock() - BgnTime) + "ms").c_str());
 			if(_InferParams.UseShallowDiffusion && DiffusionModelEnabled && !GlobalDiffusionSvcModel->OldVersion() && GlobalDiffusionSvcModel->GetDiffSvcVer() == L"DiffusionSvc")
 			{
 				if (CurStftSr != SamplingRate_I64 || CurHopSize != GlobalDiffusionSvcModel->GetHopSize())
@@ -269,17 +271,24 @@ namespace MoeVSModuleManager
 				const std::vector<double> TempAudio = InferTools::InterpResample(RtnAudio, (long)VitsSamplingRate, CurStftSr, 32767.);
 				auto Mel = MelOperator->operator()(TempAudio);
 				auto ShallData = MoeVoiceStudioCore::GetDataForShallowDiffusion();
+				BgnTime = clock();
 				RtnAudio = GlobalDiffusionSvcModel->ShallowDiffusionInference(
 					ShallData._16KAudio, _InferParams, Mel,
 					ShallData.NeedPadding ? ShallData.CUDAF0 : _Slice.F0,
 					ShallData.NeedPadding ? ShallData.CUDAVolume : _Slice.Volume,
 					ShallData.NeedPadding ? ShallData.CUDASpeaker : _Slice.Speaker,
-					_Process
-					);
+					_Process,
+					TempAudio.size()
+				);
+				logger.log(("[Inference] Slice Diffusion Use Time " + std::to_string(clock() - BgnTime) + "ms").c_str());
 			}
 		}
 		else if (DiffusionModelEnabled)
+		{
+			const auto BgnTime = clock();
 			RtnAudio = GlobalDiffusionSvcModel->SliceInference(_Slice, _InferParams, _Process);
+			logger.log(("[Inference] Slice Diffusion Use Time " + std::to_string(clock() - BgnTime) + "ms").c_str());
+		}
 		else
 			LibDLVoiceCodecThrow("You Must Load A Model To Inference!");
 

@@ -174,6 +174,16 @@ void DiffusionSvc::load(const std::map<std::string, std::wstring>& _PathDict, co
 	if (_Config["Pndm"].IsInt())
 		Pndms = _Config["Pndm"].GetInt();
 
+	if (_Config.HasMember("SpecMax") && _Config["SpecMax"].IsDouble())
+		SpecMax = _Config["SpecMax"].GetFloat();
+	else
+		logger.log(L"[Warn] Missing Field \"SpecMax\", Use Default Value (2)");
+
+	if (_Config.HasMember("SpecMin") && _Config["SpecMin"].IsDouble())
+		SpecMin = _Config["SpecMin"].GetFloat();
+	else
+		logger.log(L"[Warn] Missing Field \"SpecMin\", Use Default Value (-12)");
+
 	_callback = _ProgressCallback;
 
 	if (_Config["Cluster"].IsString())
@@ -807,6 +817,12 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 	return TempVecWav;
 }
 
+void DiffusionSvc::NormMel(std::vector<float>& MelSpec) const
+{
+	for (auto& it : MelSpec)
+		it = (it - SpecMin) / (SpecMax - SpecMin) * 2 - 1;
+}
+
 std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	std::vector<float>& _16KAudioHubert,
 	const MoeVSProjectSpace::MoeVSSvcParams& _InferParams,
@@ -814,7 +830,8 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	const std::vector<float>& _SrcF0,
 	const std::vector<float>& _SrcVolume,
 	const std::vector<std::vector<float>>& _SrcSpeakerMap,
-	size_t& Process
+	size_t& Process,
+	int64_t SrcSize
 ) const
 {
 	if (diffSvc || DiffSvcVersion != L"DiffusionSvc")
@@ -930,6 +947,16 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	DenoiseInTensors.emplace_back(std::move(EncoderOut[0]));
 
 	long long noise_shape[4] = { 1,1,melBins,_Mel_Size };
+
+	NormMel(_Mel.first);
+
+	/*std::mt19937 gen(int(_InferParams.Seed));
+	std::normal_distribution<float> normal(0, 1);
+	std::vector<float> initial_noise(melBins * _Mel_Size, 0.0);
+	for (auto& it : initial_noise)
+		it = normal(gen) * _InferParams.NoiseScale;
+	DenoiseInTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, initial_noise.data(), initial_noise.size(), noise_shape, 4));*/
+
 	DenoiseInTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, _Mel.first.data(), _Mel.first.size(), noise_shape, 4));
 
 	auto PredOut = MoeVSSampler::GetMoeVSSampler((!alpha ? L"Pndm" : _InferParams.Sampler), alpha, denoise, pred, melBins, [](size_t, size_t) {}, memory_info)->Sample(DenoiseInTensors, (int64_t)_InferParams.Step, (int64_t)_InferParams.Pndm, _InferParams.NoiseScale, _InferParams.Seed, Process);
@@ -965,15 +992,14 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	}
 
 	const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();
-	const auto dstWavLen = int64_t(_16KAudioHubert.size() * int64_t(_samplingRate)) / 16000;
-	std::vector<float> TempVecWav(dstWavLen, 0);
-	memcpy(TempVecWav.data(), finaOut[0].GetTensorData<float>(), min(dstWavLen, shapeOut[2]) * sizeof(float));
-	auto OutTmpData = InferTools::InterpResample(TempVecWav, _samplingRate, (long)_InferParams.SrcSamplingRate, 1.f);
-	std::vector<int16_t> OutData;
-	OutData.reserve(OutTmpData.size());
-	for (const auto& dat : OutTmpData)
-		OutData.emplace_back(int16_t(Clamp(dat) * 32766.f));
-	return OutData;
+	std::vector<int16_t> TempVecWav(SrcSize, 0);
+	if (shapeOut[2] < SrcSize)
+		for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
+			TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.f);
+	else
+		for (int64_t bbb = 0; bbb < SrcSize; bbb++)
+			TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.f);
+	return TempVecWav;
 }
 
 MoeVoiceStudioCoreEnd
