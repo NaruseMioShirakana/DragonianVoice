@@ -62,77 +62,91 @@ DiffusionSvc::DiffusionSvc(const MJson& _Config, const ProgressCallback& _Progre
 	ExecutionProviders ExecutionProvider_, unsigned DeviceID_, unsigned ThreadCount_):
 	SingingVoiceConversion(ExecutionProvider_, DeviceID_, ThreadCount_)
 {
+	MoeVSClassName(L"MoeVoiceStudioDiffSingingVoiceConversion");
+
 	//Check Folder
 	if (_Config["Folder"].IsNull())
-		LibDLVoiceCodecThrow("[Error] Missing field \"folder\" (Model Folder)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"folder\" (Model Folder)")
 	if (!_Config["Folder"].IsString())
-		LibDLVoiceCodecThrow("[Error] Field \"folder\" (Model Folder) Must Be String");
+		LibDLVoiceCodecThrow("[Error] Field \"folder\" (Model Folder) Must Be String")
 	const auto _folder = to_wide_string(_Config["Folder"].GetString());
 	if (_folder.empty())
-		LibDLVoiceCodecThrow("[Error] Field \"folder\" (Model Folder) Can Not Be Empty");
+		LibDLVoiceCodecThrow("[Error] Field \"folder\" (Model Folder) Can Not Be Empty")
 	const std::wstring _path = GetCurrentFolder() + L"/Models/" + _folder + L"/" + _folder;
 	const auto cluster_folder = GetCurrentFolder() + L"/Models/" + _folder;
 	if (_Config["Hubert"].IsNull())
-		LibDLVoiceCodecThrow("[Error] Missing field \"Hubert\" (Hubert Folder)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"Hubert\" (Hubert Folder)")
 	if (!_Config["Hubert"].IsString())
-		LibDLVoiceCodecThrow("[Error] Field \"Hubert\" (Hubert Folder) Must Be String");
+		LibDLVoiceCodecThrow("[Error] Field \"Hubert\" (Hubert Folder) Must Be String")
 	const std::wstring HuPath = to_wide_string(_Config["Hubert"].GetString());
 	if (HuPath.empty())
-		LibDLVoiceCodecThrow("[Error] Field \"Hubert\" (Hubert Folder) Can Not Be Empty");
+		LibDLVoiceCodecThrow("[Error] Field \"Hubert\" (Hubert Folder) Can Not Be Empty")
 
 	if (_Config["Hifigan"].IsNull())
-		LibDLVoiceCodecThrow("[Error] Missing field \"Hifigan\" (Hifigan Folder)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"Hifigan\" (Hifigan Folder)")
 	if (!_Config["Hifigan"].IsString())
-		LibDLVoiceCodecThrow("[Error] Field \"Hifigan\" (Hifigan Folder) Must Be String");
+		LibDLVoiceCodecThrow("[Error] Field \"Hifigan\" (Hifigan Folder) Must Be String")
 	const std::wstring HifiganPath = to_wide_string(_Config["Hifigan"].GetString());
 	if (HifiganPath.empty())
-		LibDLVoiceCodecThrow("[Error] Field \"Hifigan\" (Hifigan Folder) Can Not Be Empty");
+		LibDLVoiceCodecThrow("[Error] Field \"Hifigan\" (Hifigan Folder) Can Not Be Empty")
 
 	std::map<std::string, std::wstring> _PathDict;
-
 	_PathDict["Cluster"] = cluster_folder;
-	_PathDict["Hubert"] = GetCurrentFolder() + L"/hubert/" + HuPath + L".onnx";
-	_PathDict["Encoder"] = _path + L"_encoder.onnx";
-	_PathDict["DenoiseFn"] = _path + L"_denoise.onnx";
-	_PathDict["NoisePredictor"] = _path + L"_pred.onnx";
-	_PathDict["AfterProcess"] = _path + L"_after.onnx";
-	_PathDict["Alphas"] = _path + L"_alpha.onnx";
-	_PathDict["DiffSvc"] = _path + L"_DiffSvc.onnx";
-	_PathDict["Naive"] = _path + L"_naive.onnx";
+	_PathDict["DiffHubert"] = GetCurrentFolder() + L"/hubert/" + HuPath + L".onnx";
+	_PathDict["DiffHifigan"] = GetCurrentFolder() + L"/hifigan/" + HifiganPath + L".onnx";
+	if(_waccess((_path + L"_encoder.onnx").c_str(), 0) != -1)
+	{
+		_PathDict["Encoder"] = _path + L"_encoder.onnx";
+		_PathDict["DenoiseFn"] = _path + L"_denoise.onnx";
+		_PathDict["NoisePredictor"] = _path + L"_pred.onnx";
+		_PathDict["AfterProcess"] = _path + L"_after.onnx";
+		if (_waccess((_path + L"_alpha.onnx").c_str(), 0) != -1)
+			_PathDict["Alphas"] = _path + L"_alpha.onnx";
+	}
+	else
+		_PathDict["DiffSvc"] = _path + L"_DiffSvc.onnx";
+	
+	if (_waccess((_path + L"_naive.onnx").c_str(), 0) != -1)
+		_PathDict["Naive"] = _path + L"_naive.onnx";
 
 	load(_PathDict, _Config, _ProgressCallback);
 }
 
-void DiffusionSvc::load(
-	const std::map<std::string, std::wstring>& _PathDict,
-	const MJson& _Config, const ProgressCallback& _ProgressCallback
-)
+DiffusionSvc::DiffusionSvc(const std::map<std::string, std::wstring>& _PathDict,
+	const MJson& _Config, const ProgressCallback& _ProgressCallback,
+	ExecutionProviders ExecutionProvider_, unsigned DeviceID_, unsigned ThreadCount_) :
+	SingingVoiceConversion(ExecutionProvider_, DeviceID_, ThreadCount_)
 {
 	MoeVSClassName(L"MoeVoiceStudioDiffSingingVoiceConversion");
 
+	load(_PathDict, _Config, _ProgressCallback);
+}
+
+void DiffusionSvc::load(const std::map<std::string, std::wstring>& _PathDict, const MJson& _Config, const ProgressCallback& _ProgressCallback)
+{
 	//Check SamplingRate
 	if (_Config["Rate"].IsNull())
-		LibDLVoiceCodecThrow("[Error] Missing field \"Rate\" (SamplingRate)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"Rate\" (SamplingRate)")
 	if (_Config["Rate"].IsInt() || _Config["Rate"].IsInt64())
 		_samplingRate = _Config["Rate"].GetInt();
 	else
-		LibDLVoiceCodecThrow("[Error] Field \"Rate\" (SamplingRate) Must Be Int/Int64");
+		LibDLVoiceCodecThrow("[Error] Field \"Rate\" (SamplingRate) Must Be Int/Int64")
 
 	logger.log(L"[Info] Current Sampling Rate is" + std::to_wstring(_samplingRate));
 
 	if (_Config["MelBins"].IsNull())
-		LibDLVoiceCodecThrow("[Error] Missing field \"MelBins\" (MelBins)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"MelBins\" (MelBins)")
 	if (_Config["MelBins"].IsInt() || _Config["MelBins"].IsInt64())
 		melBins = _Config["MelBins"].GetInt();
 	else
-		LibDLVoiceCodecThrow("[Error] Field \"MelBins\" (MelBins) Must Be Int/Int64");
+		LibDLVoiceCodecThrow("[Error] Field \"MelBins\" (MelBins) Must Be Int/Int64")
 
 	if (!(_Config["Hop"].IsInt() || _Config["Hop"].IsInt64()))
-		LibDLVoiceCodecThrow("[Error] Hop Must Be Int");
+		LibDLVoiceCodecThrow("[Error] Hop Must Be Int")
 	HopSize = _Config["Hop"].GetInt();
 
 	if (HopSize < 1)
-		LibDLVoiceCodecThrow("[Error] Hop Must > 0");
+		LibDLVoiceCodecThrow("[Error] Hop Must > 0")
 
 	if (!(_Config["HiddenSize"].IsInt() || _Config["HiddenSize"].IsInt64()))
 		logger.log(L"[Warn] Missing Field \"HiddenSize\", Use Default Value (256)");
@@ -185,20 +199,20 @@ void DiffusionSvc::load(
 	try
 	{
 		logger.log(L"[Info] loading DiffSvc Models");
-		hubert = new Ort::Session(*env, _PathDict.at("Hubert").c_str(), *session_options);
-		if (_waccess(_PathDict.at("Encoder").c_str(), 0) != -1)
+		hubert = new Ort::Session(*env, _PathDict.at("DiffHubert").c_str(), *session_options);
+		if (_PathDict.find("Encoder")!= _PathDict.end() && _waccess(_PathDict.at("Encoder").c_str(), 0) != -1)
 		{
 			encoder = new Ort::Session(*env, _PathDict.at("Encoder").c_str(), *session_options);
 			denoise = new Ort::Session(*env, _PathDict.at("DenoiseFn").c_str(), *session_options);
 			pred = new Ort::Session(*env, _PathDict.at("NoisePredictor").c_str(), *session_options);
 			after = new Ort::Session(*env, _PathDict.at("AfterProcess").c_str(), *session_options);
-			if (_waccess(_PathDict.at("Alphas").c_str(), 0) != -1)
+			if (_PathDict.find("Alphas") != _PathDict.end() && _waccess(_PathDict.at("Alphas").c_str(), 0) != -1)
 				alpha = new Ort::Session(*env, _PathDict.at("Alphas").c_str(), *session_options);
 		}
 		else
 			diffSvc = new Ort::Session(*env, _PathDict.at("DiffSvc").c_str(), *session_options);
 
-		if (_waccess(_PathDict.at("Naive").c_str(), 0) != -1)
+		if (_PathDict.find("Naive") != _PathDict.end() && _waccess(_PathDict.at("Naive").c_str(), 0) != -1)
 			naive = new Ort::Session(*env, _PathDict.at("Naive").c_str(), *session_options);
 
 		logger.log(L"[Info] DiffSvc Models loaded");
@@ -206,7 +220,7 @@ void DiffusionSvc::load(
 	catch (Ort::Exception& _exception)
 	{
 		Destory();
-		LibDLVoiceCodecThrow(_exception.what());
+		LibDLVoiceCodecThrow(_exception.what())
 	}
 
 	if (_Config["TensorExtractor"].IsString())
@@ -225,29 +239,18 @@ void DiffusionSvc::load(
 	catch (std::exception& e)
 	{
 		Destory();
-		LibDLVoiceCodecThrow(e.what());
+		LibDLVoiceCodecThrow(e.what())
 	}
 }
 
-DiffusionSvc::DiffusionSvc(const std::map<std::string, std::wstring>& _PathDict,
-	const MJson& _Config, const ProgressCallback& _ProgressCallback,
-	ExecutionProviders ExecutionProvider_, unsigned DeviceID_, unsigned ThreadCount_) :
-	SingingVoiceConversion(ExecutionProvider_, DeviceID_, ThreadCount_)
-{
-	load(_PathDict, _Config, _ProgressCallback);
-}
-
-std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVSAudioSlice& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const
+std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcData& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const
 {
 	logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Start!");
 	std::vector<int16_t> _data;
 	size_t total_audio_size = 0;
-	for (const auto& data_size : _Slice.OrgLen)
-		total_audio_size += data_size;
+	for (const auto& data_size : _Slice.Slices)
+		total_audio_size += data_size.OrgLen;
 	_data.reserve(size_t(double(total_audio_size) * 1.5));
-
-	std::mt19937 gen(int(_InferParams.Seed));
-	std::normal_distribution<float> normal(0, 1);
 
 	auto speedup = (int64_t)_InferParams.Pndm;
 	auto step = (int64_t)_InferParams.Step;
@@ -257,262 +260,274 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVS
 	if (speedup == 0) speedup = 1;
 	const auto RealDiffSteps = step % speedup ? step / speedup + 1 : step / speedup;
 	if (diffSvc)
-		_callback(0, _Slice.F0.size());
+		_callback(0, _Slice.Slices.size());
 	else
-		_callback(0, _Slice.F0.size() * RealDiffSteps);
+		_callback(0, _Slice.Slices.size() * RealDiffSteps);
 	size_t process = 0;
-	for (size_t slice = 0; slice < _Slice.F0.size(); ++slice)
+	for (const auto& CurSlice : _Slice.Slices)
 	{
-		if (_Slice.IsNotMute[slice])
+		const auto InferDurTime = clock();
+		const auto CurRtn = SliceInference(CurSlice, _InferParams, process);
+		_data.insert(_data.end(), CurRtn.data(), CurRtn.data() + CurRtn.size());
+		if (CurSlice.IsNotMute)
+			logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Segment[" + std::to_wstring(process) + L"] Finished! Segment Use Time: " + std::to_wstring(clock() - InferDurTime) + L"ms, Segment Duration: " + std::to_wstring((size_t)CurSlice.OrgLen * 1000ull / 48000ull) + L"ms");
+		else
 		{
-			const auto InferDurTime = clock();
-			auto RawWav = InferTools::InterpResample(_Slice.Audio[slice], 48000, 16000, 32768.0f);
-			const auto src_audio_length = RawWav.size();
-			bool NeedPadding = false;
-			if (_cur_execution_provider == ExecutionProviders::CUDA && !diffSvc)
+			if (!diffSvc)
 			{
-				NeedPadding = RawWav.size() % 16000;
-				const size_t WavPaddedSize = RawWav.size() / 16000 + 1;
-				if (NeedPadding)
-					RawWav.resize(WavPaddedSize * 16000, 0.f);
+				process += RealDiffSteps;
+				_callback(process, _Slice.Slices.size() * RealDiffSteps);
 			}
+			logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Jump Empty Segment[" + std::to_wstring(process) + L"]!");
+		}
+		if (diffSvc)
+			_callback(++process, _Slice.Slices.size());
+	}
 
-			const int64_t HubertInputShape[3] = { 1i64,1i64,(int64_t)RawWav.size() };
-			std::vector<Ort::Value> HubertInputTensors, HubertOutPuts;
-			HubertInputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, RawWav.data(), RawWav.size(), HubertInputShape, 3));
-			try {
-				HubertOutPuts = hubert->Run(Ort::RunOptions{ nullptr },
-					hubertInput.data(),
-					HubertInputTensors.data(),
-					HubertInputTensors.size(),
-					hubertOutput.data(),
-					hubertOutput.size());
-			}
-			catch (Ort::Exception& e)
+	logger.log(L"[Inferring] \"" + _Slice.Path + L"\" Finished");
+	return _data;
+}
+
+std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcSlice& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, size_t& _Process) const
+{
+	std::mt19937 gen(int(_InferParams.Seed));
+	std::normal_distribution<float> normal(0, 1);
+	auto speedup = (int64_t)_InferParams.Pndm;
+	auto step = (int64_t)_InferParams.Step;
+	if (step > MaxStep) step = MaxStep;
+	if (speedup >= step) speedup = step / 5;
+	if (speedup == 0) speedup = 1;
+
+	if (_Slice.IsNotMute)
+	{
+		auto RawWav = InferTools::InterpResample(_Slice.Audio, 48000, 16000, 32768.0f);
+		const auto src_audio_length = RawWav.size();
+		bool NeedPadding = false;
+		if (_cur_execution_provider == ExecutionProviders::CUDA && !diffSvc)
+		{
+			NeedPadding = RawWav.size() % 16000;
+			const size_t WavPaddedSize = RawWav.size() / 16000 + 1;
+			if (NeedPadding)
+				RawWav.resize(WavPaddedSize * 16000, 0.f);
+		}
+
+		const int64_t HubertInputShape[3] = { 1i64,1i64,(int64_t)RawWav.size() };
+		std::vector<Ort::Value> HubertInputTensors, HubertOutPuts;
+		HubertInputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, RawWav.data(), RawWav.size(), HubertInputShape, 3));
+		try {
+			HubertOutPuts = hubert->Run(Ort::RunOptions{ nullptr },
+				hubertInput.data(),
+				HubertInputTensors.data(),
+				HubertInputTensors.size(),
+				hubertOutput.data(),
+				hubertOutput.size());
+		}
+		catch (Ort::Exception& e)
+		{
+			LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()))
+		}
+		const auto HubertSize = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetElementCount();
+		const auto HubertOutPutData = HubertOutPuts[0].GetTensorMutableData<float>();
+		auto HubertOutPutShape = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetShape();
+		HubertInputTensors.clear();
+		if (HubertOutPutShape[2] != HiddenUnitKDims)
+			LibDLVoiceCodecThrow("HiddenUnitKDims UnMatch")
+
+		std::vector srcHiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
+
+		const auto max_cluster_size = int64_t((size_t)HubertOutPutShape[1] * src_audio_length / RawWav.size());
+		if (EnableCluster && _InferParams.ClusterRate > 0.001f)
+		{
+			const auto pts = Cluster->find(srcHiddenUnits.data(), long(_InferParams.SpeakerId), max_cluster_size);
+			for (int64_t indexs = 0; indexs < max_cluster_size * HiddenUnitKDims; ++indexs)
+				srcHiddenUnits[indexs] = srcHiddenUnits[indexs] * (1.f - _InferParams.ClusterRate) + pts[indexs] * _InferParams.ClusterRate;
+		}
+		std::vector<Ort::Value> finaOut;
+		std::vector<Ort::Value> DiffOut;
+		if (diffSvc)
+		{
+			const auto HubertLen = int64_t(HubertSize) / HiddenUnitKDims;
+			const int64_t F0Shape[] = { 1, int64_t(_Slice.Audio.size() * _samplingRate / 48000 / HopSize) };
+			const int64_t HiddenUnitShape[] = { 1, HubertLen, HiddenUnitKDims };
+			constexpr int64_t CharaEmbShape[] = { 1 };
+			int64_t speedData[] = { Pndms };
+			auto srcF0Data = InferTools::InterpFunc(_Slice.F0, long(_Slice.F0.size()), long(F0Shape[1]));
+			for (auto& it : srcF0Data)
+				it *= (float)pow(2.0, static_cast<double>(_InferParams.Keys) / 12.0);
+			auto InterpedF0 = MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::GetInterpedF0log(srcF0Data, true);
+			auto alignment = MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::GetAligments(F0Shape[1], HubertLen);
+			std::vector<Ort::Value> TensorsInp;
+
+			int64_t Chara[] = { _InferParams.SpeakerId };
+
+			TensorsInp.emplace_back(Ort::Value::CreateTensor(*memory_info, srcHiddenUnits.data(), HubertSize, HiddenUnitShape, 3));
+			TensorsInp.emplace_back(Ort::Value::CreateTensor(*memory_info, alignment.data(), F0Shape[1], F0Shape, 2));
+			TensorsInp.emplace_back(Ort::Value::CreateTensor<long long>(*memory_info, Chara, 1, CharaEmbShape, 1));
+			TensorsInp.emplace_back(Ort::Value::CreateTensor(*memory_info, InterpedF0.data(), F0Shape[1], F0Shape, 2));
+
+			std::vector<float> initial_noise(melBins * F0Shape[1], 0.0);
+			long long noise_shape[4] = { 1,1,melBins,F0Shape[1] };
+			if (!naive)
 			{
-				LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()).c_str());
-			}
-			const auto HubertSize = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetElementCount();
-			const auto HubertOutPutData = HubertOutPuts[0].GetTensorMutableData<float>();
-			auto HubertOutPutShape = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetShape();
-			HubertInputTensors.clear();
-			if (HubertOutPutShape[2] != HiddenUnitKDims)
-				LibDLVoiceCodecThrow("HiddenUnitKDims UnMatch");
-
-			std::vector srcHiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
-
-			const auto max_cluster_size = int64_t((size_t)HubertOutPutShape[1] * src_audio_length / RawWav.size());
-			if (EnableCluster && _InferParams.ClusterRate > 0.001f)
-			{
-				const auto pts = Cluster->find(srcHiddenUnits.data(), long(_InferParams.SpeakerId), max_cluster_size);
-				for (int64_t indexs = 0; indexs < max_cluster_size * HiddenUnitKDims; ++indexs)
-					srcHiddenUnits[indexs] = srcHiddenUnits[indexs] * (1.f - _InferParams.ClusterRate) + pts[indexs] * _InferParams.ClusterRate;
-			}
-			std::vector<Ort::Value> finaOut;
-			std::vector<Ort::Value> DiffOut;
-			if(diffSvc)
-			{
-				const auto HubertLen = int64_t(HubertSize) / HiddenUnitKDims;
-				const int64_t F0Shape[] = { 1, int64_t(_Slice.Audio[slice].size() * _samplingRate / 48000 / HopSize) };
-				const int64_t HiddenUnitShape[] = { 1, HubertLen, HiddenUnitKDims };
-				constexpr int64_t CharaEmbShape[] = { 1 };
-				int64_t speedData[] = { Pndms };
-				auto srcF0Data = InferTools::InterpFunc(_Slice.F0[slice], long(_Slice.F0[slice].size()), long(F0Shape[1]));
-				for (auto& it : srcF0Data)
-					it *= (float)pow(2.0, static_cast<double>(_InferParams.Keys) / 12.0);
-				auto InterpedF0 = MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::GetInterpedF0log(srcF0Data, true);
-				auto alignment = MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::GetAligments(F0Shape[1], HubertLen);
-				std::vector<Ort::Value> TensorsInp;
-
-				int64_t Chara[] = { _InferParams.SpeakerId };
-
-				TensorsInp.emplace_back(Ort::Value::CreateTensor(*memory_info, srcHiddenUnits.data(), HubertSize, HiddenUnitShape, 3));
-				TensorsInp.emplace_back(Ort::Value::CreateTensor(*memory_info, alignment.data(), F0Shape[1], F0Shape, 2));
-				TensorsInp.emplace_back(Ort::Value::CreateTensor<long long>(*memory_info, Chara, 1, CharaEmbShape, 1));
-				TensorsInp.emplace_back(Ort::Value::CreateTensor(*memory_info, InterpedF0.data(), F0Shape[1], F0Shape, 2));
-
-				std::vector<float> initial_noise(melBins * F0Shape[1], 0.0);
-				long long noise_shape[4] = { 1,1,melBins,F0Shape[1] };
-				if(!naive)
-				{
-					for (auto& it : initial_noise)
-						it = normal(gen) * _InferParams.NoiseScale;
-					TensorsInp.emplace_back(Ort::Value::CreateTensor(*memory_info, initial_noise.data(), initial_noise.size(), noise_shape, 4));
-				}
-				else
-					MoeVSNotImplementedError;
-				
-				TensorsInp.emplace_back(Ort::Value::CreateTensor<long long>(*memory_info, speedData, 1, CharaEmbShape, 1));
-				try
-				{
-					DiffOut = diffSvc->Run(Ort::RunOptions{ nullptr },
-						DiffInput.data(),
-						TensorsInp.data(),
-						TensorsInp.size(),
-						DiffOutput.data(),
-						DiffOutput.size());
-				}
-				catch (Ort::Exception& e2)
-				{
-					LibDLVoiceCodecThrow((std::string("Locate: Diff\n") + e2.what()).c_str());
-				}
-				try
-				{
-					finaOut = Vocoder->Run(Ort::RunOptions{ nullptr },
-						nsfInput.data(),
-						DiffOut.data(),
-						DiffOut.size(),
-						nsfOutput.data(),
-						nsfOutput.size());
-				}
-				catch (Ort::Exception& e3)
-				{
-					LibDLVoiceCodecThrow((std::string("Locate: Nsf\n") + e3.what()).c_str());
-				}
+				for (auto& it : initial_noise)
+					it = normal(gen) * _InferParams.NoiseScale;
+				TensorsInp.emplace_back(Ort::Value::CreateTensor(*memory_info, initial_noise.data(), initial_noise.size(), noise_shape, 4));
 			}
 			else
+				MoeVSNotImplementedError
+
+			TensorsInp.emplace_back(Ort::Value::CreateTensor<long long>(*memory_info, speedData, 1, CharaEmbShape, 1));
+			try
 			{
-				MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::InferParams _Inference_Params;
-				_Inference_Params.AudioSize = _Slice.Audio[slice].size();
-				_Inference_Params.Chara = _InferParams.SpeakerId;
-				_Inference_Params.NoiseScale = _InferParams.NoiseScale;
-				_Inference_Params.DDSPNoiseScale = _InferParams.DDSPNoiseScale;
-				_Inference_Params.Seed = int(_InferParams.Seed);
-				_Inference_Params.upKeys = _InferParams.Keys;
-
-				MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::Inputs InputTensors;
-
-				if (_cur_execution_provider == ExecutionProviders::CUDA && NeedPadding)
-				{
-					auto CUDAF0 = _Slice.F0[slice];
-					auto CUDAVolume = _Slice.Volume[slice];
-					auto CUDASpeaker = _Slice.Speaker[slice];
-					const auto src_src_audio_length = _Slice.Audio[slice].size();
-					const size_t WavPaddedSize = ((src_src_audio_length / 48000) + 1) * 48000;
-					const size_t AudioPadSize = WavPaddedSize - src_src_audio_length;
-					const size_t PaddedF0Size = CUDAF0.size() + (CUDAF0.size() * AudioPadSize / src_src_audio_length);
-
-					if (!CUDAF0.empty()) CUDAF0.resize(PaddedF0Size, 0.f);
-					if (!CUDAVolume.empty()) CUDAVolume.resize(PaddedF0Size, 0.f);
-					for (auto iSpeaker : CUDASpeaker)
-					{
-						if (!iSpeaker.empty())
-							iSpeaker.resize(PaddedF0Size, 0.f);
-					}
-					_Inference_Params.AudioSize = WavPaddedSize;
-					InputTensors = _TensorExtractor->Extract(srcHiddenUnits, CUDAF0, CUDAVolume, CUDASpeaker, _Inference_Params);
-				}
-				else
-					InputTensors = _TensorExtractor->Extract(srcHiddenUnits, _Slice.F0[slice], _Slice.Volume[slice], _Slice.Speaker[slice], _Inference_Params);
-
-				std::vector<Ort::Value> EncoderOut;
-				try {
-					EncoderOut = encoder->Run(Ort::RunOptions{ nullptr },
-						InputTensors.InputNames,
-						InputTensors.Tensor.data(),
-						min(InputTensors.Tensor.size(), encoder->GetInputCount()),
-						InputTensors.OutputNames,
-						InputTensors.OutputCount);
-				}
-				catch (Ort::Exception& e1)
-				{
-					LibDLVoiceCodecThrow((std::string("Locate: encoder\n") + e1.what()).c_str());
-				}
-				if (EncoderOut.size() == 1)
-					EncoderOut.emplace_back(Ort::Value::CreateTensor(*memory_info, InputTensors.Data.F0.data(), InputTensors.Data.FrameShape[1], InputTensors.Data.FrameShape.data(), 2));
-
-				std::vector<Ort::Value> DenoiseInTensors;
-				DenoiseInTensors.emplace_back(std::move(EncoderOut[0]));
-
-				std::vector<float> initial_noise(melBins * InputTensors.Data.FrameShape[1], 0.0);
-				long long noise_shape[4] = { 1,1,melBins,InputTensors.Data.FrameShape[1] };
-				if(!naive)
-				{
-					for (auto& it : initial_noise)
-						it = normal(gen) * _InferParams.NoiseScale;
-					DenoiseInTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, initial_noise.data(), initial_noise.size(), noise_shape, 4));
-				}
-				else
-				{
-					std::vector<Ort::Value> NaiveOut;
-					try {
-						NaiveOut = naive->Run(Ort::RunOptions{ nullptr },
-							InputTensors.InputNames,
-							InputTensors.Tensor.data(),
-							min(InputTensors.Tensor.size(), naive->GetInputCount()),
-							naiveOutput.data(),
-							1);
-					}
-					catch (Ort::Exception& e1)
-					{
-						LibDLVoiceCodecThrow((std::string("Locate: naive\n") + e1.what()).c_str());
-					}
-					DenoiseInTensors.emplace_back(std::move(NaiveOut[0]));
-				}
-
-				auto PredOut = MoeVSSampler::GetMoeVSSampler((!alpha ? L"Pndm" : _InferParams.Sampler), alpha, denoise, pred, melBins, _callback, memory_info)->Sample(DenoiseInTensors, step, speedup, _InferParams.NoiseScale, _InferParams.Seed, process);
-
-				try
-				{
-					DiffOut = after->Run(Ort::RunOptions{ nullptr },
-						afterInput.data(),
-						PredOut.data(),
-						PredOut.size(),
-						afterOutput.data(),
-						afterOutput.size());
-				}
-				catch (Ort::Exception& e1)
-				{
-					LibDLVoiceCodecThrow((std::string("Locate: pred\n") + e1.what()).c_str());
-				}
-
-				DiffOut.emplace_back(std::move(EncoderOut[1]));
-				try
-				{
-					finaOut = Vocoder->Run(Ort::RunOptions{ nullptr },
-						nsfInput.data(),
-						DiffOut.data(),
-						DiffOut.size(),
-						nsfOutput.data(),
-						nsfOutput.size());
-				}
-				catch (Ort::Exception& e3)
-				{
-					LibDLVoiceCodecThrow((std::string("Locate: Nsf\n") + e3.what()).c_str());
-				}
+				DiffOut = diffSvc->Run(Ort::RunOptions{ nullptr },
+					DiffInput.data(),
+					TensorsInp.data(),
+					TensorsInp.size(),
+					DiffOutput.data(),
+					DiffOutput.size());
 			}
-			const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();
-			const auto dstWavLen = (_Slice.OrgLen[slice] * int64_t(_samplingRate)) / 48000;
-			std::vector<int16_t> TempVecWav(dstWavLen, 0);
-			if (shapeOut[2] < dstWavLen)
-				for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
-					TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.f);
-			else
-				for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
-					TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.f);
-			_data.insert(_data.end(), TempVecWav.data(), TempVecWav.data() + (dstWavLen));
-			logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Segment[" + std::to_wstring(slice) + L"] Finished! Segment Use Time: " + std::to_wstring(clock() - InferDurTime) + L"ms, Segment Duration: " + std::to_wstring((size_t)_Slice.OrgLen[slice] * 1000ull / 48000ull) + L"ms");
+			catch (Ort::Exception& e2)
+			{
+				LibDLVoiceCodecThrow((std::string("Locate: Diff\n") + e2.what()))
+			}
+			try
+			{
+				finaOut = Vocoder->Run(Ort::RunOptions{ nullptr },
+					nsfInput.data(),
+					DiffOut.data(),
+					DiffOut.size(),
+					nsfOutput.data(),
+					nsfOutput.size());
+			}
+			catch (Ort::Exception& e3)
+			{
+				LibDLVoiceCodecThrow((std::string("Locate: Nsf\n") + e3.what()))
+			}
 		}
 		else
 		{
-			//Mute clips
-			const auto len = _Slice.OrgLen[slice] * int64_t(_samplingRate) / 48000;
-			const auto data = new int16_t[len];
-			memset(data, 0, int64_t(len) * 2);
-			_data.insert(_data.end(), data, data + len);
-			delete[] data;
-			if(!diffSvc)
+			MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::InferParams _Inference_Params;
+			_Inference_Params.AudioSize = _Slice.Audio.size();
+			_Inference_Params.Chara = _InferParams.SpeakerId;
+			_Inference_Params.NoiseScale = _InferParams.NoiseScale;
+			_Inference_Params.DDSPNoiseScale = _InferParams.DDSPNoiseScale;
+			_Inference_Params.Seed = int(_InferParams.Seed);
+			_Inference_Params.upKeys = _InferParams.Keys;
+
+			MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::Inputs InputTensors;
+
+			if (_cur_execution_provider == ExecutionProviders::CUDA && NeedPadding)
 			{
-				process += RealDiffSteps;
-				_callback(process, _Slice.F0.size() * RealDiffSteps);
+				auto CUDAF0 = _Slice.F0;
+				auto CUDAVolume = _Slice.Volume;
+				auto CUDASpeaker = _Slice.Speaker;
+				const auto src_src_audio_length = _Slice.Audio.size();
+				const size_t WavPaddedSize = ((src_src_audio_length / 48000) + 1) * 48000;
+				const size_t AudioPadSize = WavPaddedSize - src_src_audio_length;
+				const size_t PaddedF0Size = CUDAF0.size() + (CUDAF0.size() * AudioPadSize / src_src_audio_length);
+
+				if (!CUDAF0.empty()) CUDAF0.resize(PaddedF0Size, 0.f);
+				if (!CUDAVolume.empty()) CUDAVolume.resize(PaddedF0Size, 0.f);
+				for (auto iSpeaker : CUDASpeaker)
+				{
+					if (!iSpeaker.empty())
+						iSpeaker.resize(PaddedF0Size, 0.f);
+				}
+				_Inference_Params.AudioSize = WavPaddedSize;
+				InputTensors = _TensorExtractor->Extract(srcHiddenUnits, CUDAF0, CUDAVolume, CUDASpeaker, _Inference_Params);
 			}
-			logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Jump Empty Segment[" + std::to_wstring(slice) + L"]!");
+			else
+				InputTensors = _TensorExtractor->Extract(srcHiddenUnits, _Slice.F0, _Slice.Volume, _Slice.Speaker, _Inference_Params);
+
+			std::vector<Ort::Value> EncoderOut;
+			try {
+				EncoderOut = encoder->Run(Ort::RunOptions{ nullptr },
+					InputTensors.InputNames,
+					InputTensors.Tensor.data(),
+					min(InputTensors.Tensor.size(), encoder->GetInputCount()),
+					InputTensors.OutputNames,
+					InputTensors.OutputCount);
+			}
+			catch (Ort::Exception& e1)
+			{
+				LibDLVoiceCodecThrow((std::string("Locate: encoder\n") + e1.what()))
+			}
+			if (EncoderOut.size() == 1)
+				EncoderOut.emplace_back(Ort::Value::CreateTensor(*memory_info, InputTensors.Data.F0.data(), InputTensors.Data.FrameShape[1], InputTensors.Data.FrameShape.data(), 2));
+
+			std::vector<Ort::Value> DenoiseInTensors;
+			DenoiseInTensors.emplace_back(std::move(EncoderOut[0]));
+
+			std::vector<float> initial_noise(melBins * InputTensors.Data.FrameShape[1], 0.0);
+			long long noise_shape[4] = { 1,1,melBins,InputTensors.Data.FrameShape[1] };
+			if (!naive)
+			{
+				for (auto& it : initial_noise)
+					it = normal(gen) * _InferParams.NoiseScale;
+				DenoiseInTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, initial_noise.data(), initial_noise.size(), noise_shape, 4));
+			}
+			else
+			{
+				std::vector<Ort::Value> NaiveOut;
+				try {
+					NaiveOut = naive->Run(Ort::RunOptions{ nullptr },
+						InputTensors.InputNames,
+						InputTensors.Tensor.data(),
+						min(InputTensors.Tensor.size(), naive->GetInputCount()),
+						naiveOutput.data(),
+						1);
+				}
+				catch (Ort::Exception& e1)
+				{
+					LibDLVoiceCodecThrow((std::string("Locate: naive\n") + e1.what()))
+				}
+				DenoiseInTensors.emplace_back(std::move(NaiveOut[0]));
+			}
+
+			auto PredOut = MoeVSSampler::GetMoeVSSampler((!alpha ? L"Pndm" : _InferParams.Sampler), alpha, denoise, pred, melBins, _callback, memory_info)->Sample(DenoiseInTensors, step, speedup, _InferParams.NoiseScale, _InferParams.Seed, _Process);
+
+			try
+			{
+				DiffOut = after->Run(Ort::RunOptions{ nullptr },
+					afterInput.data(),
+					PredOut.data(),
+					PredOut.size(),
+					afterOutput.data(),
+					afterOutput.size());
+			}
+			catch (Ort::Exception& e1)
+			{
+				LibDLVoiceCodecThrow((std::string("Locate: pred\n") + e1.what()))
+			}
+
+			DiffOut.emplace_back(std::move(EncoderOut[1]));
+			try
+			{
+				finaOut = Vocoder->Run(Ort::RunOptions{ nullptr },
+					nsfInput.data(),
+					DiffOut.data(),
+					DiffOut.size(),
+					nsfOutput.data(),
+					nsfOutput.size());
+			}
+			catch (Ort::Exception& e3)
+			{
+				LibDLVoiceCodecThrow((std::string("Locate: Nsf\n") + e3.what()))
+			}
 		}
-		if(diffSvc)
-			_callback(++process, _Slice.F0.size());
+		const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();
+		const auto dstWavLen = (_Slice.OrgLen * int64_t(_samplingRate)) / 48000;
+		std::vector<int16_t> TempVecWav(dstWavLen, 0);
+		if (shapeOut[2] < dstWavLen)
+			for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
+				TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.f);
+		else
+			for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
+				TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.f);
+		return TempVecWav;
 	}
-	logger.log(L"[Inferring] \"" + _Slice.Path + L"\" Finished");
-	return _data;
+	const auto len = size_t(_Slice.OrgLen * int64_t(_samplingRate) / 48000);
+	return { len, 0i16, std::allocator<int16_t>() };
 }
 
 std::vector<std::wstring> DiffusionSvc::Inference(std::wstring& _Paths,
@@ -587,14 +602,14 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 	}
 	catch (Ort::Exception& e)
 	{
-		LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()))
 	}
 	const auto HubertSize = hubertOut[0].GetTensorTypeAndShapeInfo().GetElementCount();
 	const auto HubertOutPutData = hubertOut[0].GetTensorMutableData<float>();
 	const auto HubertOutPutShape = hubertOut[0].GetTensorTypeAndShapeInfo().GetShape();
 	inputTensorshu.clear();
 	if (HubertOutPutShape[2] != HiddenUnitKDims)
-		LibDLVoiceCodecThrow("HiddenUnitKDims UnMatch");
+		LibDLVoiceCodecThrow("HiddenUnitKDims UnMatch")
 
 	std::vector HiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
 
@@ -703,7 +718,7 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 	}
 	catch (Ort::Exception& e1)
 	{
-		LibDLVoiceCodecThrow((std::string("Locate: encoder\n") + e1.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: encoder\n") + e1.what()))
 	}
 	EncoderOut.emplace_back(Ort::Value::CreateTensor(*memory_info, F0Data.data(), F0Shape[1], F0Shape, 2));
 
@@ -731,7 +746,7 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 		}
 		catch (Ort::Exception& e1)
 		{
-			LibDLVoiceCodecThrow((std::string("Locate: naive\n") + e1.what()).c_str());
+			LibDLVoiceCodecThrow((std::string("Locate: naive\n") + e1.what()))
 		}
 		DenoiseInTensors.emplace_back(std::move(NaiveOut[0]));
 	}
@@ -753,7 +768,7 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 	}
 	catch (Ort::Exception& e1)
 	{
-		LibDLVoiceCodecThrow((std::string("Locate: pred\n") + e1.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: pred\n") + e1.what()))
 	}
 
 	DiffOut.emplace_back(std::move(EncoderOut[1]));
@@ -768,7 +783,7 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 	}
 	catch (Ort::Exception& e3)
 	{
-		LibDLVoiceCodecThrow((std::string("Locate: Nsf\n") + e3.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: Nsf\n") + e3.what()))
 	}
 
 	const auto dstWavLen = finaOut[0].GetTensorTypeAndShapeInfo().GetShape()[2];
@@ -781,16 +796,16 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	std::vector<float>& _16KAudioHubert,
 	const MoeVSProjectSpace::MoeVSSvcParams& _InferParams,
-	Ort::Value&& _Mel,
+	std::pair<std::vector<float>, int64_t>& _Mel,
 	const std::vector<float>& _SrcF0,
 	const std::vector<float>& _SrcVolume,
 	const std::vector<std::vector<float>>& _SrcSpeakerMap
 ) const
 {
 	if (diffSvc || DiffSvcVersion != L"DiffusionSvc")
-		LibDLVoiceCodecThrow("ShallowDiffusion Only Support DiffusionSvc Model");
+		LibDLVoiceCodecThrow("ShallowDiffusion Only Support DiffusionSvc Model")
 	std::vector<const char*> InputNamesEncoder;
-	const int64_t _Mel_Size = _Mel.GetTensorTypeAndShapeInfo().GetShape()[3];
+	const auto _Mel_Size = _Mel.second;
 
 	std::vector<Ort::Value> HubertInputTensors, HubertOutputTensors;
 	const int64_t HubertInputShape[3] = { 1i64,1i64,(int64_t)_16KAudioHubert.size() };
@@ -805,7 +820,7 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	}
 	catch (Ort::Exception& e)
 	{
-		LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()))
 	}
 
 	const auto HubertLength = HubertOutputTensors[0].GetTensorTypeAndShapeInfo().GetShape()[1];
@@ -887,12 +902,14 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	}
 	catch (Ort::Exception& e1)
 	{
-		LibDLVoiceCodecThrow((std::string("Locate: encoder\n") + e1.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: encoder\n") + e1.what()))
 	}
 
 	std::vector<Ort::Value> DenoiseInTensors;
 	DenoiseInTensors.emplace_back(std::move(EncoderOut[0]));
-	DenoiseInTensors.emplace_back(std::move(_Mel));
+
+	long long noise_shape[4] = { 1,1,melBins,_Mel_Size };
+	DenoiseInTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, _Mel.first.data(), _Mel.first.size(), noise_shape, 4));
 
 	size_t process = 0;
 	auto PredOut = MoeVSSampler::GetMoeVSSampler((!alpha ? L"Pndm" : _InferParams.Sampler), alpha, denoise, pred, melBins, [](size_t, size_t) {}, memory_info)->Sample(DenoiseInTensors, (int64_t)_InferParams.Step, (int64_t)_InferParams.Pndm, _InferParams.NoiseScale, _InferParams.Seed, process);
@@ -909,7 +926,7 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	}
 	catch (Ort::Exception& e1)
 	{
-		LibDLVoiceCodecThrow((std::string("Locate: pred\n") + e1.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: pred\n") + e1.what()))
 	}
 
 	DiffOut.emplace_back(std::move(EncoderTensors[2]));
@@ -924,7 +941,7 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	}
 	catch (Ort::Exception& e3)
 	{
-		LibDLVoiceCodecThrow((std::string("Locate: Nsf\n") + e3.what()).c_str());
+		LibDLVoiceCodecThrow((std::string("Locate: Nsf\n") + e3.what()))
 	}
 
 	const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();

@@ -93,6 +93,24 @@ namespace MoeVSModuleManager
 	 * \return Vocoder状态
 	 */
 	bool VocoderEnabled();
+
+	/**
+	 * \brief 推理多组数据
+	 * \param _Slice 数据包
+	 * \param _InferParams 参数
+	 * \return 音频
+	 */
+	std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcData& _Slice,
+	                                    const MoeVSProjectSpace::MoeVSSvcParams& _InferParams);
+
+	/**
+	 * \brief 推理切片数据
+	 * \param _Slice 切片数据
+	 * \param _InferParams 参数
+	 * \param _Process 进度条
+	 * \return 音频
+	 */
+	std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcSlice& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, size_t& _Process);
 }
 
 namespace MoeVSRename

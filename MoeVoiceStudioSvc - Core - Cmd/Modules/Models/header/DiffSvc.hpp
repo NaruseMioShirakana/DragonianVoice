@@ -54,17 +54,16 @@ public:
                  ExecutionProviders ExecutionProvider_ = ExecutionProviders::CPU,
                  unsigned DeviceID_ = 0, unsigned ThreadCount_ = 0);
 
-    void load(
-        const std::map<std::string, std::wstring>& _PathDict,
-        const MJson& _Config, const ProgressCallback& _ProgressCallback
-    );
-
 	~DiffusionSvc() override;
+
+    void load(const std::map<std::string, std::wstring>& _PathDict, const MJson& _Config, const ProgressCallback& _ProgressCallback);
 
     void Destory();
 
-    [[nodiscard]] std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVSAudioSlice& _Slice,
+    [[nodiscard]] std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcData& _Slice,
         const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const override;
+
+    [[nodiscard]] std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcSlice& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, size_t& _Process) const override;
 
     [[nodiscard]] std::vector<std::wstring> Inference(std::wstring& _Paths, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams,
         const InferTools::SlicerSettings& _SlicerSettings) const override;
@@ -74,11 +73,31 @@ public:
     [[nodiscard]] std::vector<int16_t> ShallowDiffusionInference(
 		std::vector<float>& _16KAudioHubert,
         const MoeVSProjectSpace::MoeVSSvcParams& _InferParams,
-        Ort::Value&& _Mel,
+        std::pair<std::vector<float>, int64_t>& _Mel,
         const std::vector<float>& _SrcF0,
         const std::vector<float>& _SrcVolume,
         const std::vector<std::vector<float>>& _SrcSpeakerMap
     ) const;
+
+    [[nodiscard]] int64_t GetMaxStep() const
+    {
+        return MaxStep;
+    }
+
+    [[nodiscard]] bool OldVersion() const
+    {
+        return diffSvc;
+    }
+
+    [[nodiscard]] const std::wstring& GetDiffSvcVer() const
+    {
+        return DiffSvcVersion;
+    }
+
+    [[nodiscard]] int64_t GetMelBins() const
+    {
+        return melBins;
+    }
 
 private:
     Ort::Session* encoder = nullptr;

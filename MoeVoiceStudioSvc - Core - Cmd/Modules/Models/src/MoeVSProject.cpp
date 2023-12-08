@@ -1,5 +1,6 @@
 ﻿#include "../header/MoeVSProject.hpp"
 #include "../../InferTools/inferTools.hpp"
+#include <cassert>
 
 namespace MoeVSProjectSpace
 {
@@ -7,50 +8,53 @@ namespace MoeVSProjectSpace
     {
         FileWrapper project_file(_path.c_str(), L"rb");
         if (!project_file.IsOpen())
-            LibDLVoiceCodecThrow("File Doesn't Exists")
+            LibDLVoiceCodecThrow("File Doesn't Exists");
         fseek(project_file, 0, SEEK_SET);
 
         if (fread(&moevs_proj_header_, 1, sizeof(Header), project_file) != sizeof(Header))
-            LibDLVoiceCodecThrow("Unexpected EOF")
+            LibDLVoiceCodecThrow("Unexpected EOF");
         if (!(moevs_proj_header_.ChunkSymbol[0] == 'M' && moevs_proj_header_.ChunkSymbol[1] == 'O' && moevs_proj_header_.ChunkSymbol[2] == 'E' && moevs_proj_header_.ChunkSymbol[3] == 'V' && moevs_proj_header_.ChunkSymbol[4] == 'S' && moevs_proj_header_.ChunkSymbol[5] == 'P' && moevs_proj_header_.ChunkSymbol[6] == 'R' && moevs_proj_header_.ChunkSymbol[7] == 'J'))
-            LibDLVoiceCodecThrow("Unrecognized File")
+            LibDLVoiceCodecThrow("Unrecognized File");
         if (moevs_proj_header_.DataHeaderAmount == 0)
-            LibDLVoiceCodecThrow("Empty Project")
+            LibDLVoiceCodecThrow("Empty Project");
 
 
         data_pos_ = std::vector<size_type>(moevs_proj_header_.DataHeaderAmount);
         if (fread(data_pos_.data(), 1, sizeof(size_type) * (moevs_proj_header_.DataHeaderAmount), project_file) != sizeof(size_type) * (moevs_proj_header_.DataHeaderAmount))
-            LibDLVoiceCodecThrow("Unexpected EOF")
+            LibDLVoiceCodecThrow("Unexpected EOF");
         data_chunk_begin_ = sizeof(Header) + sizeof(size_type) * (moevs_proj_header_.DataHeaderAmount);
 
 
         size_type _n_bytes = 0;
         const size_type _data_begin = data_chunk_begin_;
         fseek(project_file, long(_data_begin), SEEK_SET);
-        for (const auto& i : data_pos_)
+        for (const auto& _pos_index : data_pos_)
         {
             Data _datas;
 
             //Header
             if (fread(&_datas.Header, 1, sizeof(DataHeader), project_file) != sizeof(DataHeader))
-                LibDLVoiceCodecThrow("Unexpected EOF")
+                LibDLVoiceCodecThrow("Unexpected EOF");
             if (!(_datas.Header.ChunkSymbol[0] == 'D' && _datas.Header.ChunkSymbol[1] == 'A' && _datas.Header.ChunkSymbol[2] == 'T' && _datas.Header.ChunkSymbol[3] == 'A'))
-                LibDLVoiceCodecThrow("Unrecognized File")
-
+                LibDLVoiceCodecThrow("Unrecognized File");
+            _datas.ParamData.Slices.resize(_datas.Header.OrgLenSize);
 
             //Audio
             if (_datas.Header.OrgAudioOffsetPosSize != 0) {
                 _datas.Offset.OrgAudio = std::vector<size_type>(_datas.Header.OrgAudioOffsetPosSize);
                 _n_bytes = sizeof(size_type) * _datas.Header.OrgAudioOffsetPosSize;
                 if (fread(_datas.Offset.OrgAudio.data(), 1, _n_bytes, project_file) != _n_bytes)
-                    LibDLVoiceCodecThrow("Unexpected EOF")
+                    LibDLVoiceCodecThrow("Unexpected EOF");
+                size_t _data_idx = 0;
                 for (const auto& j : _datas.Offset.OrgAudio)
                 {
+                    if (!j) continue;
                     std::vector<int16_t> hs_vector(j);
                     _n_bytes = sizeof(int16_t) * j;
                     if (fread(hs_vector.data(), 1, _n_bytes, project_file) != _n_bytes)
-                        LibDLVoiceCodecThrow("Unexpected EOF")
-                    _datas.ParamData.Audio.emplace_back(std::move(hs_vector));
+                        LibDLVoiceCodecThrow("Unexpected EOF");
+                    _datas.ParamData.Slices[_data_idx].Audio = std::move(hs_vector);
+                    _data_idx += 1;
                 }
             }
 
@@ -61,14 +65,17 @@ namespace MoeVSProjectSpace
                 _datas.Offset.F0 = std::vector<size_type>(_datas.Header.F0OffsetPosSize);
                 _n_bytes = sizeof(size_type) * _datas.Header.F0OffsetPosSize;
                 if (fread(_datas.Offset.F0.data(), 1, _n_bytes, project_file) != _n_bytes)
-                    LibDLVoiceCodecThrow("Unexpected EOF")
+                    LibDLVoiceCodecThrow("Unexpected EOF");
+                size_t _data_idx = 0;
                 for (const auto& j : _datas.Offset.F0)
                 {
+                    if (!j) continue;
                     std::vector<float> f0_vector(j);
                     _n_bytes = sizeof(float) * j;
                     if (fread(f0_vector.data(), 1, _n_bytes, project_file) != _n_bytes)
-                        LibDLVoiceCodecThrow("Unexpected EOF")
-                    _datas.ParamData.F0.emplace_back(std::move(f0_vector));
+                        LibDLVoiceCodecThrow("Unexpected EOF");
+                    _datas.ParamData.Slices[_data_idx].F0 = std::move(f0_vector);
+                    _data_idx += 1;
                 }
             }
 
@@ -79,14 +86,17 @@ namespace MoeVSProjectSpace
                 _datas.Offset.Volume = std::vector<size_type>(_datas.Header.VolumeOffsetPosSize);
                 _n_bytes = sizeof(size_type) * _datas.Header.VolumeOffsetPosSize;
                 if (fread(_datas.Offset.Volume.data(), 1, _n_bytes, project_file) != _n_bytes)
-                    LibDLVoiceCodecThrow("Unexpected EOF")
+                    LibDLVoiceCodecThrow("Unexpected EOF");
+                size_t _data_idx = 0;
                 for (const auto& j : _datas.Offset.Volume)
                 {
+                    if (!j) continue;
                     std::vector<float> Volume_vector(j);
                     _n_bytes = sizeof(float) * j;
                     if (fread(Volume_vector.data(), 1, _n_bytes, project_file) != _n_bytes)
-                        LibDLVoiceCodecThrow("Unexpected EOF")
-                    _datas.ParamData.Volume.emplace_back(std::move(Volume_vector));
+                        LibDLVoiceCodecThrow("Unexpected EOF");
+                    _datas.ParamData.Slices[_data_idx].Volume = std::move(Volume_vector);
+                    _data_idx += 1;
                 }
             }
 
@@ -97,21 +107,30 @@ namespace MoeVSProjectSpace
                 _datas.Offset.Speaker = std::vector<size_type>(_datas.Header.CharacterOffsetPosSize);
                 _n_bytes = sizeof(size_type) * _datas.Header.CharacterOffsetPosSize;
                 if (fread(_datas.Offset.Speaker.data(), 1, _n_bytes, project_file) != _n_bytes)
-                    LibDLVoiceCodecThrow("Unexpected EOF")
+                    LibDLVoiceCodecThrow("Unexpected EOF");
+                size_t _data_idx = 0;
                 for (const auto& j : _datas.Offset.Speaker)
                 {
+                    if (!j) continue;
+
+                    size_type NSpeaker = 0;
+                    if (fread(&NSpeaker, 1, sizeof(size_type), project_file) != sizeof(size_type))
+                        LibDLVoiceCodecThrow("Unexpected EOF");
+                    if (!NSpeaker) continue;
+
                     std::vector<float> Speaker_vector(j);
                     _n_bytes = sizeof(float) * j;
                     if (fread(Speaker_vector.data(), 1, _n_bytes, project_file) != _n_bytes)
-                        LibDLVoiceCodecThrow("Unexpected EOF")
+                        LibDLVoiceCodecThrow("Unexpected EOF");
                     std::vector<std::vector<float>> SpkVec;
-                    if(!Speaker_vector.empty())
+                    if (!Speaker_vector.empty())
                     {
-                        const auto frames = Speaker_vector.size() / _datas.Header.NSpeaker;
-                        for (size_t idxs = 0; idxs < _datas.Header.NSpeaker; ++idxs)
+                        const auto frames = Speaker_vector.size() / NSpeaker;
+                        for (size_t idxs = 0; idxs < NSpeaker; ++idxs)
                             SpkVec.emplace_back(Speaker_vector.data() + idxs * frames, Speaker_vector.data() + (idxs + 1) * frames);
                     }
-                    _datas.ParamData.Speaker.emplace_back(std::move(SpkVec));
+                    _datas.ParamData.Slices[_data_idx].Speaker = std::move(SpkVec);
+                    _data_idx += 1;
                 }
             }
 
@@ -119,10 +138,12 @@ namespace MoeVSProjectSpace
             //OrgLen
             if (_datas.Header.OrgLenSize != 0)
             {
-                _datas.ParamData.OrgLen = std::vector<long>(_datas.Header.OrgLenSize);
+                std::vector<long> OrgLen(_datas.Header.OrgLenSize);
                 _n_bytes = sizeof(long) * _datas.Header.OrgLenSize;
-                if (fread(_datas.ParamData.OrgLen.data(), 1, _n_bytes, project_file) != _n_bytes)
-                    LibDLVoiceCodecThrow("Unexpected EOF")
+                if (fread(OrgLen.data(), 1, _n_bytes, project_file) != _n_bytes)
+                    LibDLVoiceCodecThrow("Unexpected EOF");
+                for (size_t _data_idx = 0; _data_idx < OrgLen.size(); ++_data_idx)
+                    _datas.ParamData.Slices[_data_idx].OrgLen = OrgLen[_data_idx];
             }
 
 
@@ -132,8 +153,9 @@ namespace MoeVSProjectSpace
                 std::vector<unsigned char> BooleanVector(_datas.Header.SymbolSize);
                 _n_bytes = _datas.Header.SymbolSize;
                 if (fread(BooleanVector.data(), 1, _n_bytes, project_file) != _n_bytes)
-                    LibDLVoiceCodecThrow("Unexpected EOF")
-                _datas.ParamData.IsNotMute = std::vector<bool>((bool*)BooleanVector.data(), (bool*)(BooleanVector.data() + BooleanVector.size()));
+                    LibDLVoiceCodecThrow("Unexpected EOF");
+                for (size_t _data_idx = 0; _data_idx < BooleanVector.size(); ++_data_idx)
+                    _datas.ParamData.Slices[_data_idx].IsNotMute = BooleanVector[_data_idx];
             }
 
 
@@ -143,7 +165,7 @@ namespace MoeVSProjectSpace
                 std::vector<char> PathStr(_datas.Header.PathSize);
                 _n_bytes = _datas.Header.PathSize;
                 if (fread(PathStr.data(), 1, _n_bytes, project_file) != _n_bytes)
-                    LibDLVoiceCodecThrow("Unexpected EOF")
+                    LibDLVoiceCodecThrow("Unexpected EOF");
                 _datas.ParamData.Path = to_wide_string(PathStr.data());
             }
 
@@ -151,7 +173,7 @@ namespace MoeVSProjectSpace
         }
     }
 
-    MoeVSProject::MoeVSProject(const std::vector<MoeVSAudioSlice>& _params)
+    MoeVSProject::MoeVSProject(const std::vector<MoeVoiceStudioSvcData>& _params)
     {
         moevs_proj_header_.DataHeaderAmount = size_type(_params.size());
         data_chunk_begin_ = sizeof(Header) + sizeof(size_type) * (moevs_proj_header_.DataHeaderAmount);
@@ -161,45 +183,24 @@ namespace MoeVSProjectSpace
         {
             Data _data;
             _data.ParamData = i;
-
-            for (const auto& hidden_unit : i.Audio)
-                _data.Offset.OrgAudio.push_back(hidden_unit.size());
-            _data.Header.OrgAudioOffsetPosSize = _data.Offset.OrgAudio.size();
-
-            for (const auto& f0 : i.F0)
-                _data.Offset.F0.push_back(f0.size());
-            _data.Header.F0OffsetPosSize = _data.Offset.F0.size();
-
-            if (!i.Volume.empty())
+            for (const auto& SliceData : i.Slices)
             {
-                for (const auto& volume : i.Volume)
-                    _data.Offset.Volume.push_back(volume.size());
-                _data.Header.VolumeOffsetPosSize = _data.Offset.Volume.size();
-            }
-            else
-                _data.Header.VolumeOffsetPosSize = 0;
-
-            if (!i.Speaker.empty())
-            {
-                for (const auto& Speaker : i.Speaker)
-                    if (Speaker.size() > _data.Header.NSpeaker)
-                        _data.Header.NSpeaker = Speaker.size();
-                for (auto& Speaker : i.Speaker)
+                _data.Offset.OrgAudio.push_back(SliceData.Audio.size());
+                _data.Offset.F0.push_back(SliceData.F0.size());
+                _data.Offset.Volume.push_back(SliceData.Volume.size());
+                size_t size__ = 0;
+                for (auto& Speaker : SliceData.Speaker)
                 {
-                    size_t size__ = 0;
-                    for (const auto& spkk : Speaker)
-                        size__ += spkk.size();
-                    _data.Offset.Speaker.push_back(size__);
+                    size__ += Speaker.size();
                 }
-                _data.Header.CharacterOffsetPosSize = _data.Offset.Speaker.size();
+                _data.Offset.Speaker.push_back(size__);
             }
-            else
-                _data.Header.CharacterOffsetPosSize = 0;
-
-            _data.Header.OrgLenSize = i.OrgLen.size();
-
-            _data.Header.SymbolSize = i.IsNotMute.size();
-
+            _data.Header.OrgAudioOffsetPosSize = _data.Offset.OrgAudio.size();
+            _data.Header.F0OffsetPosSize = _data.Offset.F0.size();
+            _data.Header.VolumeOffsetPosSize = _data.Offset.Volume.size();
+            _data.Header.CharacterOffsetPosSize = _data.Offset.Speaker.size();
+            _data.Header.OrgLenSize = i.Slices.size();
+            _data.Header.SymbolSize = i.Slices.size();
             const std::string bytePath = to_byte_string(i.Path);
             _data.Header.PathSize = bytePath.length() + 1;
             _offset += _data.Size();
@@ -214,7 +215,7 @@ namespace MoeVSProjectSpace
         FILE* project_file = nullptr;
         _wfopen_s(&project_file, _path.c_str(), L"wb");
         if (!project_file)
-            LibDLVoiceCodecThrow("Cannot Create File")
+            LibDLVoiceCodecThrow("Cannot Create File");
 
         fwrite(&moevs_proj_header_, 1, sizeof(Header), project_file);
         fwrite(data_pos_.data(), 1, data_pos_.size() * sizeof(size_type), project_file);
@@ -225,36 +226,46 @@ namespace MoeVSProjectSpace
 
 
             fwrite(i.Offset.OrgAudio.data(), 1, sizeof(size_type) * i.Offset.OrgAudio.size(), project_file);
-            for (const auto& hidden_unit : i.ParamData.Audio)
-                fwrite(hidden_unit.data(), 1, hidden_unit.size() * sizeof(int16_t), project_file);
+            for (const auto& orgaudio : i.ParamData.Slices)
+                fwrite(orgaudio.Audio.data(), 1, orgaudio.Audio.size() * sizeof(int16_t), project_file);
 
 
             fwrite(i.Offset.F0.data(), 1, sizeof(size_type) * i.Offset.F0.size(), project_file);
-            for (const auto& f0 : i.ParamData.F0)
-                fwrite(f0.data(), 1, f0.size() * sizeof(float), project_file);
+            for (const auto& f0 : i.ParamData.Slices)
+                fwrite(f0.F0.data(), 1, f0.F0.size() * sizeof(float), project_file);
 
 
             if (i.Header.VolumeOffsetPosSize != 0)
             {
                 fwrite(i.Offset.Volume.data(), 1, sizeof(size_type) * i.Offset.Volume.size(), project_file);
-                for (const auto& volume : i.ParamData.Volume)
-                    fwrite(volume.data(), 1, volume.size() * sizeof(float), project_file);
+                for (const auto& volume : i.ParamData.Slices)
+                    fwrite(volume.Volume.data(), 1, volume.Volume.size() * sizeof(float), project_file);
             }
 
             if (i.Header.CharacterOffsetPosSize != 0)
             {
                 fwrite(i.Offset.Speaker.data(), 1, sizeof(size_type) * i.Offset.Speaker.size(), project_file);
-                for (const auto& Speaker : i.ParamData.Speaker)
-					for(const auto& Spkk : Speaker)
+                for (const auto& Speaker : i.ParamData.Slices)
+                {
+                    if (Speaker.Speaker.empty()) continue;
+                    const size_type NSPK = Speaker.Speaker.size();
+                    fwrite(&NSPK, 1, sizeof(size_type), project_file);
+                    for (const auto& Spkk : Speaker.Speaker)
                         fwrite(Spkk.data(), 1, Spkk.size() * sizeof(float), project_file);
+                }
             }
 
-            fwrite(i.ParamData.OrgLen.data(), 1, sizeof(long) * i.ParamData.OrgLen.size(), project_file);
+            assert(i.ParamData.Slices.size() == i.Header.OrgLenSize);
+            std::vector<long> CurOrgLen(i.Header.OrgLenSize);
+            for (size_t index = 0; index < i.ParamData.Slices.size(); ++index)
+                CurOrgLen[index] = i.ParamData.Slices[index].OrgLen;
+            fwrite(CurOrgLen.data(), 1, sizeof(long) * CurOrgLen.size(), project_file);
 
-            std::vector<char> BooleanVector(i.ParamData.IsNotMute.size());
-            for (size_t index = 0; index < i.ParamData.IsNotMute.size(); ++index)
-                BooleanVector[index] = i.ParamData.IsNotMute[index] ? 1 : 0;
-            fwrite(BooleanVector.data(), 1, i.ParamData.IsNotMute.size(), project_file);
+            assert(i.ParamData.Slices.size() == i.Header.SymbolSize);
+            std::vector<char> BooleanVector(i.Header.SymbolSize);
+            for (size_t index = 0; index < i.ParamData.Slices.size(); ++index)
+                BooleanVector[index] = i.ParamData.Slices[index].IsNotMute ? 1 : 0;
+            fwrite(BooleanVector.data(), 1, i.Header.SymbolSize, project_file);
 
             const std::string bytePath = to_byte_string(i.ParamData.Path);
             fwrite(bytePath.data(), 1, i.Header.PathSize, project_file);

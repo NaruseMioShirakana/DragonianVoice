@@ -116,17 +116,18 @@ public:
 	 * \param _InferParams 推理参数
 	 * \return 推理结果（PCM signed-int16 单声道）
 	 */
-	[[nodiscard]] virtual std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVSAudioSlice& _Slice,
+	[[nodiscard]] virtual std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcData& _Slice,
 	                                                          const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const;
 
 	/**
 	 * \brief 推理一个音频（使用引用）
 	 * \param _Slice 音频数据引用
 	 * \param _InferParams 推理参数
+	 * \param _Process 推理进度
 	 * \return 推理结果（PCM signed-int16 单声道）
 	 */
-	[[nodiscard]] virtual std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVSAudioSliceRef& _Slice,
-		const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const;
+	[[nodiscard]] virtual std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcSlice& _Slice,
+		const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, size_t& _Process) const;
 
 	/**
 	 * \brief 推理一个音频（使用PCM）
@@ -174,7 +175,7 @@ public:
 	 * \param _slicer 切片机设置
 	 * \return 音频数据
 	 */
-	[[nodiscard]] static MoeVSProjectSpace::MoeVSAudioSlice GetAudioSlice(const std::vector<int16_t>& input,
+	[[nodiscard]] static MoeVSProjectSpace::MoeVoiceStudioSvcData GetAudioSlice(const std::vector<int16_t>& input,
 	                                                                      const std::vector<size_t>& _slice_pos,
 	                                                                      const InferTools::SlicerSettings& _slicer);
 
@@ -185,7 +186,7 @@ public:
 	 * \param __HopSize HopSize
 	 * \param _f0_method F0算法
 	 */
-	static void PreProcessAudio(MoeVSProjectSpace::MoeVSAudioSlice& input,
+	static void PreProcessAudio(MoeVSProjectSpace::MoeVoiceStudioSvcData& input,
 	                            int __SamplingRate = 48000, int __HopSize = 512, const std::wstring& _f0_method = L"Dio");
 
 	~SingingVoiceConversion() override;

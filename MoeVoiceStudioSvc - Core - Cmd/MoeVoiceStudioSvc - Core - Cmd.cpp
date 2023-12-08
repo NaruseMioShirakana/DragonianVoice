@@ -5,7 +5,7 @@
 #include <iostream>
 #include "Modules/Modules.hpp"
 #include "Modules/AvCodec/AvCodeResample.h"
-
+#include "Modules/InferTools/Stft/stft.hpp"
 #include <windows.h>
 #pragma comment(lib, "winmm.lib") 
 
@@ -46,16 +46,27 @@ int main()
 
 	try
 	{
-		MoeVSModuleManager::LoadSvcModel(
+		MoeVSModuleManager::LoadVitsSvcModel(
 			MJson(to_byte_string(GetCurrentFolder() + L"/Models/crs.json").c_str()),
 			[](size_t cur, size_t total)
 			{
-				//std::cout << (double(cur) / double(total) * 100.) << "%\n";
+				std::cout << (double(cur) / double(total) * 100.) << "%\n";
 			},
 			0,
 			8,
 			0
 			);
+		MoeVSModuleManager::LoadDiffusionSvcModel(
+			MJson(to_byte_string(GetCurrentFolder() + L"/Models/ShallowDiffusion.json").c_str()),
+			[](size_t cur, size_t total)
+			{
+				std::cout << (double(cur) / double(total) * 100.) << "%\n";
+			},
+			0,
+			8,
+			0
+		);
+		MoeVSModuleManager::LoadVocoderModel(L"S:\\VSGIT\\MoeVoiceStudioSvc - Core - Cmd\\x64\\Release\\hifigan\\nsf_hifigan.onnx");
 	}
 	catch (std::exception& e)
 	{
@@ -69,11 +80,11 @@ int main()
 	Params.Pndm = 5;
 	InferTools::SlicerSettings Settings;
 	Params.F0Method = L"Dio";
-	Settings.SamplingRate = MoeVSModuleManager::GetCurSvcModel()->GetSamplingRate();
+	//Settings.SamplingRate = MoeVSModuleManager::GetCurSvcModel()->GetSamplingRate();
 	Params.Keys = 0;
 	std::wstring Paths;
 
-	MoeVSModuleManager::GetCurSvcModel()->Inference(Paths, Params, Settings);
+	//MoeVSModuleManager::GetCurSvcModel()->Inference(Paths, Params, Settings);
 
 	return 0;
 

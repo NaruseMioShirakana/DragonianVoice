@@ -32,22 +32,22 @@ VitsSvc::VitsSvc(const MJson& _Config, const ProgressCallback& _ProgressCallback
 
 	//Check Folder
 	if (_Config["Folder"].IsNull())
-		LibDLVoiceCodecThrow("[Error] Missing field \"folder\" (Model Folder)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"folder\" (Model Folder)")
 	if (!_Config["Folder"].IsString())
-		LibDLVoiceCodecThrow("[Error] Field \"folder\" (Model Folder) Must Be String");
+		LibDLVoiceCodecThrow("[Error] Field \"folder\" (Model Folder) Must Be String")
 	const auto _folder = to_wide_string(_Config["Folder"].GetString());
 	const auto cluster_folder = GetCurrentFolder() + L"/Models/" + _folder;
 	if (_folder.empty())
-		LibDLVoiceCodecThrow("[Error] Field \"folder\" (Model Folder) Can Not Be Empty");
+		LibDLVoiceCodecThrow("[Error] Field \"folder\" (Model Folder) Can Not Be Empty")
 	const std::wstring _path = GetCurrentFolder() + L"/Models/" + _folder + L"/" + _folder;
 
 	if (_Config["Hubert"].IsNull())
-		LibDLVoiceCodecThrow("[Error] Missing field \"Hubert\" (Hubert Folder)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"Hubert\" (Hubert Folder)")
 	if (!_Config["Hubert"].IsString())
-		LibDLVoiceCodecThrow("[Error] Field \"Hubert\" (Hubert Folder) Must Be String");
+		LibDLVoiceCodecThrow("[Error] Field \"Hubert\" (Hubert Folder) Must Be String")
 	const std::wstring HuPath = to_wide_string(_Config["Hubert"].GetString());
 	if (HuPath.empty())
-		LibDLVoiceCodecThrow("[Error] Field \"Hubert\" (Hubert Folder) Can Not Be Empty");
+		LibDLVoiceCodecThrow("[Error] Field \"Hubert\" (Hubert Folder) Can Not Be Empty")
 
 	std::map<std::string, std::wstring> _PathDict;
 	_PathDict["Cluster"] = cluster_folder;
@@ -81,11 +81,11 @@ void VitsSvc::load(const std::map<std::string, std::wstring>& _PathDict, const M
 
 	//Check SamplingRate
 	if (_Config["Rate"].IsNull())
-		LibDLVoiceCodecThrow("[Error] Missing field \"Rate\" (SamplingRate)");
+		LibDLVoiceCodecThrow("[Error] Missing field \"Rate\" (SamplingRate)")
 	if (_Config["Rate"].IsInt() || _Config["Rate"].IsInt64())
 		_samplingRate = _Config["Rate"].GetInt();
 	else
-		LibDLVoiceCodecThrow("[Error] Field \"Rate\" (SamplingRate) Must Be Int/Int64");
+		LibDLVoiceCodecThrow("[Error] Field \"Rate\" (SamplingRate) Must Be Int/Int64")
 
 	logger.log(L"[Info] Current Sampling Rate is" + std::to_wstring(_samplingRate));
 
@@ -105,11 +105,11 @@ void VitsSvc::load(const std::map<std::string, std::wstring>& _PathDict, const M
 
 #ifdef MOEVSDMLPROVIDER
 	if (ExecutionProvider_ == ExecutionProviders::DML && VitsSvcVersion == L"SoVits4.0-DDSP")
-		LibDLVoiceCodecThrow("[Error] DirectXMl Not Support SoVits4.0V2, Please Use Cuda Or Cpu");
+		LibDLVoiceCodecThrow("[Error] DirectXMl Not Support SoVits4.0V2, Please Use Cuda Or Cpu")
 #endif
 
 	if (!(_Config["Hop"].IsInt() || _Config["Hop"].IsInt64()))
-		LibDLVoiceCodecThrow("[Error] Hop Must Exist And Must Be Int");
+		LibDLVoiceCodecThrow("[Error] Hop Must Exist And Must Be Int")
 	HopSize = _Config["Hop"].GetInt();
 
 	if (!(_Config["HiddenSize"].IsInt() || _Config["HiddenSize"].IsInt64()))
@@ -142,7 +142,7 @@ void VitsSvc::load(const std::map<std::string, std::wstring>& _PathDict, const M
 	}
 
 	if (HopSize < 1)
-		LibDLVoiceCodecThrow("[Error] Hop Must > 0");
+		LibDLVoiceCodecThrow("[Error] Hop Must > 0")
 
 	if (_Config["Volume"].IsBool())
 		EnableVolume = _Config["Volume"].GetBool();
@@ -168,7 +168,7 @@ void VitsSvc::load(const std::map<std::string, std::wstring>& _PathDict, const M
 	catch (Ort::Exception& _exception)
 	{
 		Destory();
-		LibDLVoiceCodecThrow(_exception.what());
+		LibDLVoiceCodecThrow(_exception.what())
 	}
 
 	if (VitsSvcModel->GetInputCount() == 4 && VitsSvcVersion != L"SoVits3.0")
@@ -186,9 +186,450 @@ void VitsSvc::load(const std::map<std::string, std::wstring>& _PathDict, const M
 	catch (std::exception& e)
 	{
 		Destory();
-		LibDLVoiceCodecThrow(e.what());
+		LibDLVoiceCodecThrow(e.what())
 	}
 }
+
+std::vector<int16_t> VitsSvc::SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcData& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const
+{
+	logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Start!");
+	std::vector<int16_t> _data;
+	size_t total_audio_size = 0;
+	for (const auto& data_size : _Slice.Slices)
+		total_audio_size += data_size.OrgLen;
+	_data.reserve(size_t(double(total_audio_size) * 1.5));
+	_callback(0, _Slice.Slices.size());
+	size_t process = 0;
+	for (auto& CurSlice : _Slice.Slices)
+	{
+		const auto InferDurTime = clock();
+		const auto CurRtn = SliceInference(CurSlice, _InferParams, process);
+		_data.insert(_data.end(), CurRtn.data(), CurRtn.data() + CurRtn.size());
+		if(CurSlice.IsNotMute)
+			logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Segment[" + std::to_wstring(process) + L"] Finished! Segment Use Time: " + std::to_wstring(clock() - InferDurTime) + L"ms, Segment Duration: " + std::to_wstring((size_t)CurSlice.OrgLen * 1000ull / 48000ull) + L"ms");
+		else
+			logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Jump Empty Segment[" + std::to_wstring(process) + L"]!");
+		_callback(++process, _Slice.Slices.size());
+	}
+	logger.log(L"[Inferring] \"" + _Slice.Path + L"\" Finished");
+	return _data;
+}
+
+ShallowDiffusionData DataForDiffusion;
+
+ShallowDiffusionData& GetDataForShallowDiffusion()
+{
+	return DataForDiffusion;
+}
+
+std::vector<int16_t> VitsSvc::SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcSlice& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, size_t& _Process) const
+{
+	DataForDiffusion._16KAudio.clear();
+	DataForDiffusion.CUDAF0.clear();
+	DataForDiffusion.CUDAVolume.clear();
+	DataForDiffusion.CUDASpeaker.clear();
+	DataForDiffusion.NeedPadding = false;
+	if (_Slice.IsNotMute)
+	{
+		DataForDiffusion._16KAudio = InferTools::InterpResample(_Slice.Audio, 48000, 16000, 32768.0f);
+		const auto src_audio_length = DataForDiffusion._16KAudio.size();
+		bool NeedPadding = false;
+		if (_cur_execution_provider == ExecutionProviders::CUDA)
+		{
+			NeedPadding = DataForDiffusion._16KAudio.size() % 16000;
+			const size_t WavPaddedSize = DataForDiffusion._16KAudio.size() / 16000 + 1;
+			if (NeedPadding)
+				DataForDiffusion._16KAudio.resize(WavPaddedSize * 16000, 0.f);
+		}
+
+		const int64_t HubertInputShape[3] = { 1i64,1i64,(int64_t)DataForDiffusion._16KAudio.size() };
+		std::vector<Ort::Value> HubertInputTensors, HubertOutPuts;
+		HubertInputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, DataForDiffusion._16KAudio.data(), DataForDiffusion._16KAudio.size(), HubertInputShape, 3));
+		try {
+			HubertOutPuts = hubert->Run(Ort::RunOptions{ nullptr },
+				hubertInput.data(),
+				HubertInputTensors.data(),
+				HubertInputTensors.size(),
+				hubertOutput.data(),
+				hubertOutput.size());
+		}
+		catch (Ort::Exception& e)
+		{
+			LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()))
+		}
+		const auto HubertSize = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetElementCount();
+		const auto HubertOutPutData = HubertOutPuts[0].GetTensorMutableData<float>();
+		auto HubertOutPutShape = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetShape();
+		if (HubertOutPutShape[2] != HiddenUnitKDims)
+			LibDLVoiceCodecThrow("HiddenUnitKDims UnMatch")
+
+		std::vector SrcHiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
+
+		const auto max_cluster_size = int64_t((size_t)HubertOutPutShape[1] * src_audio_length / DataForDiffusion._16KAudio.size());
+		if (EnableCluster && _InferParams.ClusterRate > 0.001f)
+		{
+			const auto pts = Cluster->find(SrcHiddenUnits.data(), long(_InferParams.SpeakerId), max_cluster_size);
+			for (int64_t indexs = 0; indexs < max_cluster_size * HiddenUnitKDims; ++indexs)
+				SrcHiddenUnits[indexs] = SrcHiddenUnits[indexs] * (1.f - _InferParams.ClusterRate) + pts[indexs] * _InferParams.ClusterRate;
+		}
+
+		MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::InferParams _Inference_Params;
+		_Inference_Params.AudioSize = _Slice.Audio.size();
+		_Inference_Params.Chara = _InferParams.SpeakerId;
+		_Inference_Params.NoiseScale = _InferParams.NoiseScale;
+		_Inference_Params.DDSPNoiseScale = _InferParams.DDSPNoiseScale;
+		_Inference_Params.Seed = int(_InferParams.Seed);
+		_Inference_Params.upKeys = _InferParams.Keys;
+
+		MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::Inputs InputTensors;
+
+		DataForDiffusion.NeedPadding = NeedPadding;
+
+		if (_cur_execution_provider == ExecutionProviders::CUDA && NeedPadding)
+		{
+			DataForDiffusion.CUDAF0 = _Slice.F0;
+			DataForDiffusion.CUDAVolume = _Slice.Volume;
+			DataForDiffusion.CUDASpeaker = _Slice.Speaker;
+			const auto src_src_audio_length = _Slice.Audio.size();
+			const size_t WavPaddedSize = ((src_src_audio_length / 48000) + 1) * 48000;
+			const size_t AudioPadSize = WavPaddedSize - src_src_audio_length;
+			const size_t PaddedF0Size = DataForDiffusion.CUDAF0.size() + (DataForDiffusion.CUDAF0.size() * AudioPadSize / src_src_audio_length);
+
+			if (!DataForDiffusion.CUDAF0.empty()) DataForDiffusion.CUDAF0.resize(PaddedF0Size, 0.f);
+			if (!DataForDiffusion.CUDAVolume.empty()) DataForDiffusion.CUDAVolume.resize(PaddedF0Size, 0.f);
+			for (auto iSpeaker : DataForDiffusion.CUDASpeaker)
+			{
+				if (!iSpeaker.empty())
+					iSpeaker.resize(PaddedF0Size, 0.f);
+			}
+			_Inference_Params.AudioSize = WavPaddedSize;
+			InputTensors = _TensorExtractor->Extract(SrcHiddenUnits, DataForDiffusion.CUDAF0, DataForDiffusion.CUDAVolume, DataForDiffusion.CUDASpeaker, _Inference_Params);
+		}
+		else
+			InputTensors = _TensorExtractor->Extract(SrcHiddenUnits, _Slice.F0, _Slice.Volume, _Slice.Speaker, _Inference_Params);
+
+
+		std::vector<Ort::Value> finaOut;
+		try
+		{
+			finaOut = VitsSvcModel->Run(Ort::RunOptions{ nullptr },
+				InputTensors.InputNames,
+				InputTensors.Tensor.data(),
+				InputTensors.Tensor.size(),
+				soVitsOutput.data(),
+				soVitsOutput.size());
+		}
+		catch (Ort::Exception& e)
+		{
+			LibDLVoiceCodecThrow((std::string("Locate: VitsSvc\n") + e.what()))
+		}
+
+		const auto dstWavLen = (_Slice.OrgLen * int64_t(_samplingRate)) / 48000;
+		/*if (shallow_diffusion && stft_operator && _InferParams.UseShallowDiffusion)
+		{
+			auto PCMAudioBegin = finaOut[0].GetTensorData<float>();
+			auto PCMAudioEnd = PCMAudioBegin + finaOut[0].GetTensorTypeAndShapeInfo().GetElementCount();
+			auto MelSpec = MelExtractor(PCMAudioBegin, PCMAudioEnd);
+			auto ShallowParam = _InferParams;
+			ShallowParam.SrcSamplingRate = _samplingRate;
+			auto ShallowDiffusionOutput = shallow_diffusion->ShallowDiffusionInference(
+				RawWav,
+				ShallowParam,
+				std::move(MelSpec[0]),
+				NeedPadding ? CUDAF0 : _Slice.F0,
+				NeedPadding ? CUDAVolume : _Slice.Volume,
+				NeedPadding ? CUDASpeaker : _Slice.Speaker
+			);
+			ShallowDiffusionOutput.resize(dstWavLen, 0);
+			return ShallowDiffusionOutput;
+		}*/
+
+		const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();
+		std::vector<int16_t> TempVecWav = std::vector<int16_t>(dstWavLen, 0);
+		if (shapeOut[2] < dstWavLen)
+			for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
+				TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
+		else
+			for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
+				TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
+		return TempVecWav;
+	}
+	//Mute clips
+	const auto len = size_t(_Slice.OrgLen * int64_t(_samplingRate) / 48000);
+	return { len, 0i16, std::allocator<int16_t>() };
+}
+
+std::vector<std::wstring> VitsSvc::Inference(std::wstring& _Paths,
+	const MoeVSProjectSpace::MoeVSSvcParams& _InferParams,
+	const InferTools::SlicerSettings& _SlicerSettings) const
+{
+	std::vector<std::wstring> _Lens = GetOpenFileNameMoeVS();
+	std::vector<std::wstring> AudioFolders;
+	for (auto& path : _Lens)
+	{
+		path = std::regex_replace(path, std::wregex(L"\\\\"), L"/");
+		auto PCMData = AudioPreprocess().codec(path, 48000);
+		auto slicer_setting = _SlicerSettings;
+		slicer_setting.SamplingRate = 48000;
+		auto SlicePos = SliceAudio(PCMData, slicer_setting);
+		auto Audio = GetAudioSlice(PCMData, SlicePos, slicer_setting);
+		Audio.Path = path;
+		PreProcessAudio(Audio, 48000, 512, _InferParams.F0Method);
+		std::vector<int16_t> _data = SliceInference(Audio, _InferParams);
+
+		std::wstring OutFolder = GetCurrentFolder() + L"/Outputs/" + path.substr(path.rfind(L'/') + 1, path.rfind(L'.') - path.rfind(L'/') - 1);
+		OutFolder += L"-Params-(-NoiseScale=" +
+			std::to_wstring(_InferParams.NoiseScale) +
+			L"-Speaker=" +
+			(EnableCharaMix ? std::wstring(L"SpeakerMix") : std::to_wstring(_InferParams.SpeakerId)) +
+			L"-Seed=" +
+			std::to_wstring(_InferParams.Seed) +
+			L"-F0Method=" +
+			_InferParams.F0Method + L")";
+		if (_waccess((OutFolder + L".wav").c_str(), 0) != -1)
+		{
+			for (size_t idx = 0; idx < 99999999; ++idx)
+				if (_waccess((OutFolder + L" (" + std::to_wstring(idx) + L").wav").c_str(), 0) == -1)
+				{
+					OutFolder += L" (" + std::to_wstring(idx) + L").wav";
+					break;
+				}
+		}
+		else
+			OutFolder += L".wav";
+		AudioFolders.emplace_back(OutFolder);
+		_data = InferTools::InterpResample(_data, _samplingRate, 48000, 1i16);
+		InferTools::Wav::WritePCMData(48000, 1, _data, OutFolder);
+	}
+	return AudioFolders;
+}
+
+std::vector<int16_t> VitsSvc::InferPCMData(const std::vector<int16_t>& PCMData, long srcSr, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const
+{
+	auto hubertin = InferTools::InterpResample<float>(PCMData, srcSr, 16000);
+	int64_t charEmb = _InferParams.SpeakerId;
+	std::mt19937 gen(int(_InferParams.Seed));
+	std::normal_distribution<float> normal(0, 1);
+	float noise_scale = _InferParams.NoiseScale;
+	float ddsp_noise_scale = _InferParams.DDSPNoiseScale;
+
+	const int64_t inputShape[3] = { 1i64,1i64,(int64_t)hubertin.size() };
+	std::vector<Ort::Value> inputTensorshu;
+	inputTensorshu.emplace_back(Ort::Value::CreateTensor(*memory_info, hubertin.data(), hubertin.size(), inputShape, 3));
+	std::vector<Ort::Value> hubertOut;
+
+	try {
+		hubertOut = hubert->Run(Ort::RunOptions{ nullptr },
+			hubertInput.data(),
+			inputTensorshu.data(),
+			inputTensorshu.size(),
+			hubertOutput.data(),
+			hubertOutput.size());
+	}
+	catch (Ort::Exception& e)
+	{
+		LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()))
+	}
+	auto HubertSize = hubertOut[0].GetTensorTypeAndShapeInfo().GetElementCount();
+	auto HubertOutPutData = hubertOut[0].GetTensorMutableData<float>();
+	auto HubertOutPutShape = hubertOut[0].GetTensorTypeAndShapeInfo().GetShape();
+	inputTensorshu.clear();
+	if (HubertOutPutShape[2] != HiddenUnitKDims)
+		LibDLVoiceCodecThrow("HiddenUnitKDims UnMatch")
+
+	std::vector HiddenUnitsSrc(HubertOutPutData, HubertOutPutData + HubertSize);
+
+	if (EnableCluster && _InferParams.ClusterRate > 0.001f)
+	{
+		const auto clus_size = HubertOutPutShape[1];
+		const auto pts = Cluster->find(HiddenUnitsSrc.data(), long(charEmb), clus_size);
+		for (size_t indexs = 0; indexs < HiddenUnitsSrc.size(); ++indexs)
+			HiddenUnitsSrc[indexs] = HiddenUnitsSrc[indexs] * (1.f - _InferParams.ClusterRate) + pts[indexs] * _InferParams.ClusterRate;
+	}
+
+	const auto HubertLen = int64_t(HubertSize) / HiddenUnitKDims;
+	int64_t F0Shape[] = { 1, int64_t(PCMData.size() / HopSize) };
+	int64_t HiddenUnitShape[] = { 1, HubertLen, HiddenUnitKDims };
+	constexpr int64_t LengthShape[] = { 1 };
+	int64_t CharaEmbShape[] = { 1 };
+	int64_t CharaMixShape[] = { F0Shape[1], SpeakerCount };
+	int64_t RandnShape[] = { 1, 192, F0Shape[1] };
+	const int64_t IstftShape[] = { 1, 2048, F0Shape[1] };
+	int64_t RandnCount = F0Shape[1] * 192;
+	const int64_t IstftCount = F0Shape[1] * 2048;
+
+	std::vector<float> RandnInput, IstftInput, UV, InterpedF0;
+	std::vector<int64_t> alignment;
+	int64_t XLength[1] = { HubertLen };
+	std::vector<int64_t> Nsff0;
+	//auto SoVitsInput = soVitsInput;
+	int64_t Chara[] = { charEmb };
+	std::vector<float> charaMix;
+
+	const auto F0Extractor = MoeVSF0Extractor::GetF0Extractor(_InferParams.F0Method, _samplingRate, HopSize);
+
+	auto srcF0Data = F0Extractor->ExtractF0(PCMData, PCMData.size() / HopSize);
+	for (auto& ifo : srcF0Data)
+		ifo *= (float)pow(2.0, static_cast<double>(_InferParams.Keys) / 12.0);
+	std::vector<float> HiddenUnits;
+	std::vector<float> F0Data;
+
+	std::vector<Ort::Value> _Tensors;
+	std::vector<const char*> SoVitsInput = soVitsInput;
+
+	//Compatible with all versions
+	if (VitsSvcVersion == L"SoVits3.0")
+	{
+		int64_t upSample = _samplingRate / 16000;
+		HiddenUnits.reserve(HubertSize * (upSample + 1));
+		for (int64_t itS = 0; itS < HiddenUnitShape[1]; ++itS)
+			for (int64_t itSS = 0; itSS < upSample; ++itSS)
+				HiddenUnits.insert(HiddenUnits.end(), HiddenUnitsSrc.begin() + itS * HiddenUnitKDims, HiddenUnitsSrc.begin() + (itS + 1) * HiddenUnitKDims);
+		HiddenUnitShape[1] *= upSample;
+		HubertSize *= upSample;
+		F0Data = _TensorExtractor->GetInterpedF0(InferTools::InterpFunc(srcF0Data, long(srcF0Data.size()), long(HiddenUnitShape[1])));
+		F0Shape[1] = HiddenUnitShape[1];
+		XLength[0] = HiddenUnitShape[1];
+		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, HiddenUnits.data(), HubertSize, HiddenUnitShape, 3));
+		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, XLength, 1, LengthShape, 1));
+		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, F0Data.data(), F0Data.size(), F0Shape, 2));
+	}
+	else if (VitsSvcVersion == L"SoVits2.0")
+	{
+		HiddenUnits = std::move(HiddenUnitsSrc);
+		F0Shape[1] = HiddenUnitShape[1];
+		F0Data = InferTools::InterpFunc(srcF0Data, long(srcF0Data.size()), long(HiddenUnitShape[1]));
+		XLength[0] = HiddenUnitShape[1];
+		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, HiddenUnits.data(), HubertSize, HiddenUnitShape, 3));
+		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, XLength, 1, LengthShape, 1));
+		Nsff0 = _TensorExtractor->GetNSFF0(F0Data);
+		_Tensors.emplace_back(Ort::Value::CreateTensor<long long>(*memory_info, Nsff0.data(), Nsff0.size(), F0Shape, 2));
+	}
+	else if (VitsSvcVersion == L"RVC")
+	{
+		constexpr int64_t upSample = 2;
+		HiddenUnits.reserve(HubertSize * (upSample + 1));
+		for (int64_t itS = 0; itS < HiddenUnitShape[1]; ++itS)
+			for (int64_t itSS = 0; itSS < upSample; ++itSS)
+				HiddenUnits.insert(HiddenUnits.end(), HiddenUnitsSrc.begin() + itS * HiddenUnitKDims, HiddenUnitsSrc.begin() + (itS + 1) * HiddenUnitKDims);
+		HiddenUnitShape[1] *= upSample;
+		HubertSize *= upSample;
+		F0Data = InferTools::InterpFunc(srcF0Data, long(srcF0Data.size()), long(HiddenUnitShape[1]));
+		F0Shape[1] = HiddenUnitShape[1];
+		XLength[0] = HiddenUnitShape[1];
+		RandnCount = 192 * F0Shape[1];
+		RandnShape[2] = F0Shape[1];
+		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, HiddenUnits.data(), HubertSize, HiddenUnitShape, 3));
+		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, XLength, 1, LengthShape, 1));
+		InterpedF0 = _TensorExtractor->GetInterpedF0(F0Data);
+		Nsff0 = _TensorExtractor->GetNSFF0(InterpedF0);
+		_Tensors.emplace_back(Ort::Value::CreateTensor<long long>(*memory_info, Nsff0.data(), Nsff0.size(), F0Shape, 2));
+		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, InterpedF0.data(), InterpedF0.size(), F0Shape, 2));
+		SoVitsInput = RVCInput;
+		RandnInput = std::vector<float>(RandnCount, 0.f);
+		for (auto& it : RandnInput)
+			it = normal(gen) * noise_scale;
+	}
+	else
+	{
+		HiddenUnits = std::move(HiddenUnitsSrc);
+		F0Data = InferTools::InterpFunc(srcF0Data, long(srcF0Data.size()), long(F0Shape[1]));
+		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, HiddenUnits.data(), HubertSize, HiddenUnitShape, 3));
+		InterpedF0 = _TensorExtractor->GetInterpedF0(F0Data);
+		alignment = _TensorExtractor->GetAligments(F0Shape[1], HubertLen);
+		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, InterpedF0.data(), InterpedF0.size(), F0Shape, 2));
+		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, alignment.data(), InterpedF0.size(), F0Shape, 2));
+		if (VitsSvcVersion != L"SoVits4.0-DDSP")
+		{
+			UV = _TensorExtractor->GetUV(F0Data);
+			SoVitsInput = { "c", "f0", "mel2ph", "uv", "noise", "sid" };
+			_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, UV.data(), UV.size(), F0Shape, 2));
+		}
+		else
+		{
+			SoVitsInput = { "c", "f0", "mel2ph", "t_window", "noise", "sid" };
+			IstftInput = std::vector<float>(IstftCount, ddsp_noise_scale);
+			_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, IstftInput.data(), IstftInput.size(), IstftShape, 3));
+		}
+		RandnInput = std::vector<float>(RandnCount, 0.f);
+		for (auto& it : RandnInput)
+			it = normal(gen) * noise_scale;
+		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, RandnInput.data(), RandnCount, RandnShape, 3));
+	}
+
+
+	if (EnableCharaMix)
+	{
+		CharaMixShape[0] = F0Shape[1];
+		std::vector charaMap(SpeakerCount, 0.f);
+		charaMap[charEmb] = 1.f;
+		charaMix.reserve((SpeakerCount + 1) * F0Shape[1]);
+		for (int64_t index = 0; index < F0Shape[1]; ++index)
+			charaMix.insert(charaMix.end(), charaMap.begin(), charaMap.end());
+		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, charaMix.data(), charaMix.size(), CharaMixShape, 2));
+	}
+	else
+		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, Chara, 1, CharaEmbShape, 1));
+
+	if (VitsSvcVersion == L"RVC")
+		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, RandnInput.data(), RandnCount, RandnShape, 3));
+
+	std::vector<float> VolumeData;
+
+	if (EnableVolume)
+	{
+		SoVitsInput.emplace_back("vol");
+		VolumeData = ExtractVolume(PCMData, HopSize);
+		VolumeData.resize(F0Shape[1], 0.f);
+		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, VolumeData.data(), F0Shape[1], F0Shape, 2));
+	}
+
+	std::vector<Ort::Value> finaOut;
+
+	finaOut = VitsSvcModel->Run(Ort::RunOptions{ nullptr },
+		SoVitsInput.data(),
+		_Tensors.data(),
+		_Tensors.size(),
+		soVitsOutput.data(),
+		soVitsOutput.size());
+
+	const auto dstWavLen = finaOut[0].GetTensorTypeAndShapeInfo().GetShape()[2];
+	std::vector<int16_t> TempVecWav(dstWavLen, 0);
+	for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
+		TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
+	if(VitsSvcVersion == L"RVC")
+		TempVecWav = InferTools::InterpResample(TempVecWav, _samplingRate, 48000, 1i16);
+	return TempVecWav;
+}
+
+/*std::vector<Ort::Value> VitsSvc::MelExtractor(const float* PCMAudioBegin, const float* PCMAudioEnd) const
+{
+	std::vector<float> _SRAudio{PCMAudioBegin, PCMAudioEnd};
+	_SRAudio = InferTools::InterpResample(_SRAudio, _samplingRate, 16000, 1.f);
+	const auto _MelLength = int64_t(_SRAudio.size() * shallow_diffusion->GetSamplingRate() / 16000ull / shallow_diffusion->GetHopSize());
+	const auto _SpecLength = (int64_t)ceil(double(_SRAudio.size()) / 16000. * 100.);
+	auto Alignment = _TensorExtractor->GetAligments(_MelLength, _SpecLength);
+	Alignment.resize(_MelLength);
+	std::vector<Ort::Value> AudioTensors;
+	const int64_t AudioInputShape[] = { 1,1,int64_t(_SRAudio.size()) };
+	const int64_t AligShape[] = { 1,_MelLength };
+	AudioTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, _SRAudio.data(), _SRAudio.size(), AudioInputShape, 3));
+	AudioTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, Alignment.data(), Alignment.size(), AligShape, 2));
+	try
+	{
+		return stft_operator->Run(Ort::RunOptions{ nullptr },
+			StftInput.data(),
+			AudioTensors.data(),
+			AudioTensors.size(),
+			StftOutput.data(),
+			StftOutput.size()
+		);
+	}
+	catch (Ort::Exception& e)
+	{
+		LibDLVoiceCodecThrow((std::string("Locate: ShallowDiffusionStftOperator\n") + e.what()).c_str());
+	}
+}*/
 
 //已弃用（旧MoeSS的推理函数）
 #ifdef MOESSDFN
@@ -231,7 +672,7 @@ std::vector<int16_t> VitsSvc::InferBatch() const
 		noise_scale = 1.0f;
 	if (ddsp_noise_scale > 50.0f)
 		ddsp_noise_scale = 1.0f;
-	for(auto & path : _Lens)
+	for (auto& path : _Lens)
 	{
 		logger.log(L"[Inferring] Inferring \"" + path + L'\"');
 		size_t proc = 0;
@@ -445,7 +886,7 @@ std::vector<int16_t> VitsSvc::InferBatch() const
 			return _data;
 		}
 		std::wstring outPutPath = GetCurrentFolder() + L"\\OutPuts\\" + path.substr(path.rfind(L'\\') + 1, path.rfind(L'.')) + L'-' + std::to_wstring(uint64_t(path.data())) + L".wav";
-		logger.log(L"[Inferring] Write To \""+ outPutPath + L'\"');
+		logger.log(L"[Inferring] Write To \"" + outPutPath + L'\"');
 		Wav(_samplingRate, long(_data.size()) * 2, _data.data()).Writef(outPutPath);
 	}
 	logger.log(L"[Info] Finished");
@@ -643,430 +1084,6 @@ std::vector<Ort::Value> VitsSvc::InferSliceTensor(const MoeVSProjectSpace::MoeVS
 	   soVitsOutput.size());
 }
  */
-
-std::vector<int16_t> VitsSvc::SliceInference(const MoeVSProjectSpace::MoeVSAudioSlice& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const
-{
-	logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Start!");
-	std::vector<int16_t> _data;
-	size_t total_audio_size = 0;
-	for (const auto& data_size : _Slice.OrgLen)
-		total_audio_size += data_size;
-	_data.reserve(size_t(double(total_audio_size) * 1.5));
-	_callback(0, _Slice.F0.size());
-	size_t process = 0;
-	for (size_t slice = 0; slice < _Slice.F0.size(); ++slice)
-	{
-		if(_Slice.IsNotMute[slice])
-		{
-			const auto InferDurTime = clock();
-			auto RawWav = InferTools::InterpResample(_Slice.Audio[slice], 48000, 16000, 32768.0f);
-			const auto src_audio_length = RawWav.size();
-			bool NeedPadding = false;
-			if(_cur_execution_provider == ExecutionProviders::CUDA)
-			{
-				NeedPadding = RawWav.size() % 16000;
-				const size_t WavPaddedSize = RawWav.size() / 16000 + 1;
-				if (NeedPadding)
-					RawWav.resize(WavPaddedSize * 16000, 0.f);
-			}
-
-			const int64_t HubertInputShape[3] = { 1i64,1i64,(int64_t)RawWav.size() };
-			std::vector<Ort::Value> HubertInputTensors, HubertOutPuts;
-			HubertInputTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, RawWav.data(), RawWav.size(), HubertInputShape, 3));
-			try {
-				HubertOutPuts = hubert->Run(Ort::RunOptions{ nullptr },
-					hubertInput.data(),
-					HubertInputTensors.data(),
-					HubertInputTensors.size(),
-					hubertOutput.data(),
-					hubertOutput.size());
-			}
-			catch (Ort::Exception& e)
-			{
-				LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()).c_str());
-			}
-			const auto HubertSize = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetElementCount();
-			const auto HubertOutPutData = HubertOutPuts[0].GetTensorMutableData<float>();
-			auto HubertOutPutShape = HubertOutPuts[0].GetTensorTypeAndShapeInfo().GetShape();
-			if (HubertOutPutShape[2] != HiddenUnitKDims)
-				LibDLVoiceCodecThrow("HiddenUnitKDims UnMatch");
-
-			std::vector srcHiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
-
-			const auto max_cluster_size = int64_t((size_t)HubertOutPutShape[1] * src_audio_length / RawWav.size());
-			if (EnableCluster && _InferParams.ClusterRate > 0.001f)
-			{
-				const auto pts = Cluster->find(srcHiddenUnits.data(), long(_InferParams.SpeakerId), max_cluster_size);
-				for (int64_t indexs = 0; indexs < max_cluster_size * HiddenUnitKDims; ++indexs)
-					srcHiddenUnits[indexs] = srcHiddenUnits[indexs] * (1.f - _InferParams.ClusterRate) + pts[indexs] * _InferParams.ClusterRate;
-			}
-
-			MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::InferParams _Inference_Params;
-			_Inference_Params.AudioSize = _Slice.Audio[slice].size();
-			_Inference_Params.Chara = _InferParams.SpeakerId;
-			_Inference_Params.NoiseScale = _InferParams.NoiseScale;
-			_Inference_Params.DDSPNoiseScale = _InferParams.DDSPNoiseScale;
-			_Inference_Params.Seed = int(_InferParams.Seed);
-			_Inference_Params.upKeys = _InferParams.Keys;
-
-			MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::Inputs InputTensors;
-			std::vector<std::vector<float>> CUDASpeaker;
-			std::vector<float> CUDAVolume, CUDAF0;
-
-			if(_cur_execution_provider == ExecutionProviders::CUDA && NeedPadding)
-			{
-				CUDAF0 = _Slice.F0[slice];
-				CUDAVolume = _Slice.Volume[slice];
-				CUDASpeaker = _Slice.Speaker[slice];
-				const auto src_src_audio_length = _Slice.Audio[slice].size();
-				const size_t WavPaddedSize = ((src_src_audio_length / 48000) + 1) * 48000;
-				const size_t AudioPadSize = WavPaddedSize - src_src_audio_length;
-				const size_t PaddedF0Size = CUDAF0.size() + (CUDAF0.size() * AudioPadSize / src_src_audio_length);
-
-				if (!CUDAF0.empty()) CUDAF0.resize(PaddedF0Size, 0.f);
-				if (!CUDAVolume.empty()) CUDAVolume.resize(PaddedF0Size, 0.f);
-				for (auto iSpeaker : CUDASpeaker)
-				{
-					if (!iSpeaker.empty())
-						iSpeaker.resize(PaddedF0Size, 0.f);
-				}
-				_Inference_Params.AudioSize = WavPaddedSize;
-				InputTensors = _TensorExtractor->Extract(srcHiddenUnits, CUDAF0, CUDAVolume, CUDASpeaker, _Inference_Params);
-			}
-			else
-				InputTensors = _TensorExtractor->Extract(srcHiddenUnits, _Slice.F0[slice], _Slice.Volume[slice], _Slice.Speaker[slice], _Inference_Params);
-			
-
-			std::vector<Ort::Value> finaOut;
-			try
-			{
-				finaOut = VitsSvcModel->Run(Ort::RunOptions{ nullptr },
-					InputTensors.InputNames,
-					InputTensors.Tensor.data(),
-					InputTensors.Tensor.size(),
-					soVitsOutput.data(),
-					soVitsOutput.size());
-			}
-			catch (Ort::Exception& e)
-			{
-				LibDLVoiceCodecThrow((std::string("Locate: VitsSvc\n") + e.what()).c_str());
-			}
-
-			const auto dstWavLen = (_Slice.OrgLen[slice] * int64_t(_samplingRate)) / 48000;
-			
-			/*if(shallow_diffusion && stft_operator && _InferParams.UseShallowDiffusion)
-			{
-				auto PCMAudioBegin = finaOut[0].GetTensorData<float>();
-				auto PCMAudioEnd = PCMAudioBegin + finaOut[0].GetTensorTypeAndShapeInfo().GetElementCount();
-				auto MelSpec = MelExtractor(PCMAudioBegin, PCMAudioEnd);
-				auto ShallowParam = _InferParams;
-				ShallowParam.SrcSamplingRate = _samplingRate;
-				auto ShallowDiffusionOutput = shallow_diffusion->ShallowDiffusionInference(
-					RawWav,
-					ShallowParam,
-					std::move(MelSpec[0]),
-					NeedPadding ? CUDAF0 : _Slice.F0[slice],
-					NeedPadding ? CUDAVolume : _Slice.Volume[slice],
-					NeedPadding ? CUDASpeaker : _Slice.Speaker[slice]
-				);
-				ShallowDiffusionOutput.resize(dstWavLen, 0);
-				_data.insert(_data.end(), ShallowDiffusionOutput.begin(), ShallowDiffusionOutput.end());
-			}*/
-
-			const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();
-			std::vector<int16_t> TempVecWav = std::vector<int16_t>(dstWavLen, 0);
-			if (shapeOut[2] < dstWavLen)
-				for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
-					TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
-			else
-				for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
-					TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
-			_data.insert(_data.end(), TempVecWav.data(), TempVecWav.data() + (dstWavLen));
-
-			logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Segment[" + std::to_wstring(slice) + L"] Finished! Segment Use Time: " + std::to_wstring(clock() - InferDurTime) + L"ms, Segment Duration: " + std::to_wstring((size_t)_Slice.OrgLen[slice] * 1000ull / 48000ull) + L"ms");
-		}
-		else
-		{
-			//Mute clips
-			const auto len = _Slice.OrgLen[slice] * int64_t(_samplingRate) / 48000;
-			const auto data = new int16_t[len];
-			memset(data, 0, int64_t(len) * 2);
-			_data.insert(_data.end(), data, data + len);
-			delete[] data;
-			logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Jump Empty Segment[" + std::to_wstring(slice) + L"]!");
-		}
-		_callback(++process, _Slice.F0.size());
-	}
-	logger.log(L"[Inferring] \"" + _Slice.Path + L"\" Finished");
-	return _data;
-}
-
-std::vector<std::wstring> VitsSvc::Inference(std::wstring& _Paths,
-	const MoeVSProjectSpace::MoeVSSvcParams& _InferParams,
-	const InferTools::SlicerSettings& _SlicerSettings) const
-{
-	std::vector<std::wstring> _Lens = GetOpenFileNameMoeVS();
-	std::vector<std::wstring> AudioFolders;
-	for (auto& path : _Lens)
-	{
-		path = std::regex_replace(path, std::wregex(L"\\\\"), L"/");
-		auto PCMData = AudioPreprocess().codec(path, 48000);
-		auto SlicePos = SliceAudio(PCMData, _SlicerSettings);
-		auto Audio = GetAudioSlice(PCMData, SlicePos, _SlicerSettings);
-		Audio.Path = path;
-		PreProcessAudio(Audio);
-		std::vector<int16_t> _data = SliceInference(Audio, _InferParams);
-
-		std::wstring OutFolder = GetCurrentFolder() + L"/Outputs/" + path.substr(path.rfind(L'/') + 1, path.rfind(L'.') - path.rfind(L'/') - 1);
-		OutFolder += L"-Params-(-NoiseScale=" +
-			std::to_wstring(_InferParams.NoiseScale) +
-			L"-Speaker=" +
-			(EnableCharaMix ? std::wstring(L"SpeakerMix") : std::to_wstring(_InferParams.SpeakerId)) +
-			L"-Seed=" +
-			std::to_wstring(_InferParams.Seed) +
-			L"-F0Method=" +
-			_InferParams.F0Method + L")";
-		if (_waccess((OutFolder + L".wav").c_str(), 0) != -1)
-		{
-			for (size_t idx = 0; idx < 99999999; ++idx)
-				if (_waccess((OutFolder + L" (" + std::to_wstring(idx) + L").wav").c_str(), 0) == -1)
-				{
-					OutFolder += L" (" + std::to_wstring(idx) + L").wav";
-					break;
-				}
-		}
-		else
-			OutFolder += L".wav";
-		AudioFolders.emplace_back(OutFolder);
-		InferTools::Wav::WritePCMData(_samplingRate, 1, _data, OutFolder);
-	}
-	return AudioFolders;
-}
-
-std::vector<int16_t> VitsSvc::InferPCMData(const std::vector<int16_t>& PCMData, long srcSr, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const
-{
-	auto hubertin = InferTools::InterpResample<float>(PCMData, srcSr, 16000);
-	int64_t charEmb = _InferParams.SpeakerId;
-	std::mt19937 gen(int(_InferParams.Seed));
-	std::normal_distribution<float> normal(0, 1);
-	float noise_scale = _InferParams.NoiseScale;
-	float ddsp_noise_scale = _InferParams.DDSPNoiseScale;
-
-	const int64_t inputShape[3] = { 1i64,1i64,(int64_t)hubertin.size() };
-	std::vector<Ort::Value> inputTensorshu;
-	inputTensorshu.emplace_back(Ort::Value::CreateTensor(*memory_info, hubertin.data(), hubertin.size(), inputShape, 3));
-	std::vector<Ort::Value> hubertOut;
-
-	try {
-		hubertOut = hubert->Run(Ort::RunOptions{ nullptr },
-			hubertInput.data(),
-			inputTensorshu.data(),
-			inputTensorshu.size(),
-			hubertOutput.data(),
-			hubertOutput.size());
-	}
-	catch (Ort::Exception& e)
-	{
-		LibDLVoiceCodecThrow((std::string("Locate: hubert\n") + e.what()).c_str());
-	}
-	auto HubertSize = hubertOut[0].GetTensorTypeAndShapeInfo().GetElementCount();
-	auto HubertOutPutData = hubertOut[0].GetTensorMutableData<float>();
-	auto HubertOutPutShape = hubertOut[0].GetTensorTypeAndShapeInfo().GetShape();
-	inputTensorshu.clear();
-	if (HubertOutPutShape[2] != HiddenUnitKDims)
-		LibDLVoiceCodecThrow("HiddenUnitKDims UnMatch");
-
-	std::vector srcHiddenUnits(HubertOutPutData, HubertOutPutData + HubertSize);
-
-	if (EnableCluster && _InferParams.ClusterRate > 0.001f)
-	{
-		const auto clus_size = HubertOutPutShape[1];
-		const auto pts = Cluster->find(srcHiddenUnits.data(), long(charEmb), clus_size);
-		for (size_t indexs = 0; indexs < srcHiddenUnits.size(); ++indexs)
-			srcHiddenUnits[indexs] = srcHiddenUnits[indexs] * (1.f - _InferParams.ClusterRate) + pts[indexs] * _InferParams.ClusterRate;
-	}
-
-	const auto HubertLen = int64_t(HubertSize) / HiddenUnitKDims;
-	int64_t F0Shape[] = { 1, int64_t(PCMData.size() / HopSize) };
-	int64_t HiddenUnitShape[] = { 1, HubertLen, HiddenUnitKDims };
-	constexpr int64_t LengthShape[] = { 1 };
-	int64_t CharaEmbShape[] = { 1 };
-	int64_t CharaMixShape[] = { F0Shape[1], SpeakerCount };
-	int64_t RandnShape[] = { 1, 192, F0Shape[1] };
-	const int64_t IstftShape[] = { 1, 2048, F0Shape[1] };
-	int64_t RandnCount = F0Shape[1] * 192;
-	const int64_t IstftCount = F0Shape[1] * 2048;
-
-	std::vector<float> RandnInput, IstftInput, UV, InterpedF0;
-	std::vector<int64_t> alignment;
-	int64_t XLength[1] = { HubertLen };
-	std::vector<int64_t> Nsff0;
-	//auto SoVitsInput = soVitsInput;
-	int64_t Chara[] = { charEmb };
-	std::vector<float> charaMix;
-
-	const auto F0Extractor = MoeVSF0Extractor::GetF0Extractor(_InferParams.F0Method, _samplingRate, HopSize);
-
-	auto srcF0Data = F0Extractor->ExtractF0(PCMData, PCMData.size() / HopSize);
-	for (auto& ifo : srcF0Data)
-		ifo *= (float)pow(2.0, static_cast<double>(_InferParams.Keys) / 12.0);
-	std::vector<float> HiddenUnits;
-	std::vector<float> F0Data;
-
-	std::vector<Ort::Value> _Tensors;
-	std::vector<const char*> SoVitsInput = soVitsInput;
-
-	//Compatible with all versions
-	if (VitsSvcVersion == L"SoVits3.0")
-	{
-		int64_t upSample = _samplingRate / 16000;
-		HiddenUnits.reserve(HubertSize * (upSample + 1));
-		for (int64_t itS = 0; itS < HiddenUnitShape[1]; ++itS)
-			for (int64_t itSS = 0; itSS < upSample; ++itSS)
-				HiddenUnits.insert(HiddenUnits.end(), srcHiddenUnits.begin() + itS * HiddenUnitKDims, srcHiddenUnits.begin() + (itS + 1) * HiddenUnitKDims);
-		HiddenUnitShape[1] *= upSample;
-		HubertSize *= upSample;
-		F0Data = _TensorExtractor->GetInterpedF0(InferTools::InterpFunc(srcF0Data, long(srcF0Data.size()), long(HiddenUnitShape[1])));
-		F0Shape[1] = HiddenUnitShape[1];
-		XLength[0] = HiddenUnitShape[1];
-		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, HiddenUnits.data(), HubertSize, HiddenUnitShape, 3));
-		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, XLength, 1, LengthShape, 1));
-		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, F0Data.data(), F0Data.size(), F0Shape, 2));
-	}
-	else if (VitsSvcVersion == L"SoVits2.0")
-	{
-		HiddenUnits = std::move(srcHiddenUnits);
-		F0Shape[1] = HiddenUnitShape[1];
-		F0Data = InferTools::InterpFunc(srcF0Data, long(srcF0Data.size()), long(HiddenUnitShape[1]));
-		XLength[0] = HiddenUnitShape[1];
-		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, HiddenUnits.data(), HubertSize, HiddenUnitShape, 3));
-		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, XLength, 1, LengthShape, 1));
-		Nsff0 = _TensorExtractor->GetNSFF0(F0Data);
-		_Tensors.emplace_back(Ort::Value::CreateTensor<long long>(*memory_info, Nsff0.data(), Nsff0.size(), F0Shape, 2));
-	}
-	else if (VitsSvcVersion == L"RVC")
-	{
-		constexpr int64_t upSample = 2;
-		HiddenUnits.reserve(HubertSize * (upSample + 1));
-		for (int64_t itS = 0; itS < HiddenUnitShape[1]; ++itS)
-			for (int64_t itSS = 0; itSS < upSample; ++itSS)
-				HiddenUnits.insert(HiddenUnits.end(), srcHiddenUnits.begin() + itS * HiddenUnitKDims, srcHiddenUnits.begin() + (itS + 1) * HiddenUnitKDims);
-		HiddenUnitShape[1] *= upSample;
-		HubertSize *= upSample;
-		F0Data = InferTools::InterpFunc(srcF0Data, long(srcF0Data.size()), long(HiddenUnitShape[1]));
-		F0Shape[1] = HiddenUnitShape[1];
-		XLength[0] = HiddenUnitShape[1];
-		RandnCount = 192 * F0Shape[1];
-		RandnShape[2] = F0Shape[1];
-		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, HiddenUnits.data(), HubertSize, HiddenUnitShape, 3));
-		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, XLength, 1, LengthShape, 1));
-		InterpedF0 = _TensorExtractor->GetInterpedF0(F0Data);
-		Nsff0 = _TensorExtractor->GetNSFF0(InterpedF0);
-		_Tensors.emplace_back(Ort::Value::CreateTensor<long long>(*memory_info, Nsff0.data(), Nsff0.size(), F0Shape, 2));
-		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, InterpedF0.data(), InterpedF0.size(), F0Shape, 2));
-		SoVitsInput = RVCInput;
-		RandnInput = std::vector<float>(RandnCount, 0.f);
-		for (auto& it : RandnInput)
-			it = normal(gen) * noise_scale;
-	}
-	else
-	{
-		HiddenUnits = std::move(srcHiddenUnits);
-		F0Data = InferTools::InterpFunc(srcF0Data, long(srcF0Data.size()), long(F0Shape[1]));
-		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, HiddenUnits.data(), HubertSize, HiddenUnitShape, 3));
-		InterpedF0 = _TensorExtractor->GetInterpedF0(F0Data);
-		alignment = _TensorExtractor->GetAligments(F0Shape[1], HubertLen);
-		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, InterpedF0.data(), InterpedF0.size(), F0Shape, 2));
-		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, alignment.data(), InterpedF0.size(), F0Shape, 2));
-		if (VitsSvcVersion != L"SoVits4.0-DDSP")
-		{
-			UV = _TensorExtractor->GetUV(F0Data);
-			SoVitsInput = { "c", "f0", "mel2ph", "uv", "noise", "sid" };
-			_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, UV.data(), UV.size(), F0Shape, 2));
-		}
-		else
-		{
-			SoVitsInput = { "c", "f0", "mel2ph", "t_window", "noise", "sid" };
-			IstftInput = std::vector<float>(IstftCount, ddsp_noise_scale);
-			_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, IstftInput.data(), IstftInput.size(), IstftShape, 3));
-		}
-		RandnInput = std::vector<float>(RandnCount, 0.f);
-		for (auto& it : RandnInput)
-			it = normal(gen) * noise_scale;
-		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, RandnInput.data(), RandnCount, RandnShape, 3));
-	}
-
-
-	if (EnableCharaMix)
-	{
-		CharaMixShape[0] = F0Shape[1];
-		std::vector charaMap(SpeakerCount, 0.f);
-		charaMap[charEmb] = 1.f;
-		charaMix.reserve((SpeakerCount + 1) * F0Shape[1]);
-		for (int64_t index = 0; index < F0Shape[1]; ++index)
-			charaMix.insert(charaMix.end(), charaMap.begin(), charaMap.end());
-		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, charaMix.data(), charaMix.size(), CharaMixShape, 2));
-	}
-	else
-		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, Chara, 1, CharaEmbShape, 1));
-
-	if (VitsSvcVersion == L"RVC")
-		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, RandnInput.data(), RandnCount, RandnShape, 3));
-
-	std::vector<float> VolumeData;
-
-	if (EnableVolume)
-	{
-		SoVitsInput.emplace_back("vol");
-		VolumeData = ExtractVolume(PCMData, HopSize);
-		VolumeData.resize(F0Shape[1], 0.f);
-		_Tensors.emplace_back(Ort::Value::CreateTensor(*memory_info, VolumeData.data(), F0Shape[1], F0Shape, 2));
-	}
-
-	std::vector<Ort::Value> finaOut;
-
-	finaOut = VitsSvcModel->Run(Ort::RunOptions{ nullptr },
-		SoVitsInput.data(),
-		_Tensors.data(),
-		_Tensors.size(),
-		soVitsOutput.data(),
-		soVitsOutput.size());
-
-	const auto dstWavLen = finaOut[0].GetTensorTypeAndShapeInfo().GetShape()[2];
-	std::vector<int16_t> TempVecWav(dstWavLen, 0);
-	for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
-		TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
-	return TempVecWav;
-}
-
-/*std::vector<Ort::Value> VitsSvc::MelExtractor(const float* PCMAudioBegin, const float* PCMAudioEnd) const
-{
-	std::vector<float> _SRAudio{PCMAudioBegin, PCMAudioEnd};
-	_SRAudio = InferTools::InterpResample(_SRAudio, _samplingRate, 16000, 1.f);
-	const auto _MelLength = int64_t(_SRAudio.size() * shallow_diffusion->GetSamplingRate() / 16000ull / shallow_diffusion->GetHopSize());
-	const auto _SpecLength = (int64_t)ceil(double(_SRAudio.size()) / 16000. * 100.);
-	auto Alignment = _TensorExtractor->GetAligments(_MelLength, _SpecLength);
-	Alignment.resize(_MelLength);
-	std::vector<Ort::Value> AudioTensors;
-	const int64_t AudioInputShape[] = { 1,1,int64_t(_SRAudio.size()) };
-	const int64_t AligShape[] = { 1,_MelLength };
-	AudioTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, _SRAudio.data(), _SRAudio.size(), AudioInputShape, 3));
-	AudioTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, Alignment.data(), Alignment.size(), AligShape, 2));
-	try
-	{
-		return stft_operator->Run(Ort::RunOptions{ nullptr },
-			StftInput.data(),
-			AudioTensors.data(),
-			AudioTensors.size(),
-			StftOutput.data(),
-			StftOutput.size()
-		);
-	}
-	catch (Ort::Exception& e)
-	{
-		LibDLVoiceCodecThrow((std::string("Locate: ShallowDiffusionStftOperator\n") + e.what()).c_str());
-	}
-}*/
 
 #ifdef WIN32
 #ifdef MoeVSMui

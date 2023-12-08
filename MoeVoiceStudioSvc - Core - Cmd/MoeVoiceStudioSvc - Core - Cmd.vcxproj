@@ -71,10 +71,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)Lib\World\src\world;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\build\native\include;$(SolutionDir)Lib\MJson;$(SolutionDir)Lib\ffmpeg-4.2.1\include;$(SolutionDir)Lib\openblas\include;$(SolutionDir)Lib\faiss;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Lib\World\src\world;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\build\native\include;$(SolutionDir)Lib\MJson;$(SolutionDir)Lib\ffmpeg-4.2.1\include;$(SolutionDir)Lib\openblas\include;$(SolutionDir)Lib\faiss;$(SolutionDir)Lib\stft;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)Lib\ffmpeg-4.2.1\include;$(SolutionDir)Lib\MJson;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\build\native\include;$(SolutionDir)Lib\World\src\world;$(SolutionDir)Lib\openblas\include;$(SolutionDir)Lib\faiss;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)Lib\ffmpeg-4.2.1\include;$(SolutionDir)Lib\MJson;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\build\native\include;$(SolutionDir)Lib\World\src\world;$(SolutionDir)Lib\openblas\include;$(SolutionDir)Lib\faiss;$(SolutionDir)Lib\stft;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -117,8 +117,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Lib\ffmpeg-4.2.1\Lib;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\runtimes\win-x64\native;$(SolutionDir)Lib\openblas\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;onnxruntime.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Lib\ffmpeg-4.2.1\Lib;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\runtimes\win-x64\native;$(SolutionDir)Lib\openblas\lib;$(SolutionDir)Lib\stft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;onnxruntime.lib;fftw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -138,8 +138,8 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Lib\ffmpeg-4.2.1\Lib;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\runtimes\win-x64\native;$(SolutionDir)Lib\openblas\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;onnxruntime.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Lib\ffmpeg-4.2.1\Lib;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\runtimes\win-x64\native;$(SolutionDir)Lib\openblas\lib;$(SolutionDir)Lib\stft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;onnxruntime.lib;fftw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -175,6 +175,7 @@
     <ClCompile Include="Modules\InferTools\Sampler\MoeVSBaseSampler.cpp" />
     <ClCompile Include="Modules\InferTools\Sampler\MoeVSSamplerManager.cpp" />
     <ClCompile Include="Modules\InferTools\Sampler\MoeVSSamplers.cpp" />
+    <ClCompile Include="Modules\InferTools\Stft\stft.cpp" />
     <ClCompile Include="Modules\InferTools\TensorExtractor\MoeVoiceStudioTensorExtractor.cpp" />
     <ClCompile Include="Modules\InferTools\TensorExtractor\MoeVSCoreTensorExtractor.cpp" />
     <ClCompile Include="Modules\InferTools\TensorExtractor\TensorExtractorManager.cpp" />
@@ -227,6 +228,7 @@
     <ClInclude Include="Modules\InferTools\Sampler\MoeVSBaseSampler.hpp" />
     <ClInclude Include="Modules\InferTools\Sampler\MoeVSSamplerManager.hpp" />
     <ClInclude Include="Modules\InferTools\Sampler\MoeVSSamplers.hpp" />
+    <ClInclude Include="Modules\InferTools\Stft\stft.hpp" />
     <ClInclude Include="Modules\InferTools\TensorExtractor\MoeVoiceStudioTensorExtractor.hpp" />
     <ClInclude Include="Modules\InferTools\TensorExtractor\MoeVSCoreTensorExtractor.hpp" />
     <ClInclude Include="Modules\InferTools\TensorExtractor\TensorExtractorManager.hpp" />

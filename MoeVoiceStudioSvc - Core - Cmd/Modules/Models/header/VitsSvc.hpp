@@ -32,6 +32,15 @@
 
 MoeVoiceStudioCoreHeader
 
+struct ShallowDiffusionData
+{
+    std::vector<float> _16KAudio, CUDAF0, CUDAVolume;
+    std::vector<std::vector<float>> CUDASpeaker;
+    bool NeedPadding = false;
+};
+
+ShallowDiffusionData& GetDataForShallowDiffusion();
+
 class VitsSvc : public SingingVoiceConversion
 {
 public:
@@ -55,8 +64,10 @@ public:
 
     void Destory();
 
-    [[nodiscard]] std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVSAudioSlice& _Slice,
+    [[nodiscard]] std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcData& _Slice,
         const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const override;
+
+    [[nodiscard]] std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcSlice& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, size_t& _Process) const override;
 
 	[[nodiscard]] std::vector<std::wstring> Inference(std::wstring& _Paths, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams,
         const InferTools::SlicerSettings& _SlicerSettings) const override;
@@ -67,7 +78,7 @@ public:
 
     [[nodiscard]] std::vector<int16_t> InferPCMData(const std::vector<int16_t>& PCMData, long srcSr, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const override;
 
-    [[nodiscard]] std::vector<Ort::Value> MelExtractor(const float* PCMAudioBegin, const float* PCMAudioEnd) const;
+    [[nodiscard]] std::vector<Ort::Value> MelExtractor(const float* PCMAudioBegin, const float* PCMAudioEnd) const = delete;
 
 #ifdef WIN32
 #ifdef MoeVSMui
@@ -84,7 +95,7 @@ private:
     const std::vector<const char*> RVCInput = { "phone", "phone_lengths", "pitch", "pitchf", "ds", "rnd" };
     const std::vector<const char*> StftOutput = { "mel" };
     const std::vector<const char*> StftInput = { "waveform", "aligment"};
-    
+
 #ifdef WIN32
 #ifdef MoeVSMui
     bool RTSTAT = false;

@@ -115,6 +115,12 @@
     <Filter Include="头文件\Modules\Models\SVC">
       <UniqueIdentifier>{e1a1babf-b512-4926-9870-160cf546636a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\Modules\InferTools\Stft">
+      <UniqueIdentifier>{d0408cd7-c27d-4858-9702-0e1227fc9c97}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Modules\InferTools\Stft">
+      <UniqueIdentifier>{5085f9bd-9b2e-4ffd-8c97-084b73762ffa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MoeVoiceStudioSvc - Core - Cmd.cpp">
@@ -254,6 +260,9 @@
     </ClCompile>
     <ClCompile Include="Modules\Models\src\Vits.cpp">
       <Filter>源文件\Modules\Models\TTS</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\InferTools\Stft\stft.cpp">
+      <Filter>源文件\Modules\InferTools\Stft</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -409,6 +418,9 @@
     </ClInclude>
     <ClInclude Include="Modules\StringPreprocess.hpp">
       <Filter>头文件\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\InferTools\Stft\stft.hpp">
+      <Filter>头文件\Modules\InferTools\Stft</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

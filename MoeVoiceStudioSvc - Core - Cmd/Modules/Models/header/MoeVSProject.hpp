@@ -255,15 +255,13 @@ namespace MoeVSProjectSpace
 
             size_type PathSize = 0;
 
-            size_type NSpeaker = 0;
-
             size_type HeaderSize = sizeof(DataHeader) - sizeof(size_type);
         };
         struct Data
         {
             DataHeader Header;
             ParamsOffset Offset;
-            MoeVSAudioSlice ParamData;
+            MoeVoiceStudioSvcData ParamData;
             [[nodiscard]] size_type Size() const
             {
                 size_type size = sizeof(DataHeader);
@@ -280,15 +278,15 @@ namespace MoeVSProjectSpace
         MoeVSProject(const std::wstring& _path);
 
         //从音频数据构造项目
-        MoeVSProject(const std::vector<MoeVSAudioSlice>& _params);
+        MoeVSProject(const std::vector<MoeVoiceStudioSvcData>& _params);
 
         //写入文件
         void Write(const std::wstring& _path) const;
 
         //从项目获取音频数据
-        [[nodiscard]] std::vector<MoeVSAudioSlice> GetParams() const
+        [[nodiscard]] std::vector<MoeVoiceStudioSvcData> GetParams() const
         {
-            std::vector<MoeVSAudioSlice> Params_data;
+            std::vector<MoeVoiceStudioSvcData> Params_data;
             Params_data.reserve(data_.size());
             for (const auto& i : data_)
                 Params_data.emplace_back(i.ParamData);
@@ -296,9 +294,9 @@ namespace MoeVSProjectSpace
         }
 
         //从项目获取音频数据（移动构造）
-        [[nodiscard]] std::vector<MoeVSAudioSlice> GetParamsMove()
+        [[nodiscard]] std::vector<MoeVoiceStudioSvcData> GetParamsMove()
         {
-            std::vector<MoeVSAudioSlice> Params_data;
+            std::vector<MoeVoiceStudioSvcData> Params_data;
             Params_data.reserve(data_.size());
             for (auto& i : data_)
                 Params_data.emplace_back(std::move(i.ParamData));
