@@ -1,4 +1,5 @@
 #pragma once
+#include <cassert>
 #include <vector>
 #include "base.h"
 
@@ -30,7 +31,6 @@ public:
 	Value& save(const std::wstring& _Path);
 	virtual void loadData(WeightDict& _Dict);
 	virtual void saveData(FileWrapper& _File);
-	
 };
 
 class Module : public Value
@@ -65,15 +65,11 @@ public:
 
 protected:
 	std::vector<int64_t> Shape_;
-	bool TensorLayer_ = false;
+	std::vector<uint64_t> Step_;
+	std::vector<int64_t> Transopse_;
+	size_t DTypeAligBytes_ = 4;
 	std::string Type_ = "float32";
-
-public:
-	void loadData(WeightDict& _Dict) override;
-	void saveData(FileWrapper& _File) override;
-
-protected:
-	MResource<byte> Data_;
+	bool MemOwner_ = false;
 
 public:
 	LIBDVCND const std::string& dtype() const { return Type_; }
@@ -90,34 +86,23 @@ public:
 		return ttsize;
 	}
 	LIBDVCND size_t buf_size() const {
-		return total_size() * __Dtype.at(Type_);
+		return total_size() * DTypeAligBytes_;
 	}
 	LIBDVCND size_t step() const {
-		if (Shape_.empty()) return 0;
-		return total_size() / Shape_[0];
+		if (Step_.empty()) return 0;
+		return Step_[0];
 	}
 	LIBDVCND byte* data() const { return DataPtr_; }
 	template<typename _ValueType>
 	LIBDVCND _ValueType& item()
 	{
-		assert(sizeof(_ValueType) == __Dtype.at(Type_));
-		return *(_ValueType*)(DataPtr_);
-	}
-	template<typename _ValueType>
-	LIBDVCND _ValueType* begin()
-	{
-		assert(sizeof(_ValueType) == __Dtype.at(Type_));
-		return (_ValueType*)(DataPtr_);
-	}
-	template<typename _ValueType>
-	LIBDVCND _ValueType* end()
-	{
-		assert(sizeof(_ValueType) == __Dtype.at(Type_));
-		return (_ValueType*)(DataPtr_)+total_size();
+		assert(sizeof(_ValueType) == DTypeAligBytes_);
+		return *(_ValueType*)(ThisPtr_);
 	}
 
 protected:
 	byte* DataPtr_ = nullptr;
+	byte* ThisPtr_ = nullptr;
 
 public:
 	LIBDVCND TensorView operator[](int64_t index) const;
@@ -130,22 +115,110 @@ class Tensor : public TensorData
 public:
 	using DType = float;
 	Tensor() = default;
-	Tensor(const std::initializer_list<int64_t>& _Shape, const std::string& _Dtype = "float32", const std::string& _Name = "Tensor", bool _TensorLayer = false);
-	Tensor(const std::vector<int64_t>& _Shape, const std::string& _Dtype = "float32", const std::string& _Name = "Tensor", bool _TensorLayer = false);
+	Tensor(const std::initializer_list<int64_t>& _Shape, const std::string& _Dtype = "float32", const std::string& _Name = "Tensor");
+	Tensor(const std::vector<int64_t>& _Shape, const std::string& _Dtype = "float32", const std::string& _Name = "Tensor");
 	Tensor(const Tensor& _Left);
 	Tensor(Tensor&& _Right) noexcept;
 	~Tensor() override = default;
 	Tensor& operator=(const Tensor& _Left);
 	Tensor& operator=(Tensor&& _Right) noexcept;
 
-	static Tensor zeros(const std::initializer_list<int64_t>& _Shape, const std::string& _Dtype = "float32", const std::string& _Name = "Tensor", bool _TensorLayer = false);
-	static Tensor zeros_like(const Tensor& _O, bool _TensorLayer = false);
-	static Tensor ones(const std::initializer_list<int64_t>& _Shape, const std::string& _Dtype = "float32", const std::string& _Name = "Tensor", bool _TensorLayer = false);
-	static Tensor ones_like(const Tensor& _O, bool _TensorLayer = false);
-	static Tensor rand(const std::initializer_list<int64_t>& _Shape, int _Seed = 114514, const std::string& _Dtype = "float32", const std::string& _Name = "Tensor", bool _TensorLayer = false);
-	static Tensor rand_like(const Tensor& _O, int _Seed = 114514, bool _TensorLayer = false);
-	static Tensor randn(const std::initializer_list<int64_t>& _Shape, int _Seed = 114514, const std::string& _Dtype = "float32", const std::string& _Name = "Tensor", bool _TensorLayer = false);
-	static Tensor randn_like(const Tensor& _O, int _Seed = 114514, bool _TensorLayer = false);
+protected:
+	MResource<byte> Data_;
+
+private:
+	template<typename _ValueType>
+	LIBDVCND _ValueType* buf_begin()
+	{
+		assert(sizeof(_ValueType) == DTypeAligBytes_);
+		return (_ValueType*)(Data_.begin()._Ptr);
+	}
+	template<typename _ValueType>
+	LIBDVCND _ValueType* buf_end()
+	{
+		assert(sizeof(_ValueType) == DTypeAligBytes_);
+		return (_ValueType*)(Data_.end()._Ptr);
+	}
+
+public:
+	static Tensor zeros(const std::vector<int64_t>& _Shape, const std::string& _Dtype = "float32", const std::string& _Name = "Tensor");
+	static Tensor zeros_like(const Tensor& _O);
+	static Tensor ones(const std::vector<int64_t>& _Shape, const std::string& _Dtype = "float32", const std::string& _Name = "Tensor");
+	static Tensor ones_like(const Tensor& _O);
+	static Tensor rand(const std::vector<int64_t>& _Shape, int _Seed = 114514, const std::string& _Dtype = "float32", const std::string& _Name = "Tensor");
+	static Tensor rand_like(const Tensor& _O, int _Seed = 114514);
+	static Tensor randn(const std::vector<int64_t>& _Shape, int _Seed = 114514, const std::string& _Dtype = "float32", const std::string& _Name = "Tensor");
+	static Tensor randn_like(const Tensor& _O, int _Seed = 114514);
+	template <typename __TY>
+	static Tensor arange(__TY _Begin, __TY _End, __TY _Step, const std::string& _Dtype = "float32", const std::string& _Name = "Tensor")
+	{
+		if (__Dtype.find(_Dtype) == __Dtype.end())
+			LibDLVoiceCodecThrow("DType Not Recognized");
+		if (sizeof(__TY) != __Dtype.at(_Dtype))
+			LibDLVoiceCodecThrow("Size Of DType MisMatch");
+		Tensor ret;
+		ret.Type_ = _Dtype;
+		ret.RegName_ = _Name;
+		ret.DTypeAligBytes_ = __Dtype.at(ret.Type_);
+		ret.MemOwner_ = true;
+		const auto diff = _End - _Begin;
+		const auto len = size_t(diff / _Step);
+		if (len <= 0)
+			LibDLVoiceCodecThrow("The Positive And Negative Of Both _End - _Begin And _Step Must Be The Same");
+
+		ret.Shape_ = { len };
+		ret.Data_ = MResource<byte>(len * ret.DTypeAligBytes_);
+		ret.Step_ = { ret.DTypeAligBytes_ };
+		ret.Transopse_ = { 0 };
+		ret.DataPtr_ = ret.Data_.data();
+		ret.ThisPtr_ = ret.Data_.data();
+
+		__TY* pdata = ret.DataPtr_;
+		*(pdata++) = _Begin;
+		for (size_t i = 1; i < len; ++i)
+		{
+			*pdata = *(pdata - 1) + _Step;
+			++pdata;
+		}
+
+		return ret;
+	}
+	template <typename __TY>
+	static Tensor linspace(__TY _Begin, __TY _End, size_t _Len, const std::string& _Dtype = "float32", const std::string& _Name = "Tensor")
+	{
+		if (__Dtype.find(_Dtype) == __Dtype.end())
+			LibDLVoiceCodecThrow("DType Not Recognized");
+		if (sizeof(__TY) != __Dtype.at(_Dtype))
+			LibDLVoiceCodecThrow("Size Of DType MisMatch");
+		Tensor ret;
+		ret.Type_ = _Dtype;
+		ret.RegName_ = _Name;
+		ret.DTypeAligBytes_ = __Dtype.at(ret.Type_);
+		ret.MemOwner_ = true;
+		const auto diff = _End - _Begin;
+		const auto step = size_t(diff / __TY(_Len));
+
+		ret.Shape_ = { _Len };
+		ret.Data_ = MResource<byte>(_Len * ret.DTypeAligBytes_);
+		ret.Step_ = { ret.DTypeAligBytes_ };
+		ret.Transopse_ = { 0 };
+		ret.DataPtr_ = ret.Data_.data();
+		ret.ThisPtr_ = ret.Data_.data();
+
+		__TY* pdata = ret.DataPtr_;
+		*(pdata++) = _Begin;
+		for (size_t i = 1; i < _Len; ++i)
+		{
+			*pdata = *(pdata - 1) + step;
+			++pdata;
+		}
+
+		return ret;
+	}
+
+protected:
+	void loadData(WeightDict& _Dict) override;
+	void saveData(FileWrapper& _File) override;
 };
 
 class TensorView : public TensorData

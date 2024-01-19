@@ -1,12 +1,11 @@
 ﻿#include <regex>
+#include "Modules/StringPreprocess.hpp"
 #ifndef MOEVSONNX
 #include <deque>
 #include <mutex>
 #include <iostream>
-#include "Modules/Modules.hpp"
-#include "Modules/AvCodec/AvCodeResample.h"
-#include "Modules/InferTools/Stft/stft.hpp"
 #include <windows.h>
+#include "LibDLVoiceCodec/value.h"
 #pragma comment(lib, "winmm.lib") 
 
 #ifdef _IOSTREAM_
@@ -41,8 +40,11 @@ std::vector<T>& operator-=(std::vector<T>& left, const std::vector<T>& right)
 
 int main()
 {
+	libdlvcodec::Tensor a({1,2,3});
+}
+#endif
 
-	MoeVSModuleManager::MoeVoiceStudioCoreInitSetup();
+/*MoeVSModuleManager::MoeVoiceStudioCoreInitSetup();
 
 	DlCodecStft::Mel(2048, 512, 32000, 128)(InferTools::arange(0, 1, 0.00001));
 
@@ -112,7 +114,4 @@ int main()
 		std::cout << e.what();
 	}
 
-	return 0;
-}
-#endif
-
+	return 0;*/
