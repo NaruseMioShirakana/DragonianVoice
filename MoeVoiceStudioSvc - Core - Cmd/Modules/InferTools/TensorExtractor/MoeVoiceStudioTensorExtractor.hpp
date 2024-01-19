@@ -127,6 +127,9 @@ public:
 	//将F0中0值单独插值
 	static std::vector<float> GetInterpedF0(const std::vector<float>&);
 
+	//
+	static std::vector<float> InterpUVF0(const std::vector<float>&);
+
 	//获取UnVoiceMask
 	static std::vector<float> GetUV(const std::vector<float>&);
 

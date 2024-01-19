@@ -170,6 +170,39 @@ std::vector<float> MoeVoiceStudioTensorExtractor::GetInterpedF0(const std::vecto
 	return Of0;
 }
 
+std::vector<float> MoeVoiceStudioTensorExtractor::InterpUVF0(const std::vector<float>& F0)
+{
+	std::vector<double> NUVF0;
+	std::vector<double> UVF0Indices, NUVF0Indices;
+	UVF0Indices.reserve(F0.size());
+	NUVF0.reserve(F0.size());
+	NUVF0Indices.reserve(F0.size());
+	if(F0[0] < 0.0001f)
+	{
+		NUVF0.emplace_back(0);
+		NUVF0Indices.emplace_back(0);
+	}
+	for (size_t i = 1; i < F0.size(); ++i)
+	{
+		if (F0[i] < 0.0001f)
+			UVF0Indices.emplace_back((double)i);
+		else
+		{
+			NUVF0.emplace_back((double)F0[i]);
+			NUVF0Indices.emplace_back((double)i);
+		}
+	}
+	if (UVF0Indices.empty() || NUVF0Indices.empty())
+		return F0;
+	std::vector<double> UVF0(F0.size());
+	std::vector<float> Of0 = F0;
+	interp1(NUVF0Indices.data(), NUVF0.data(), (int)NUVF0.size(),
+		UVF0Indices.data(), (int)UVF0Indices.size(), UVF0.data());
+	for (size_t i = 0; i < UVF0Indices.size(); ++i)
+		Of0[size_t(UVF0Indices[i])] = (float)UVF0[i];
+	return Of0;
+}
+
 std::vector<float> MoeVoiceStudioTensorExtractor::GetUV(const std::vector<float>& F0)
 {
 	const auto specLen = F0.size();

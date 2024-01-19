@@ -511,7 +511,7 @@ MoeVoiceStudioTensorExtractor::Inputs DiffusionSvcTensorExtractor::Extract(const
 	SvcTensors.Data.SpkShape = { SvcTensors.Data.FrameShape[1], int64_t(_NSpeaker) };
 
 	SvcTensors.Data.HiddenUnit = HiddenUnit;
-	SvcTensors.Data.F0 = GetInterpedF0(InferTools::InterpFunc(F0, long(F0.size()), long(SvcTensors.Data.FrameShape[1])));
+	SvcTensors.Data.F0 = InterpUVF0(InferTools::InterpFunc(F0, long(F0.size()), long(SvcTensors.Data.FrameShape[1])));
 	for (auto& it : SvcTensors.Data.F0)
 		it *= (float)pow(2.0, static_cast<double>(params.upKeys) / 12.0);
 	SvcTensors.Data.Alignment = GetAligments(SvcTensors.Data.FrameShape[1], HubertLen);
