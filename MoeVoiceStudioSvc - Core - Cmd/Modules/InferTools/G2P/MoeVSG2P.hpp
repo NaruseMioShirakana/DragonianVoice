@@ -228,7 +228,7 @@ public:
 	}
 	[[nodiscard]] std::vector<std::wstring> WordPieceMethod(const std::wstring& Seq, size_t MaxWordLength = 25, TokenizerMethod Method = TokenizerMethod::Left) const;
 	[[nodiscard]] std::vector<std::wstring> UnigramMethod(const std::wstring& Seq, size_t MaxWordLength = 25, TokenizerMethod Method = TokenizerMethod::Left) const;
-	std::vector<TokenizerType> operator()(const std::vector<std::wstring>& Seq) const;
+	std::vector<TokenizerType> operator()(const std::vector<std::wstring>& Seq, bool SkipBlank = false) const;
 	[[nodiscard]] std::vector<std::wstring> Tokenize(const std::wstring& Seq, size_t MaxWordLength = 25, TokenizerMethod Method = TokenizerMethod::Left) const;
 	[[nodiscard]] std::vector<std::wstring> SplitWithPlugin(const std::vector<std::wstring>& _Inputs) const;
 	static std::vector<std::wstring> SplitString(const std::wstring& _InputRef, const std::wregex& _SignRegex);

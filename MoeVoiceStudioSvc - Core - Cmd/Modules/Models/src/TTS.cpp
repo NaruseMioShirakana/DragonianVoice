@@ -2,10 +2,25 @@
 #include <set>
 
 MoeVoiceStudioCoreHeader
-	std::unordered_map<std::wstring, int64_t> _ACCMAP{
+std::unordered_map<std::wstring, int64_t> _ACCMAP{
 	{ L"[acc_6]", 6 }, { L"[acc_5]", 5 }, { L"[acc_4]", 4 }, { L"[acc_3]", 3 }, { L"[acc_2]", 2 }, { L"[acc_1]", 1 },
 	{ L"[acc_-4]", -4 }, { L"[acc_-3]", -3 }, { L"[acc_-2]", -2 }, { L"[acc_-1]", -1 },
 };
+
+std::unordered_map<std::string, std::string> _LANGREPMAP{
+	{"CHINESE", "ZH"}, { "CHINA", "ZH" },
+	{ "JAPAN", "JP" }, { "JAPANESE", "JP" }, { "JA", "JP" },
+	{ "ENGLISH", "EN" }
+};
+
+void PreventNoobsInputErrors(std::string& _Src)
+{
+	for (auto& i : _Src)
+		i = char(toupper(i));
+	const auto res = _LANGREPMAP.find(_Src);
+	if (res != _LANGREPMAP.end())
+		_Src = res->second;
+}
 
 TextToSpeech::TextToSpeech(const ExecutionProviders& ExecutionProvider_, unsigned DeviceID_, unsigned ThreadCount_) : MoeVoiceStudioModule(ExecutionProvider_, DeviceID_, ThreadCount_)
 {
@@ -18,46 +33,61 @@ std::vector<MoeVSProjectSpace::MoeVSTTSSeq> TextToSpeech::GetInputSeqs(const MJs
 	return SpecializeInputSeqs(InputSeq);
 }
 
+std::tuple<std::vector<std::wstring>, std::vector<int64_t>> TextToSpeech::SplitTonesFromTokens(const std::vector<std::wstring>& _Src, const std::vector<int64_t>& _ToneRef, int64_t FirstToneIdx, const std::string& LanguageSymbol)
+{
+	if (_Src.empty())
+		return{ {},{} };
+	std::vector<std::wstring> TempSeqVec;
+	std::vector<int64_t> TempToneVec;
+	TempSeqVec.reserve(_Src.size());
+	TempToneVec.reserve(_Src.size());
+	for (const auto& it : _Src)
+	{
+		if (_ACCMAP.find(it) == _ACCMAP.end())
+		{
+			TempSeqVec.emplace_back(it);
+			TempToneVec.emplace_back(0);
+		}
+		else
+		{
+			if (TempToneVec.empty())
+				continue;
+			*(TempToneVec.end() - 1) = _ACCMAP.at(it);
+			if (TempToneVec.size() > 1 && *(TempToneVec.end() - 2) == 0 && LanguageSymbol == "ZH")
+				*(TempToneVec.end() - 2) = *(TempToneVec.end() - 1);
+		}
+	}
+	if (TempToneVec.size() == _ToneRef.size())
+	{
+		for (size_t i = 0; i < _ToneRef.size(); ++i)
+			if (_ToneRef[i] != 0)
+				TempToneVec[i] = _ToneRef[i];
+	}
+
+	if (FirstToneIdx)
+		for (auto& it : TempToneVec)
+			it += FirstToneIdx;
+
+	return { std::move(TempSeqVec) ,std::move(TempToneVec) };
+}
+
 std::vector<MoeVSProjectSpace::MoeVSTTSSeq>& TextToSpeech::SpecializeInputSeqs(std::vector<MoeVSProjectSpace::MoeVSTTSSeq>& _Seq) const
 {
 	for (auto& _Temp : _Seq)
 	{
+		PreventNoobsInputErrors(_Temp.LanguageSymbol);
+
 		const int64_t FirstToneIdx = LanguageTones.at(_Temp.LanguageSymbol);
 
 		for(auto& _iter : _Temp.SlicedTokens)
 		{
 			if (!_iter.Phonemes.empty())
 			{
-				std::vector<std::wstring> TempSeqVec;
-				TempSeqVec.reserve(_iter.Phonemes.size());
-				std::vector<int64_t> TempToneVec;
-				TempToneVec.reserve(_iter.Phonemes.size());
-
-				for (const auto& it : _iter.Phonemes)
-				{
-					if (_ACCMAP.find(it) == _ACCMAP.end())
-					{
-						TempSeqVec.emplace_back(it);
-						TempToneVec.emplace_back(0);
-					}
-					else
-					{
-						if (TempToneVec.empty())
-							continue;
-						*(TempToneVec.end() - 1) = _ACCMAP.at(it);
-						if (TempToneVec.size() > 1 && *(TempToneVec.end() - 2) == 0)
-							*(TempToneVec.end() - 2) = *(TempToneVec.end() - 1);
-					}
-				}
-				if (TempToneVec.size() != _iter.Tones.size())
-					TempToneVec.resize(_iter.Tones.size(), 0);
-				_iter.Phonemes = TempSeqVec;
-				for (size_t i = 0; i < _iter.Tones.size(); ++i)
-					if (_iter.Tones[i] == 0)
-						_iter.Tones[i] = TempToneVec[i];
+				auto RtnData = SplitTonesFromTokens(_iter.Phonemes, _iter.Tones, FirstToneIdx, _Temp.LanguageSymbol);
+				_iter.Phonemes = std::move(std::get<0>(RtnData));
+				_iter.Tones = std::move(std::get<1>(RtnData));
 			}
-
-			if (FirstToneIdx)
+			else if (FirstToneIdx)
 				for (auto& it : _iter.Tones)
 					it += FirstToneIdx;
 		}

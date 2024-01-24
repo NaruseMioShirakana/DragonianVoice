@@ -3,13 +3,23 @@
 #include <random>
 
 MoeVoiceStudioCoreHeader
-
 bool BertEnabled = false;
 std::unordered_map<std::wstring ,Ort::Session*> sessionBert;
+std::unordered_map<std::wstring, Ort::Session*> sessionClap;
 
 void SetBertEnabled(bool cond)
 {
 	BertEnabled = cond;
+}
+
+void DestoryAllBerts()
+{
+	for (const auto& it : sessionBert)
+		delete it.second;
+	for (const auto& it : sessionClap)
+		delete it.second;
+	sessionBert.clear();
+	sessionClap.clear();
 }
 
 Vits::~Vits()
@@ -45,6 +55,13 @@ Vits::Vits(const MJson& _Config, const ProgressCallback& _ProgressCallback,
 			_PathDict["EmotionalPath"] = GetCurrentFolder() + L"/emotion/" + emoStringload + L".npy";
 			_PathDict["EmotionalDictPath"] = GetCurrentFolder() + L"/emotion/" + emoStringload + L".json";
 		}
+	}
+
+	if(_Config.HasMember("Clap") && _Config["Clap"].IsString())
+	{
+		const auto ClapStringload = to_wide_string(_Config["Clap"].GetString());
+		if (!ClapStringload.empty())
+			_PathDict["Clap"] = GetCurrentFolder() + L"/clap/" + ClapStringload;
 	}
 
 	_PathDict["Decoder"] = _path + L"_dec.onnx";
@@ -180,7 +197,7 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 		{
 			const auto EmotionPath = _PathDict.at("EmotionalDictPath");
 			if (!EmotionPath.empty())
-				EmoJson = { to_byte_string(EmotionPath).c_str() };
+				EmoJson = { EmotionPath };
 		}
 	}
 	catch (std::exception& e)
@@ -237,34 +254,47 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 		for(const auto& Path : _BertPaths)
 		{
 			const auto BertName = Path.substr(Path.rfind(L'/') + 1);
-			if(sessionBert.find(BertName) != sessionBert.end() && sessionBert.at(BertName) != nullptr)
-				continue;
+			if (LanguageTokenizerMap.find("ZH") == LanguageTokenizerMap.end() && BertName.find(L"chinese") != std::string::npos)
+				LanguageTokenizerMap["ZH"] = BertName;
+			if (LanguageTokenizerMap.find("JP") == LanguageTokenizerMap.end() && BertName.find(L"japanese") != std::string::npos)
+				LanguageTokenizerMap["JP"] = BertName;
 			Ort::Session* SessionBert = nullptr;
+			if (sessionBert.find(BertName) != sessionBert.end() && sessionBert.at(BertName) != nullptr)
+				SessionBert = sessionBert.at(BertName);
 			if (_waccess(Path.c_str(), 0) != -1)
 			{
-				try
+				if(!SessionBert)
 				{
-					SessionBert = new Ort::Session(*env, (Path + L"/model.onnx").c_str(), *session_options);
-				}
-				catch(Ort::Exception& e)
-				{
-					logger.log(L"[Warn] " + to_wide_string(e.what()));
-					delete SessionBert;
-					SessionBert = nullptr;
+					try
+					{
+						SessionBert = new Ort::Session(*env, (Path + L"/model.onnx").c_str(), *session_options);
+					}
+					catch(Ort::Exception& e)
+					{
+						logger.log(L"[Warn] " + to_wide_string(e.what()));
+						delete SessionBert;
+						SessionBert = nullptr;
+					}
 				}
 				if (_waccess((Path + L"/Tokenizer.json").c_str(), 0) != -1)
 				{
-					Tokenizers.emplace_back(Path + L"/Tokenizer.json");
-					Tokenizers.back().BondCleaner(Cleaner);
+					Tokenizers.insert({ BertName ,Path + L"/Tokenizer.json" });
+					Tokenizers[BertName].BondCleaner(Cleaner);
 				}
 				else if (SessionBert)
+				{
+					delete SessionBert;
 					LibDLVoiceCodecThrow("Bert Must Have a Tokenizer")
+				}
 			}
 			sessionBert[BertName] = SessionBert;
 		}
-		for (const auto& iter : sessionBert)
+		for (auto& iter : sessionBert)
 			if (std::find(BertNamesIdx.begin(), BertNamesIdx.end(), iter.first) == BertNamesIdx.end())
+			{
 				delete iter.second;
+				iter.second = nullptr;
+			}
 	}
 
 	if(_BertPaths.empty())
@@ -272,6 +302,54 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 		for (const auto& iter : sessionBert)
 			delete iter.second;
 		sessionBert.clear();
+	}
+
+	if (VitsType == "BertVits" && _PathDict.find("Clap") != _PathDict.end())
+	{
+		EncoderInputNames.emplace_back("emo");
+		UseClap = true;
+		const auto& Path = _PathDict.at("Clap");
+		ClapName = Path.substr(Path.rfind(L'/') + 1);
+		Ort::Session* SessionClap = nullptr;
+		if ((sessionClap.find(ClapName) != sessionClap.end() && sessionClap.at(ClapName) != nullptr))
+			SessionClap = sessionClap.at(ClapName);
+		if (!SessionClap)
+		{
+			try
+			{
+				SessionClap = new Ort::Session(*env, (Path + L".onnx").c_str(), *session_options);
+			}
+			catch (Ort::Exception& e)
+			{
+				logger.log(L"[Warn] " + to_wide_string(e.what()));
+				delete SessionClap;
+				SessionClap = nullptr;
+			}
+		}
+		if (_waccess((Path + L".json").c_str(), 0) != -1)
+		{
+			Tokenizers.insert({ ClapName , Path + L".json" });
+			Tokenizers[ClapName].BondCleaner(Cleaner);
+		}
+		else if (SessionClap)
+		{
+			delete SessionClap;
+			LibDLVoiceCodecThrow("Clap Must Have a Tokenizer")
+		}
+		sessionClap[ClapName] = SessionClap;
+		for (auto& iter : sessionClap)
+			if (ClapName != iter.first)
+			{
+				delete iter.second;
+				iter.second = nullptr;
+			}
+	}
+	else
+	{
+		for (auto& iter : sessionClap)
+			delete iter.second;
+		sessionClap.clear();
+		UseClap = false;
 	}
 
 	_callback = _ProgressCallback;
@@ -323,7 +401,7 @@ void Vits::load(const std::map<std::string, std::wstring>& _PathDict,
 		DecInputNames.emplace_back("g");
 	}
 
-	if(sessionEnc_p->GetInputCount() == EncoderInputNames.size() + 2)
+	if(VitsType == "BertVits" && sessionEnc_p->GetInputCount() == EncoderInputNames.size() + 2)
 	{
 		EncoderInputNames.emplace_back("vqidx");
 		EncoderInputNames.emplace_back("sid");
@@ -364,10 +442,33 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 		if (AddBlank)
 			BertAligSeq.emplace_back(0);
 
-		if(!Seq.SlicedTokens.empty())
+		std::vector<MoeVSProjectSpace::MoeVSTTSToken> TmpToken;
+		const std::vector<MoeVSProjectSpace::MoeVSTTSToken>* TokensPtr = &Seq.SlicedTokens;
+		if (BertEnabled && UseBert && Seq.SlicedTokens.empty())
+		{
+			HasBertSeq = true;
+			if(Seq.LanguageSymbol != "ZH")
+				TokenSeq = GetTokenizer(Seq.LanguageSymbol).Tokenize(Seq.TextSeq);
+			else
+			{
+				auto NewData = GetTokenizer(Seq.LanguageSymbol).Tokenize(Seq.TextSeq);
+				if (NewData.empty())
+					continue;
+				TmpToken.reserve(NewData.size());
+				for (const auto& it : NewData)
+				{
+					MoeVSProjectSpace::MoeVSTTSToken Tok;
+					Tok.Text = it;
+					TmpToken.emplace_back(std::move(Tok));
+				}
+				TokensPtr = &TmpToken;
+			}
+		}
+
+		if(UseBert && TokensPtr && !TokensPtr->empty())
 		{
 			size_t TokensIndex = 1;
-			for(const auto& iter : Seq.SlicedTokens)
+			for(const auto& iter : *TokensPtr)
 			{
 				if (iter.Text.empty())
 				{
@@ -381,8 +482,10 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 					break;
 				std::vector<std::wstring> const* PhonemesPtr;
 				std::vector<std::wstring> TempPhonemes;
+				std::vector<int64_t> TempToneVec;
 				if (iter.Phonemes.empty())
 				{
+					std::vector<std::wstring> TempSeqVec;
 					auto TempText = iter.Text;
 					if (TempText == L"[UNK]")
 						TempPhonemes = { L"[UNK]" };
@@ -392,8 +495,12 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 							TempText = TempText.substr(2);
 						if (TempText.find(L'▁') == 0)
 							TempText = TempText.substr(1);
-						TempPhonemes = Cleaner->DictReplace(Cleaner->G2p(TempText, Seq.PlaceHolderSymbol, Seq.AdditionalInfo, Seq.LanguageSymbol), Seq.PlaceHolderSymbol);
+						TempPhonemes = Cleaner->DictReplace(Cleaner->G2p(TempText, Seq.PlaceHolderSymbol, L"/[WithTone]" + Seq.AdditionalInfo, Seq.LanguageSymbol), Seq.PlaceHolderSymbol);
 					}
+					const int64_t FirstToneIdx = LanguageTones.at(Seq.LanguageSymbol);
+					auto RtnData = SplitTonesFromTokens(TempPhonemes, iter.Tones, FirstToneIdx, Seq.LanguageSymbol);
+					TempPhonemes = std::move(std::get<0>(RtnData));
+					TempToneVec = std::move(std::get<1>(RtnData));
 					PhonemesPtr = &TempPhonemes;
 				}
 				else
@@ -409,6 +516,8 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 					DurationSeq.insert(DurationSeq.end(), iter.Durations.begin(), iter.Durations.end());
 				if (PhonemesPtr->size() == iter.Tones.size())
 					ToneSeq.insert(ToneSeq.end(), iter.Tones.begin(), iter.Tones.end());
+				else if(PhonemesPtr->size() == TempToneVec.size())
+					ToneSeq.insert(ToneSeq.end(), TempToneVec.begin(), TempToneVec.end());
 				else
 					ToneSeq.insert(ToneSeq.end(), PhonemesPtr->size(), LanguageTones.at(Seq.LanguageSymbol));
 				for (size_t idxl = 0; idxl < PhonemesPtr->size(); ++idxl)
@@ -421,12 +530,16 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 			}
 			if ((AddBlank && BertAligSeq.size() == PhonemeSeq.size() * 2 + 1) || (!AddBlank && BertAligSeq.size() == PhonemeSeq.size()))
 				HasBertSeq = true;
+			else
+				HasBertSeq = false;
 		}
 		else if (!Seq.TextSeq.empty())
 		{
-			PhonemeSeq = Cleaner->DictReplace(Cleaner->G2p(Seq.TextSeq, Seq.PlaceHolderSymbol, Seq.AdditionalInfo, Seq.LanguageSymbol), Seq.PlaceHolderSymbol);
+			PhonemeSeq = Cleaner->DictReplace(Cleaner->G2p(Seq.TextSeq, Seq.PlaceHolderSymbol, L"/[WithTone]" + Seq.AdditionalInfo, Seq.LanguageSymbol), Seq.PlaceHolderSymbol);
 			LanguageSeq = std::vector(PhonemeSeq.size(), CurLanguageIdx);
-			ToneSeq = std::vector(PhonemeSeq.size(), LanguageTones.at(Seq.LanguageSymbol));
+			auto RtnVal = SplitTonesFromTokens(PhonemeSeq, {}, LanguageTones.at(Seq.LanguageSymbol), Seq.LanguageSymbol);
+			PhonemeSeq = std::move(std::get<0>(RtnVal));
+			ToneSeq = std::move(std::get<1>(RtnVal));
 		}
 		else
 		{
@@ -530,7 +643,7 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 					(IndexOfBert != size_t(CurLanguageIdx) && sessionBert.size() == 1))) &&
 					BertEnabled && HasBertSeq)
 				{
-					auto input_ids = Tokenizers[IndexOfBert](TokenSeq);
+					auto input_ids = Tokenizers.at(BertNamesIdx[IndexOfBert])(TokenSeq);
 					std::vector<int64_t> attention_mask(input_ids.size(), 1), token_type_ids(input_ids.size(), 0);
 					int64_t AttentionShape[2] = { 1, (int64_t)input_ids.size() };
 					std::vector<Ort::Value> AttentionInput, AttentionOutput;
@@ -575,12 +688,53 @@ std::vector<std::vector<int16_t>> Vits::Inference(const std::vector<MoeVSProject
 						LibDLVoiceCodecThrow((std::string("Locate: Bert\n") + e.what()))
 					}
 					const auto AttnData = AttentionOutput[0].GetTensorData<float>();
+					if (BertAligSeq.size() == 1)
+						BertAligSeq = GetAligments(TextSeqLength[0], AttentionOutput[0].GetTensorTypeAndShapeInfo().GetShape()[0] - 2);
 					for (int64_t IndexOfSrcVector = 0; IndexOfSrcVector < TextSeqLength[0]; ++IndexOfSrcVector)
-						memcpy(BertData.data() + IndexOfSrcVector * 1024, AttnData + BertAligSeq[IndexOfSrcVector] * 1024, 1024 * sizeof(float));
+						memcpy(BertData.data() + IndexOfSrcVector * 1024, AttnData + (BertAligSeq[IndexOfSrcVector]) * 1024, 1024 * sizeof(float));
 				}
 				EncoderInputs.emplace_back(Ort::Value::CreateTensor(
 					*memory_info, BertData.data(), BertData.size(), BertShape, 2));
 			}
+		}
+
+		auto ClapData = std::vector(512, 0.f);
+		int64_t ClapShape[2] = { 512, 1 };
+
+		if(UseClap)
+		{
+			std::vector<Ort::Value> ClapInput;
+			const auto CurClapSession = sessionClap[ClapName];
+			std::wstring ClapSeq;
+			for (const auto& itt : Seq.EmotionPrompt)
+				ClapSeq += itt + L" ";
+			if(CurClapSession && !ClapSeq.empty())
+			{
+				std::vector<Ort::Value> ClapOutput;
+				const auto& CurClapTokenizer = Tokenizers.at(ClapName);
+				auto input_ids = CurClapTokenizer(CurClapTokenizer.Tokenize(ClapSeq), true);
+				std::vector<int64_t> attention_mask(input_ids.size(), 1);
+				int64_t AttentionShape[2] = { 1, (int64_t)input_ids.size() };
+				ClapInput.emplace_back(Ort::Value::CreateTensor(
+					*memory_info, input_ids.data(), input_ids.size(), AttentionShape, 2));
+				ClapInput.emplace_back(Ort::Value::CreateTensor(
+					*memory_info, attention_mask.data(), attention_mask.size(), AttentionShape, 2));
+				try
+				{
+					ClapOutput = CurClapSession->Run(Ort::RunOptions{ nullptr },
+						BertInputNames2.data(),
+						ClapInput.data(),
+						CurClapSession->GetInputCount(),
+						BertOutputNames.data(),
+						1);
+				}
+				catch (Ort::Exception& e)
+				{
+					LibDLVoiceCodecThrow((std::string("Locate: Clap\n") + e.what()))
+				}
+				ClapData = { ClapOutput[0].GetTensorData<float>(),ClapOutput[0].GetTensorData<float>() + 512 };
+			}
+			EncoderInputs.emplace_back(Ort::Value::CreateTensor(*memory_info, ClapData.data(), ClapData.size(), ClapShape, 2));
 		}
 
 		int64_t VQIndices[] = { 0 };

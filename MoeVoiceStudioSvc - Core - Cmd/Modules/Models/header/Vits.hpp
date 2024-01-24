@@ -26,6 +26,8 @@ MoeVoiceStudioCoreHeader
 
 void SetBertEnabled(bool cond);
 
+void DestoryAllBerts();
+
 class Vits : public TextToSpeech
 {
 public:
@@ -77,8 +79,10 @@ private:
     bool EncoderG = false;
     std::vector<std::string> BertNames;
     std::vector<std::wstring> BertNamesIdx;
+    std::wstring ClapName;
     int64_t VQCodeBookSize = 10;
     bool UseVQ = false;
+    bool UseClap = false;
 
     std::vector<const char*> EncoderInputNames = { "x" };
     const std::vector<const char*> EncoderOutputNames = { "xout", "m_p", "logs_p", "x_mask" };

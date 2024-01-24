@@ -165,17 +165,21 @@ public:
 			i /= Sum;
 	}
 
-	MoeVSG2P::Tokenizer& GetTokenizer(const std::string& LanguageId)
+	[[nodiscard]] const MoeVSG2P::Tokenizer& GetTokenizer(const std::string& LanguageId) const
 	{
-		return Tokenizers[LanguageMap.at(LanguageId)];
+		return Tokenizers.at(LanguageTokenizerMap.at(LanguageId));
 	}
+
+	[[nodiscard]] static std::tuple<std::vector<std::wstring>, std::vector<int64_t>> SplitTonesFromTokens(const std::vector<std::wstring>& _Src, const std::vector<int64_t>& _ToneRef, int64_t FirstToneIdx, const std::string& LanguageSymbol);
+
 protected:
 	DurationCallback CustomDurationCallback;
 	int64_t SpeakerCount = 1;
 	std::unordered_map<std::wstring, int64_t> SpeakerMap;
+	std::map<std::string, std::wstring> LanguageTokenizerMap;
 	std::map<std::string, int64_t> LanguageMap = { {"ZH", 0}, {"JP", 1}, {"EN", 2} };
 	std::map<std::string, int64_t> LanguageTones = { {"ZH", 0}, {"JP", 0}, {"EN", 0} };
-	std::vector<MoeVSG2P::Tokenizer> Tokenizers;
+	std::map<std::wstring, MoeVSG2P::Tokenizer> Tokenizers;
 	MoeVSG2P::MVSCleaner* Cleaner = nullptr;
 	bool AddBlank = true;
 	bool Emotion = false;

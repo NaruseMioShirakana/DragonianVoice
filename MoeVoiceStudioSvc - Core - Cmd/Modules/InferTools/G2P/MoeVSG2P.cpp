@@ -238,7 +238,7 @@ std::wstring MVSDict::DictReplaceGetStr(const std::wstring& input, const std::ws
 
 void Tokenizer::load(const std::wstring& _Path)
 {
-	const MJson _VocabJson(to_byte_string(_Path).c_str());
+	const MJson _VocabJson(_Path);
 	if (!_VocabJson.HasMember("ContinuingSubwordPrefix") ||
 		!_VocabJson.HasMember("Type") ||
 		!_VocabJson.HasMember("Vocab") ||
@@ -251,34 +251,35 @@ void Tokenizer::load(const std::wstring& _Path)
 	if (Type == "Unigram") Model = TokenizerModel::Unigram;
 	Symbol = to_wide_string(_VocabJson["ContinuingSubwordPrefix"].GetString());
 
-	if(Model == TokenizerModel::WordPiece)
-	{
-		if(_VocabJson["Vocab"].IsArray())
-		{
-			const auto _VocabArray = _VocabJson["Vocab"].GetArray();
-			int64_t Index = 0;
-			for (const auto& Object : _VocabArray)
-				Vocab[to_wide_string(Object.GetString())] = Index++;
-		}
-		else
-		{
-			const auto _VocabDict = _VocabJson["Vocab"].GetMemberArray();
-			for (const auto& Pair : _VocabDict)
-			{
-				if (Pair.second.IsInt())
-					Vocab[to_wide_string(Pair.first)] = TokenizerType(Pair.second.GetInt());
-				else if (Pair.second.IsFloat())
-					Vocab[to_wide_string(Pair.first)] = TokenizerType(Pair.second.GetFloat());
-			}
-		}
-	}
-	else
+	if (_VocabJson["Vocab"].IsArray())
 	{
 		const auto _VocabArray = _VocabJson["Vocab"].GetArray();
 		int64_t Index = 0;
 		for (const auto& Object : _VocabArray)
-			Vocab[to_wide_string(Object.GetArray()[0].GetString())] = Index++;
+		{
+			if (!(Object.IsString() || Object.IsArray()))
+			{
+				auto Beg = Object.MemberBegin();
+				if (Beg.first.empty())
+					continue;
+				Vocab[to_wide_string(Beg.first)] = Beg.second.GetInt64();
+			}
+			else
+				Vocab[to_wide_string(Object.IsString() ? Object.GetString() : Object.GetArray()[0].GetString())] = Index++;
+		}
 	}
+	else
+	{
+		const auto _VocabDict = _VocabJson["Vocab"].GetMemberArray();
+		for (const auto& Pair : _VocabDict)
+		{
+			if (Pair.second.IsInt())
+				Vocab[to_wide_string(Pair.first)] = TokenizerType(Pair.second.GetInt());
+			else if (Pair.second.IsFloat())
+				Vocab[to_wide_string(Pair.first)] = TokenizerType(Pair.second.GetFloat());
+		}
+	}
+
 	if (_VocabJson.HasMember("UseSplit") && _VocabJson["UseSplit"].IsBool())
 		UseSplit = _VocabJson["UseSplit"].GetBool();
 }
@@ -430,7 +431,7 @@ std::vector<std::wstring> Tokenizer::WordPieceMethod(const std::wstring& Seq, si
 	return Tokens;
 }
 
-std::vector<Tokenizer::TokenizerType> Tokenizer::operator()(const std::vector<std::wstring>& Seq) const
+std::vector<Tokenizer::TokenizerType> Tokenizer::operator()(const std::vector<std::wstring>& Seq, bool SkipBlank) const
 {
 	std::vector<TokenizerType> Tokens;
 	const auto UNKID = Vocab.at(L"[UNK]");
@@ -439,8 +440,12 @@ std::vector<Tokenizer::TokenizerType> Tokenizer::operator()(const std::vector<st
 		const auto res = Vocab.find(iter);
 		if (res != Vocab.end())
 			Tokens.emplace_back(res->second);
-		else if(Tokens.empty() || Tokens.back() != UNKID)
+		else if(iter.empty() || Tokens.back() != UNKID)
+		{
+			if (SkipBlank && std::regex_match(iter, BlankRegex))
+				continue;
 			Tokens.emplace_back(UNKID);
+		}
 	}
 	return Tokens;
 }
