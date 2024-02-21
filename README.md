@@ -175,7 +175,9 @@ demo: [RVC命令行示例](https://github.com/NaruseMioShirakana/MoeVoiceStudio/
 #### 与所支持的几个项目无关 为深度学习领域的通用模型
 停止更新（由于下载和上传速度）: [Vocoder & HiddenUnitBert](https://github.com/NaruseMioShirakana/RequireMent-Model-For-MoeSS) 
 
-最新仓库地址 : [HuggingFace](https://huggingface.co/NaruseMioShirakana/MoeSS-SUBModel) 
+停止更新（由于HuggingFace被墙） : [HuggingFace](https://huggingface.co/NaruseMioShirakana/MoeSS-SUBModel) 
+
+最新仓库：[Openi](https://openi.pcl.ac.cn/Shirakana/SubModel)
 
 自己导出前置：
 - HuBert：`input_names`应该为`["source"]`，`output_names`应该为`["embed"]`，`dynamic_axes`应当为`{"source":[0,2],}`
