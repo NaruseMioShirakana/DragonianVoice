@@ -1,0 +1,363 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\Modules">
+      <UniqueIdentifier>{fb0b5757-fc04-4d88-8597-2d94fe79e2cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Modules\Models">
+      <UniqueIdentifier>{54cbaedb-ecbf-4fb3-87b5-36ebc8c6cfce}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Modules\InferTools">
+      <UniqueIdentifier>{9b0ef72f-b6a6-40a5-b235-1976820fe35c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Modules\InferTools\AVCodec">
+      <UniqueIdentifier>{aad5c051-397f-436b-9b11-fec3ca01aa9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Modules\InferTools\DataStruct">
+      <UniqueIdentifier>{6cfaac44-b900-49e1-8fc9-35f8f9ab6e18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Modules\InferTools\F0Extractor">
+      <UniqueIdentifier>{9e2f1339-c577-45aa-a509-5dddb4d9d542}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Modules\InferTools\Sampler">
+      <UniqueIdentifier>{eb24584c-3751-4dbe-823e-90d25c93772e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Modules\InferTools\Stft">
+      <UniqueIdentifier>{c4adc16a-e759-4f1c-b5e6-3d76f4505e02}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Modules\InferTools\TensorExtractor">
+      <UniqueIdentifier>{c7deefd2-d55c-4b5a-80d8-1cac74f545cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Modules\Logger">
+      <UniqueIdentifier>{e99697a0-cd74-43bc-ae4c-bfa1299311f4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Modules\InferTools\Cluster">
+      <UniqueIdentifier>{df45b238-81cd-49bf-bf84-ec6e97b35b83}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Modules">
+      <UniqueIdentifier>{d98ecef8-77c5-4e4a-915c-4d71f0ea665d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Modules\InferTools">
+      <UniqueIdentifier>{4a90fefb-d821-42c0-aba2-b31ba87ffaaa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Modules\Logger">
+      <UniqueIdentifier>{8c7cf0e0-76ea-40a0-82de-2e020b44c65f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Modules\Models">
+      <UniqueIdentifier>{c579373a-26a1-4979-b8ba-93b8aee12708}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Modules\InferTools\AVCodec">
+      <UniqueIdentifier>{94e998a7-0897-4c87-9ee0-1426f372b6b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Modules\InferTools\Cluster">
+      <UniqueIdentifier>{3d85cc85-c9e7-4d29-92a2-57b044c10fc8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Modules\InferTools\DataStruct">
+      <UniqueIdentifier>{7ce28dec-70cd-445a-9a99-b11ebfc0635e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Modules\InferTools\F0Extractor">
+      <UniqueIdentifier>{65e1efd6-d194-4317-abb3-fa252719bef8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Modules\InferTools\TensorExtractor">
+      <UniqueIdentifier>{d60edd1b-50d6-4880-a09e-6f1a1d8b4f70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Modules\InferTools\Stft">
+      <UniqueIdentifier>{cfa6e269-3e22-43ed-8f28-fd50b9bf9d18}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Modules\InferTools\Sampler">
+      <UniqueIdentifier>{965d3ac6-1a15-45bf-890e-af0cf1e0e3c4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Lib">
+      <UniqueIdentifier>{01dc10ac-ad67-4d10-b7a7-92cb14cf5fe3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Lib\World">
+      <UniqueIdentifier>{c1060cbd-4688-4a7d-88f7-d81f38533cb8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Lib\Json">
+      <UniqueIdentifier>{7e0d0066-c7ce-4445-a80c-d93cda1fc5fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Lib">
+      <UniqueIdentifier>{6c8a8d59-2b2b-4b2f-8dbb-3ccc3f802e9a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Lib\Json">
+      <UniqueIdentifier>{bc3612f1-00b0-4d01-97b0-2eb66f7b33be}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Lib\World">
+      <UniqueIdentifier>{3405ef93-0ba8-495b-9110-22b821411ce9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Modules\header\Models\EnvManager.hpp">
+      <Filter>头文件\Modules\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\Models\DiffSvc.hpp">
+      <Filter>头文件\Modules\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\Models\ModelBase.hpp">
+      <Filter>头文件\Modules\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\Models\MoeVSProject.hpp">
+      <Filter>头文件\Modules\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\Models\SVC.hpp">
+      <Filter>头文件\Modules\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\Models\VitsSvc.hpp">
+      <Filter>头文件\Modules\Models</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\Modules.hpp">
+      <Filter>头文件\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\StringPreprocess.hpp">
+      <Filter>头文件\Modules</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\Logger\MoeSSLogger.hpp">
+      <Filter>头文件\Modules\Logger</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\AvCodec\AvCodeResample.h">
+      <Filter>头文件\Modules\InferTools\AVCodec</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\Cluster\MoeVSBaseCluster.hpp">
+      <Filter>头文件\Modules\InferTools\Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\Cluster\MoeVSClusterManager.hpp">
+      <Filter>头文件\Modules\InferTools\Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\Cluster\MoeVSIndexCluster.hpp">
+      <Filter>头文件\Modules\InferTools\Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\Cluster\MoeVSKmeansCluster.hpp">
+      <Filter>头文件\Modules\InferTools\Cluster</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\DataStruct\KDTree.hpp">
+      <Filter>头文件\Modules\InferTools\DataStruct</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\F0Extractor\F0ExtractorManager.hpp">
+      <Filter>头文件\Modules\InferTools\F0Extractor</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\F0Extractor\HarvestF0Extractor.hpp">
+      <Filter>头文件\Modules\InferTools\F0Extractor</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\F0Extractor\NetF0Predictors.hpp">
+      <Filter>头文件\Modules\InferTools\F0Extractor</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\F0Extractor\BaseF0Extractor.hpp">
+      <Filter>头文件\Modules\InferTools\F0Extractor</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\F0Extractor\DioF0Extractor.hpp">
+      <Filter>头文件\Modules\InferTools\F0Extractor</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\Sampler\MoeVSBaseSampler.hpp">
+      <Filter>头文件\Modules\InferTools\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\Sampler\MoeVSSamplerManager.hpp">
+      <Filter>头文件\Modules\InferTools\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\Sampler\MoeVSSamplers.hpp">
+      <Filter>头文件\Modules\InferTools\Sampler</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\Stft\stft.hpp">
+      <Filter>头文件\Modules\InferTools\Stft</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\TensorExtractor\MoeVoiceStudioTensorExtractor.hpp">
+      <Filter>头文件\Modules\InferTools\TensorExtractor</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\TensorExtractor\MoeVSCoreTensorExtractor.hpp">
+      <Filter>头文件\Modules\InferTools\TensorExtractor</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\TensorExtractor\TensorExtractorManager.hpp">
+      <Filter>头文件\Modules\InferTools\TensorExtractor</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\header\InferTools\inferTools.hpp">
+      <Filter>头文件\Modules\InferTools</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\framework.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\MJson\MJson.h">
+      <Filter>头文件\Lib\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\MJson\yyjson.h">
+      <Filter>头文件\Lib\Json</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\synthesis.h">
+      <Filter>头文件\Lib\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\synthesisrealtime.h">
+      <Filter>头文件\Lib\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\cheaptrick.h">
+      <Filter>头文件\Lib\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\codec.h">
+      <Filter>头文件\Lib\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\common.h">
+      <Filter>头文件\Lib\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\constantnumbers.h">
+      <Filter>头文件\Lib\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\d4c.h">
+      <Filter>头文件\Lib\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\dio.h">
+      <Filter>头文件\Lib\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\fft.h">
+      <Filter>头文件\Lib\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\harvest.h">
+      <Filter>头文件\Lib\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\macrodefinitions.h">
+      <Filter>头文件\Lib\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\matlabfunctions.h">
+      <Filter>头文件\Lib\World</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\stonemask.h">
+      <Filter>头文件\Lib\World</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\Models\DiffSvc.cpp">
+      <Filter>源文件\Modules\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\Models\EnvManager.cpp">
+      <Filter>源文件\Modules\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\Models\ModelBase.cpp">
+      <Filter>源文件\Modules\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\Models\MoeVSProject.cpp">
+      <Filter>源文件\Modules\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\Models\SVC.cpp">
+      <Filter>源文件\Modules\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\Models\VitsSvc.cpp">
+      <Filter>源文件\Modules\Models</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\Logger\MoeSSLogger.cpp">
+      <Filter>源文件\Modules\Logger</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\inferTools.cpp">
+      <Filter>源文件\Modules\InferTools</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\TensorExtractor\MoeVSCoreTensorExtractor.cpp">
+      <Filter>源文件\Modules\InferTools\TensorExtractor</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\TensorExtractor\TensorExtractorManager.cpp">
+      <Filter>源文件\Modules\InferTools\TensorExtractor</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\TensorExtractor\MoeVoiceStudioTensorExtractor.cpp">
+      <Filter>源文件\Modules\InferTools\TensorExtractor</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\Stft\stft.cpp">
+      <Filter>源文件\Modules\InferTools\Stft</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\Sampler\MoeVSSamplerManager.cpp">
+      <Filter>源文件\Modules\InferTools\Sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\Sampler\MoeVSSamplers.cpp">
+      <Filter>源文件\Modules\InferTools\Sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\Sampler\MoeVSBaseSampler.cpp">
+      <Filter>源文件\Modules\InferTools\Sampler</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\F0Extractor\F0ExtractorManager.cpp">
+      <Filter>源文件\Modules\InferTools\F0Extractor</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\F0Extractor\HarvestF0Extractor.cpp">
+      <Filter>源文件\Modules\InferTools\F0Extractor</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\F0Extractor\NetF0Predictors.cpp">
+      <Filter>源文件\Modules\InferTools\F0Extractor</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\F0Extractor\BaseF0Extractor.cpp">
+      <Filter>源文件\Modules\InferTools\F0Extractor</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\F0Extractor\DioF0Extractor.cpp">
+      <Filter>源文件\Modules\InferTools\F0Extractor</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\DataStruct\KDTree.cpp">
+      <Filter>源文件\Modules\InferTools\DataStruct</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\Cluster\MoeVSClusterManager.cpp">
+      <Filter>源文件\Modules\InferTools\Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\Cluster\MoeVSIndexCluster.cpp">
+      <Filter>源文件\Modules\InferTools\Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\Cluster\MoeVSKmeansCluster.cpp">
+      <Filter>源文件\Modules\InferTools\Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\Cluster\MoeVSBaseCluster.cpp">
+      <Filter>源文件\Modules\InferTools\Cluster</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\InferTools\AvCodec\AvCodeResample.cpp">
+      <Filter>源文件\Modules\InferTools\AVCodec</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\Modules.cpp">
+      <Filter>源文件\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\StringPreprocess.cpp">
+      <Filter>源文件\Modules</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\MJson\yyjson.c">
+      <Filter>源文件\Lib\Json</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\cheaptrick.cpp">
+      <Filter>源文件\Lib\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\codec.cpp">
+      <Filter>源文件\Lib\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\common.cpp">
+      <Filter>源文件\Lib\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\d4c.cpp">
+      <Filter>源文件\Lib\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\dio.cpp">
+      <Filter>源文件\Lib\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\fft.cpp">
+      <Filter>源文件\Lib\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\harvest.cpp">
+      <Filter>源文件\Lib\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\matlabfunctions.cpp">
+      <Filter>源文件\Lib\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\stonemask.cpp">
+      <Filter>源文件\Lib\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\synthesis.cpp">
+      <Filter>源文件\Lib\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\synthesisrealtime.cpp">
+      <Filter>源文件\Lib\World</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\MJson\MJson.cpp">
+      <Filter>源文件\Lib\Json</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

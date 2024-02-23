@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{dc31109b-1984-41db-bd9f-4261675c3962}</ProjectGuid>
+    <RootNamespace>libsvc</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)libsvc\Modules\Lib\World\src\world;$(SolutionDir)Lib\ffmpeg-4.2.1\include;$(SolutionDir)libsvc\Modules\Lib\MJson;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\build\native\include;$(SolutionDir)Lib\faiss;$(SolutionDir)Lib\openblas\include;$(SolutionDir)Lib\stft;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir)libsvc\Modules\Lib\World\src\world;$(SolutionDir)Lib\ffmpeg-4.2.1\include;$(SolutionDir)libsvc\Modules\Lib\MJson;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\build\native\include;$(SolutionDir)Lib\faiss;$(SolutionDir)Lib\openblas\include;$(SolutionDir)Lib\stft;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;LIBSVC_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;NDEBUG;LIBSVC_EXPORTS;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;LIBSVC_EXPORTS;_WINDOWS;_USRDLL;MOEVSDMLPROVIDER;MoeVoiceStudioIndexCluster;LibSvcDll;YYJSON_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+      <AdditionalLibraryDirectories>$(SolutionDir)Lib\ffmpeg-4.2.1\Lib;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\runtimes\win-x64\native;$(SolutionDir)Lib\;$(SolutionDir)Lib\openblas\lib;$(SolutionDir)Lib\stft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;onnxruntime.lib;fftw3.lib;libopenblas.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>NDEBUG;LIBSVC_EXPORTS;_WINDOWS;_USRDLL;MOEVSDMLPROVIDER;MoeVoiceStudioIndexCluster;LibSvcDll;YYJSON_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableUAC>false</EnableUAC>
+      <AdditionalLibraryDirectories>$(SolutionDir)Lib\ffmpeg-4.2.1\Lib;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\runtimes\win-x64\native;$(SolutionDir)Lib\;$(SolutionDir)Lib\openblas\lib;$(SolutionDir)Lib\stft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;onnxruntime.lib;fftw3.lib;libopenblas.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="Modules\framework.h" />
+    <ClInclude Include="Modules\header\InferTools\AvCodec\AvCodeResample.h" />
+    <ClInclude Include="Modules\header\InferTools\Cluster\MoeVSBaseCluster.hpp" />
+    <ClInclude Include="Modules\header\InferTools\Cluster\MoeVSClusterManager.hpp" />
+    <ClInclude Include="Modules\header\InferTools\Cluster\MoeVSIndexCluster.hpp" />
+    <ClInclude Include="Modules\header\InferTools\Cluster\MoeVSKmeansCluster.hpp" />
+    <ClInclude Include="Modules\header\InferTools\DataStruct\KDTree.hpp" />
+    <ClInclude Include="Modules\header\InferTools\F0Extractor\BaseF0Extractor.hpp" />
+    <ClInclude Include="Modules\header\InferTools\F0Extractor\DioF0Extractor.hpp" />
+    <ClInclude Include="Modules\header\InferTools\F0Extractor\F0ExtractorManager.hpp" />
+    <ClInclude Include="Modules\header\InferTools\F0Extractor\HarvestF0Extractor.hpp" />
+    <ClInclude Include="Modules\header\InferTools\F0Extractor\NetF0Predictors.hpp" />
+    <ClInclude Include="Modules\header\InferTools\inferTools.hpp" />
+    <ClInclude Include="Modules\header\InferTools\Sampler\MoeVSBaseSampler.hpp" />
+    <ClInclude Include="Modules\header\InferTools\Sampler\MoeVSSamplerManager.hpp" />
+    <ClInclude Include="Modules\header\InferTools\Sampler\MoeVSSamplers.hpp" />
+    <ClInclude Include="Modules\header\InferTools\Stft\stft.hpp" />
+    <ClInclude Include="Modules\header\InferTools\TensorExtractor\MoeVoiceStudioTensorExtractor.hpp" />
+    <ClInclude Include="Modules\header\InferTools\TensorExtractor\MoeVSCoreTensorExtractor.hpp" />
+    <ClInclude Include="Modules\header\InferTools\TensorExtractor\TensorExtractorManager.hpp" />
+    <ClInclude Include="Modules\header\Logger\MoeSSLogger.hpp" />
+    <ClInclude Include="Modules\header\Models\DiffSvc.hpp" />
+    <ClInclude Include="Modules\header\Models\EnvManager.hpp" />
+    <ClInclude Include="Modules\header\Models\ModelBase.hpp" />
+    <ClInclude Include="Modules\header\Models\MoeVSProject.hpp" />
+    <ClInclude Include="Modules\header\Models\SVC.hpp" />
+    <ClInclude Include="Modules\header\Models\VitsSvc.hpp" />
+    <ClInclude Include="Modules\header\Modules.hpp" />
+    <ClInclude Include="Modules\header\StringPreprocess.hpp" />
+    <ClInclude Include="Modules\Lib\MJson\MJson.h" />
+    <ClInclude Include="Modules\Lib\MJson\yyjson.h" />
+    <ClInclude Include="Modules\Lib\World\src\world\cheaptrick.h" />
+    <ClInclude Include="Modules\Lib\World\src\world\codec.h" />
+    <ClInclude Include="Modules\Lib\World\src\world\common.h" />
+    <ClInclude Include="Modules\Lib\World\src\world\constantnumbers.h" />
+    <ClInclude Include="Modules\Lib\World\src\world\d4c.h" />
+    <ClInclude Include="Modules\Lib\World\src\world\dio.h" />
+    <ClInclude Include="Modules\Lib\World\src\world\fft.h" />
+    <ClInclude Include="Modules\Lib\World\src\world\harvest.h" />
+    <ClInclude Include="Modules\Lib\World\src\world\macrodefinitions.h" />
+    <ClInclude Include="Modules\Lib\World\src\world\matlabfunctions.h" />
+    <ClInclude Include="Modules\Lib\World\src\world\stonemask.h" />
+    <ClInclude Include="Modules\Lib\World\src\world\synthesis.h" />
+    <ClInclude Include="Modules\Lib\World\src\world\synthesisrealtime.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp" />
+    <ClCompile Include="Modules\Lib\MJson\MJson.cpp" />
+    <ClCompile Include="Modules\Lib\MJson\yyjson.c" />
+    <ClCompile Include="Modules\Lib\World\src\cheaptrick.cpp" />
+    <ClCompile Include="Modules\Lib\World\src\codec.cpp" />
+    <ClCompile Include="Modules\Lib\World\src\common.cpp" />
+    <ClCompile Include="Modules\Lib\World\src\d4c.cpp" />
+    <ClCompile Include="Modules\Lib\World\src\dio.cpp" />
+    <ClCompile Include="Modules\Lib\World\src\fft.cpp" />
+    <ClCompile Include="Modules\Lib\World\src\harvest.cpp" />
+    <ClCompile Include="Modules\Lib\World\src\matlabfunctions.cpp" />
+    <ClCompile Include="Modules\Lib\World\src\stonemask.cpp" />
+    <ClCompile Include="Modules\Lib\World\src\synthesis.cpp" />
+    <ClCompile Include="Modules\Lib\World\src\synthesisrealtime.cpp" />
+    <ClCompile Include="Modules\src\InferTools\AvCodec\AvCodeResample.cpp" />
+    <ClCompile Include="Modules\src\InferTools\Cluster\MoeVSBaseCluster.cpp" />
+    <ClCompile Include="Modules\src\InferTools\Cluster\MoeVSClusterManager.cpp" />
+    <ClCompile Include="Modules\src\InferTools\Cluster\MoeVSIndexCluster.cpp" />
+    <ClCompile Include="Modules\src\InferTools\Cluster\MoeVSKmeansCluster.cpp" />
+    <ClCompile Include="Modules\src\InferTools\DataStruct\KDTree.cpp" />
+    <ClCompile Include="Modules\src\InferTools\F0Extractor\BaseF0Extractor.cpp" />
+    <ClCompile Include="Modules\src\InferTools\F0Extractor\DioF0Extractor.cpp" />
+    <ClCompile Include="Modules\src\InferTools\F0Extractor\F0ExtractorManager.cpp" />
+    <ClCompile Include="Modules\src\InferTools\F0Extractor\HarvestF0Extractor.cpp" />
+    <ClCompile Include="Modules\src\InferTools\F0Extractor\NetF0Predictors.cpp" />
+    <ClCompile Include="Modules\src\InferTools\inferTools.cpp" />
+    <ClCompile Include="Modules\src\InferTools\Sampler\MoeVSBaseSampler.cpp" />
+    <ClCompile Include="Modules\src\InferTools\Sampler\MoeVSSamplerManager.cpp" />
+    <ClCompile Include="Modules\src\InferTools\Sampler\MoeVSSamplers.cpp" />
+    <ClCompile Include="Modules\src\InferTools\Stft\stft.cpp" />
+    <ClCompile Include="Modules\src\InferTools\TensorExtractor\MoeVoiceStudioTensorExtractor.cpp" />
+    <ClCompile Include="Modules\src\InferTools\TensorExtractor\MoeVSCoreTensorExtractor.cpp" />
+    <ClCompile Include="Modules\src\InferTools\TensorExtractor\TensorExtractorManager.cpp" />
+    <ClCompile Include="Modules\src\Logger\MoeSSLogger.cpp" />
+    <ClCompile Include="Modules\src\Models\DiffSvc.cpp" />
+    <ClCompile Include="Modules\src\Models\EnvManager.cpp" />
+    <ClCompile Include="Modules\src\Models\ModelBase.cpp" />
+    <ClCompile Include="Modules\src\Models\MoeVSProject.cpp" />
+    <ClCompile Include="Modules\src\Models\SVC.cpp" />
+    <ClCompile Include="Modules\src\Models\VitsSvc.cpp" />
+    <ClCompile Include="Modules\src\Modules.cpp" />
+    <ClCompile Include="Modules\src\StringPreprocess.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
