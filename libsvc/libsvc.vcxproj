@@ -155,6 +155,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Api\header\libsvc.h" />
     <ClInclude Include="Modules\framework.h" />
     <ClInclude Include="Modules\header\InferTools\AvCodec\AvCodeResample.h" />
     <ClInclude Include="Modules\header\InferTools\Cluster\MoeVSBaseCluster.hpp" />
@@ -201,6 +202,7 @@
     <ClInclude Include="Modules\Lib\World\src\world\synthesisrealtime.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Api\src\libsvc.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Modules\Lib\MJson\MJson.cpp" />
     <ClCompile Include="Modules\Lib\MJson\yyjson.c" />

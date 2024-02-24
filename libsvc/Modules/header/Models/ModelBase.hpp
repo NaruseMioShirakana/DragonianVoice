@@ -50,6 +50,72 @@ static std::wstring GetCurrentFolder(const std::wstring& defualt = L"")
 }
 
 MoeVoiceStudioCoreHeader
+struct DiffusionSvcPaths
+{
+	std::wstring Encoder;
+	std::wstring Denoise;
+	std::wstring Pred;
+	std::wstring After;
+	std::wstring Alpha;
+	std::wstring Naive;
+
+	std::wstring DiffSvc;
+};
+
+struct VitsSvcPaths
+{
+	std::wstring VitsSvc;
+};
+
+struct ClusterConfig
+{
+	int64_t ClusterCenterSize = 10000;
+	std::wstring Path;
+	/**
+	 * \brief Type Of Cluster : "KMeans" "Index"
+	 */
+	std::wstring Type;
+};
+
+struct Hparams
+{
+	/**
+	 * \brief Model Version
+	 * For VitsSvc : "SoVits2.0" "SoVits3.0" "SoVits4.0" "SoVits4.0-DDSP" "RVC"
+	 * For DiffusionSvc : "DiffSvc" "DiffusionSvc"
+	 */
+	std::wstring TensorExtractor = L"DiffSvc";
+	/**
+	 * \brief Path Of Hubert Model
+	 */
+	std::wstring HubertPath;
+	/**
+	 * \brief Path Of DiffusionSvc Model
+	 */
+	DiffusionSvcPaths DiffusionSvc;
+	/**
+	 * \brief Path Of VitsSvc Model
+	 */
+	VitsSvcPaths VitsSvc;
+	/**
+	 * \brief Config Of Cluster
+	 */
+	ClusterConfig Cluster;
+
+	long SamplingRate = 22050;
+
+	int HopSize = 320;
+	int64_t HiddenUnitKDims = 256;
+	int64_t SpeakerCount = 1;
+	bool EnableCharaMix = false;
+	bool EnableVolume = false;
+
+	int64_t MelBins = 128;
+	int64_t Pndms = 100;
+	int64_t MaxStep = 1000;
+	float SpecMin = -12;
+	float SpecMax = 2;
+};
 
 class MoeVoiceStudioModule
 {

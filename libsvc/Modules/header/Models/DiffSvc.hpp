@@ -54,6 +54,10 @@ public:
                  ExecutionProviders ExecutionProvider_ = ExecutionProviders::CPU,
                  unsigned DeviceID_ = 0, unsigned ThreadCount_ = 0);
 
+    DiffusionSvc(const Hparams& _Hps, const ProgressCallback& _ProgressCallback,
+        ExecutionProviders ExecutionProvider_ = ExecutionProviders::CPU,
+        unsigned DeviceID_ = 0, unsigned ThreadCount_ = 0);
+
 	~DiffusionSvc() override;
 
     void load(const std::map<std::string, std::wstring>& _PathDict, const MJson& _Config, const ProgressCallback& _ProgressCallback);

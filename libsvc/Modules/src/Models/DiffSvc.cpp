@@ -122,6 +122,83 @@ DiffusionSvc::DiffusionSvc(const std::map<std::string, std::wstring>& _PathDict,
 	load(_PathDict, _Config, _ProgressCallback);
 }
 
+DiffusionSvc::DiffusionSvc(const Hparams& _Hps, const ProgressCallback& _ProgressCallback, ExecutionProviders ExecutionProvider_, unsigned DeviceID_, unsigned ThreadCount_) : 
+	SingingVoiceConversion(ExecutionProvider_, DeviceID_, ThreadCount_)
+{
+	MoeVSClassName(L"MoeVoiceStudioDiffSingingVoiceConversion");
+
+	_samplingRate = max(_Hps.SamplingRate, 2000);
+	melBins = max(_Hps.MelBins, 1);
+	HopSize = max(_Hps.HopSize, 1);
+	HiddenUnitKDims = max(_Hps.HiddenUnitKDims, 1);
+	SpeakerCount = max(_Hps.SpeakerCount, 1);
+	EnableVolume = _Hps.EnableVolume;
+	EnableCharaMix = _Hps.EnableCharaMix;
+	DiffSvcVersion = _Hps.TensorExtractor;
+	Pndms = max(_Hps.Pndms, 1);
+	SpecMax = _Hps.SpecMax;
+	SpecMin = _Hps.SpecMin;
+	MaxStep = max(_Hps.MaxStep, 1);
+
+	_callback = _ProgressCallback;
+
+	if (!_Hps.Cluster.Type.empty())
+	{
+		ClusterCenterSize = _Hps.Cluster.ClusterCenterSize;
+		try
+		{
+			Cluster = MoeVoiceStudioCluster::GetMoeVSCluster(_Hps.Cluster.Type, _Hps.Cluster.Path, HiddenUnitKDims, ClusterCenterSize);
+			EnableCluster = true;
+		}
+		catch (std::exception& e)
+		{
+			logger.error(e.what());
+			EnableCluster = false;
+		}
+	}
+
+	//LoadModels
+	try
+	{
+		logger.log(L"[Info] loading DiffSvc Models");
+		hubert = new Ort::Session(*env, _Hps.HubertPath.c_str(), *session_options);
+		if (!_Hps.DiffusionSvc.Encoder.empty())
+		{
+			encoder = new Ort::Session(*env, _Hps.DiffusionSvc.Encoder.c_str(), *session_options);
+			denoise = new Ort::Session(*env, _Hps.DiffusionSvc.Denoise.c_str(), *session_options);
+			pred = new Ort::Session(*env, _Hps.DiffusionSvc.Pred.c_str(), *session_options);
+			after = new Ort::Session(*env, _Hps.DiffusionSvc.After.c_str(), *session_options);
+			if (!_Hps.DiffusionSvc.Alpha.empty())
+				alpha = new Ort::Session(*env, _Hps.DiffusionSvc.Alpha.c_str(), *session_options);
+		}
+		else
+			diffSvc = new Ort::Session(*env, _Hps.DiffusionSvc.DiffSvc.c_str(), *session_options);
+
+		if (!_Hps.DiffusionSvc.Naive.empty())
+			naive = new Ort::Session(*env, _Hps.DiffusionSvc.Naive.c_str(), *session_options);
+
+		logger.log(L"[Info] DiffSvc Models loaded");
+	}
+	catch (Ort::Exception& _exception)
+	{
+		Destory();
+		LibDLVoiceCodecThrow(_exception.what())
+	}
+
+	MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::Others _others_param;
+	_others_param.Memory = *memory_info;
+
+	try
+	{
+		_TensorExtractor = GetTensorExtractor(DiffSvcVersion, 48000, _samplingRate, HopSize, EnableCharaMix, EnableVolume, HiddenUnitKDims, SpeakerCount, _others_param);
+	}
+	catch (std::exception& e)
+	{
+		Destory();
+		LibDLVoiceCodecThrow(e.what())
+	}
+}
+
 void DiffusionSvc::load(const std::map<std::string, std::wstring>& _PathDict, const MJson& _Config, const ProgressCallback& _ProgressCallback)
 {
 	//Check SamplingRate

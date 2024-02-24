@@ -76,6 +76,70 @@ VitsSvc::VitsSvc(const std::map<std::string, std::wstring>& _PathDict, const MJs
 	load(_PathDict, _Config, _ProgressCallback, ExecutionProvider_, DeviceID_, ThreadCount_, false);
 }
 
+VitsSvc::VitsSvc(const Hparams& _Hps, const ProgressCallback& _ProgressCallback, ExecutionProviders ExecutionProvider_, unsigned DeviceID_, unsigned ThreadCount_) :
+	SingingVoiceConversion(ExecutionProvider_, DeviceID_, ThreadCount_)
+{
+	MoeVSClassName(L"MoeVoiceStudioVitsSingingVoiceConversion");
+
+	_samplingRate = max(_Hps.SamplingRate, 2000);
+	HopSize = max(_Hps.HopSize, 1);
+	HiddenUnitKDims = max(_Hps.HiddenUnitKDims, 1);
+	SpeakerCount = max(_Hps.SpeakerCount, 1);
+	EnableVolume = _Hps.EnableVolume;
+	EnableCharaMix = _Hps.EnableCharaMix;
+	VitsSvcVersion = _Hps.TensorExtractor;
+
+#ifdef MOEVSDMLPROVIDER
+	if (ExecutionProvider_ == ExecutionProviders::DML && VitsSvcVersion == L"SoVits4.0-DDSP")
+		LibDLVoiceCodecThrow("[Error] DirectXMl Not Support SoVits4.0V2, Please Use Cuda Or Cpu")
+#endif
+
+	_callback = _ProgressCallback;
+
+	if (!_Hps.Cluster.Type.empty())
+	{
+		ClusterCenterSize = _Hps.Cluster.ClusterCenterSize;
+		try
+		{
+			Cluster = MoeVoiceStudioCluster::GetMoeVSCluster(_Hps.Cluster.Type, _Hps.Cluster.Path, HiddenUnitKDims, ClusterCenterSize);
+			EnableCluster = true;
+		}
+		catch (std::exception& e)
+		{
+			logger.error(e.what());
+			EnableCluster = false;
+		}
+	}
+
+	try
+	{
+		logger.log(L"[Info] loading VitsSvcModel Models");
+		hubert = new Ort::Session(*env, _Hps.HubertPath.c_str(), *session_options);
+		VitsSvcModel = new Ort::Session(*env, _Hps.VitsSvc.VitsSvc.c_str(), *session_options);
+		logger.log(L"[Info] VitsSvcModel Models loaded");
+	}
+	catch (Ort::Exception& _exception)
+	{
+		Destory();
+		LibDLVoiceCodecThrow(_exception.what())
+	}
+
+	if (VitsSvcModel->GetInputCount() == 4 && VitsSvcVersion != L"SoVits3.0")
+		VitsSvcVersion = L"SoVits2.0";
+
+	MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor::Others _others_param;
+	_others_param.Memory = *memory_info;
+	try
+	{
+		_TensorExtractor = GetTensorExtractor(VitsSvcVersion, 48000, _samplingRate, HopSize, EnableCharaMix, EnableVolume, HiddenUnitKDims, SpeakerCount, _others_param);
+	}
+	catch (std::exception& e)
+	{
+		Destory();
+		LibDLVoiceCodecThrow(e.what())
+	}
+}
+
 void VitsSvc::load(const std::map<std::string, std::wstring>& _PathDict, const MJson& _Config, const ProgressCallback& _ProgressCallback, ExecutionProviders ExecutionProvider_, unsigned DeviceID_, unsigned ThreadCount_, bool MoeVoiceStudioFrontEnd)
 {
 

@@ -97,6 +97,12 @@
     <Filter Include="源文件\Lib\World">
       <UniqueIdentifier>{3405ef93-0ba8-495b-9110-22b821411ce9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\API">
+      <UniqueIdentifier>{e5b4addf-6f94-41ac-8186-49efa1f37d72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\API">
+      <UniqueIdentifier>{c1f11d2a-5fb5-4480-b895-2e26036943b5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Modules\header\Models\EnvManager.hpp">
@@ -231,6 +237,9 @@
     <ClInclude Include="Modules\Lib\World\src\world\stonemask.h">
       <Filter>头文件\Lib\World</Filter>
     </ClInclude>
+    <ClInclude Include="Api\header\libsvc.h">
+      <Filter>头文件\API</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -358,6 +367,9 @@
     </ClCompile>
     <ClCompile Include="Modules\Lib\MJson\MJson.cpp">
       <Filter>源文件\Lib\Json</Filter>
+    </ClCompile>
+    <ClCompile Include="Api\src\libsvc.cpp">
+      <Filter>源文件\API</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
