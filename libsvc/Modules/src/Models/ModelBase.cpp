@@ -1,15 +1,25 @@
 ﻿#include "../../header/Models/ModelBase.hpp"
 #include <commdlg.h>
-#include "../../header/Models/EnvManager.hpp"
 MoeVoiceStudioCoreHeader
 
 MoeVoiceStudioModule::MoeVoiceStudioModule(const ExecutionProviders& ExecutionProvider_, unsigned DeviceID_, unsigned ThreadCount_)
 {
-	moevsenv::GetGlobalMoeVSEnv().Load(ThreadCount_, DeviceID_, (unsigned)ExecutionProvider_);
-	_cur_execution_provider = ExecutionProvider_;
-	env = moevsenv::GetGlobalMoeVSEnv().GetEnv();
-	memory_info = moevsenv::GetGlobalMoeVSEnv().GetMemoryInfo();
-	session_options = moevsenv::GetGlobalMoeVSEnv().GetSessionOptions();
+	if (moevsenv::SingleOrtApiEnvEnabled())
+	{
+		OrtApiEnv.Load(ThreadCount_, DeviceID_, (unsigned)ExecutionProvider_);
+		_cur_execution_provider = ExecutionProvider_;
+		env = OrtApiEnv.GetEnv();
+		memory_info = OrtApiEnv.GetMemoryInfo();
+		session_options = OrtApiEnv.GetSessionOptions();
+	}
+	else
+	{
+		moevsenv::GetGlobalMoeVSEnv().Load(ThreadCount_, DeviceID_, (unsigned)ExecutionProvider_);
+		_cur_execution_provider = ExecutionProvider_;
+		env = moevsenv::GetGlobalMoeVSEnv().GetEnv();
+		memory_info = moevsenv::GetGlobalMoeVSEnv().GetMemoryInfo();
+		session_options = moevsenv::GetGlobalMoeVSEnv().GetSessionOptions();
+	}
 }
 
 MoeVoiceStudioModule::~MoeVoiceStudioModule()

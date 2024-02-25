@@ -79,6 +79,12 @@ namespace libsvccore
 	/// </summary>
 	/// <returns></returns>
 	LibSvcApi void Init();
+
+	/// <summary>
+	/// 设置全局环境（主要影响F0Predictor）
+	/// </summary>
+	/// <returns></returns>
+	LibSvcApi void SetGlobalEnv(unsigned ThreadCount, unsigned DeviceID, unsigned Provider);
 }
 
 namespace libsvc
@@ -101,6 +107,7 @@ namespace libsvc
 	using libsvccore::EmptyStftCache;
 	using libsvccore::LoadVocoder;
 	using libsvccore::Init;
+	using libsvccore::SetGlobalEnv;
 
 	/// <summary>
 	/// 卸载一个模型

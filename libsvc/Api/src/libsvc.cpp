@@ -247,6 +247,11 @@ namespace libsvccore
 	{
 		MoeVSModuleManager::MoeVoiceStudioCoreInitSetup();
 		vocoder_memory_info = new Ort::MemoryInfo(Ort::MemoryInfo::CreateCpu(OrtArenaAllocator, OrtMemTypeDefault));
+		moevsenv::UseSingleOrtApiEnv(true);
 	}
 
+	void SetGlobalEnv(unsigned ThreadCount, unsigned DeviceID, unsigned Provider)
+	{
+		moevsenv::GetGlobalMoeVSEnv().Load(ThreadCount, DeviceID, Provider);
+	}
 }

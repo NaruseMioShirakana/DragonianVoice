@@ -27,6 +27,8 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
+
+#include "EnvManager.hpp"
 #include "MoeVSProject.hpp"
 #include "../InferTools/inferTools.hpp"
 
@@ -184,6 +186,7 @@ protected:
 	Ort::MemoryInfo* memory_info = nullptr;
 	ExecutionProviders _cur_execution_provider = ExecutionProviders::CPU;
 	ProgressCallback _callback;
+	moevsenv::MoeVoiceStudioEnv OrtApiEnv;
 
 	std::vector<std::wstring> __NAME__CLASS__ = { L"MoeVoiceStudioModule" };
 public:

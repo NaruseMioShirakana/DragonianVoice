@@ -27,6 +27,11 @@
 #define MoeVoiceStudioCoreEnvManagerEnd }
 
 MoeVoiceStudioCoreEnvManagerHeader
+
+bool SingleOrtApiEnvEnabled();
+
+void UseSingleOrtApiEnv(bool _cond);
+
 class MoeVoiceStudioEnv
 {
 public:

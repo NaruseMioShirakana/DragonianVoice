@@ -9,7 +9,19 @@
 #include "../../header/Modules.hpp"
 MoeVoiceStudioCoreEnvManagerHeader
 
-const char* logger_id = "MoeVoiceStudioCore";
+bool SingleOrtApiEnv = false;
+
+bool SingleOrtApiEnvEnabled()
+{
+	return SingleOrtApiEnv;
+}
+
+void UseSingleOrtApiEnv(bool _cond)
+{
+	SingleOrtApiEnv = _cond;
+}
+
+const char* logger_id = "libdlvoicecodec";
 
 void MoeVSOrtLoggingFn(void* param, OrtLoggingLevel severity, const char* category, const char* logid, const char* code_location,
 	const char* message)
