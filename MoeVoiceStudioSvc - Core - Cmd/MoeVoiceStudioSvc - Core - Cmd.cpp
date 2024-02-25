@@ -1,117 +1,93 @@
-﻿#include <regex>
-#include "Modules/StringPreprocess.hpp"
-#ifndef MOEVSONNX
-#include <deque>
-#include <mutex>
-#include <iostream>
-#include <windows.h>
-#include "LibDLVoiceCodec/value.h"
-#pragma comment(lib, "winmm.lib") 
+﻿#include <iostream>
 
-#ifdef _IOSTREAM_
-std::ostream& operator<<(std::ostream& stream, const std::wstring& str)
+#include "../libsvc/Api/header/libsvc.h"
+
+//测试用代码
+#pragma pack(push, 1)
+struct WavHeader {
+	char riff[4];        // "RIFF"标志
+	DWORD fileSize;      // 文件大小
+	char wave[4];        // "WAVE"标志
+	char fmt[4];         // "fmt "标志
+	DWORD fmtSize;       // 格式数据大小
+	WORD audioFormat;    // 音频格式
+	WORD numChannels;    // 声道数
+	DWORD sampleRate;    // 采样率
+	DWORD byteRate;      // 每秒字节数
+	WORD blockAlign;     // 数据块对齐
+	WORD bitsPerSample;  // 采样位数
+	char data[4];        // "data"标志
+	DWORD dataSize;      // 音频数据大小
+};
+#pragma pack(pop)
+WavHeader header;
+bool ReadWavFile(const wchar_t* filename, std::vector<short>& audioData)
 {
-	return stream << to_byte_string(str);
-}
-#include <vector>
-template<typename T>
-std::ostream& operator<<(std::ostream& stream, std::vector<T>& vec)
-{
-	stream << "[ ";
-	for (size_t i = 0; i < vec.size(); ++i)
-	{
-		stream << vec[i];
-		if (i != vec.size() - 1)
-			stream << ", ";
+	FILE* file = nullptr;
+	_wfopen_s(&file, filename, L"rb");
+	if (!file) {
+		return false;
 	}
-	stream << " ]";
-	return stream;
+
+	fread(&header, sizeof(WavHeader), 1, file);
+
+	if (memcmp(header.riff, "RIFF", 4) != 0 ||
+		memcmp(header.wave, "WAVE", 4) != 0 ||
+		memcmp(header.fmt, "fmt ", 4) != 0 ||
+		memcmp(header.data, "data", 4) != 0) {
+		fclose(file);
+		return false;
+	}
+
+	audioData.resize(header.dataSize / sizeof(short));
+	fread(audioData.data(), sizeof(short), audioData.size(), file);
+
+	fclose(file);
+
+	return true;
 }
-#endif
-#ifdef _VECTOR_
-template <typename T>
-std::vector<T>& operator-=(std::vector<T>& left, const std::vector<T>& right)
+
+void WriteWavFile(const wchar_t* filename, const std::vector<short>& audioData)
 {
-	for (size_t i = 0; i < left.size() && i < right.size(); ++i)
-		left[i] -= right[i];
-	return left;
+	FILE* file = nullptr;
+	_wfopen_s(&file, filename, L"wb+");
+	if (!file) {
+		return;
+	}
+
+	fwrite(&header, sizeof(WavHeader), 1, file);
+
+	fwrite(audioData.data(), sizeof(short), audioData.size(), file);
+
+	fclose(file);
 }
-#endif
 
 int main()
 {
-	libdlvcodec::Tensor a({1,2,3});
+	libsvc::Init();
+	libsvc::Config Config;
+	Config.TensorExtractor = L"RVC";
+	Config.SamplingRate = 40000;
+	Config.HopSize = 320;
+	Config.HubertPath = LR"(S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\x64\Debug\hubert\vec-768-layer-12.onnx)";
+	Config.SpeakerCount = 1;
+	Config.HiddenUnitKDims = 768;
+	Config.VitsSvc.VitsSvc = LR"(S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\x64\Debug\Models\NaruseMioShirakana\NaruseMioShirakana_RVC.onnx)";
+	libsvc::LoadModel(libsvc::ModelType::Vits, Config, L"Shirakana", [](size_t, size_t) {}, MoeVoiceStudioCore::MoeVoiceStudioModule::ExecutionProviders::CPU, 0, 8);
+	std::vector<int16_t> _Pcm;
+	ReadWavFile(L"input.wav", _Pcm);
+	InferTools::SlicerSettings _SS;
+	_SS.SamplingRate = static_cast<int32_t>(header.sampleRate);
+	const auto pos = libsvc::SliceAudio(_Pcm, _SS);
+	const auto slices = libsvc::PreprocessSlices(_Pcm, pos, _SS, static_cast<int>(header.sampleRate));
+	size_t prop = 0;
+	_Pcm.clear();
+	for(const auto& i : slices.Slices)
+	{
+		const auto _Temp = libsvc::InferSlice(libsvc::ModelType::Vits, L"Shirakana", i, {}, prop);
+		_Pcm.insert(_Pcm.end(), _Temp.begin(), _Temp.end());
+		std::cout << double(++prop) / double(slices.Slices.size()) * 100. << std::endl;
+	}
+	
+	WriteWavFile(L"output.wav", _Pcm);
 }
-#endif
-
-/*MoeVSModuleManager::MoeVoiceStudioCoreInitSetup();
-
-	DlCodecStft::Mel(2048, 512, 32000, 128)(InferTools::arange(0, 1, 0.00001));
-
-	try
-	{
-		MoeVSModuleManager::LoadVitsSvcModel(
-			MJson(to_byte_string(GetCurrentFolder() + L"/Models/crs.json").c_str()),
-			[](size_t cur, size_t total)
-			{
-				std::cout << (double(cur) / double(total) * 100.) << "%\n";
-			},
-			0,
-			8,
-			0
-			);
-		MoeVSModuleManager::LoadDiffusionSvcModel(
-			MJson(to_byte_string(GetCurrentFolder() + L"/Models/ShallowDiffusion.json").c_str()),
-			[](size_t cur, size_t total)
-			{
-				std::cout << (double(cur) / double(total) * 100.) << "%\n";
-			},
-			0,
-			8,
-			0
-		);
-		MoeVSModuleManager::LoadVocoderModel(L"S:\\VSGIT\\MoeVoiceStudioSvc - Core - Cmd\\x64\\Release\\hifigan\\nsf_hifigan.onnx");
-	}
-	catch (std::exception& e)
-	{
-		std::cout << e.what();
-		return 0;
-	}
-
-	MoeVSProjectSpace::MoeVSSvcParams Params;
-	Params.Sampler = L"DDim";
-	Params.Step = 100;
-	Params.Pndm = 5;
-	InferTools::SlicerSettings Settings;
-	Params.F0Method = L"Dio";
-	//Settings.SamplingRate = MoeVSModuleManager::GetCurSvcModel()->GetSamplingRate();
-	Params.Keys = 0;
-	std::wstring Paths;
-
-	//MoeVSModuleManager::GetCurSvcModel()->Inference(Paths, Params, Settings);
-
-	return 0;
-
-	const MJson Config(to_byte_string(GetCurrentFolder() + L"/Models/HimenoSena.json").c_str());  //改为模型配置路径（相对exe）
-	const MoeVoiceStudioCore::MoeVoiceStudioModule::ProgressCallback ProCallback = [](size_t cur, size_t total)
-	{
-		std::cout << (double(cur) / double(total) * 100.) << "%\n";
-	};
-	const MoeVoiceStudioCore::TextToSpeech::DurationCallback DurCallback = [](std::vector<float>&)
-	{
-		return;
-	};
-	try
-	{
-		const MoeVoiceStudioCore::TextToSpeech* VitsTest = dynamic_cast<MoeVoiceStudioCore::TextToSpeech*>(new MoeVoiceStudioCore::Vits(Config, ProCallback, DurCallback, MoeVoiceStudioCore::MoeVoiceStudioModule::ExecutionProviders::CPU, 8, 0));
-		//这里改为Json的字符串或者Json文件
-		const auto Voice = VitsTest->Inference(MJson("S:\\VSGIT\\MoeVoiceStudioSvc - Core - Cmd\\x64\\Debug\\test.json"));
-		//输出
-		InferTools::Wav::WritePCMData(VitsTest->GetSamplingRate(), 1, Voice[0], L"Test1.wav");
-	}
-	catch (std::exception& e)
-	{
-		std::cout << e.what();
-	}
-
-	return 0;*/

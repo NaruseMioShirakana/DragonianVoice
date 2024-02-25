@@ -1,6 +1,7 @@
 #include "../header/libsvc.h"
 #include <queue>
 #include "../../header/InferTools/Stft/stft.hpp"
+#include <random>
 namespace libsvccore
 {
 	std::unordered_map<std::wstring, DiffusionSvc*> DiffusionSvcSessions;
@@ -10,6 +11,7 @@ namespace libsvccore
 	size_t MaxErrorCount = 10;
 	std::unordered_map<std::wstring, DlCodecStft::Mel*> MelOperators;
 	Ort::MemoryInfo* vocoder_memory_info = nullptr;
+	std::any NoneType(false);
 
 	void RaiseError(const std::wstring& _Msg)
 	{
@@ -112,36 +114,31 @@ namespace libsvccore
 			UnloadVitsSvcSession(_Name);
 	}
 
-	void SafeFree(void** _Ptr)
+	std::mt19937 gen;
+	std::uniform_int_distribution<size_t> normal;
+	std::unordered_map<size_t, std::any> LibSvcRtnData;
+
+	std::mutex RtnDataMx;
+	void EmplaceRtnData(size_t& _Id, std::any&& _Val)
 	{
-		if (*_Ptr)
-			free(*_Ptr);
-		*_Ptr = nullptr;
+		std::lock_guard lg(RtnDataMx);
+		for (_Id = normal(gen); LibSvcRtnData.find(_Id) != LibSvcRtnData.end(); ) _Id = normal(gen);
+		LibSvcRtnData[_Id] = _Val;
 	}
 
-	void SafeAlloc(void** _Ptr, size_t _Size)
+	void SliceAudio(size_t& _Id, const std::vector<int16_t>& _Audio, const InferTools::SlicerSettings& _Setting)
 	{
-		*_Ptr = malloc(_Size);
+		EmplaceRtnData(_Id, InferTools::SliceAudio(_Audio, _Setting));
 	}
 
-	void SliceAudio(void* _Output, const std::vector<int16_t>& _Audio, const InferTools::SlicerSettings& _Setting)
+	void Preprocess(size_t& _Id, const std::vector<int16_t>& _Audio, const std::vector<size_t>& _SlicePos, const InferTools::SlicerSettings& _Setting, int _SamplingRate, int _HopSize, const std::wstring& _F0Method)
 	{
-		if (!_Output)
-			return;
-		const auto _Ptr = static_cast<std::vector<size_t>*>(_Output);
-		*_Ptr = InferTools::SliceAudio(_Audio, _Setting);
+		auto Rtn = MoeVoiceStudioCore::SingingVoiceConversion::GetAudioSlice(_Audio, _SlicePos, _Setting);
+		MoeVoiceStudioCore::SingingVoiceConversion::PreProcessAudio(Rtn, _SamplingRate, _HopSize, _F0Method);
+		EmplaceRtnData(_Id, std::move(Rtn));
 	}
 
-	void Preprocess(void* _Output, const std::vector<int16_t>& _Audio, const std::vector<size_t>& _SlicePos, const InferTools::SlicerSettings& _Setting, int _SamplingRate, int _HopSize, const std::wstring& _F0Method)
-	{
-		if (!_Output)
-			return;
-		const auto _Ptr = static_cast<Slices*>(_Output);
-		*_Ptr = MoeVoiceStudioCore::SingingVoiceConversion::GetAudioSlice(_Audio, _SlicePos, _Setting);
-		MoeVoiceStudioCore::SingingVoiceConversion::PreProcessAudio(*_Ptr, _SamplingRate, _HopSize, _F0Method);
-	}
-
-	int InferSlice(void* _Output, ModelType _T, const std::wstring& _Name, const SingleSlice& _Slice, const Params& _InferParams, size_t& _Process)
+	int InferSlice(size_t& _Id, ModelType _T, const std::wstring& _Name, const SingleSlice& _Slice, const Params& _InferParams, size_t& _Process)
 	{
 		const MoeVoiceStudioCore::SingingVoiceConversion* _Model = nullptr;
 		if (_T == ModelType::Vits && VitsSvcSessions.find(_Name) != VitsSvcSessions.end())
@@ -160,20 +157,21 @@ namespace libsvccore
 			RaiseError(L"Model Not Exists");
 			return 1;
 		}
-		const auto _Ptr = static_cast<std::vector<int16_t>*>(_Output);
+		std::vector<int16_t> Rtn;
 		try
 		{
-			*_Ptr = _Model->SliceInference(_Slice, _InferParams, _Process);
+			Rtn = _Model->SliceInference(_Slice, _InferParams, _Process);
 		}
 		catch (std::exception& e)
 		{
 			RaiseError(to_wide_string(e.what()));
 			return 1;
 		}
+		EmplaceRtnData(_Id, std::move(Rtn));
 		return 0;
 	}
 
-	int ShallowDiffusionInference(void* _Output, const std::wstring& _Name, const std::vector<float>& _16KAudioHubert, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, const std::pair<std::vector<float>, int64_t>& _Mel, const std::vector<float>& _SrcF0, const std::vector<float>& _SrcVolume, const std::vector<std::vector<float>>& _SrcSpeakerMap, size_t& Process, int64_t SrcSize)
+	int ShallowDiffusionInference(size_t& _Id, const std::wstring& _Name, const std::vector<float>& _16KAudioHubert, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, const std::pair<std::vector<float>, int64_t>& _Mel, const std::vector<float>& _SrcF0, const std::vector<float>& _SrcVolume, const std::vector<std::vector<float>>& _SrcSpeakerMap, size_t& Process, int64_t SrcSize)
 	{
 		if (!MoeVSModuleManager::VocoderEnabled())
 		{
@@ -182,31 +180,53 @@ namespace libsvccore
 		}
 		if(DiffusionSvcSessions.find(_Name) != DiffusionSvcSessions.end())
 		{
-			const auto _Ptr = static_cast<std::vector<int16_t>*>(_Output);
+			std::vector<int16_t> Rtn;
 			try
 			{
 				auto _Hubert = _16KAudioHubert;
 				auto _MelCopy = _Mel;
-				*_Ptr = DiffusionSvcSessions.at(_Name)->ShallowDiffusionInference(_Hubert, _InferParams, _MelCopy, _SrcF0, _SrcVolume, _SrcSpeakerMap, Process, SrcSize);
+				Rtn = DiffusionSvcSessions.at(_Name)->ShallowDiffusionInference(_Hubert, _InferParams, _MelCopy, _SrcF0, _SrcVolume, _SrcSpeakerMap, Process, SrcSize);
 			}
 			catch (std::exception& e)
 			{
 				RaiseError(to_wide_string(e.what()));
 				return 1;
 			}
+			EmplaceRtnData(_Id, std::move(Rtn));
 			return 0;
 		}
 		RaiseError(L"Model Not Exists");
 		return 1;
 	}
 
-	void Stft(void* _Output, const std::vector<double>& _NormalizedAudio, int _SamplingRate, int _Hopsize, int _MelBins)
+	int Stft(size_t& _Id, const std::vector<double>& _NormalizedAudio, int _SamplingRate, int _Hopsize, int _MelBins)
 	{
-		const auto _Ptr = static_cast<std::pair<std::vector<float>, int64_t>*>(_Output);
 		const std::wstring _Name = L"S" + std::to_wstring(_SamplingRate) + L"H" + std::to_wstring(_Hopsize) + L"M" + std::to_wstring(_MelBins);
 		if (MelOperators.find(_Name) == MelOperators.end())
 			MelOperators[_Name] = new DlCodecStft::Mel(_Hopsize * 4, _Hopsize, _SamplingRate, _MelBins);
-		*_Ptr = MelOperators.at(_Name)->operator()(_NormalizedAudio);
+		EmplaceRtnData(_Id, MelOperators.at(_Name)->operator()(_NormalizedAudio));
+		return 0;
+	}
+
+	int VocoderEnhance(size_t& _Id, const std::vector<float>& Mel, const std::vector<float>& F0, size_t MelSize, long VocoderMelBins)
+	{
+		if(!MoeVoiceStudioCore::VocoderEnabled())
+		{
+			RaiseError(L"Vocoder Not Exists");
+			return 1;
+		}
+		auto Rf0 = F0;
+		auto MelTemp = Mel;
+		if (Rf0.size() != MelSize)
+			Rf0 = InferTools::InterpFunc(Rf0, (long)Rf0.size(), (long)MelSize);
+		EmplaceRtnData(_Id, MoeVoiceStudioCore::VocoderInfer(
+			MelTemp,
+			Rf0,
+			VocoderMelBins,
+			(int64_t)MelSize,
+			vocoder_memory_info
+		));
+		return 0;
 	}
 
 	void EmptyStftCache()
@@ -221,28 +241,6 @@ namespace libsvccore
 		MoeVoiceStudioCore::LoadVocoderModel(VocoderPath);
 	}
 
-	int VocoderEnhance(void* _Output, const std::vector<float>& Mel, const std::vector<float>& F0, size_t MelSize, long VocoderMelBins)
-	{
-		if(!MoeVoiceStudioCore::VocoderEnabled())
-		{
-			RaiseError(L"Vocoder Not Exists");
-			return 1;
-		}
-		const auto _Ptr = static_cast<std::vector<int16_t>*>(_Output);
-		auto Rf0 = F0;
-		auto MelTemp = Mel;
-		if (Rf0.size() != MelSize)
-			Rf0 = InferTools::InterpFunc(Rf0, (long)Rf0.size(), (long)MelSize);
-		*_Ptr = MoeVoiceStudioCore::VocoderInfer(
-			MelTemp,
-			Rf0,
-			VocoderMelBins,
-			(int64_t)MelSize,
-			vocoder_memory_info
-		);
-		return 0;
-	}
-
 	void Init()
 	{
 		MoeVSModuleManager::MoeVoiceStudioCoreInitSetup();
@@ -254,4 +252,18 @@ namespace libsvccore
 	{
 		moevsenv::GetGlobalMoeVSEnv().Load(ThreadCount, DeviceID, Provider);
 	}
+
+	std::any& GetData(size_t _Id)
+	{
+		if (LibSvcRtnData.find(_Id) != LibSvcRtnData.end())
+			return LibSvcRtnData.at(_Id);
+		return NoneType;
+	}
+
+	void PopData(size_t _Id)
+	{
+		std::lock_guard lg(RtnDataMx);
+		LibSvcRtnData.erase(_Id);
+	}
+
 }

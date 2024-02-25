@@ -117,8 +117,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Lib\ffmpeg-4.2.1\Lib;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\runtimes\win-x64\native;$(SolutionDir)Lib\openblas\lib;$(SolutionDir)Lib\stft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;onnxruntime.lib;fftw3.lib;libopenblas.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Lib\ffmpeg-4.2.1\Lib;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\runtimes\win-x64\native;$(SolutionDir)Lib\openblas\lib;$(SolutionDir)Lib\stft;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\x64\libsvc\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;onnxruntime.lib;libsvc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -143,52 +143,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\Lib\MJson\yyjson.c" />
-    <ClCompile Include="..\Lib\World\src\cheaptrick.cpp" />
-    <ClCompile Include="..\Lib\World\src\codec.cpp" />
-    <ClCompile Include="..\Lib\World\src\common.cpp" />
-    <ClCompile Include="..\Lib\World\src\d4c.cpp" />
-    <ClCompile Include="..\Lib\World\src\dio.cpp" />
-    <ClCompile Include="..\Lib\World\src\fft.cpp" />
-    <ClCompile Include="..\Lib\World\src\harvest.cpp" />
-    <ClCompile Include="..\Lib\World\src\matlabfunctions.cpp" />
-    <ClCompile Include="..\Lib\World\src\stonemask.cpp" />
-    <ClCompile Include="..\Lib\World\src\synthesis.cpp" />
-    <ClCompile Include="..\Lib\World\src\synthesisrealtime.cpp" />
-    <ClCompile Include="..\Lib\World\tools\audioio.cpp" />
-    <ClCompile Include="..\Lib\World\tools\parameterio.cpp" />
     <ClCompile Include="LibDLVoiceCodec\base.cpp" />
     <ClCompile Include="LibDLVoiceCodec\operator.cpp" />
     <ClCompile Include="LibDLVoiceCodec\value.cpp" />
-    <ClCompile Include="Modules\DataStruct\KDTree.cpp" />
-    <ClCompile Include="Modules\InferTools\Cluster\MoeVSBaseCluster.cpp" />
-    <ClCompile Include="Modules\InferTools\Cluster\MoeVSClusterManager.cpp" />
-    <ClCompile Include="Modules\InferTools\Cluster\MoeVSIndexCluster.cpp" />
-    <ClCompile Include="Modules\InferTools\Cluster\MoeVSKmeansCluster.cpp" />
-    <ClCompile Include="Modules\InferTools\F0Extractor\BaseF0Extractor\BaseF0Extractor.cpp" />
-    <ClCompile Include="Modules\InferTools\F0Extractor\DioF0Extractor\DioF0Extractor.cpp" />
-    <ClCompile Include="Modules\InferTools\F0Extractor\F0ExtractorManager.cpp" />
-    <ClCompile Include="Modules\InferTools\F0Extractor\HarvestF0Extractor\HarvestF0Extractor.cpp" />
-    <ClCompile Include="Modules\InferTools\F0Extractor\NetF0Predictors\NetF0Predictors.cpp" />
-    <ClCompile Include="Modules\InferTools\G2P\MoeVSG2P.cpp" />
-    <ClCompile Include="Modules\InferTools\inferTools.cpp" />
-    <ClCompile Include="Modules\InferTools\Sampler\MoeVSBaseSampler.cpp" />
-    <ClCompile Include="Modules\InferTools\Sampler\MoeVSSamplerManager.cpp" />
-    <ClCompile Include="Modules\InferTools\Sampler\MoeVSSamplers.cpp" />
-    <ClCompile Include="Modules\InferTools\Stft\stft.cpp" />
-    <ClCompile Include="Modules\InferTools\TensorExtractor\MoeVoiceStudioTensorExtractor.cpp" />
-    <ClCompile Include="Modules\InferTools\TensorExtractor\MoeVSCoreTensorExtractor.cpp" />
-    <ClCompile Include="Modules\InferTools\TensorExtractor\TensorExtractorManager.cpp" />
-    <ClCompile Include="Modules\Logger\MoeSSLogger.cpp" />
-    <ClCompile Include="Modules\Models\EnvManager.cpp" />
-    <ClCompile Include="Modules\Models\src\DiffSvc.cpp" />
-    <ClCompile Include="Modules\Models\src\ModelBase.cpp" />
-    <ClCompile Include="Modules\Models\src\MoeVSProject.cpp" />
-    <ClCompile Include="Modules\Models\src\SVC.cpp" />
-    <ClCompile Include="Modules\Models\src\TTS.cpp" />
-    <ClCompile Include="Modules\Models\src\Vits.cpp" />
-    <ClCompile Include="Modules\Models\src\VitsSvc.cpp" />
-    <ClCompile Include="Modules\Modules.cpp" />
     <ClCompile Include="MoeVoiceStudioSvc - Core - Cmd.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -246,6 +203,7 @@
     <ClInclude Include="Modules\StringPreprocess.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\.gitignore" />
     <None Include="..\README.md" />
     <None Include="..\README_en.md" />
   </ItemGroup>

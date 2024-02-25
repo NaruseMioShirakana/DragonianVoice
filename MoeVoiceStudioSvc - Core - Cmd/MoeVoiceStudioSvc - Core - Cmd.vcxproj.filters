@@ -13,38 +13,20 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="源文件\Modules">
-      <UniqueIdentifier>{b06247ca-2285-44cf-8fbc-bdeb5e43b095}</UniqueIdentifier>
-    </Filter>
     <Filter Include="头文件\Modules">
       <UniqueIdentifier>{1c27b89b-a422-414a-8a9b-e3b4cfe00382}</UniqueIdentifier>
     </Filter>
     <Filter Include="头文件\Lib">
       <UniqueIdentifier>{72360403-6c70-4a9e-8510-d6d116c4d110}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Lib">
-      <UniqueIdentifier>{d417ed89-6f71-4ac3-8449-45a6aa1ffb25}</UniqueIdentifier>
-    </Filter>
     <Filter Include="头文件\Lib\World">
       <UniqueIdentifier>{5ee8b24d-0d7d-4ce3-a346-1aac9c990a59}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Lib\World">
-      <UniqueIdentifier>{5c9fbc8f-0170-4fd4-9c06-498bc2fd6050}</UniqueIdentifier>
     </Filter>
     <Filter Include="头文件\Lib\Json">
       <UniqueIdentifier>{48681f95-1540-4189-972c-6cc3528e6699}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Lib\Json">
-      <UniqueIdentifier>{d6d40f88-038a-48e2-851f-52208fb13d26}</UniqueIdentifier>
-    </Filter>
     <Filter Include="头文件\Modules\AVCodec">
       <UniqueIdentifier>{5958e013-1dc2-4551-84a8-cf2e66ccf5c7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Modules\AVCodec">
-      <UniqueIdentifier>{fdde9f6a-cbe5-4b74-9f8a-cd0fb634e203}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Modules\InferTools">
-      <UniqueIdentifier>{71ba53d6-016f-4f47-8b81-99af2c4b295c}</UniqueIdentifier>
     </Filter>
     <Filter Include="头文件\Modules\InferTools">
       <UniqueIdentifier>{ac48c536-6f94-4eb2-ad9f-81975d6364c0}</UniqueIdentifier>
@@ -52,41 +34,20 @@
     <Filter Include="头文件\Modules\Logger">
       <UniqueIdentifier>{4cedd722-b658-40ae-bb79-87c22154e1e5}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Modules\Logger">
-      <UniqueIdentifier>{410adff2-cf2d-4b12-b09c-a64a2f51db37}</UniqueIdentifier>
-    </Filter>
     <Filter Include="头文件\Modules\Models">
       <UniqueIdentifier>{7bc10a82-2361-40fa-a45f-34a3fc658bc5}</UniqueIdentifier>
     </Filter>
     <Filter Include="头文件\Modules\DataStruct">
       <UniqueIdentifier>{11b32da3-f9a6-4cf3-8021-d768e0aeeedf}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Modules\DataStruct">
-      <UniqueIdentifier>{4db62f28-4508-4f2e-8416-e0845f5e5ad1}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Modules\Models">
-      <UniqueIdentifier>{72ee2b07-b249-4301-a7cf-f3f8c2d4ad02}</UniqueIdentifier>
-    </Filter>
     <Filter Include="头文件\Modules\InferTools\TensorExtractor">
       <UniqueIdentifier>{265d1b47-a92d-45ac-a4a9-8dcb5f7ae920}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Modules\InferTools\TensorExtractor">
-      <UniqueIdentifier>{b0632b21-3225-4742-bd2c-d854adb47055}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Modules\InferTools\Sampler">
-      <UniqueIdentifier>{4d264c30-9df5-4810-8b18-e7fad5e6234a}</UniqueIdentifier>
     </Filter>
     <Filter Include="头文件\Modules\InferTools\Sampler">
       <UniqueIdentifier>{6faeac75-c0b1-43dd-8039-19e30bb6e3a7}</UniqueIdentifier>
     </Filter>
     <Filter Include="头文件\Modules\InferTools\F0Extractor">
       <UniqueIdentifier>{e884db22-461a-4d58-9613-77973937a209}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Modules\InferTools\F0Extractor">
-      <UniqueIdentifier>{69496051-5b57-4d43-b70a-d6937f8a18a2}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Modules\InferTools\Cluster">
-      <UniqueIdentifier>{390b6cca-ac90-4c70-b65b-1947481986dd}</UniqueIdentifier>
     </Filter>
     <Filter Include="头文件\Modules\InferTools\Cluster">
       <UniqueIdentifier>{7cc7c826-511c-434d-a057-362c82a3da04}</UniqueIdentifier>
@@ -97,17 +58,8 @@
     <Filter Include="头文件\LibDLVoiceCodec">
       <UniqueIdentifier>{9cdc3e22-5d4a-4a08-a1cd-57dd5c657e2c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Modules\InferTools\G2P">
-      <UniqueIdentifier>{c016ee4a-744e-431d-8bad-ac18310fb098}</UniqueIdentifier>
-    </Filter>
     <Filter Include="头文件\Modules\InferTools\G2P">
       <UniqueIdentifier>{b5a33287-5ba2-45ae-9135-5a8e3da3d93f}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Modules\Models\SVC">
-      <UniqueIdentifier>{3c32c0a2-b610-47d9-ab2b-ab37e9741903}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="源文件\Modules\Models\TTS">
-      <UniqueIdentifier>{2971f642-2c62-4b10-ad90-8cb65bcc99a0}</UniqueIdentifier>
     </Filter>
     <Filter Include="头文件\Modules\Models\TTS">
       <UniqueIdentifier>{02644a09-1bb9-48df-9364-1ea5177de68b}</UniqueIdentifier>
@@ -118,115 +70,10 @@
     <Filter Include="头文件\Modules\InferTools\Stft">
       <UniqueIdentifier>{d0408cd7-c27d-4858-9702-0e1227fc9c97}</UniqueIdentifier>
     </Filter>
-    <Filter Include="源文件\Modules\InferTools\Stft">
-      <UniqueIdentifier>{5085f9bd-9b2e-4ffd-8c97-084b73762ffa}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="MoeVoiceStudioSvc - Core - Cmd.cpp">
       <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\World\src\cheaptrick.cpp">
-      <Filter>源文件\Lib\World</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\World\src\codec.cpp">
-      <Filter>源文件\Lib\World</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\World\src\common.cpp">
-      <Filter>源文件\Lib\World</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\World\src\d4c.cpp">
-      <Filter>源文件\Lib\World</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\World\src\dio.cpp">
-      <Filter>源文件\Lib\World</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\World\src\fft.cpp">
-      <Filter>源文件\Lib\World</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\World\src\harvest.cpp">
-      <Filter>源文件\Lib\World</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\World\src\matlabfunctions.cpp">
-      <Filter>源文件\Lib\World</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\World\src\stonemask.cpp">
-      <Filter>源文件\Lib\World</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\World\src\synthesis.cpp">
-      <Filter>源文件\Lib\World</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\World\src\synthesisrealtime.cpp">
-      <Filter>源文件\Lib\World</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\World\tools\parameterio.cpp">
-      <Filter>源文件\Lib\World</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\World\tools\audioio.cpp">
-      <Filter>源文件\Lib\World</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\Modules.cpp">
-      <Filter>源文件\Modules</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Lib\MJson\yyjson.c">
-      <Filter>源文件\Lib\Json</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\Models\src\ModelBase.cpp">
-      <Filter>源文件\Modules\Models</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\DataStruct\KDTree.cpp">
-      <Filter>源文件\Modules\DataStruct</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\Logger\MoeSSLogger.cpp">
-      <Filter>源文件\Modules\Logger</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\inferTools.cpp">
-      <Filter>源文件\Modules\InferTools</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\Cluster\MoeVSKmeansCluster.cpp">
-      <Filter>源文件\Modules\InferTools\Cluster</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\Cluster\MoeVSBaseCluster.cpp">
-      <Filter>源文件\Modules\InferTools\Cluster</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\Cluster\MoeVSClusterManager.cpp">
-      <Filter>源文件\Modules\InferTools\Cluster</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\F0Extractor\F0ExtractorManager.cpp">
-      <Filter>源文件\Modules\InferTools\F0Extractor</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\F0Extractor\HarvestF0Extractor\HarvestF0Extractor.cpp">
-      <Filter>源文件\Modules\InferTools\F0Extractor</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\F0Extractor\DioF0Extractor\DioF0Extractor.cpp">
-      <Filter>源文件\Modules\InferTools\F0Extractor</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\F0Extractor\BaseF0Extractor\BaseF0Extractor.cpp">
-      <Filter>源文件\Modules\InferTools\F0Extractor</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\Sampler\MoeVSSamplers.cpp">
-      <Filter>源文件\Modules\InferTools\Sampler</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\Sampler\MoeVSBaseSampler.cpp">
-      <Filter>源文件\Modules\InferTools\Sampler</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\Sampler\MoeVSSamplerManager.cpp">
-      <Filter>源文件\Modules\InferTools\Sampler</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\TensorExtractor\TensorExtractorManager.cpp">
-      <Filter>源文件\Modules\InferTools\TensorExtractor</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\TensorExtractor\MoeVoiceStudioTensorExtractor.cpp">
-      <Filter>源文件\Modules\InferTools\TensorExtractor</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\TensorExtractor\MoeVSCoreTensorExtractor.cpp">
-      <Filter>源文件\Modules\InferTools\TensorExtractor</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\Models\EnvManager.cpp">
-      <Filter>源文件\Modules\Models</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\F0Extractor\NetF0Predictors\NetF0Predictors.cpp">
-      <Filter>源文件\Modules\InferTools\F0Extractor</Filter>
     </ClCompile>
     <ClCompile Include="LibDLVoiceCodec\base.cpp">
       <Filter>源文件\LibDLVoiceCodec</Filter>
@@ -236,33 +83,6 @@
     </ClCompile>
     <ClCompile Include="LibDLVoiceCodec\operator.cpp">
       <Filter>源文件\LibDLVoiceCodec</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\Cluster\MoeVSIndexCluster.cpp">
-      <Filter>源文件\Modules\InferTools\Cluster</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\G2P\MoeVSG2P.cpp">
-      <Filter>源文件\Modules\InferTools\G2P</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\Models\src\SVC.cpp">
-      <Filter>源文件\Modules\Models\SVC</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\Models\src\DiffSvc.cpp">
-      <Filter>源文件\Modules\Models\SVC</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\Models\src\VitsSvc.cpp">
-      <Filter>源文件\Modules\Models\SVC</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\Models\src\MoeVSProject.cpp">
-      <Filter>源文件\Modules\Models</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\Models\src\TTS.cpp">
-      <Filter>源文件\Modules\Models\TTS</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\Models\src\Vits.cpp">
-      <Filter>源文件\Modules\Models\TTS</Filter>
-    </ClCompile>
-    <ClCompile Include="Modules\InferTools\Stft\stft.cpp">
-      <Filter>源文件\Modules\InferTools\Stft</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

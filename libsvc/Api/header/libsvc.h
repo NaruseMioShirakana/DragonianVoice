@@ -1,5 +1,6 @@
 #pragma once
 #include "../../Modules/header/Modules.hpp"
+#include <any>
 
 namespace libsvccore
 {
@@ -15,13 +16,17 @@ namespace libsvccore
 	using Params = MoeVSProjectSpace::MoeVSSvcParams;
 	enum class ModelType { Vits, Diffusion };
 
-	LibSvcApi void SafeAlloc(void** _Ptr, size_t _Size);
+	LibSvcApi void SliceAudio(size_t& _Id, const std::vector<int16_t>& _Audio, const InferTools::SlicerSettings& _Setting);
 
-	LibSvcApi void SafeFree(void** _Ptr);
+	LibSvcApi void Preprocess(size_t& _Id, const std::vector<int16_t>& _Audio, const std::vector<size_t>& _SlicePos, const InferTools::SlicerSettings& _Setting, int _SamplingRate, int _HopSize, const std::wstring& _F0Method);
 
-	LibSvcApi void SliceAudio(void* _Output, const std::vector<int16_t>& _Audio, const InferTools::SlicerSettings& _Setting);
+	LibSvcApi int InferSlice(size_t& _Id, ModelType _T, const std::wstring& _Name, const SingleSlice& _Slice, const Params& _InferParams, size_t& _Process);
 
-	LibSvcApi void Preprocess(void* _Output, const std::vector<int16_t>& _Audio, const std::vector<size_t>& _SlicePos, const InferTools::SlicerSettings& _Setting, int _SamplingRate = 48000, int _HopSize = 512, const std::wstring& _F0Method = L"Dio");
+	LibSvcApi int ShallowDiffusionInference(size_t& _Id, const std::wstring& _Name, const std::vector<float>& _16KAudioHubert, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, const std::pair<std::vector<float>, int64_t>& _Mel, const std::vector<float>& _SrcF0, const std::vector<float>& _SrcVolume, const std::vector<std::vector<float>>& _SrcSpeakerMap, size_t& Process, int64_t SrcSize);
+	
+	LibSvcApi int Stft(size_t& _Id, const std::vector<double>& _NormalizedAudio, int _SamplingRate, int _Hopsize, int _MelBins);
+
+	LibSvcApi int VocoderEnhance(size_t& _Id, const std::vector<float>& Mel, const std::vector<float>& F0, size_t MelSize, long VocoderMelBins);
 
 	LibSvcApi int LoadModel(ModelType _T, const Config& _Config, const std::wstring& _Name, const ProgressCallback& _ProgressCallback,
 		ExecutionProvider ExecutionProvider_ = ExecutionProvider::CPU,
@@ -29,23 +34,9 @@ namespace libsvccore
 
 	LibSvcApi void UnloadModel(ModelType _T, const std::wstring& _Name);
 
-	LibSvcApi int InferSlice(void* _Output, ModelType _T, const std::wstring& _Name, const SingleSlice& _Slice, const Params& _InferParams, size_t& _Process);
+	LibSvcApi std::any& GetData(size_t _Id);
 
-	LibSvcApi int ShallowDiffusionInference(
-		void* _Output, const std::wstring& _Name,
-		const std::vector<float>& _16KAudioHubert,
-		const MoeVSProjectSpace::MoeVSSvcParams& _InferParams,
-		const std::pair<std::vector<float>, int64_t>& _Mel,
-		const std::vector<float>& _SrcF0,
-		const std::vector<float>& _SrcVolume,
-		const std::vector<std::vector<float>>& _SrcSpeakerMap,
-		size_t& Process,
-		int64_t SrcSize
-	);
-	
-	LibSvcApi void Stft(void* _Output, const std::vector<double>& _NormalizedAudio, int _SamplingRate, int _Hopsize, int _MelBins);
-
-	LibSvcApi int VocoderEnhance(void* _Output, std::vector<float>& Mel, const std::vector<float>& F0, size_t MelSize, long VocoderMelBins);
+	LibSvcApi void PopData(size_t _Id);
 
 	/// <summary>
 	/// 设置Error队列的最大长度（缓存Error信息）
@@ -158,13 +149,10 @@ namespace libsvc
 		const InferTools::SlicerSettings& _Setting
 	)
 	{
-		void* _Ptr = nullptr;
-		libsvccore::SafeAlloc(&_Ptr, sizeof(std::vector<size_t>));
-		if (!_Ptr)
-			return {};
+		size_t _Ptr = 0;
 		libsvccore::SliceAudio(_Ptr, _Audio, _Setting);
-		std::vector temp = *static_cast<std::vector<size_t>*>(_Ptr);
-		libsvccore::SafeFree(&_Ptr);
+		std::vector temp = std::any_cast<std::vector<size_t>>(libsvccore::GetData(_Ptr));
+		libsvccore::PopData(_Ptr);
 		return temp;
 	}
 
@@ -187,13 +175,10 @@ namespace libsvc
 		const std::wstring& _F0Method = L"Dio"
 	)
 	{
-		void* _Ptr = nullptr;
-		libsvccore::SafeAlloc(&_Ptr, sizeof(Slices));
-		if (!_Ptr)
-			return {};
+		size_t _Ptr = 0;
 		libsvccore::Preprocess(_Ptr, _Audio, _SlicePos, _Setting, _SamplingRate, _HopSize, _F0Method);
-		Slices temp = *static_cast<Slices*>(_Ptr);
-		libsvccore::SafeFree(&_Ptr);
+		Slices temp = std::any_cast<Slices>(libsvccore::GetData(_Ptr));
+		libsvccore::PopData(_Ptr);
 		return temp;
 	}
 
@@ -212,12 +197,10 @@ namespace libsvc
 		int _MelBins
 	)
 	{
-		void* _Ptr = nullptr;
-		libsvccore::SafeAlloc(&_Ptr, sizeof(MelContainer));
-		if (!_Ptr)
-			return {};
+		size_t _Ptr = 0;
 		libsvccore::Stft(_Ptr, _NormalizedAudio, _SamplingRate, _Hopsize, _MelBins);
-		MelContainer temp = *static_cast<MelContainer*>(_Ptr);
+		MelContainer temp = std::any_cast<MelContainer>(libsvccore::GetData(_Ptr));
+		libsvccore::PopData(_Ptr);
 		return temp;
 	}
 
@@ -238,13 +221,11 @@ namespace libsvc
 		size_t& _Process
 	)
 	{
-		void* _Ptr = nullptr;
-		libsvccore::SafeAlloc(&_Ptr, sizeof(std::vector<int16_t>));
-		if (!_Ptr)
-			return {};
+		size_t _Ptr = 0;
 		if(!libsvccore::InferSlice(_Ptr, _T, _Name, _Slice, _InferParams, _Process))
 		{
-			std::vector<int16_t> temp = *static_cast<std::vector<int16_t>*>(_Ptr);
+			std::vector<int16_t> temp = std::any_cast<std::vector<int16_t>>(libsvccore::GetData(_Ptr));
+			libsvccore::PopData(_Ptr);
 			return temp;
 		}
 		return {};
@@ -275,13 +256,11 @@ namespace libsvc
 		int64_t SrcSize
 	)
 	{
-		void* _Ptr = nullptr;
-		libsvccore::SafeAlloc(&_Ptr, sizeof(std::vector<int16_t>));
-		if (!_Ptr)
-			return {};
+		size_t _Ptr = 0;
 		if(!libsvccore::ShallowDiffusionInference(_Ptr, _Name, _16KAudioHubert, _InferParams, _Mel, _SrcF0, _SrcVolume, _SrcSpeakerMap, Process, SrcSize))
 		{
-			std::vector<int16_t> temp = *static_cast<std::vector<int16_t>*>(_Ptr);
+			std::vector<int16_t> temp = std::any_cast<std::vector<int16_t>>(libsvccore::GetData(_Ptr));
+			libsvccore::PopData(_Ptr);
 			return temp;
 		}
 		return {};
@@ -297,13 +276,11 @@ namespace libsvc
 	 */
 	inline std::vector<int16_t> VocoderEnhance(std::vector<float>& Mel, const std::vector<float>& F0, size_t MelSize, long VocoderMelBins)
 	{
-		void* _Ptr = nullptr;
-		libsvccore::SafeAlloc(&_Ptr, sizeof(std::vector<int16_t>));
-		if (!_Ptr)
-			return {};
+		size_t _Ptr = 0;
 		if(!libsvccore::VocoderEnhance(_Ptr, Mel, F0, MelSize, VocoderMelBins))
 		{
-			std::vector<int16_t> temp = *static_cast<std::vector<int16_t>*>(_Ptr);
+			std::vector<int16_t> temp = std::any_cast<std::vector<int16_t>>(libsvccore::GetData(_Ptr));
+			libsvccore::PopData(_Ptr);
 			return temp;
 		}
 		return {};
