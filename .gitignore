@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /MoeVoiceStudioSvc - Core - Cmd/Modules/README.md
 /Lib
+/MoeVoiceStudioSvc - Core - Cmd/output.wav
+/MoeVoiceStudioSvc - Core - Cmd/input.wav
