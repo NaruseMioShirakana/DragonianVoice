@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\VC-LTL.5.0.9\build\native\VC-LTL.props" Condition="Exists('..\packages\VC-LTL.5.0.9\build\native\VC-LTL.props')" />
+  <Import Project="..\packages\YY.NuGet.Import.Helper.1.0.0.4\build\native\YY.NuGet.Import.Helper.props" Condition="Exists('..\packages\YY.NuGet.Import.Helper.1.0.0.4\build\native\YY.NuGet.Import.Helper.props')" />
+  <Import Project="..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.17.1\build\native\Microsoft.ML.OnnxRuntime.DirectML.props" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.17.1\build\native\Microsoft.ML.OnnxRuntime.DirectML.props')" />
+  <Import Project="..\packages\Microsoft.AI.DirectML.1.13.1\build\Microsoft.AI.DirectML.props" Condition="Exists('..\packages\Microsoft.AI.DirectML.1.13.1\build\Microsoft.AI.DirectML.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -44,6 +48,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <SupportLTL>true</SupportLTL>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -51,6 +56,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <SupportLTL>true</SupportLTL>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -71,10 +77,10 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>$(SolutionDir)Lib\World\src\world;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\build\native\include;$(SolutionDir)Lib\MJson;$(SolutionDir)Lib\ffmpeg-4.2.1\include;$(SolutionDir)Lib\openblas\include;$(SolutionDir)Lib\faiss;$(SolutionDir)Lib\stft;$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>$(SolutionDir)Lib\ffmpeg-4.2.1\include;$(SolutionDir)Lib\MJson;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\build\native\include;$(SolutionDir)Lib\World\src\world;$(SolutionDir)Lib\openblas\include;$(SolutionDir)Lib\faiss;$(SolutionDir)Lib\stft;$(IncludePath)</IncludePath>
+    <IncludePath>$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -117,8 +123,8 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Lib\ffmpeg-4.2.1\Lib;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\runtimes\win-x64\native;$(SolutionDir)Lib\openblas\lib;$(SolutionDir)Lib\stft;S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\x64\libsvc\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;onnxruntime.lib;libsvc.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\x64\libsvc\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libsvc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -138,76 +144,35 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalLibraryDirectories>$(SolutionDir)Lib\ffmpeg-4.2.1\Lib;$(SolutionDir)Lib\OnnxRuntimeDmlProvider\runtimes\win-x64\native;$(SolutionDir)Lib\openblas\lib;$(SolutionDir)Lib\stft;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>avcodec.lib;avformat.lib;avutil.lib;swresample.lib;swscale.lib;onnxruntime.lib;fftw3.lib;libopenblas.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>S:\VSGIT\MoeVoiceStudioSvc - Core - Cmd\x64\libsvc\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libsvc.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="LibDLVoiceCodec\base.cpp" />
-    <ClCompile Include="LibDLVoiceCodec\operator.cpp" />
-    <ClCompile Include="LibDLVoiceCodec\value.cpp" />
     <ClCompile Include="MoeVoiceStudioSvc - Core - Cmd.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\Lib\MJson\MJson.h" />
-    <ClInclude Include="..\Lib\MJson\yyjson.h" />
-    <ClInclude Include="..\Lib\World\src\world\cheaptrick.h" />
-    <ClInclude Include="..\Lib\World\src\world\codec.h" />
-    <ClInclude Include="..\Lib\World\src\world\common.h" />
-    <ClInclude Include="..\Lib\World\src\world\constantnumbers.h" />
-    <ClInclude Include="..\Lib\World\src\world\d4c.h" />
-    <ClInclude Include="..\Lib\World\src\world\dio.h" />
-    <ClInclude Include="..\Lib\World\src\world\fft.h" />
-    <ClInclude Include="..\Lib\World\src\world\harvest.h" />
-    <ClInclude Include="..\Lib\World\src\world\macrodefinitions.h" />
-    <ClInclude Include="..\Lib\World\src\world\matlabfunctions.h" />
-    <ClInclude Include="..\Lib\World\src\world\stonemask.h" />
-    <ClInclude Include="..\Lib\World\src\world\synthesis.h" />
-    <ClInclude Include="..\Lib\World\src\world\synthesisrealtime.h" />
-    <ClInclude Include="..\Lib\World\tools\audioio.h" />
-    <ClInclude Include="..\Lib\World\tools\parameterio.h" />
-    <ClInclude Include="LibDLVoiceCodec\base.h" />
-    <ClInclude Include="LibDLVoiceCodec\operator.h" />
-    <ClInclude Include="LibDLVoiceCodec\value.h" />
-    <ClInclude Include="Modules\AvCodec\AvCodeResample.h" />
-    <ClInclude Include="Modules\DataStruct\KDTree.hpp" />
-    <ClInclude Include="Modules\InferTools\Cluster\MoeVSBaseCluster.hpp" />
-    <ClInclude Include="Modules\InferTools\Cluster\MoeVSClusterManager.hpp" />
-    <ClInclude Include="Modules\InferTools\Cluster\MoeVSIndexCluster.hpp" />
-    <ClInclude Include="Modules\InferTools\Cluster\MoeVSKmeansCluster.hpp" />
-    <ClInclude Include="Modules\InferTools\F0Extractor\BaseF0Extractor\BaseF0Extractor.hpp" />
-    <ClInclude Include="Modules\InferTools\F0Extractor\DioF0Extractor\DioF0Extractor.hpp" />
-    <ClInclude Include="Modules\InferTools\F0Extractor\F0ExtractorManager.hpp" />
-    <ClInclude Include="Modules\InferTools\F0Extractor\HarvestF0Extractor\HarvestF0Extractor.hpp" />
-    <ClInclude Include="Modules\InferTools\F0Extractor\NetF0Predictors\NetF0Predictors.hpp" />
-    <ClInclude Include="Modules\InferTools\G2P\MoeVSG2P.hpp" />
-    <ClInclude Include="Modules\InferTools\inferTools.hpp" />
-    <ClInclude Include="Modules\InferTools\Sampler\MoeVSBaseSampler.hpp" />
-    <ClInclude Include="Modules\InferTools\Sampler\MoeVSSamplerManager.hpp" />
-    <ClInclude Include="Modules\InferTools\Sampler\MoeVSSamplers.hpp" />
-    <ClInclude Include="Modules\InferTools\Stft\stft.hpp" />
-    <ClInclude Include="Modules\InferTools\TensorExtractor\MoeVoiceStudioTensorExtractor.hpp" />
-    <ClInclude Include="Modules\InferTools\TensorExtractor\MoeVSCoreTensorExtractor.hpp" />
-    <ClInclude Include="Modules\InferTools\TensorExtractor\TensorExtractorManager.hpp" />
-    <ClInclude Include="Modules\Logger\MoeSSLogger.hpp" />
-    <ClInclude Include="Modules\Models\EnvManager.hpp" />
-    <ClInclude Include="Modules\Models\header\DiffSvc.hpp" />
-    <ClInclude Include="Modules\Models\header\ModelBase.hpp" />
-    <ClInclude Include="Modules\Models\header\MoeVSProject.hpp" />
-    <ClInclude Include="Modules\Models\header\SVC.hpp" />
-    <ClInclude Include="Modules\Models\header\Tacotron.hpp" />
-    <ClInclude Include="Modules\Models\header\TTS.hpp" />
-    <ClInclude Include="Modules\Models\header\Vits.hpp" />
-    <ClInclude Include="Modules\Models\header\VitsSvc.hpp" />
-    <ClInclude Include="Modules\Modules.hpp" />
-    <ClInclude Include="Modules\StringPreprocess.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.gitignore" />
     <None Include="..\README.md" />
     <None Include="..\README_en.md" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\Microsoft.AI.DirectML.1.13.1\build\Microsoft.AI.DirectML.targets" Condition="Exists('..\packages\Microsoft.AI.DirectML.1.13.1\build\Microsoft.AI.DirectML.targets')" />
+    <Import Project="..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.17.1\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets" Condition="Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.17.1\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets')" />
+    <Import Project="..\packages\YY.NuGet.Import.Helper.1.0.0.4\build\native\YY.NuGet.Import.Helper.targets" Condition="Exists('..\packages\YY.NuGet.Import.Helper.1.0.0.4\build\native\YY.NuGet.Import.Helper.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>这台计算机上缺少此项目引用的 NuGet 程序包。使用“NuGet 程序包还原”可下载这些程序包。有关更多信息，请参见 http://go.microsoft.com/fwlink/?LinkID=322105。缺少的文件是 {0}。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.AI.DirectML.1.13.1\build\Microsoft.AI.DirectML.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.AI.DirectML.1.13.1\build\Microsoft.AI.DirectML.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.AI.DirectML.1.13.1\build\Microsoft.AI.DirectML.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.AI.DirectML.1.13.1\build\Microsoft.AI.DirectML.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.17.1\build\native\Microsoft.ML.OnnxRuntime.DirectML.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.17.1\build\native\Microsoft.ML.OnnxRuntime.DirectML.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.17.1\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.ML.OnnxRuntime.DirectML.1.17.1\build\native\Microsoft.ML.OnnxRuntime.DirectML.targets'))" />
+    <Error Condition="!Exists('..\packages\YY.NuGet.Import.Helper.1.0.0.4\build\native\YY.NuGet.Import.Helper.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\YY.NuGet.Import.Helper.1.0.0.4\build\native\YY.NuGet.Import.Helper.props'))" />
+    <Error Condition="!Exists('..\packages\YY.NuGet.Import.Helper.1.0.0.4\build\native\YY.NuGet.Import.Helper.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\YY.NuGet.Import.Helper.1.0.0.4\build\native\YY.NuGet.Import.Helper.targets'))" />
+    <Error Condition="!Exists('..\packages\VC-LTL.5.0.9\build\native\VC-LTL.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\VC-LTL.5.0.9\build\native\VC-LTL.props'))" />
+  </Target>
 </Project>

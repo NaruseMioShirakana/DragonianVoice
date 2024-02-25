@@ -27,7 +27,7 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 #include <windows.h>
-
+#include "../../Lib/MJson/MJson.h"
 #include "EnvManager.hpp"
 #include "MoeVSProject.hpp"
 #include "../InferTools/inferTools.hpp"

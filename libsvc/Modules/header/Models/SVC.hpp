@@ -22,7 +22,6 @@
 #pragma once
 #include "ModelBase.hpp"
 #include "../Logger/MoeSSLogger.hpp"
-#include "MJson.h"
 #include "../InferTools/inferTools.hpp"
 #include "../InferTools/TensorExtractor/TensorExtractorManager.hpp"
 #include "../InferTools/Cluster/MoeVSClusterManager.hpp"

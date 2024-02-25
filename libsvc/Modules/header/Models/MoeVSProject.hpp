@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 #include "../StringPreprocess.hpp"
-#include "MJson.h"
+#include "../../Lib/MJson/MJson.h"
 namespace MoeVSProjectSpace
 {
     class FileWrapper
