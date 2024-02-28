@@ -2,6 +2,16 @@
 #include "../../../header/InferTools/Cluster/MoeVSIndexCluster.hpp"
 #include <filesystem>
 #include "../../../header/InferTools/inferTools.hpp"
+#ifdef NDEBUG
+#pragma comment (lib,"../../../../../Lib/faiss/out/build/x64-Release/faiss/faiss.lib")
+#endif
+#ifdef _DEBUG
+#pragma comment (lib,"../../../../../Lib/faiss/out/build/x64-Debug/faiss/faiss.lib")
+#endif
+#pragma comment (lib,"../../../../../Lib/faiss/faiss/libblas.lib")
+#pragma comment (lib,"../../../../../Lib/faiss/faiss/liblapack.lib")
+#pragma comment (lib,"../../../../../Lib/faiss/faiss/liblapacke.lib")
+
 MoeVoiceStudioClusterHeader
 
 IndexClusterCore::~IndexClusterCore()

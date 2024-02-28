@@ -28,5 +28,9 @@
     </None>
     <None Include="..\.gitignore" />
     <None Include="packages.config" />
+    <None Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x64\native\onnxruntime.dll" />
+    <None Include="analyse\GptSoVits.md">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
 </Project>

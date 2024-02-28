@@ -31,7 +31,7 @@ public:
     LibSvcApi void release();
     LibSvcApi void init();
     LibSvcApi AudioPreprocess();
-    ~AudioPreprocess()
+	~AudioPreprocess()
 	{
         release();
 	}

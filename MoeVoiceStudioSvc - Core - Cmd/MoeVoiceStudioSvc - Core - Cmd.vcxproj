@@ -155,6 +155,7 @@
     <None Include="..\.gitignore" />
     <None Include="..\README.md" />
     <None Include="..\README_en.md" />
+    <None Include="analyse\GptSoVits.md" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
