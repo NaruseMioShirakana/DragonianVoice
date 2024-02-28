@@ -28,7 +28,9 @@
 	- text_seq：输入文本音素序列的数字ID（在Symbols数组中的下标）
 	- ref_audio：参考音频（训练集内音频）
 
-与SoVits比较，其中的codes实际上相当于SoVits的Hubert，使用
+与SoVits比较，其中的codes实际上相当于SoVits的Hubert，只不过这个Hubert是使用AR预测所得序列生成的。
+GptSoVits使用输入音素的Embedding，AR预测所得的Hubert以及参考音频的Mel共通指导音频生成，可以有效的控制音频的语气，感情。
+然而在一些时候，会出现漏字和错字的情况，可能和AR有较大的关系
 
 ---
 
