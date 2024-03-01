@@ -1,0 +1,189 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\Core">
+      <UniqueIdentifier>{78781af4-e3e2-4221-a154-66b35a25e8e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Core">
+      <UniqueIdentifier>{e7aebf36-79a7-4eeb-9160-eb766cd45777}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Lib">
+      <UniqueIdentifier>{68b44bd5-6d9a-45b6-93fd-159704b20e49}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\Lib">
+      <UniqueIdentifier>{4ae442dd-0ced-40c1-92fb-78b171577cd2}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="framework.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Modules.hpp">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\StringPreprocess.hpp">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Models\EnvManager.hpp">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Models\header\GPT-SoVits.hpp">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Models\header\ModelBase.hpp">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Models\header\MoeVSProject.hpp">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Models\header\Tacotron.hpp">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Models\header\TTS.hpp">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Models\header\Vits.hpp">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Logger\MoeSSLogger.hpp">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\InferTools\inferTools.hpp">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\InferTools\G2P\MoeVSG2P.hpp">
+      <Filter>头文件\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\cheaptrick.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\codec.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\common.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\constantnumbers.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\d4c.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\dio.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\fft.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\harvest.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\macrodefinitions.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\matlabfunctions.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\stonemask.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\synthesis.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\World\src\world\synthesisrealtime.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\MJson\yyjson.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+    <ClInclude Include="Modules\Lib\MJson\MJson.h">
+      <Filter>头文件\Lib</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="dllmain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Modules.cpp">
+      <Filter>源文件\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Models\EnvManager.cpp">
+      <Filter>源文件\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Models\src\GPT-SoVits.cpp">
+      <Filter>源文件\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Models\src\ModelBase.cpp">
+      <Filter>源文件\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Models\src\MoeVSProject.cpp">
+      <Filter>源文件\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Models\src\TTS.cpp">
+      <Filter>源文件\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Models\src\Vits.cpp">
+      <Filter>源文件\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Logger\MoeSSLogger.cpp">
+      <Filter>源文件\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\InferTools\inferTools.cpp">
+      <Filter>源文件\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\InferTools\G2P\MoeVSG2P.cpp">
+      <Filter>源文件\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\cheaptrick.cpp">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\codec.cpp">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\common.cpp">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\d4c.cpp">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\dio.cpp">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\fft.cpp">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\harvest.cpp">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\matlabfunctions.cpp">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\stonemask.cpp">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\synthesis.cpp">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\World\src\synthesisrealtime.cpp">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\MJson\yyjson.c">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\Lib\MJson\MJson.cpp">
+      <Filter>源文件\Lib</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

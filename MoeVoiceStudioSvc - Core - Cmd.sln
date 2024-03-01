@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MoeVoiceStudioSvc - Core - 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libsvc", "libsvc\libsvc.vcxproj", "{DC31109B-1984-41DB-BD9F-4261675C3962}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libtts", "libtts\libtts.vcxproj", "{3CA188F3-E511-486C-AC28-CCFC6D893861}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +33,14 @@ Global
 		{DC31109B-1984-41DB-BD9F-4261675C3962}.Release|x64.Build.0 = Release|x64
 		{DC31109B-1984-41DB-BD9F-4261675C3962}.Release|x86.ActiveCfg = Release|Win32
 		{DC31109B-1984-41DB-BD9F-4261675C3962}.Release|x86.Build.0 = Release|Win32
+		{3CA188F3-E511-486C-AC28-CCFC6D893861}.Debug|x64.ActiveCfg = Debug|x64
+		{3CA188F3-E511-486C-AC28-CCFC6D893861}.Debug|x64.Build.0 = Debug|x64
+		{3CA188F3-E511-486C-AC28-CCFC6D893861}.Debug|x86.ActiveCfg = Debug|Win32
+		{3CA188F3-E511-486C-AC28-CCFC6D893861}.Debug|x86.Build.0 = Debug|Win32
+		{3CA188F3-E511-486C-AC28-CCFC6D893861}.Release|x64.ActiveCfg = Release|x64
+		{3CA188F3-E511-486C-AC28-CCFC6D893861}.Release|x64.Build.0 = Release|x64
+		{3CA188F3-E511-486C-AC28-CCFC6D893861}.Release|x86.ActiveCfg = Release|Win32
+		{3CA188F3-E511-486C-AC28-CCFC6D893861}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
