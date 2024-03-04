@@ -36,10 +36,15 @@ GptSoVits使用输入音素的Embedding，AR预测所得的Hubert以及参考音
 
 ### 实验方案
 将GptSovits中的AR部分去除，将VQ的输入从Indices（code）替换为ssl（即使用最临近点搜索）。即可获得一个svc模型。
+
 两个音频，一个训练集参考音频，一个输入音频。需完成以下步骤。
+
 1、训练集参考音频直接编码为mel记作ref_audio。
+
 2、输入音频经过一个asr处理为音素序列记作text_seq。
+
 3、输入音频经过hubert后使用最临近点搜索，从vq的embedding中取元素，记作ssl。
+
 4、将ssl，text_seq和ref_audio作为vits的输入进行推理。
 
 
