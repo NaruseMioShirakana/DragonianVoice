@@ -13,6 +13,8 @@
 
 > 经过实验，Dml会导致Onnx中一些算子得到错误的结果，最新的SoVits仓库中的Onnx导出已经替换了这些算子，故SoVits3.0和SoVits4.0恢复支持Dml使用，但是要使用最新（2023/7/17）版本的SoVitsOnnx导出重新导出Onnx模型
 
+> 由于Diffusion模型的特性，如果你推理的总步数大于模型训练时最大的步数（实际步数=总步数/加速倍率，这个总步数不是推理时实际走过的步数，而是K_Step），会导致输出音频炸掉或者出现非常大的噪声，所以建议在推理前请仔细观察自己模型配置文件中的MaxStep（或K_Step_Max） 
+
 <details><summary><b>支持的Net：</b></summary>
     
 - [DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
