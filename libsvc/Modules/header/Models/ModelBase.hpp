@@ -64,6 +64,13 @@ struct DiffusionSvcPaths
 	std::wstring DiffSvc;
 };
 
+struct ReflowSvcPaths
+{
+	std::wstring Encoder;
+	std::wstring VelocityFn;
+	std::wstring After;
+};
+
 struct VitsSvcPaths
 {
 	std::wstring VitsSvc;
@@ -100,10 +107,14 @@ struct Hparams
 	 */
 	VitsSvcPaths VitsSvc;
 	/**
+	 * \brief Path Of ReflowSvc Model
+	 */
+	ReflowSvcPaths ReflowSvc;
+	/**
 	 * \brief Config Of Cluster
 	 */
 	ClusterConfig Cluster;
-
+	
 	long SamplingRate = 22050;
 
 	int HopSize = 320;
@@ -111,12 +122,14 @@ struct Hparams
 	int64_t SpeakerCount = 1;
 	bool EnableCharaMix = false;
 	bool EnableVolume = false;
+	bool VaeMode = true;
 
 	int64_t MelBins = 128;
 	int64_t Pndms = 100;
 	int64_t MaxStep = 1000;
 	float SpecMin = -12;
 	float SpecMax = 2;
+	float Scale = 1000.f;
 };
 
 class MoeVoiceStudioModule

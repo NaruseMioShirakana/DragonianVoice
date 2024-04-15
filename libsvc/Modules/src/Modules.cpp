@@ -50,13 +50,151 @@
 		return new MoeVSSampler::__ClassName(alpha, dfn, pred, Mel_Bins, _ProgressCallback, memory);				 \
 	})
 
+#define MoeVSRegisterReflowSampler(__RegisterName, __ClassName) MoeVSSampler::RegisterMoeVSReflowSampler(__RegisterName,		 \
+	[](Ort::Session* velocity, int64_t Mel_Bins,								 \
+		const MoeVSSampler::MoeVSBaseSampler::ProgressCallback& _ProgressCallback,								 	 \
+		Ort::MemoryInfo* memory) -> MoeVSSampler::MoeVSReflowSampler														 \
+	{																												 \
+		return new MoeVSSampler::__ClassName(velocity, Mel_Bins, _ProgressCallback, memory);				 \
+	})
+
+namespace MoeVSModuleManager
+{
+	MoeVoiceStudioCore::SingingVoiceConversion* UnionSvcModel::GetPtr() const
+	{
+		if (Diffusion_) return Diffusion_;
+		return Reflow_;
+	}
+
+	std::vector<std::wstring> UnionSvcModel::Inference(std::wstring& _Paths, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, const InferTools::SlicerSettings& _SlicerSettings) const
+	{
+		if (Diffusion_) return Diffusion_->Inference(_Paths, _InferParams, _SlicerSettings);
+		return Reflow_->Inference(_Paths, _InferParams, _SlicerSettings);
+	}
+
+	std::vector<int16_t> UnionSvcModel::InferPCMData(const std::vector<int16_t>& PCMData, long srcSr, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const
+	{
+		if (Diffusion_) return Diffusion_->InferPCMData(PCMData, srcSr, _InferParams);
+		return Reflow_->InferPCMData(PCMData, srcSr, _InferParams);
+	}
+
+	std::vector<int16_t> UnionSvcModel::ShallowDiffusionInference(std::vector<float>& _16KAudioHubert, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, std::pair<std::vector<float>, int64_t>& _Mel, const std::vector<float>& _SrcF0, const std::vector<float>& _SrcVolume, const std::vector<std::vector<float>>& _SrcSpeakerMap, size_t& Process, int64_t SrcSize) const
+	{
+		if (Diffusion_) return Diffusion_->ShallowDiffusionInference(_16KAudioHubert, _InferParams, _Mel, _SrcF0, _SrcVolume, _SrcSpeakerMap, Process, SrcSize);
+		return Reflow_->ShallowDiffusionInference(_16KAudioHubert, _InferParams, _Mel, _SrcF0, _SrcVolume, _SrcSpeakerMap, Process, SrcSize);
+	}
+
+	std::vector<int16_t> UnionSvcModel::SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcData& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const
+	{
+		if (Diffusion_) return Diffusion_->SliceInference(_Slice,_InferParams);
+		return Reflow_->SliceInference(_Slice, _InferParams);
+	}
+
+	std::vector<int16_t> UnionSvcModel::SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcSlice& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, size_t& _Process) const
+	{
+		if (Diffusion_) return Diffusion_->SliceInference(_Slice, _InferParams, _Process);
+		return Reflow_->SliceInference(_Slice, _InferParams, _Process);
+	}
+
+	UnionSvcModel::UnionSvcModel(const MJson& Config, const MoeVoiceStudioCore::MoeVoiceStudioModule::ProgressCallback& Callback, int ProviderID, int NumThread, int DeviceID)
+	{
+		if (Config["Type"].GetString() == "DiffSvc")
+			Diffusion_ = new MoeVoiceStudioCore::DiffusionSvc(
+				Config, Callback,
+				MoeVoiceStudioCore::MoeVoiceStudioModule::ExecutionProviders(ProviderID),
+				DeviceID, NumThread
+			);
+		else if (Config["Type"].GetString() == "ReflowSvc")
+			Reflow_ = new MoeVoiceStudioCore::ReflowSvc(
+				Config, Callback,
+				MoeVoiceStudioCore::MoeVoiceStudioModule::ExecutionProviders(ProviderID),
+				DeviceID, NumThread
+			);
+		else
+			LibDLVoiceCodecThrow("Trying To Load VitsSvc Model As Union Model!")
+	}
+
+	UnionSvcModel::~UnionSvcModel()
+	{
+		delete Diffusion_;
+		delete Reflow_;
+		Diffusion_ = nullptr;
+		Reflow_ = nullptr;
+	}
+
+	int64_t UnionSvcModel::GetMaxStep() const
+	{
+		if (Diffusion_) return Diffusion_->GetMaxStep();
+		return Reflow_->GetMaxStep();
+	}
+
+	bool UnionSvcModel::OldVersion() const
+	{
+		if (Diffusion_) return Diffusion_->OldVersion();
+		return false;
+	}
+
+	const std::wstring& UnionSvcModel::GetDiffSvcVer() const
+	{
+		if (Diffusion_) return Diffusion_->GetDiffSvcVer();
+		return Reflow_->GetReflowSvcVer();
+	}
+
+	int64_t UnionSvcModel::GetMelBins() const
+	{
+		if (Diffusion_) return Diffusion_->GetMelBins();
+		return Reflow_->GetMelBins();
+	}
+
+	int UnionSvcModel::GetHopSize() const
+	{
+		if (Diffusion_) return Diffusion_->GetHopSize();
+		return Reflow_->GetHopSize();
+	}
+
+	int64_t UnionSvcModel::GetHiddenUnitKDims() const
+	{
+		if (Diffusion_) return Diffusion_->GetHiddenUnitKDims();
+		return Reflow_->GetHiddenUnitKDims();
+	}
+
+	int64_t UnionSvcModel::GetSpeakerCount() const
+	{
+		if (Diffusion_) return Diffusion_->GetSpeakerCount();
+		return Reflow_->GetSpeakerCount();
+	}
+
+	bool UnionSvcModel::CharaMixEnabled() const
+	{
+		if (Diffusion_) return Diffusion_->CharaMixEnabled();
+		return Reflow_->CharaMixEnabled();
+	}
+
+	long UnionSvcModel::GetSamplingRate() const
+	{
+		if (Diffusion_) return Diffusion_->GetSamplingRate();
+		return Reflow_->GetSamplingRate();
+	}
+
+	void UnionSvcModel::NormMel(std::vector<float>& MelSpec) const
+	{
+		if (Diffusion_) return Diffusion_->NormMel(MelSpec);
+		return Reflow_->NormMel(MelSpec);
+	}
+
+	bool UnionSvcModel::IsDiffusion() const
+	{
+		return Diffusion_;
+	}
+}
+
 namespace MoeVSModuleManager
 {
 	bool MoeVoiceStudioCoreInitStat = false;
 
 	MoeVoiceStudioCore::VitsSvc* GlobalVitsSvcModel = nullptr;
 
-	MoeVoiceStudioCore::DiffusionSvc* GlobalDiffusionSvcModel = nullptr;
+	UnionSvcModel* GlobalUnionSvcModel = nullptr;
 
 	MoeVoiceStudioCore::MoeVoiceStudioModule::ProgressCallback ProgessBar;
 
@@ -107,6 +245,10 @@ namespace MoeVSModuleManager
 #endif
 		MoeVSRegisterSampler(L"Pndm", PndmSampler);
 		MoeVSRegisterSampler(L"DDim", DDimSampler);
+		MoeVSRegisterReflowSampler(L"Eular", ReflowEularSampler);
+		MoeVSRegisterReflowSampler(L"Rk4", ReflowRk4Sampler);
+		MoeVSRegisterReflowSampler(L"Heun", ReflowHeunSampler);
+		MoeVSRegisterReflowSampler(L"Pecece", ReflowPececeSampler);
 		MoeVoiceStudioCoreInitStat = true;
 	}
 
@@ -115,9 +257,9 @@ namespace MoeVSModuleManager
 		return GlobalVitsSvcModel;
 	}
 
-	MoeVoiceStudioCore::DiffusionSvc* GetDiffusionSvcModel()
+	UnionSvcModel* GetUnionSvcModel()
 	{
-		return GlobalDiffusionSvcModel;
+		return GlobalUnionSvcModel;
 	}
 
 	void UnloadVitsSvcModel()
@@ -126,18 +268,22 @@ namespace MoeVSModuleManager
 		GlobalVitsSvcModel = nullptr;
 	}
 
-	void UnloadDiffusionSvcModel()
+	void UnloadUnionSvcModel()
 	{
-		delete GlobalDiffusionSvcModel;
-		GlobalDiffusionSvcModel = nullptr;
+		delete GlobalUnionSvcModel;
+		GlobalUnionSvcModel = nullptr;
 	}
 
 	void LoadVitsSvcModel(const MJson& Config,
 	                  const MoeVoiceStudioCore::MoeVoiceStudioModule::ProgressCallback& Callback,
 	                  int ProviderID, int NumThread, int DeviceID)
 	{
+		logger.log("[Model Loader] Bonding Progress Event");
 		ProgessBar = Callback;
+		logger.log("[Model Loader] Progress Event Bonded");
 		UnloadVitsSvcModel();
+		logger.log("[Model Loader] Empty Cache!");
+
 		if (Config["Type"].GetString() == "DiffSvc")
 			LibDLVoiceCodecThrow("Trying To Load Diffusion Model As VitsSvc Model!")
 
@@ -151,24 +297,23 @@ namespace MoeVSModuleManager
 		SamplingRate = VitsSamplingRate;
 	}
 
-	void LoadDiffusionSvcModel(const MJson& Config,
+	void LoadUnionSvcModel(const MJson& Config,
 		const MoeVoiceStudioCore::MoeVoiceStudioModule::ProgressCallback& Callback,
 		int ProviderID, int NumThread, int DeviceID)
 	{
+		logger.log("[Model Loader] Bonding Progress Event");
 		ProgessBar = Callback;
-		UnloadDiffusionSvcModel();
-		if (Config["Type"].GetString() == "DiffSvc")
-			GlobalDiffusionSvcModel = new MoeVoiceStudioCore::DiffusionSvc(
-				Config, Callback,
-				MoeVoiceStudioCore::MoeVoiceStudioModule::ExecutionProviders(ProviderID),
-				DeviceID, NumThread
-			);
-		else
-			LibDLVoiceCodecThrow("Trying To Load VitsSvc Model As Diffusion Model!")
+		logger.log("[Model Loader] Progress Event Bonded");
+		UnloadUnionSvcModel();
+		logger.log("[Model Loader] Empty Cache!");
 
-		if(VocoderEnabled())
-			if (!GetVitsSvcModel() || (!GlobalDiffusionSvcModel->OldVersion() && GlobalDiffusionSvcModel->GetDiffSvcVer() == L"DiffusionSvc"))
-				SamplingRate = GlobalDiffusionSvcModel->GetSamplingRate();
+		GlobalUnionSvcModel = new UnionSvcModel(
+			Config, Callback, ProviderID, NumThread, DeviceID
+		);
+
+		if (VocoderEnabled())
+			if (!GetVitsSvcModel() || (!GlobalUnionSvcModel->OldVersion() && GlobalUnionSvcModel->GetDiffSvcVer() == L"DiffusionSvc"))
+				SamplingRate = GlobalUnionSvcModel->GetSamplingRate();
 	}
 
 	void LoadVocoderModel(const std::wstring& VocoderPath)
@@ -189,7 +334,7 @@ namespace MoeVSModuleManager
 	std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcData& _Slice,
 		const MoeVSProjectSpace::MoeVSSvcParams& _InferParams)
 	{
-		const bool DiffusionModelEnabled = GlobalDiffusionSvcModel && VocoderEnabled();
+		const bool DiffusionModelEnabled = GetUnionSvcModel() && VocoderEnabled();
 		std::vector<int16_t> RtnAudio;
 		size_t TotalAudioSize = 0;
 		for (const auto& data_size : _Slice.Slices)
@@ -205,16 +350,18 @@ namespace MoeVSModuleManager
 		auto SkipDiffusionStep = (int64_t)_InferParams.Pndm;
 		auto DiffusionTotalStep = (int64_t)_InferParams.Step;
 		
-		if (DiffusionModelEnabled && DiffusionTotalStep > GlobalDiffusionSvcModel->GetMaxStep()) 
-			DiffusionTotalStep = GlobalDiffusionSvcModel->GetMaxStep();
+		if (DiffusionModelEnabled && DiffusionTotalStep > GetUnionSvcModel()->GetMaxStep())
+			DiffusionTotalStep = GetUnionSvcModel()->GetMaxStep();
 		if (SkipDiffusionStep >= DiffusionTotalStep) 
 			SkipDiffusionStep = DiffusionTotalStep / 5;
 		if (SkipDiffusionStep == 0) 
 			SkipDiffusionStep = 1;
-		const auto RealDiffSteps = DiffusionTotalStep % SkipDiffusionStep ? DiffusionTotalStep / SkipDiffusionStep + 1 : DiffusionTotalStep / SkipDiffusionStep;
+		auto RealDiffSteps = DiffusionTotalStep;
+		if (GetUnionSvcModel() && GetUnionSvcModel()->IsDiffusion())
+			RealDiffSteps = DiffusionTotalStep % SkipDiffusionStep ? DiffusionTotalStep / SkipDiffusionStep + 1 : DiffusionTotalStep / SkipDiffusionStep;
 		if((DiffusionModelEnabled && !GlobalVitsSvcModel) || (DiffusionModelEnabled && ShallowDiffusionEnabled()))
 		{
-			if (GlobalDiffusionSvcModel->OldVersion())
+			if (GetUnionSvcModel()->OldVersion())
 				GlobalSteps += 1;
 			else
 				GlobalSteps += RealDiffSteps;
@@ -234,14 +381,14 @@ namespace MoeVSModuleManager
 				logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Segment[" + std::to_wstring(SliceIndex++) + L"] Finished! Segment Use Time: " + std::to_wstring(clock() - InferBeginTime) + L"ms, Segment Duration: " + std::to_wstring((size_t)CurSlice.OrgLen * 1000ull / 48000ull) + L"ms");
 			else
 			{
-				if (DiffusionModelEnabled && !GlobalDiffusionSvcModel->OldVersion())
+				if (DiffusionModelEnabled && !GetUnionSvcModel()->OldVersion())
 				{
 					ProgressVal += RealDiffSteps;
 					ProgessBar(ProgressVal, TotalSteps);
 				}
 				logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Jump Empty Segment[" + std::to_wstring(SliceIndex++) + L"]!");
 			}
-			if (DiffusionModelEnabled && GlobalDiffusionSvcModel->OldVersion())
+			if (DiffusionModelEnabled && GetUnionSvcModel()->OldVersion())
 				ProgessBar(++ProgressVal, TotalSteps);
 			if (GlobalVitsSvcModel)
 				ProgessBar(++ProgressVal, TotalSteps);
@@ -284,13 +431,13 @@ namespace MoeVSModuleManager
 
 	std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcSlice& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, size_t& _Process)
 	{
-		const bool DiffusionModelEnabled = GlobalDiffusionSvcModel && VocoderEnabled();
+		const bool DiffusionModelEnabled = GetUnionSvcModel() && VocoderEnabled();
 		int64_t SamplingRate_I64 = VitsSamplingRate;
 		SamplingRate = VitsSamplingRate;
 		if ((DiffusionModelEnabled && !GlobalVitsSvcModel) || (_InferParams.UseShallowDiffusion && DiffusionModelEnabled && ShallowDiffusionEnabled()))
 		{
-			SamplingRate_I64 = GlobalDiffusionSvcModel->GetSamplingRate();
-			SamplingRate = GlobalDiffusionSvcModel->GetSamplingRate();
+			SamplingRate_I64 = GetUnionSvcModel()->GetSamplingRate();
+			SamplingRate = GetUnionSvcModel()->GetSamplingRate();
 		}
 		if (!_Slice.IsNotMute)
 			return { size_t(_Slice.OrgLen * SamplingRate_I64 / 48000), 0i16, std::allocator<int16_t>() };
@@ -302,19 +449,18 @@ namespace MoeVSModuleManager
 			auto BgnTime = clock();
 			RtnAudio = GlobalVitsSvcModel->SliceInference(_Slice, _InferParams, _Process);
 			logger.log(("[Inference] Slice Vits Use Time " + std::to_string(clock() - BgnTime) + "ms").c_str());
-			if(_InferParams.UseShallowDiffusion && DiffusionModelEnabled && !GlobalDiffusionSvcModel->OldVersion() && GlobalDiffusionSvcModel->GetDiffSvcVer() == L"DiffusionSvc")
+			if(_InferParams.UseShallowDiffusion && DiffusionModelEnabled && !GetUnionSvcModel()->OldVersion() && GetUnionSvcModel()->GetDiffSvcVer() == L"DiffusionSvc")
 			{
 				ReloadMelOps(
 					(int)SamplingRate_I64,
-					GlobalDiffusionSvcModel->GetHopSize(),
-					(int)GlobalDiffusionSvcModel->GetMelBins()
+					GetUnionSvcModel()->GetHopSize(),
+					(int)GetUnionSvcModel()->GetMelBins()
 				);
-
 				const auto TempAudio = InferTools::InterpResample(RtnAudio, (long)VitsSamplingRate, CurStftSr, 32767.);
 				auto Mel = MelOperator->operator()(TempAudio);
 				auto& ShallData = MoeVoiceStudioCore::GetDataForShallowDiffusion();
 				BgnTime = clock();
-				RtnAudio = GlobalDiffusionSvcModel->ShallowDiffusionInference(
+				RtnAudio = GetUnionSvcModel()->ShallowDiffusionInference(
 					ShallData._16KAudio, _InferParams, Mel,
 					ShallData.NeedPadding ? ShallData.CUDAF0 : _Slice.F0,
 					ShallData.NeedPadding ? ShallData.CUDAVolume : _Slice.Volume,
@@ -324,7 +470,7 @@ namespace MoeVSModuleManager
 				);
 				logger.log(("[Inference] Slice Diffusion Use Time " + std::to_string(clock() - BgnTime) + "ms").c_str());
 			}
-			if(_InferParams.UseShallowDiffusion && VocoderEnabled() && !GetDiffusionSvcModel())
+			if(_InferParams.UseShallowDiffusion && VocoderEnabled() && !GetUnionSvcModel())
 			{
 				ReloadMelOps(
 					(int)SamplingRate_I64,
@@ -342,7 +488,7 @@ namespace MoeVSModuleManager
 		else if (DiffusionModelEnabled)
 		{
 			const auto BgnTime = clock();
-			RtnAudio = GlobalDiffusionSvcModel->SliceInference(_Slice, _InferParams, _Process);
+			RtnAudio = GetUnionSvcModel()->SliceInference(_Slice, _InferParams, _Process);
 			logger.log(("[Inference] Slice Diffusion Use Time " + std::to_string(clock() - BgnTime) + "ms").c_str());
 		}
 		else
@@ -353,7 +499,7 @@ namespace MoeVSModuleManager
 
 	bool ShallowDiffusionEnabled()
 	{
-		const bool DiffusionModelEnabled = GlobalDiffusionSvcModel && VocoderEnabled();
-		return DiffusionModelEnabled && !GlobalDiffusionSvcModel->OldVersion() && GlobalDiffusionSvcModel->GetDiffSvcVer() == L"DiffusionSvc";
+		const bool DiffusionModelEnabled = GetUnionSvcModel() && VocoderEnabled();
+		return DiffusionModelEnabled && !GetUnionSvcModel()->OldVersion() && GetUnionSvcModel()->GetDiffSvcVer() == L"DiffusionSvc";
 	}
 }

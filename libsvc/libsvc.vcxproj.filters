@@ -240,6 +240,9 @@
     <ClInclude Include="Api\header\libsvc.h">
       <Filter>头文件\API</Filter>
     </ClInclude>
+    <ClInclude Include="Modules\header\Models\ReflowSvc.hpp">
+      <Filter>头文件\Modules\Models</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -370,6 +373,9 @@
     </ClCompile>
     <ClCompile Include="Api\src\libsvc.cpp">
       <Filter>源文件\API</Filter>
+    </ClCompile>
+    <ClCompile Include="Modules\src\Models\ReflowSvc.cpp">
+      <Filter>源文件\Modules\Models</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

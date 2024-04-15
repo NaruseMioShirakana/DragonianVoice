@@ -453,7 +453,7 @@ std::vector<Tokenizer::TokenizerType> Tokenizer::operator()(const std::vector<st
 std::vector<std::wstring> SplitWordsFromStr(const std::wstring& Seq)
 {
 	std::vector<std::wstring> rtn;
-	for (auto i : Seq)
+	for (const auto i : Seq)
 		rtn.emplace_back(std::wstring() + i);
 	return rtn;
 }

@@ -65,7 +65,7 @@ namespace MoeVSProjectSpace
         std::vector<int16_t> Audio;
         std::vector<float> F0;
         std::vector<float> Volume;
-        std::vector< std::vector<float>> Speaker;
+        std::vector<std::vector<float>> Speaker;
         long OrgLen = 0;
         bool IsNotMute = false;
         MoeVoiceStudioSvcSlice() = default;
@@ -146,9 +146,12 @@ namespace MoeVSProjectSpace
 		float DDSPNoiseScale = 0.8f;                       //DDSP噪声修正因子      0-10
 		float Keys = 0.f;                                  //升降调               -64-64
 		size_t MeanWindowLength = 2;                       //均值滤波器窗口大小     1-20
-		size_t Pndm = 100;                                 //Diffusion加速倍数    2-200
-		size_t Step = 1000;                                //Diffusion总步数      200-1000
+		size_t Pndm = 100;                                 //Diffusion加速倍数    1-200
+		size_t Step = 1000;                                //Diffusion总步数      1-1000
+        float TBegin = 0.f;
+        float TEnd = 1.f;
 		std::wstring Sampler = L"Pndm";                    //Diffusion采样器
+        std::wstring ReflowSampler = L"Eular";             //Reflow采样器
 		std::wstring F0Method = L"Dio";                    //F0提取算法
         bool UseShallowDiffusion = false;                  //使用浅扩散
 

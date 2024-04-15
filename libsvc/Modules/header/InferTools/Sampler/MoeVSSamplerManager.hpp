@@ -58,6 +58,39 @@ private:
 	MoeVSBaseSampler* _f0_ext = nullptr;
 };
 
+class MoeVSReflowSampler
+{
+public:
+	MoeVSReflowSampler() = delete;
+	MoeVSReflowSampler(MoeVSReflowBaseSampler* _ext) : _f0_ext(_ext) {}
+	MoeVSReflowSampler(const MoeVSReflowSampler&) = delete;
+	MoeVSReflowSampler(MoeVSReflowSampler&& _ext) noexcept
+	{
+		delete _f0_ext;
+		_f0_ext = _ext._f0_ext;
+		_ext._f0_ext = nullptr;
+	}
+	MoeVSReflowSampler& operator=(const MoeVSReflowSampler&) = delete;
+	MoeVSReflowSampler& operator=(MoeVSReflowSampler&& _ext) noexcept
+	{
+		if (this == &_ext)
+			return *this;
+		delete _f0_ext;
+		_f0_ext = _ext._f0_ext;
+		_ext._f0_ext = nullptr;
+		return *this;
+	}
+	~MoeVSReflowSampler()
+	{
+		delete _f0_ext;
+		_f0_ext = nullptr;
+	}
+	MoeVSReflowBaseSampler* operator->() const { return _f0_ext; }
+
+private:
+	MoeVSReflowBaseSampler* _f0_ext = nullptr;
+};
+
 using GetMoeVSSamplerFn = std::function<MoeVSSampler(Ort::Session*, Ort::Session*, Ort::Session*, int64_t, const MoeVSBaseSampler::ProgressCallback&, Ort::MemoryInfo*)>;
 
 LibSvcApi void RegisterMoeVSSampler(const std::wstring& _name, const GetMoeVSSamplerFn& _constructor_fn);
@@ -73,14 +106,46 @@ LibSvcApi void RegisterMoeVSSampler(const std::wstring& _name, const GetMoeVSSam
  * \param memory 模型的OrtMemoryInfo
  * \return 采样器
  */
-LibSvcApi MoeVSSampler GetMoeVSSampler(const std::wstring& _name,
-                             Ort::Session* alpha,
-                             Ort::Session* dfn,
-                             Ort::Session* pred,
-                             int64_t Mel_Bins,
-                             const MoeVSBaseSampler::ProgressCallback& _ProgressCallback,
-                             Ort::MemoryInfo* memory);
+LibSvcApi MoeVSSampler GetMoeVSSampler(
+	const std::wstring& _name,
+	Ort::Session* alpha,
+	Ort::Session* dfn,
+	Ort::Session* pred,
+	int64_t Mel_Bins,
+	const MoeVSBaseSampler::ProgressCallback& _ProgressCallback,
+	Ort::MemoryInfo* memory
+);
 
 LibSvcApi std::vector<std::wstring> GetMoeVSSamplerList();
+
+/******************************* Reflow ***********************************/
+
+using GetMoeVSReflowSamplerFn = std::function<MoeVSReflowSampler(
+	Ort::Session*, 
+	int64_t, 
+	const MoeVSReflowBaseSampler::ProgressCallback&,
+	Ort::MemoryInfo*
+)>;
+
+LibSvcApi void RegisterMoeVSReflowSampler(const std::wstring& _name, const GetMoeVSReflowSamplerFn& _constructor_fn);
+
+/**
+ * \brief 获取采样器
+ * \param _name 类名
+ * \param velocity Velocity Onnx模型Session
+ * \param Mel_Bins MelBins
+ * \param _ProgressCallback 进度条回调（直接传模型的回调就可以了）
+ * \param memory 模型的OrtMemoryInfo
+ * \return 采样器
+ */
+LibSvcApi MoeVSReflowSampler GetMoeVSReflowSampler(
+	const std::wstring& _name,
+	Ort::Session* velocity,
+	int64_t Mel_Bins,
+	const MoeVSBaseSampler::ProgressCallback& _ProgressCallback,
+	Ort::MemoryInfo* memory
+);
+
+LibSvcApi std::vector<std::wstring> GetMoeVSReflowSamplerList();
 
 MoeVoiceStudioSamplerEnd

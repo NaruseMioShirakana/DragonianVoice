@@ -4,9 +4,25 @@
 
 namespace libsvccore
 {
+	struct FloatArray
+	{
+		float* Data = nullptr;
+		size_t Size = 0;
+	};
+
+	struct RetData
+	{
+		FloatArray Audio;
+		FloatArray F0;
+		FloatArray Volume;
+		long OrgLen = 0;
+		bool IsNotMute = false;
+	};
+
 	using Config = MoeVoiceStudioCore::Hparams;
 	using VitsSvc = MoeVoiceStudioCore::VitsSvc;
 	using DiffusionSvc = MoeVoiceStudioCore::DiffusionSvc;
+	using ReflowSvc = MoeVoiceStudioCore::ReflowSvc;
 	using ClusterBase = MoeVoiceStudioCluster::MoeVoiceStudioBaseCluster;
 	using TensorExtractorBase = MoeVSTensorPreprocess::MoeVoiceStudioTensorExtractor;
 	using ProgressCallback = MoeVoiceStudioCore::MoeVoiceStudioModule::ProgressCallback;
@@ -14,7 +30,7 @@ namespace libsvccore
 	using Slices = MoeVSProjectSpace::MoeVoiceStudioSvcData;
 	using SingleSlice = MoeVSProjectSpace::MoeVoiceStudioSvcSlice;
 	using Params = MoeVSProjectSpace::MoeVSSvcParams;
-	enum class ModelType { Vits, Diffusion };
+	enum class ModelType { Vits, Diffusion, Reflow };
 
 	LibSvcApi void SliceAudio(size_t& _Id, const std::vector<int16_t>& _Audio, const InferTools::SlicerSettings& _Setting);
 
@@ -274,7 +290,7 @@ namespace libsvc
 	 * \param VocoderMelBins ÉùÂëÆ÷µÄMelBins
 	 * \return PCMÊý¾Ý
 	 */
-	inline std::vector<int16_t> VocoderEnhance(std::vector<float>& Mel, const std::vector<float>& F0, size_t MelSize, long VocoderMelBins)
+	inline std::vector<int16_t> VocoderEnhance(const std::vector<float>& Mel, const std::vector<float>& F0, size_t MelSize, long VocoderMelBins)
 	{
 		size_t _Ptr = 0;
 		if(!libsvccore::VocoderEnhance(_Ptr, Mel, F0, MelSize, VocoderMelBins))

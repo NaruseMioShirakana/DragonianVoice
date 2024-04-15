@@ -6,6 +6,7 @@ namespace libsvccore
 {
 	std::unordered_map<std::wstring, DiffusionSvc*> DiffusionSvcSessions;
 	std::unordered_map<std::wstring, VitsSvc*> VitsSvcSessions;
+	std::unordered_map<std::wstring, ReflowSvc*> ReflowSvcSessions;
 	std::deque<std::wstring> ErrorMessage;
 	std::wstring NoneError;
 	size_t MaxErrorCount = 10;
@@ -41,6 +42,16 @@ namespace libsvccore
 		}
 	}
 
+	void UnloadReflowSvcSession(const std::wstring& _Name)
+	{
+		const auto ModelPair = ReflowSvcSessions.find(_Name);
+		if (ModelPair != ReflowSvcSessions.end())
+		{
+			delete ModelPair->second;
+			ReflowSvcSessions.erase(ModelPair);
+		}
+	}
+
 	int LoadDiffusionSvcSession(const Config& _Config, const std::wstring& _Name, const ProgressCallback& _ProgressCallback, ExecutionProvider ExecutionProvider_, unsigned DeviceID_, unsigned ThreadCount_)
 	{
 		const auto ModelPair = DiffusionSvcSessions.find(_Name);
@@ -49,6 +60,28 @@ namespace libsvccore
 		try
 		{
 			DiffusionSvcSessions[_Name] = new MoeVoiceStudioCore::DiffusionSvc(
+				_Config, _ProgressCallback,
+				ExecutionProvider_,
+				DeviceID_, ThreadCount_
+			);
+		}
+		catch (std::exception& e)
+		{
+			RaiseError(to_wide_string(e.what()));
+			UnloadDiffusionSvcSession(_Name);
+			return 1;
+		}
+		return 0;
+	}
+
+	int LoadReflowSvcSession(const Config& _Config, const std::wstring& _Name, const ProgressCallback& _ProgressCallback, ExecutionProvider ExecutionProvider_, unsigned DeviceID_, unsigned ThreadCount_)
+	{
+		const auto ModelPair = ReflowSvcSessions.find(_Name);
+		if (ModelPair != ReflowSvcSessions.end())
+			delete ModelPair->second;
+		try
+		{
+			ReflowSvcSessions[_Name] = new MoeVoiceStudioCore::ReflowSvc(
 				_Config, _ProgressCallback,
 				ExecutionProvider_,
 				DeviceID_, ThreadCount_
@@ -103,7 +136,7 @@ namespace libsvccore
 			return LoadVitsSvcSession(_Config, _Name, _ProgressCallback, ExecutionProvider_, DeviceID_, ThreadCount_);
 		if (_T == ModelType::Diffusion)
 			return LoadDiffusionSvcSession(_Config, _Name, _ProgressCallback, ExecutionProvider_, DeviceID_, ThreadCount_);
-		return 1;
+		return LoadReflowSvcSession(_Config, _Name, _ProgressCallback, ExecutionProvider_, DeviceID_, ThreadCount_);
 	}
 
 	void UnloadModel(ModelType _T, const std::wstring& _Name)
@@ -112,6 +145,8 @@ namespace libsvccore
 			UnloadDiffusionSvcSession(_Name);
 		else if (_T == ModelType::Vits)
 			UnloadVitsSvcSession(_Name);
+		else
+			UnloadReflowSvcSession(_Name);
 	}
 
 	std::mt19937 gen;
@@ -123,7 +158,7 @@ namespace libsvccore
 	{
 		std::lock_guard lg(RtnDataMx);
 		for (_Id = normal(gen); LibSvcRtnData.find(_Id) != LibSvcRtnData.end(); ) _Id = normal(gen);
-		LibSvcRtnData[_Id] = _Val;
+		LibSvcRtnData[_Id] = std::move(_Val);
 	}
 
 	void SliceAudio(size_t& _Id, const std::vector<int16_t>& _Audio, const InferTools::SlicerSettings& _Setting)
@@ -147,6 +182,15 @@ namespace libsvccore
 		{
 			_Model = dynamic_cast<MoeVoiceStudioCore::SingingVoiceConversion*>(DiffusionSvcSessions.at(_Name));
 			if(!MoeVSModuleManager::VocoderEnabled())
+			{
+				RaiseError(L"Vocoder Not Exists");
+				return 1;
+			}
+		}
+		else if(_T == ModelType::Reflow && ReflowSvcSessions.find(_Name) != ReflowSvcSessions.end())
+		{
+			_Model = dynamic_cast<MoeVoiceStudioCore::SingingVoiceConversion*>(ReflowSvcSessions.at(_Name));
+			if (!MoeVSModuleManager::VocoderEnabled())
 			{
 				RaiseError(L"Vocoder Not Exists");
 				return 1;

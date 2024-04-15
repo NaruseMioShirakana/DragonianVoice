@@ -64,4 +64,38 @@ protected:
 	Ort::MemoryInfo* Memory = nullptr;
 };
 
+class MoeVSReflowBaseSampler
+{
+public:
+	using ProgressCallback = std::function<void(size_t, size_t)>;
+
+	/**
+	 * \brief 获取采样器
+	 * \param Velocity Velocity Onnx模型Session
+	 * \param MelBins MelBins
+	 * \param _ProgressCallback 进度条回调（直接传模型的回调就可以了）
+	 * \param memory 模型的OrtMemoryInfo
+	 * \return 采样器
+	 */
+	MoeVSReflowBaseSampler(Ort::Session* Velocity, int64_t MelBins, const ProgressCallback& _ProgressCallback, Ort::MemoryInfo* memory);
+
+	virtual ~MoeVSReflowBaseSampler() = default;
+
+	/**
+	 * \brief 采样
+	 * \param Tensors 输入张量
+	 * \param Steps 采样步数
+	 * \param dt dt
+	 * \param Scale Scale
+	 * \param Process 当前进度
+	 * \return Mel张量
+	 */
+	virtual std::vector<Ort::Value> Sample(std::vector<Ort::Value>& Tensors, int64_t Steps, float dt, float Scale, size_t& Process);
+protected:
+	int64_t MelBins_ = 128;
+	Ort::Session* Velocity_ = nullptr;
+	ProgressCallback Callback_;
+	Ort::MemoryInfo* Memory_ = nullptr;
+};
+
 MoeVoiceStudioSamplerEnd

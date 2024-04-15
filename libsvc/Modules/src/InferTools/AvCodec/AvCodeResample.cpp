@@ -61,7 +61,7 @@ std::vector<short> AudioPreprocess::codec(const std::wstring& path, int sr)
     std::vector<uint8_t> outData;
     int ret = avformat_open_input(&avFormatContext, to_byte_string(path).c_str(), nullptr, nullptr);
     if (ret != 0) {
-        LibDLVoiceCodecThrow((std::string("Can't Open Audio File [ErrCode]") + std::to_string(ret)).c_str());
+        LibDLVoiceCodecThrow(std::string("Can't Open Audio File [ErrCode]") + std::to_string(ret));
     }
     ret = avformat_find_stream_info(avFormatContext, nullptr);
     if (ret < 0) {

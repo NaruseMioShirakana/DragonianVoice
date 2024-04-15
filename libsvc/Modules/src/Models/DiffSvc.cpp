@@ -26,6 +26,11 @@ bool VocoderEnabled()
 	return Vocoder;
 }
 
+Ort::Session* GetCurrentVocoder()
+{
+	return Vocoder;
+}
+
 void DiffusionSvc::Destory()
 {
 	//AudioEncoder
@@ -82,18 +87,9 @@ DiffusionSvc::DiffusionSvc(const MJson& _Config, const ProgressCallback& _Progre
 	if (HuPath.empty())
 		LibDLVoiceCodecThrow("[Error] Field \"Hubert\" (Hubert Folder) Can Not Be Empty")
 
-	if (_Config["Hifigan"].IsNull())
-		LibDLVoiceCodecThrow("[Error] Missing field \"Hifigan\" (Hifigan Folder)")
-	if (!_Config["Hifigan"].IsString())
-		LibDLVoiceCodecThrow("[Error] Field \"Hifigan\" (Hifigan Folder) Must Be String")
-	const std::wstring HifiganPath = to_wide_string(_Config["Hifigan"].GetString());
-	if (HifiganPath.empty())
-		LibDLVoiceCodecThrow("[Error] Field \"Hifigan\" (Hifigan Folder) Can Not Be Empty")
-
 	std::map<std::string, std::wstring> _PathDict;
 	_PathDict["Cluster"] = cluster_folder;
 	_PathDict["DiffHubert"] = GetCurrentFolder() + L"/hubert/" + HuPath + L".onnx";
-	_PathDict["DiffHifigan"] = GetCurrentFolder() + L"/hifigan/" + HifiganPath + L".onnx";
 	if(_waccess((_path + L"_encoder.onnx").c_str(), 0) != -1)
 	{
 		_PathDict["Encoder"] = _path + L"_encoder.onnx";
@@ -109,6 +105,7 @@ DiffusionSvc::DiffusionSvc(const MJson& _Config, const ProgressCallback& _Progre
 	if (_waccess((_path + L"_naive.onnx").c_str(), 0) != -1)
 		_PathDict["Naive"] = _path + L"_naive.onnx";
 
+	logger.log("[Model Loader] Prepeocess Complete!");
 	load(_PathDict, _Config, _ProgressCallback);
 }
 
@@ -341,11 +338,11 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVo
 
 	auto speedup = (int64_t)_InferParams.Pndm;
 	auto step = (int64_t)_InferParams.Step;
-
 	if (step > MaxStep) step = MaxStep;
 	if (speedup >= step) speedup = step / 5;
 	if (speedup == 0) speedup = 1;
 	const auto RealDiffSteps = step % speedup ? step / speedup + 1 : step / speedup;
+
 	if (diffSvc)
 		_callback(0, _Slice.Slices.size());
 	else
@@ -692,7 +689,13 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 	inputTensorshu.emplace_back(Ort::Value::CreateTensor(*memory_info, hubertin.data(), hubertin.size(), inputShape, 3));
 	std::vector<Ort::Value> hubertOut;
 
-	const auto RealDiffSteps = _InferParams.Step % _InferParams.Pndm ? _InferParams.Step / _InferParams.Pndm + 1 : _InferParams.Step / _InferParams.Pndm;
+	auto speedup = (int64_t)_InferParams.Pndm;
+	auto step = (int64_t)_InferParams.Step;
+	if (step > MaxStep) step = MaxStep;
+	if (speedup >= step) speedup = step / 5;
+	if (speedup == 0) speedup = 1;
+	const auto RealDiffSteps = step % speedup ? step / speedup + 1 : step / speedup;
+
 	_callback(0, RealDiffSteps);
 
 	try {
@@ -859,7 +862,7 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 
 	size_t process = 0;
 
-	auto PredOut = MoeVSSampler::GetMoeVSSampler((!alpha ? L"Pndm" : _InferParams.Sampler), alpha, denoise, pred, melBins, _callback, memory_info)->Sample(DenoiseInTensors, (int64_t)_InferParams.Step, (int64_t)_InferParams.Pndm, _InferParams.NoiseScale, _InferParams.Seed, process);
+	auto PredOut = MoeVSSampler::GetMoeVSSampler((!alpha ? L"Pndm" : _InferParams.Sampler), alpha, denoise, pred, melBins, _callback, memory_info)->Sample(DenoiseInTensors, step, speedup, _InferParams.NoiseScale, _InferParams.Seed, process);
 
 	std::vector<Ort::Value> DiffOut, finaOut;
 
@@ -918,6 +921,13 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 {
 	if (diffSvc || DiffSvcVersion != L"DiffusionSvc")
 		LibDLVoiceCodecThrow("ShallowDiffusion Only Support DiffusionSvc Model")
+
+	auto speedup = (int64_t)_InferParams.Pndm;
+	auto step = (int64_t)_InferParams.Step;
+	if (step > MaxStep) step = MaxStep;
+	if (speedup >= step) speedup = step / 5;
+	if (speedup == 0) speedup = 1;
+
 	std::vector<const char*> InputNamesEncoder;
 	const auto _Mel_Size = _Mel.second;
 
@@ -1041,7 +1051,7 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 
 	DenoiseInTensors.emplace_back(Ort::Value::CreateTensor(*memory_info, _Mel.first.data(), _Mel.first.size(), noise_shape, 4));
 
-	auto PredOut = MoeVSSampler::GetMoeVSSampler((!alpha ? L"Pndm" : _InferParams.Sampler), alpha, denoise, pred, melBins, [](size_t, size_t) {}, memory_info)->Sample(DenoiseInTensors, (int64_t)_InferParams.Step, (int64_t)_InferParams.Pndm, _InferParams.NoiseScale, _InferParams.Seed, Process);
+	auto PredOut = MoeVSSampler::GetMoeVSSampler((!alpha ? L"Pndm" : _InferParams.Sampler), alpha, denoise, pred, melBins, _callback, memory_info)->Sample(DenoiseInTensors, step, speedup, _InferParams.NoiseScale, _InferParams.Seed, Process);
 
 	std::vector<Ort::Value> DiffOut, finaOut;
 	try

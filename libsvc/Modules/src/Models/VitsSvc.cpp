@@ -64,6 +64,7 @@ VitsSvc::VitsSvc(const MJson& _Config, const ProgressCallback& _ProgressCallback
 			_PathDict["MelOperator"] = GetCurrentFolder() + L"/MelOps.onnx";
 	}
 
+	logger.log("[Model Loader] Prepeocess Complete!");
 	load(_PathDict, _Config, _ProgressCallback, ExecutionProvider_, DeviceID_, ThreadCount_, true);
 }
 

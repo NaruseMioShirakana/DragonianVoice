@@ -31,6 +31,8 @@ LibSvcApi void UnLoadVocoderModel();
 
 LibSvcApi bool VocoderEnabled();
 
+LibSvcApi Ort::Session* GetCurrentVocoder();
+
 /**
  * \brief DiffSvc模型
  */

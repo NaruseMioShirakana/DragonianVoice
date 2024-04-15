@@ -59,7 +59,7 @@ void MoeVoiceStudioEnv::Load(unsigned ThreadCount, unsigned DeviceID, unsigned P
 	if (((Provider != CurProvider) ||
 		(Provider == 0 && ThreadCount != CurThreadCount) ||
 		((Provider == 1 || Provider == 2) && DeviceID != CurDeviceID)) &&
-		(MoeVSModuleManager::GetDiffusionSvcModel() || MoeVSModuleManager::GetVitsSvcModel() || MoeVSModuleManager::VocoderEnabled()))
+		(MoeVSModuleManager::GetUnionSvcModel() || MoeVSModuleManager::GetVitsSvcModel() || MoeVSModuleManager::VocoderEnabled()))
 		LibDLVoiceCodecThrow("A Model Has Been Loaded, You Cannot Change Env When A Model Has Been Loaded");
 	try
 	{

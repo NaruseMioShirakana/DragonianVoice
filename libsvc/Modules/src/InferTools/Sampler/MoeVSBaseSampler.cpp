@@ -14,4 +14,16 @@ std::vector<Ort::Value> MoeVSBaseSampler::Sample(std::vector<Ort::Value>& Tensor
 	LibDLVoiceCodecThrow("NotImplementedError");
 }
 
+MoeVSReflowBaseSampler::MoeVSReflowBaseSampler(Ort::Session* Velocity, int64_t MelBins, const ProgressCallback& _ProgressCallback, Ort::MemoryInfo* memory) :
+	MelBins_(MelBins), Velocity_(Velocity)
+{
+	Callback_ = _ProgressCallback;
+	Memory_ = memory;
+}
+
+std::vector<Ort::Value> MoeVSReflowBaseSampler::Sample(std::vector<Ort::Value>& Tensors, int64_t Steps, float dt, float Scale, size_t& Process)
+{
+	LibDLVoiceCodecThrow("NotImplementedError");
+}
+
 MoeVoiceStudioSamplerEnd

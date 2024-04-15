@@ -22,10 +22,70 @@
 #pragma once
 #include "Models/VitsSvc.hpp"
 #include "Models/DiffSvc.hpp"
+#include "Models/ReflowSvc.hpp"
 #include "../framework.h"
 
 namespace MoeVSModuleManager
 {
+	class UnionSvcModel
+	{
+	public:
+		UnionSvcModel() = delete;
+		LibSvcApi ~UnionSvcModel();
+		LibSvcApi UnionSvcModel(const MJson& Config,
+			const MoeVoiceStudioCore::MoeVoiceStudioModule::ProgressCallback& Callback,
+			int ProviderID, int NumThread, int DeviceID);
+
+		LibSvcApi [[nodiscard]] std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcData& _Slice,
+			const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const;
+
+		LibSvcApi [[nodiscard]] std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcSlice& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, size_t& _Process) const;
+
+		LibSvcApi [[nodiscard]] std::vector<std::wstring> Inference(std::wstring& _Paths, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams,
+			const InferTools::SlicerSettings& _SlicerSettings) const;
+
+		LibSvcApi [[nodiscard]] std::vector<int16_t> InferPCMData(const std::vector<int16_t>& PCMData, long srcSr, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const;
+
+		LibSvcApi [[nodiscard]] std::vector<int16_t> ShallowDiffusionInference(
+			std::vector<float>& _16KAudioHubert,
+			const MoeVSProjectSpace::MoeVSSvcParams& _InferParams,
+			std::pair<std::vector<float>, int64_t>& _Mel,
+			const std::vector<float>& _SrcF0,
+			const std::vector<float>& _SrcVolume,
+			const std::vector<std::vector<float>>& _SrcSpeakerMap,
+			size_t& Process,
+			int64_t SrcSize
+		) const;
+
+		LibSvcApi MoeVoiceStudioCore::SingingVoiceConversion* GetPtr() const;
+
+		LibSvcApi [[nodiscard]] int64_t GetMaxStep() const;
+
+		LibSvcApi [[nodiscard]] bool OldVersion() const;
+
+		LibSvcApi [[nodiscard]] const std::wstring& GetDiffSvcVer() const;
+
+		LibSvcApi [[nodiscard]] int64_t GetMelBins() const;
+
+		LibSvcApi [[nodiscard]] int GetHopSize() const;
+
+		LibSvcApi [[nodiscard]] int64_t GetHiddenUnitKDims() const;
+
+		LibSvcApi [[nodiscard]] int64_t GetSpeakerCount() const;
+
+		LibSvcApi [[nodiscard]] bool CharaMixEnabled() const;
+
+		LibSvcApi [[nodiscard]] long GetSamplingRate() const;
+
+		LibSvcApi void NormMel(std::vector<float>& MelSpec) const;
+
+		[[nodiscard]] bool IsDiffusion() const;
+	private:
+		MoeVoiceStudioCore::DiffusionSvc* Diffusion_ = nullptr;
+		MoeVoiceStudioCore::ReflowSvc* Reflow_ = nullptr;
+	};
+
+
 	LibSvcApi int64_t& GetSpeakerCount();
 	LibSvcApi int64_t& GetSamplingRate();
 	LibSvcApi int32_t& GetVocoderHopSize();
@@ -42,10 +102,10 @@ namespace MoeVSModuleManager
 	LibSvcApi MoeVoiceStudioCore::VitsSvc* GetVitsSvcModel();
 
 	/**
-	 * \brief 获取当前DiffusionSvc模型
+	 * \brief 获取当前UnionSvc模型
 	 * \return 当前模型的指针
 	 */
-	LibSvcApi MoeVoiceStudioCore::DiffusionSvc* GetDiffusionSvcModel();
+	LibSvcApi UnionSvcModel* GetUnionSvcModel();
 
 	/**
 	 * \brief 卸载模型
@@ -55,7 +115,7 @@ namespace MoeVSModuleManager
 	/**
 	 * \brief 卸载模型
 	 */
-	LibSvcApi void UnloadDiffusionSvcModel();
+	LibSvcApi void UnloadUnionSvcModel();
 
 	/**
 	 * \brief 载入VitsSvc模型
@@ -77,7 +137,7 @@ namespace MoeVSModuleManager
 	 * \param NumThread CPU推理时的线程数（最好设置高一点，GPU不支持的算子可能也会Fallback到CPU）
 	 * \param DeviceID GPU设备ID
 	 */
-	LibSvcApi void LoadDiffusionSvcModel(const MJson& Config,
+	LibSvcApi void LoadUnionSvcModel(const MJson& Config,
 		const MoeVoiceStudioCore::MoeVoiceStudioModule::ProgressCallback& Callback,
 		int ProviderID, int NumThread, int DeviceID);
 

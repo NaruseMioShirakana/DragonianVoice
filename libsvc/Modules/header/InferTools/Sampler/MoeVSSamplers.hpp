@@ -50,4 +50,48 @@ private:
 	const std::vector<const char*> denoiseOutput = { "noise_pred" };
 };
 
+class ReflowEularSampler : public MoeVSReflowBaseSampler
+{
+public:
+	ReflowEularSampler(Ort::Session* Velocity, int64_t MelBins, const ProgressCallback& _ProgressCallback, Ort::MemoryInfo* memory);
+	~ReflowEularSampler() override = default;
+	std::vector<Ort::Value> Sample(std::vector<Ort::Value>& Tensors, int64_t Steps, float dt, float Scale, size_t& Process) override;
+private:
+	const std::vector<const char*> velocityInput = { "x", "t", "cond" };
+	const std::vector<const char*> velocityOutput = { "o" };
+};
+
+class ReflowRk4Sampler : public MoeVSReflowBaseSampler
+{
+public:
+	ReflowRk4Sampler(Ort::Session* Velocity, int64_t MelBins, const ProgressCallback& _ProgressCallback, Ort::MemoryInfo* memory);
+	~ReflowRk4Sampler() override = default;
+	std::vector<Ort::Value> Sample(std::vector<Ort::Value>& Tensors, int64_t Steps, float dt, float Scale, size_t& Process) override;
+private:
+	const std::vector<const char*> velocityInput = { "x", "t", "cond" };
+	const std::vector<const char*> velocityOutput = { "o" };
+};
+
+class ReflowHeunSampler : public MoeVSReflowBaseSampler
+{
+public:
+	ReflowHeunSampler(Ort::Session* Velocity, int64_t MelBins, const ProgressCallback& _ProgressCallback, Ort::MemoryInfo* memory);
+	~ReflowHeunSampler() override = default;
+	std::vector<Ort::Value> Sample(std::vector<Ort::Value>& Tensors, int64_t Steps, float dt, float Scale, size_t& Process) override;
+private:
+	const std::vector<const char*> velocityInput = { "x", "t", "cond" };
+	const std::vector<const char*> velocityOutput = { "o" };
+};
+
+class ReflowPececeSampler : public MoeVSReflowBaseSampler
+{
+public:
+	ReflowPececeSampler(Ort::Session* Velocity, int64_t MelBins, const ProgressCallback& _ProgressCallback, Ort::MemoryInfo* memory);
+	~ReflowPececeSampler() override = default;
+	std::vector<Ort::Value> Sample(std::vector<Ort::Value>& Tensors, int64_t Steps, float dt, float Scale, size_t& Process) override;
+private:
+	const std::vector<const char*> velocityInput = { "x", "t", "cond" };
+	const std::vector<const char*> velocityOutput = { "o" };
+};
+
 MoeVoiceStudioSamplerEnd
