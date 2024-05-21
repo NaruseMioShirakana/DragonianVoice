@@ -66,7 +66,7 @@ namespace MoeVSProjectSpace
         std::vector<float> F0;
         std::vector<float> Volume;
         std::vector<std::vector<float>> Speaker;
-        long OrgLen = 0;
+        int32_t OrgLen = 0;
         bool IsNotMute = false;
         MoeVoiceStudioSvcSlice() = default;
     };
@@ -154,6 +154,7 @@ namespace MoeVSProjectSpace
         std::wstring ReflowSampler = L"Eular";             //Reflow采样器
 		std::wstring F0Method = L"Dio";                    //F0提取算法
         bool UseShallowDiffusion = false;                  //使用浅扩散
+        void* _VocoderModel = nullptr;
 
         //SVCRTInfer
         int64_t RTSampleSize = 44100;

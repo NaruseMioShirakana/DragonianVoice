@@ -8,27 +8,27 @@
 
 MoeVoiceStudioCoreHeader
 
-Ort::Session* Vocoder = nullptr;
+Ort::Session* GlobalVocoder = nullptr;
 
 void LoadVocoderModel(const std::wstring& VocoderPath)
 {
-	Vocoder = new Ort::Session(*moevsenv::GetGlobalMoeVSEnv().GetEnv(), VocoderPath.c_str(), *moevsenv::GetGlobalMoeVSEnv().GetSessionOptions());
+	GlobalVocoder = new Ort::Session(*moevsenv::GetGlobalMoeVSEnv().GetEnv(), VocoderPath.c_str(), *moevsenv::GetGlobalMoeVSEnv().GetSessionOptions());
 }
 
 void UnLoadVocoderModel()
 {
-	delete Vocoder;
-	Vocoder = nullptr;
+	delete GlobalVocoder;
+	GlobalVocoder = nullptr;
 }
 
 bool VocoderEnabled()
 {
-	return Vocoder;
+	return GlobalVocoder;
 }
 
 Ort::Session* GetCurrentVocoder()
 {
-	return Vocoder;
+	return GlobalVocoder;
 }
 
 void DiffusionSvc::Destory()
@@ -479,6 +479,9 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVo
 			{
 				LibDLVoiceCodecThrow((std::string("Locate: Diff\n") + e2.what()))
 			}
+			Ort::Session* Vocoder = GlobalVocoder;
+			if (_InferParams._VocoderModel)
+				Vocoder = static_cast<Ort::Session*>(_InferParams._VocoderModel);
 			try
 			{
 				finaOut = Vocoder->Run(Ort::RunOptions{ nullptr },
@@ -590,8 +593,10 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVo
 			{
 				LibDLVoiceCodecThrow((std::string("Locate: pred\n") + e1.what()))
 			}
-
 			DiffOut.emplace_back(std::move(EncoderOut[1]));
+			Ort::Session* Vocoder = GlobalVocoder;
+			if (_InferParams._VocoderModel)
+				Vocoder = static_cast<Ort::Session*>(_InferParams._VocoderModel);
 			try
 			{
 				finaOut = Vocoder->Run(Ort::RunOptions{ nullptr },
@@ -879,8 +884,10 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 	{
 		LibDLVoiceCodecThrow((std::string("Locate: pred\n") + e1.what()))
 	}
-
 	DiffOut.emplace_back(std::move(EncoderOut[1]));
+	Ort::Session* Vocoder = GlobalVocoder;
+	if (_InferParams._VocoderModel)
+		Vocoder = static_cast<Ort::Session*>(_InferParams._VocoderModel);
 	try
 	{
 		finaOut = Vocoder->Run(Ort::RunOptions{ nullptr },
@@ -1067,8 +1074,10 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	{
 		LibDLVoiceCodecThrow((std::string("Locate: pred\n") + e1.what()))
 	}
-
 	DiffOut.emplace_back(std::move(EncoderTensors[2]));
+	Ort::Session* Vocoder = GlobalVocoder;
+	if (_InferParams._VocoderModel)
+		Vocoder = static_cast<Ort::Session*>(_InferParams._VocoderModel);
 	try
 	{
 		finaOut = Vocoder->Run(Ort::RunOptions{ nullptr },
@@ -1100,7 +1109,7 @@ void StaticNormMel(std::vector<float>& MelSpec, float SpecMin = -12, float SpecM
 		it = (it - SpecMin) / (SpecMax - SpecMin) * 2 - 1;
 }
 
-std::vector<int16_t> VocoderInfer(std::vector<float>& Mel, std::vector<float>& F0, int64_t MelBins, int64_t MelSize, const Ort::MemoryInfo* Mem)
+std::vector<int16_t> VocoderInfer(std::vector<float>& Mel, std::vector<float>& F0, int64_t MelBins, int64_t MelSize, const Ort::MemoryInfo* Mem, void* _VocoderModel)
 {
 	const int64_t MelShape[] = { 1i64,MelBins,MelSize };
 	const int64_t FrameShape[] = { 1,MelSize };
@@ -1121,6 +1130,9 @@ std::vector<int16_t> VocoderInfer(std::vector<float>& Mel, std::vector<float>& F
 	);
 	const std::vector nsfInput = { "c", "f0" };
 	const std::vector nsfOutput = { "audio" };
+	Ort::Session* Vocoder = GlobalVocoder;
+	if (_VocoderModel)
+		Vocoder = static_cast<Ort::Session*>(_VocoderModel);
 	Tensors = Vocoder->Run(Ort::RunOptions{ nullptr },
 		nsfInput.data(),
 		Tensors.data(),

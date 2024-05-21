@@ -136,6 +136,6 @@ private:
     const std::vector<const char*> naiveOutput = { "mel" };
 };
 
-LibSvcApi std::vector<int16_t> VocoderInfer(std::vector<float>& Mel, std::vector<float>& F0, int64_t MelBins, int64_t MelSize, const Ort::MemoryInfo* Mem);
+LibSvcApi std::vector<int16_t> VocoderInfer(std::vector<float>& Mel, std::vector<float>& F0, int64_t MelBins, int64_t MelSize, const Ort::MemoryInfo* Mem, void* _VocoderModel = nullptr);
 
 MoeVoiceStudioCoreEnd

@@ -4,21 +4,6 @@
 
 namespace libsvccore
 {
-	struct FloatArray
-	{
-		float* Data = nullptr;
-		size_t Size = 0;
-	};
-
-	struct RetData
-	{
-		FloatArray Audio;
-		FloatArray F0;
-		FloatArray Volume;
-		long OrgLen = 0;
-		bool IsNotMute = false;
-	};
-
 	using Config = MoeVoiceStudioCore::Hparams;
 	using VitsSvc = MoeVoiceStudioCore::VitsSvc;
 	using DiffusionSvc = MoeVoiceStudioCore::DiffusionSvc;

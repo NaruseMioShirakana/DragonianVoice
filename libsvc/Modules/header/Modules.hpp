@@ -36,6 +36,10 @@ namespace MoeVSModuleManager
 			const MoeVoiceStudioCore::MoeVoiceStudioModule::ProgressCallback& Callback,
 			int ProviderID, int NumThread, int DeviceID);
 
+		LibSvcApi UnionSvcModel(const MoeVoiceStudioCore::Hparams& Config,
+			const MoeVoiceStudioCore::MoeVoiceStudioModule::ProgressCallback& Callback,
+			int ProviderID, int NumThread, int DeviceID);
+
 		LibSvcApi [[nodiscard]] std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcData& _Slice,
 			const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const;
 

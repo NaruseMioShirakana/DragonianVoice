@@ -149,7 +149,7 @@ namespace libsvccore
 			UnloadReflowSvcSession(_Name);
 	}
 
-	std::mt19937 gen;
+	std::mt19937 gen(114514);
 	std::uniform_int_distribution<size_t> normal;
 	std::unordered_map<size_t, std::any> LibSvcRtnData;
 

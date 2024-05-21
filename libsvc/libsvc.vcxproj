@@ -15,6 +15,14 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDll|Win32">
+      <Configuration>ReleaseDll</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="ReleaseDll|x64">
+      <Configuration>ReleaseDll</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="ReleaseLib|Win32">
       <Configuration>ReleaseLib</Configuration>
       <Platform>Win32</Platform>
@@ -97,6 +105,12 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <SupportLTL>true</SupportLTL>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='ReleaseDll|Win32'">
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='ReleaseDll|x64'">
+    <PlatformToolset>v143</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -266,7 +280,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)Lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -290,7 +304,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
       <AdditionalIncludeDirectories>$(SolutionDir)Lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
@@ -305,6 +319,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Api\header\CAndDotNetApi.h" />
     <ClInclude Include="Api\header\libsvc.h" />
     <ClInclude Include="Modules\framework.h" />
     <ClInclude Include="Modules\header\InferTools\AvCodec\AvCodeResample.h" />
@@ -353,6 +368,7 @@
     <ClInclude Include="Modules\Lib\World\src\world\synthesisrealtime.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Api\src\CAndDotNetApi.cpp" />
     <ClCompile Include="Api\src\libsvc.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Modules\Lib\MJson\MJson.cpp" />

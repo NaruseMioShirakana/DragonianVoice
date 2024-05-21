@@ -73,7 +73,7 @@ public:
 
 	std::vector<float> ExtractF0(const std::vector<double>& PCMData, size_t TargetLength) override;
 private:
-	std::vector<const char*> InputNames = { "waveform"};
+	std::vector<const char*> InputNames = { "waveform" };
 	std::vector<const char*> OutputNames = { "f0" };
 	std::vector<double> refined_f0;
 };

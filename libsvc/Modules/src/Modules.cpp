@@ -114,6 +114,22 @@ namespace MoeVSModuleManager
 			LibDLVoiceCodecThrow("Trying To Load VitsSvc Model As Union Model!")
 	}
 
+	UnionSvcModel::UnionSvcModel(const MoeVoiceStudioCore::Hparams& Config, const MoeVoiceStudioCore::MoeVoiceStudioModule::ProgressCallback& Callback, int ProviderID, int NumThread, int DeviceID)
+	{
+		if ((Config.TensorExtractor.find(L"Diff") != std::wstring::npos) || Config.TensorExtractor.find(L"diff") != std::wstring::npos)
+			Diffusion_ = new MoeVoiceStudioCore::DiffusionSvc(
+				Config, Callback,
+				MoeVoiceStudioCore::MoeVoiceStudioModule::ExecutionProviders(ProviderID),
+				DeviceID, NumThread
+			);
+		else
+			Reflow_ = new MoeVoiceStudioCore::ReflowSvc(
+				Config, Callback,
+				MoeVoiceStudioCore::MoeVoiceStudioModule::ExecutionProviders(ProviderID),
+				DeviceID, NumThread
+			);
+	}
+
 	UnionSvcModel::~UnionSvcModel()
 	{
 		delete Diffusion_;
