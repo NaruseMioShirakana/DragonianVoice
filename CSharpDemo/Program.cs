@@ -35,6 +35,7 @@ Console.WriteLine(Audio.Size());
 
 LibSvc.SlicerSettings slicerSettings = new();
 UInt64Vector SlicePos = LibSvc.Factory.SliceAudio(ref Audio, ref slicerSettings);
+SlicePos.Resize(3);
 Console.WriteLine(SlicePos.Size());
 
 Slices slices = LibSvc.Factory.Preprocess(ref Audio, ref SlicePos);
@@ -44,10 +45,18 @@ string VocoderPath = "D:\\VSGIT\\MoeVoiceStudioSvc - Core - Cmd\\x64\\Debug\\hif
 VocoderModel Vocoder = LibSvc.Factory.LoadVocoderModel(ref VocoderPath);
 
 LibSvc.Params _params = new();
+_params.Step = 100;
+_params.Pndm = 10;
 _params.SetVocoder(ref Vocoder);
 ulong Proc = 0;
-Slice slice = slices[0];
+Slice slice = slices[1];
 Audio = Model.Inference(slice, ref _params, ref Proc);
 Console.WriteLine((double)slice.SrcLength() * Config.SamplingRate / slicerSettings.SamplingRate);
 Console.WriteLine(Audio.Size());
+Callback(1, 2);
 GC.KeepAlive(Callback);
+GC.KeepAlive(Vocoder);
+
+LibSvc.Factory.WriteAudio(Audio, "Out1.wav", Config.SamplingRate);
+Audio.Insert(ref Audio);
+LibSvc.Factory.WriteAudio(Audio, "Out2.wav", Config.SamplingRate);

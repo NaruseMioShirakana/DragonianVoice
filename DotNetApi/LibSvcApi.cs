@@ -107,6 +107,11 @@ namespace LibSvcApi
             LibSvcSetAudioLength(Obj_, _Size);
         }
 
+        public void Insert(ref Int16Vector _Input)
+        {
+            LibSvcInsertAudio(Obj_, _Input.Object);
+        }
+
         [DllImport("libsvc.dll")]
         private static extern short* LibSvcGetAudioData(void* _Obj);
 
@@ -121,6 +126,9 @@ namespace LibSvcApi
 
         [DllImport("libsvc.dll")]
         private static extern void LibSvcSetAudioLength(void* _Obj, ulong _Size);
+
+        [DllImport("libsvc.dll")]
+        private static extern void LibSvcInsertAudio(void* _ObjA, void* _ObjB);
 
         private void* Obj_ = null;
         private bool Owner_ = false;
@@ -158,6 +166,11 @@ namespace LibSvcApi
             return LibSvcGetOffsetSize(Obj_);
         }
 
+        public void Resize(ulong _Size)
+        {
+            LibSvcSetOffsetLength(Obj_, _Size);
+        }
+
         [DllImport("libsvc.dll")]
         private static extern ulong* LibSvcGetOffsetData(void* _Obj);
 
@@ -169,6 +182,9 @@ namespace LibSvcApi
 
         [DllImport("libsvc.dll")]
         private static extern void LibSvcReleaseOffset(void* _Obj);
+
+        [DllImport("libsvc.dll")]
+        private static extern void LibSvcSetOffsetLength(void* _Obj, ulong _Size);
 
         private void* Obj_ = null;
         private bool Owner_ = false;
@@ -704,6 +720,7 @@ namespace LibSvcApi
         public void Init()
         {
             LibSvcInit();
+            EnableFileLogger(false);
             SetF0PredictorEnv(8, 0, 0);
         }
 
@@ -807,6 +824,13 @@ namespace LibSvcApi
             throw new Exception(GetError(0));
         }
 
+        public void EnableFileLogger(bool _Cond) { LibSvcEnableFileLogger(_Cond); }
+
+        public void WriteAudio(Int16Vector _PCMData, string _OutputPath, int _SamplingRate)
+        {
+            LibSvcWriteAudioFile(_PCMData.Object, _OutputPath, _SamplingRate);
+        }
+
         [DllImport("libsvc.dll")]
         private static extern void LibSvcInit();
 
@@ -862,5 +886,11 @@ namespace LibSvcApi
 
         [DllImport("libsvc.dll", CharSet = CharSet.Unicode)]
         private static extern int LibSvcReadAudio(string _AudioPath, int _SamplingRate, void* _Output);
+
+        [DllImport("libsvc.dll", CharSet = CharSet.Unicode)]
+        private static extern void LibSvcWriteAudioFile(void* _PCMData, string _OutputPath, int _SamplingRate);
+
+        [DllImport("libsvc.dll")]
+        private static extern void LibSvcEnableFileLogger(bool _Cond);
     }
 }

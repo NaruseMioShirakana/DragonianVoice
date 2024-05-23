@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <Configurations>Debug;Release;ReleaseDll</Configurations>
+    <Configurations>Debug;Release</Configurations>
     <BaseOutputPath></BaseOutputPath>
   </PropertyGroup>
 

@@ -90,6 +90,12 @@ void LibSvcReleaseOffset(void* _Obj)
 	delete (OffsetContainer*)_Obj;
 }
 
+void LibSvcSetOffsetLength(void* _Obj, size_t _Size)
+{
+	auto& Obj = *(OffsetContainer*)_Obj;
+	Obj.resize(_Size);
+}
+
 void LibSvcReleaseSliceData(void* _Obj)
 {
 	delete (DataContainer*)_Obj;
@@ -111,6 +117,13 @@ void LibSvcSetAudioLength(void* _Obj, size_t _Size)
 {
 	auto& Obj = *(AudioContainer*)_Obj;
 	Obj.resize(_Size);
+}
+
+void LibSvcInsertAudio(void* _ObjA, void* _ObjB)
+{
+	auto& ObjA = *(AudioContainer*)_ObjA;
+	auto& ObjB = *(AudioContainer*)_ObjB;
+	ObjA.insert(ObjA.end(), ObjB.begin(), ObjB.end());
 }
 
 int16_t* LibSvcGetAudioData(void* _Obj)
@@ -755,7 +768,7 @@ void* LibSvcLoadVocoder(LPWSTR VocoderPath)
 	const auto& Env = moevsenv::GetGlobalMoeVSEnv();
 	try
 	{
-		return Ort::Session(*Env.GetEnv(), VocoderPath, *Env.GetSessionOptions());
+		return new Ort::Session(*Env.GetEnv(), VocoderPath, *Env.GetSessionOptions());
 	}
 	catch (std::exception& e)
 	{
@@ -792,4 +805,14 @@ INT32 LibSvcReadAudio(LPWSTR _AudioPath, INT32 _SamplingRate, void* _Output)
 	}
 
 	return 0;
+}
+
+void LibSvcEnableFileLogger(bool _Cond)
+{
+	MoeSSLogger::GetLogger().enable(_Cond);
+}
+
+void LibSvcWriteAudioFile(void* _PCMData, LPWSTR _OutputPath, INT32 _SamplingRate)
+{
+	InferTools::Wav::WritePCMData(_SamplingRate, 1, *(std::vector<int16_t>*)(_PCMData), _OutputPath);
 }

@@ -133,6 +133,8 @@ extern "C" {
 
 	LibSvcApi void LibSvcSetAudioLength(void* _Obj, size_t _Size);
 
+	LibSvcApi void LibSvcInsertAudio(void* _ObjA, void* _ObjB);
+
 	LibSvcApi short* LibSvcGetAudioData(void* _Obj);
 
 	LibSvcApi size_t LibSvcGetAudioSize(void* _Obj);
@@ -142,6 +144,8 @@ extern "C" {
 	LibSvcApi void* LibSvcAllocateOffset();
 
 	LibSvcApi void LibSvcReleaseOffset(void* _Obj);
+
+	LibSvcApi void LibSvcSetOffsetLength(void* _Obj, size_t _Size);
 
 	LibSvcApi size_t* LibSvcGetOffsetData(void* _Obj);
 
@@ -268,6 +272,10 @@ extern "C" {
 	LibSvcApi INT32 LibSvcUnloadVocoder(void* _Model);
 
 	LibSvcApi INT32 LibSvcReadAudio(LPWSTR _AudioPath, INT32 _SamplingRate, void* _Output);
+
+	LibSvcApi void LibSvcEnableFileLogger(bool _Cond);
+
+	LibSvcApi void LibSvcWriteAudioFile(void* _PCMData, LPWSTR _OutputPath, INT32 _SamplingRate);
 
 #ifdef __cplusplus
 }

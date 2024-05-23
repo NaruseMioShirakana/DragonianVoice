@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "DotNetApi": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
