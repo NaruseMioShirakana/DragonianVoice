@@ -25,6 +25,12 @@
     <Filter Include="头文件\Lib">
       <UniqueIdentifier>{4ae442dd-0ced-40c1-92fb-78b171577cd2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\Api">
+      <UniqueIdentifier>{95907600-9031-43ba-b3ac-20dd1d9f39fe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\Api">
+      <UniqueIdentifier>{d9fd3421-73d0-40ce-8069-dfb762113415}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -111,6 +117,9 @@
     <ClInclude Include="Modules\Lib\MJson\MJson.h">
       <Filter>头文件\Lib</Filter>
     </ClInclude>
+    <ClInclude Include="Api\NativeApi.h">
+      <Filter>头文件\Api</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dllmain.cpp">
@@ -184,6 +193,9 @@
     </ClCompile>
     <ClCompile Include="Modules\Lib\MJson\MJson.cpp">
       <Filter>源文件\Lib</Filter>
+    </ClCompile>
+    <ClCompile Include="Api\NativeApi.cpp">
+      <Filter>源文件\Api</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

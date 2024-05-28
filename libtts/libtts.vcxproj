@@ -444,6 +444,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Api\NativeApi.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="Modules\InferTools\G2P\MoeVSG2P.hpp" />
     <ClInclude Include="Modules\InferTools\inferTools.hpp" />
@@ -474,6 +475,7 @@
     <ClInclude Include="Modules\StringPreprocess.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Api\NativeApi.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="Modules\InferTools\G2P\MoeVSG2P.cpp" />
     <ClCompile Include="Modules\InferTools\inferTools.cpp" />

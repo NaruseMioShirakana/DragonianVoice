@@ -243,7 +243,7 @@
     <ClInclude Include="Modules\header\Models\ReflowSvc.hpp">
       <Filter>头文件\Modules\Models</Filter>
     </ClInclude>
-    <ClInclude Include="Api\header\CAndDotNetApi.h">
+    <ClInclude Include="Api\header\NativeApi.h">
       <Filter>头文件\API</Filter>
     </ClInclude>
   </ItemGroup>
@@ -380,7 +380,7 @@
     <ClCompile Include="Modules\src\Models\ReflowSvc.cpp">
       <Filter>源文件\Modules\Models</Filter>
     </ClCompile>
-    <ClCompile Include="Api\src\CAndDotNetApi.cpp">
+    <ClCompile Include="Api\src\NativeApi.cpp">
       <Filter>源文件\API</Filter>
     </ClCompile>
   </ItemGroup>

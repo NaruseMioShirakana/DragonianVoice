@@ -1,4 +1,4 @@
-#include "../header/CAndDotNetApi.h"
+#include "../header/NativeApi.h"
 #include <deque>
 #include <string>
 #include "../../Modules/header/Modules.hpp"
