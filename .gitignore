@@ -365,3 +365,4 @@ FodyWeavers.xsd
 /Lib
 /MoeVoiceStudioSvc - Core - Cmd/output.wav
 /MoeVoiceStudioSvc - Core - Cmd/input.wav
+/fish-speech.cpp/ggml
