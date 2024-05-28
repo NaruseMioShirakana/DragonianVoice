@@ -1,6 +1,6 @@
 <div align="center">
 
-# Dragonian Speech
+# DragonianVoice
 [中文](README.md) | [English](README_en.md)
 
 </div>
