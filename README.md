@@ -1,29 +1,35 @@
 <div align="center">
 
-# MoeVoiceStudio
+# Dragonian Speech
 [中文](README.md) | [English](README_en.md)
-
-本项目是专注于二次元亚文化圈，面向动漫爱好者的语音辅助软件。
 
 </div>
 
+> 本仓库为：1、TTS（Tacotron2、Vits、EmotionalVits、BERTVits2、GPtSoVits）；2、SVC（SoVitsSvc、RVC、DiffusionSvc、FishDiffusion、ReflowSvc）；3、SVS（DiffSinger） 的Onnx框架推理仓库，目前支持C/Cpp/C#调用。
+
+> 本仓库的最新版本已经与 [fish-speech](https://github.com/fishaudio/fish-speech) 联动，使用ggml框架重写fish-speech，组成fish-speech.cpp子项目
+
 > 注意：支持SVS的分支：[MoeVoiceStudio](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudio) [MoeVoiceStudioCore](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/MoeVoiceStudioCore)
 
-> 关于Cuda支持的相关问题可以前往[OnnxRuntime官方仓库](https://github.com/microsoft/onnxruntime/releases)查看
+> 关于Cuda支持的相关问题可以前往 [OnnxRuntime官方仓库](https://github.com/microsoft/onnxruntime/releases) 查看
 
-> 经过实验，Dml会导致Onnx中一些算子得到错误的结果，最新的SoVits仓库中的Onnx导出已经替换了这些算子，故SoVits3.0和SoVits4.0恢复支持Dml使用，但是要使用最新（2023/7/17）版本的SoVitsOnnx导出重新导出Onnx模型
+> 经过实验，Dml会导致Onnx中一些不支持的算子在使用时并不会报错，而是会返回一个不可预料的结果，所以会导致SoVits3.0和SoVits4.0在DmlEP上的推理结果错误。不过最新的SoVits仓库中的Onnx导出已经替换了这些算子，故SoVits3.0和SoVits4.0恢复支持Dml使用，但是要使用最新（2023/7/17）版本的SoVitsOnnx导出重新导出Onnx模型
 
-> 由于Diffusion模型的特性，如果你推理的总步数大于模型训练时最大的步数（实际步数=总步数/加速倍率，这个总步数不是推理时实际走过的步数，而是K_Step），会导致输出音频炸掉或者出现非常大的噪声，所以建议在推理前请仔细观察自己模型配置文件中的MaxStep（或K_Step_Max） 
+> 由于Diffusion和Reflow模型的特性，如果你推理的总步数大于模型训练时最大的步数（实际步数=总步数/加速倍率，这个总步数不是推理时实际走过的步数，而是K_Step），会导致输出音频炸掉或者出现非常大的噪声，所以建议在推理前请仔细观察自己模型配置文件中的MaxStep（或K_Step_Max） 
 
 <details><summary><b>支持的Net：</b></summary>
     
 - [DeepLearningExamples](https://github.com/NVIDIA/DeepLearningExamples)
-- [VITS](https://github.com/jaywalnut310/vits)
-- [SoVits](https://github.com/svc-develop-team/so-vits-svc)
-- [DiffSvc](https://github.com/prophesier/diff-SVC)
-- [DiffSinger](https://github.com/openvpi/DiffSinger)
+- [Vits](https://github.com/jaywalnut310/vits)
+- [EmotionalVits](https://github.com/innnky/emotional-vits)
+- [BertVits2](https://github.com/fishaudio/Bert-VITS2)
+- [SoVitsSvc (v2/v3/v4)](https://github.com/svc-develop-team/so-vits-svc)
 - [RVC](https://github.com/RVC-Project/Retrieval-based-Voice-Conversion-WebUI)
+- [DiffSvc](https://github.com/prophesier/diff-SVC)
+- [DiffusionSvc (v1/v2)](https://github.com/CNChTu/Diffusion-SVC)
 - [FishDiffusion](https://github.com/fishaudio/fish-diffusion)
+- [ReflowSvc](https://github.com/prophesier/diff-SVC)
+- [DiffSinger](https://github.com/openvpi/DiffSinger)
 - [FCPE](https://github.com/CNChTu/MelPE)
 - [RMVPE](https://github.com/yxlllc/RMVPE)
 
@@ -35,6 +41,7 @@
 - [说明](#说明)
   - [分支说明](#分支)
 - [FAQ问答](#faq)
+  - Q: [项目名的来历是什么？](#q-项目名的来历)
   - Q: [这个项目到底有什么作用?](#q-这个项目到底有什么作用)
   - Q: [该项目以后会收费吗?](#q-该项目以后会收费吗)
   - Q: [是否提供有偿模型代训练?](#q-是否提供有偿模型代训练)
@@ -70,7 +77,7 @@
 ## 免责声明
 本项目为**开源、离线的项目，本项目的所有开发者以及维护者（以下简称贡献者）对本项目没有控制力**。本项目的贡献者从未向任何组织或个人提供包括但不限于数据集提取、数据集加工、算力支持、训练支持、推理等一切形式的帮助；本项目的贡献者不知晓也无法知晓使用者使用该项目的用途。故一切基于本项目合成的音频都与本项目贡献者无关。**一切由此造成的问题由使用者自行承担**。
 
-本项目本身不具备任何语音合成的功能，一切的功能均需要由使用者自行训练模型并自行将其制作为Onnx模型，且模型的训练与Onnx模型的制作均与本项目的贡献者无关，均为使用者自己的行为，本项目贡献者未参与一切使用者的模型训练与制作。
+本项目本身不具备任何语音合成的功能，只是用于启动使用者自行训练并自行制作为Onnx模型的模型，且模型的训练与Onnx模型的制作均与本项目的贡献者无关，均为使用者自己的行为，本项目贡献者未参与一切使用者的模型训练与制作。
 
 本项目为完全离线状态下运行，无法采集任何用户信息，也无法获取用户的输入数据，故本项目贡献者对用户的一切输入以及模型不知情，因此不对任何用户输入负责。
 
@@ -83,7 +90,7 @@
 
 如果想要参加开发，可以加入QQ群:263805400或直接提PR
 
-**模型需要转换为ONNX模型，转换ONNX的程序我已经pull到每个项目的源仓库了，PTH不能直接用！！！！！！！！！！！！！**
+**模型需要转换为ONNX模型，详情见你选择的项目的源仓库，PTH模型不能直接使用！！！！！！！！！！！！！**
 
 ## 分支
 本项目的各分支:
@@ -93,16 +100,23 @@
 - [MoeSSV1](https://github.com/NaruseMioShirakana/MoeVoiceStudio/tree/V2) 旧版MoeSSV1版本存档
 
 ## FAQ
+### Q: 项目名的来历？
+<details><summary>A: </b></summary>
+
+> XP至上主义者狂喜，有谁不喜欢龙娘呢
+
+</details>
+
 ### Q: 这个项目到底有什么作用？
 <details><summary>A: </b></summary>
 
 > 这个项目的开发初衷主要是实现无需环境部属各个语音合成项目，而现在打算制作为一个SVC的辅助编辑器。
+> 
 > 由于这个项目毕竟是一个"个人的" "不专业"的项目，所以在您拥有更专业的软件，或者您是Python Cli爱好者，又或者您是相关领域大佬。我自知本软件不够专业且很大可能无法满足您的需求甚至对您没有用处。
+> 
 > 本项目并不是不可替代的项目，相反的本项目的功能您可以使用各种工具替代，我没有奢望本项目成为相关领域的领军项目，我只是怀着一腔热情继续着该项目的开发。但是热情总有消散的一天，但是该项目承诺在我的开   > 发热情完全消散之前会一直保持维护（不管有没有人使用，就算用户数目为0）
 > 
 > 本项目在设计上可能存在着各种各样的问题，所以也是需要大家积极的点炒饭来帮助我完善功能的，大部分对于功能和体验的优化我都会接受。
-> 
-> 最后再说一句我对于这个项目的看法吧：MoeSS和MoeVS就是依托答辩。
 
 </details>
 
