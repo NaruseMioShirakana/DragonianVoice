@@ -4,6 +4,7 @@
 [中文](README.md) | [English](README_en.md)
 
 </div>
+> 本仓库已经暂时停止了UI项目的维护，以后可能会成为一个纯Lib项目。
 
 > 本仓库为：1、TTS（Tacotron2、Vits、EmotionalVits、BERTVits2、GPtSoVits）；2、SVC（SoVitsSvc、RVC、DiffusionSvc、FishDiffusion、ReflowSvc）；3、SVS（DiffSinger） 的Onnx框架推理仓库，目前支持C/Cpp/C#调用。
 
