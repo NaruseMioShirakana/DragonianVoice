@@ -152,7 +152,7 @@ void Value::saveData(FileGuard& _File)
 	LibTTSNotImplementedError;
 }
 
-Module::Module(Module* _Parent, const std::wstring& _Name, ggml_context* _Ctx): GGMLCtx_(_Ctx)
+Module::Module(Module* _Parent, const std::wstring& _Name)
 {
 	if (_Parent != nullptr)
 	{
@@ -178,7 +178,7 @@ void Module::saveData(FileGuard& _File)
 		it->saveData(_File);
 }
 
-ggml_tensor* Module::operator()(ggml_tensor*)
+ggml_tensor* Module::operator()(ggml_tensor*, ggml_context*, bool _Inplace)
 {
 	LibTTSNotImplementedError;
 }
@@ -204,7 +204,7 @@ std::wstring Module::DumpLayerNameInfo()
 
 void Module::DumpLayerNameInfoImpl(std::wstring& _Tmp, int TabCount)
 {
-	for (int i = 0; i < TabCount; ++i) _Tmp += L' ';
+	for (int i = 0; i < TabCount; ++i) _Tmp += L"  ";
 	DumpCurrentLayerInfo(_Tmp);
 	if(!Layers_.empty())
 	{
@@ -215,7 +215,7 @@ void Module::DumpLayerNameInfoImpl(std::wstring& _Tmp, int TabCount)
 		_Tmp += '\n';
 		for (auto i : Layers_ | std::ranges::views::values)
 			i->DumpLayerNameInfoImpl(_Tmp, TabCount + 1);
-		for (int i = 0; i < TabCount; ++i) _Tmp += L' ';
+		for (int i = 0; i < TabCount; ++i) _Tmp += L"  ";
 		_Tmp += L'}';
 		_Tmp += '\n';
 	}
@@ -228,19 +228,56 @@ void Module::DumpCurrentLayerInfo(std::wstring& _Tmp)
 	_Tmp += RegName_;
 }
 
-Parameter::Parameter(Module* _Parent, const std::wstring& _Name) : Module(_Parent, _Name)
+Parameter::Parameter(Module* _Parent, const std::wstring& _Name, std::vector<SizeType> _Shape) :
+	Module(_Parent, _Name),
+	Shape_(std::move(_Shape))
 {
+	std::ranges::reverse(Shape_);
 }
 
 Parameter::operator ggml_tensor*() const
 {
-	return _Weight;
+	if (!Weight_)
+		LibTTSThrow(UnicodeToByte(L"\"" + RegName_ + L"\" Is Null!"));
+	return Weight_;
+}
+
+void Parameter::ChangeShape(std::vector<SizeType> _Shape)
+{
+	Shape_ = std::move(_Shape);
+	std::ranges::reverse(Shape_);
+}
+
+void Parameter::DumpCurrentLayerInfo(std::wstring& _Tmp)
+{
+	_Tmp += (RegName_ + L" (Size[");
+	auto RShape = Shape_;
+	std::ranges::reverse(RShape);
+	for (auto i : RShape)
+		_Tmp += (std::to_wstring(i) + L", ");
+	if(!RShape.empty())
+	{
+		_Tmp.pop_back();
+		_Tmp.pop_back();
+	}
+	_Tmp += L"])";
 }
 
 void Parameter::loadData(const DictType& _WeightDict, bool _Strict)
 {
-	_Weight = ggml_get_tensor(_WeightDict, UnicodeToByte(RegName_).c_str());
-	if (!_Weight)
+	try
+	{
+		Weight_ = ggml_get_tensor(_WeightDict, UnicodeToByte(RegName_).c_str());
+	}
+	catch (std::exception& e)
+	{
+		LibTTSThrow(e.what());
+	}
+	size_t Index = 0;
+	for (const auto Value : Shape_)
+		if (Value != Weight_->ne[Index++])
+			LibTTSThrow(UnicodeToByte(L"Size Of \"" + RegName_ + L"\" ¡Ù Size Of Pretrained Model!"));
+	if (!Weight_)
 		LibTTSThrow("Missing Weight \"" + UnicodeToByte(RegName_) + '\"');
 }
 
@@ -260,10 +297,10 @@ Sequential::~Sequential()
 	_Items.clear();
 }
 
-ggml_tensor* Sequential::operator()(ggml_tensor* _Input)
+ggml_tensor* Sequential::operator()(ggml_tensor* _Input, ggml_context* _Ctx, bool _Inplace)
 {
 	for (auto i : _Items)
-		_Input = i->operator()(_Input);
+		_Input = i->operator()(_Input, _Ctx, _Inplace);
 	return _Input;
 }
 
@@ -290,7 +327,7 @@ ModuleList::~ModuleList()
 {
 }
 
-ggml_tensor* ModuleList::operator()(ggml_tensor* _Input)
+ggml_tensor* ModuleList::operator()(ggml_tensor* _Input, ggml_context* _Ctx, bool _Inplace)
 {
 	LibTTSNotImplementedError;
 }

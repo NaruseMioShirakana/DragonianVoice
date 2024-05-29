@@ -11,7 +11,7 @@
 #define LibTTSEnd }
 #define LIBTTSND [[nodiscard]]
 
-#define LibTTSThrowImpl(message, exception_type) {\
+#define LibTTSThrowImpl(message, exception_type) do {\
 	const std::string __LibTTS__Message__ = message;\
 	const std::string __LibTTS__Message__Prefix__ =\
 	std::string("[In File: \"") + std::filesystem::path(__FILE__).filename().string() + "\", " +\
@@ -20,7 +20,7 @@
 	if (__LibTTS__Message__.substr(0, __LibTTS__Message__Prefix__.length()) != __LibTTS__Message__Prefix__)\
 		throw exception_type((__LibTTS__Message__Prefix__ + __LibTTS__Message__).c_str());\
 	throw exception_type(__LibTTS__Message__.c_str());\
-}
+} while(false)
 
 #define LibTTSThrow(message) LibTTSThrowImpl(message, std::exception)
 
@@ -51,7 +51,7 @@ using uint32 = uint32_t;
 using uint64 = uint64_t;
 struct NoneType {};
 static constexpr NoneType None;
-using SizeType = int64;
+using SizeType = int32;
 using DictType = ggml_context*;
 
 std::string UnicodeToByte(const std::wstring& input);
@@ -98,9 +98,9 @@ private:
 class Module : public Value
 {
 public:
-	Module(Module* _Parent, const std::wstring& _Name, ggml_context* _Ctx = nullptr);
+	Module(Module* _Parent, const std::wstring& _Name);
 	~Module() override = default;
-	virtual ggml_tensor* operator()(ggml_tensor*);
+	virtual ggml_tensor* operator()(ggml_tensor*, ggml_context*, bool _Inplace = false);
 	std::wstring& Name() { return RegName_; }
 	std::wstring DumpLayerNameInfo();
 
@@ -110,7 +110,6 @@ private:
 
 protected:
 	std::unordered_map<std::wstring, Module*> Layers_;
-	ggml_context* GGMLCtx_ = nullptr;
 
 public:
 	void loadData(const DictType& _WeightDict, bool _Strict) override;
@@ -122,13 +121,16 @@ class Parameter : public Module
 {
 public:
 	using Ty = float;
-	Parameter(Module* _Parent, const std::wstring& _Name);
+	Parameter(Module* _Parent, const std::wstring& _Name, std::vector<SizeType> _Shape);
 	~Parameter() override = default;
 	operator ggml_tensor* () const;
+	void ChangeShape(std::vector<SizeType> _Shape);
 
 protected:
-	ggml_tensor* _Weight = nullptr;
+	ggml_tensor* Weight_ = nullptr;
+	std::vector<SizeType> Shape_;
 public:
+	void DumpCurrentLayerInfo(std::wstring& _Tmp) override;
 	void loadData(const DictType& _WeightDict, bool _Strict) override;
 	void saveData(FileGuard& _File) override;
 };
@@ -138,12 +140,12 @@ class Sequential : public Module
 public:
 	Sequential(Module* _Parent, const std::wstring& _Name);
 	~Sequential() override;
-	ggml_tensor* operator()(ggml_tensor* _Input) override;
+	ggml_tensor* operator()(ggml_tensor* _Input, ggml_context* _Ctx, bool _Inplace = false) override;
 	void Append(Module* _Module);
 	virtual Sequential& operator=(const std::initializer_list<Module*>& _Input);
 	Module** begin() { return _Items.data(); }
 	Module** end() { return _Items.data() + _Items.size(); }
-	Module& operator[](int64_t _Index) const { return **(_Items.data() + _Index); }
+	Module* operator[](int64_t _Index) const { return *(_Items.data() + _Index); }
 
 private:
 	std::vector<Module*> _Items;
@@ -156,7 +158,7 @@ public:
 	~ModuleList() override;
 	ModuleList& operator=(const std::initializer_list<Module*>& _Input) override;
 private:
-	ggml_tensor* operator()(ggml_tensor* _Input) override;
+	ggml_tensor* operator()(ggml_tensor* _Input, ggml_context* _Ctx, bool _Inplace) override;
 };
 
 LibTTSEnd
