@@ -51,6 +51,7 @@ using uint32 = uint32_t;
 using uint64 = uint64_t;
 struct NoneType {};
 static constexpr NoneType None;
+using SizeType = int64;
 using DictType = ggml_context*;
 
 std::string UnicodeToByte(const std::wstring& input);
@@ -97,7 +98,7 @@ private:
 class Module : public Value
 {
 public:
-	Module(Module* _Parent, const std::wstring& _Name);
+	Module(Module* _Parent, const std::wstring& _Name, ggml_context* _Ctx = nullptr);
 	~Module() override = default;
 	virtual ggml_tensor* operator()(ggml_tensor*);
 	std::wstring& Name() { return RegName_; }
@@ -105,9 +106,11 @@ public:
 
 private:
 	void DumpLayerNameInfoImpl(std::wstring& _Tmp, int TabCount);
+	virtual void DumpCurrentLayerInfo(std::wstring& _Tmp);
 
 protected:
 	std::unordered_map<std::wstring, Module*> Layers_;
+	ggml_context* GGMLCtx_ = nullptr;
 
 public:
 	void loadData(const DictType& _WeightDict, bool _Strict) override;
@@ -137,13 +140,23 @@ public:
 	~Sequential() override;
 	ggml_tensor* operator()(ggml_tensor* _Input) override;
 	void Append(Module* _Module);
-	Sequential& operator=(const std::initializer_list<Module*>& _Input);
+	virtual Sequential& operator=(const std::initializer_list<Module*>& _Input);
 	Module** begin() { return _Items.data(); }
 	Module** end() { return _Items.data() + _Items.size(); }
 	Module& operator[](int64_t _Index) const { return **(_Items.data() + _Index); }
 
 private:
 	std::vector<Module*> _Items;
+};
+
+class ModuleList : public Sequential
+{
+public:
+	ModuleList(Module* _Parent, const std::wstring& _Name);
+	~ModuleList() override;
+	ModuleList& operator=(const std::initializer_list<Module*>& _Input) override;
+private:
+	ggml_tensor* operator()(ggml_tensor* _Input) override;
 };
 
 LibTTSEnd

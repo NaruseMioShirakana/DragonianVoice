@@ -152,7 +152,7 @@ void Value::saveData(FileGuard& _File)
 	LibTTSNotImplementedError;
 }
 
-Module::Module(Module* _Parent, const std::wstring& _Name)
+Module::Module(Module* _Parent, const std::wstring& _Name, ggml_context* _Ctx): GGMLCtx_(_Ctx)
 {
 	if (_Parent != nullptr)
 	{
@@ -205,7 +205,7 @@ std::wstring Module::DumpLayerNameInfo()
 void Module::DumpLayerNameInfoImpl(std::wstring& _Tmp, int TabCount)
 {
 	for (int i = 0; i < TabCount; ++i) _Tmp += L' ';
-	_Tmp += RegName_;
+	DumpCurrentLayerInfo(_Tmp);
 	if(!Layers_.empty())
 	{
 		if(!_Tmp.empty())
@@ -221,6 +221,11 @@ void Module::DumpLayerNameInfoImpl(std::wstring& _Tmp, int TabCount)
 	}
 	else
 		_Tmp += '\n';
+}
+
+void Module::DumpCurrentLayerInfo(std::wstring& _Tmp)
+{
+	_Tmp += RegName_;
 }
 
 Parameter::Parameter(Module* _Parent, const std::wstring& _Name) : Module(_Parent, _Name)
@@ -271,6 +276,26 @@ void Sequential::Append(Module* _Module)
 }
 
 Sequential& Sequential::operator=(const std::initializer_list<Module*>& _Input)
+{
+	for (auto i : _Input)
+		Append(i);
+	return *this;
+}
+
+ModuleList::ModuleList(Module* _Parent, const std::wstring& _Name) : Sequential(_Parent, _Name)
+{
+}
+
+ModuleList::~ModuleList()
+{
+}
+
+ggml_tensor* ModuleList::operator()(ggml_tensor* _Input)
+{
+	LibTTSNotImplementedError;
+}
+
+ModuleList& ModuleList::operator=(const std::initializer_list<Module*>& _Input)
 {
 	for (auto i : _Input)
 		Append(i);

@@ -1,48 +1,22 @@
 #include <iostream>
 #include <windows.h>
-#include "../include/Base.h"
+#include "Module.h"
 
 using namespace libtts;
-
-class Conv1D : public Module
-{
-public:
-	Conv1D(Module* _Parent, const std::wstring& _Name) :
-		Module(_Parent, _Name),
-		RegisterLayer(weight),
-		RegisterLayer(bias)
-	{}
-private:
-	Parameter weight;
-	Parameter bias;
-};
-
-class Linear : public Module
-{
-public:
-	Linear(Module* _Parent, const std::wstring& _Name) :
-		Module(_Parent, _Name),
-		RegisterLayer(weight),
-		RegisterLayer(bias)
-	{}
-private:
-	Parameter weight;
-	Parameter bias;
-};
 
 class ConvBlock : public Module
 {
 public:
 	ConvBlock(Module* _Parent, const std::wstring& _Name) :
 		Module(_Parent, _Name),
-		RegisterLayer(in_conv),
+		RegisterLayer(in_conv, { 114,514,8 }, nullptr),
 		RegisterLayer(block),
-		RegisterLayer(out_conv)
+		RegisterLayer(out_conv, { 1919,810,8 }, nullptr)
 	{
 		block = {
-			LayerItem(Conv1D),
+			LayerItem(Conv1D, { 1453,666,8 }, nullptr),
 			LayerItem(Linear),
-			LayerItem(Conv1D),
+			LayerItem(Conv1D, { 514,0721,8 }, nullptr),
 			LayerItem(Linear),
 		};
 	}
@@ -57,7 +31,7 @@ class MyNet : public Module
 public:
 	MyNet(Module* _Parent, const std::wstring& _Name) :
 		Module(_Parent, _Name),
-		RegisterLayer(conv_pre),
+		RegisterLayer(conv_pre, { 114,514,8 }, nullptr),
 		RegisterLayer(block_out)
 	{
 		block_out = {
@@ -69,7 +43,7 @@ public:
 	}
 private:
 	Conv1D conv_pre;
-	Sequential block_out;
+	ModuleList block_out;
 };
 
 int main()
