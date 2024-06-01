@@ -114,84 +114,88 @@ extern "C" {
 #else
 #pragma pack()
 #endif
+	typedef void* FloatVector, * DoubleDimsFloatVector, * Int16Vector, * UInt64Vector, * MelType, * SliceType, * SlicesType, * SvcModel, * VocoderModel;
+	typedef const void* CFloatVector, * CDoubleDimsFloatVector, * CInt16Vector, * CUInt64Vector, * CMelType, * CSliceType, * CSlicesType;
 
-	LibSvcApi float* LibSvcGetFloatVectorData(void* _Obj);
+	LibSvcApi float* LibSvcGetFloatVectorData(FloatVector _Obj);
 
-	LibSvcApi size_t LibSvcGetFloatVectorSize(void* _Obj);
+	LibSvcApi size_t LibSvcGetFloatVectorSize(FloatVector _Obj);
 
 	//DFloatVector
 
-	LibSvcApi void* LibSvcGetDFloatVectorData(void* _Obj, size_t _Index);
+	LibSvcApi FloatVector LibSvcGetDFloatVectorData(DoubleDimsFloatVector _Obj, size_t _Index);
 
-	LibSvcApi size_t LibSvcGetDFloatVectorSize(void* _Obj);
+	LibSvcApi size_t LibSvcGetDFloatVectorSize(DoubleDimsFloatVector _Obj);
 
 	//Audio - vector<int16_t>
 
-	LibSvcApi void* LibSvcAllocateAudio();
+	LibSvcApi Int16Vector LibSvcAllocateAudio();
 
-	LibSvcApi void LibSvcReleaseAudio(void* _Obj);
+	LibSvcApi void LibSvcReleaseAudio(Int16Vector _Obj);
 
-	LibSvcApi void LibSvcSetAudioLength(void* _Obj, size_t _Size);
+	LibSvcApi void LibSvcSetAudioLength(Int16Vector _Obj, size_t _Size);
 
-	LibSvcApi void LibSvcInsertAudio(void* _ObjA, void* _ObjB);
+	LibSvcApi void LibSvcInsertAudio(Int16Vector _ObjA, Int16Vector _ObjB);
 
-	LibSvcApi short* LibSvcGetAudioData(void* _Obj);
+	LibSvcApi short* LibSvcGetAudioData(Int16Vector _Obj);
 
-	LibSvcApi size_t LibSvcGetAudioSize(void* _Obj);
+	LibSvcApi size_t LibSvcGetAudioSize(Int16Vector _Obj);
 
 	//Offset - vector<size_t>
 
-	LibSvcApi void* LibSvcAllocateOffset();
+	LibSvcApi UInt64Vector LibSvcAllocateOffset();
 
-	LibSvcApi void LibSvcReleaseOffset(void* _Obj);
+	LibSvcApi void LibSvcReleaseOffset(UInt64Vector _Obj);
 
-	LibSvcApi void LibSvcSetOffsetLength(void* _Obj, size_t _Size);
+	LibSvcApi void LibSvcSetOffsetLength(UInt64Vector _Obj, size_t _Size);
 
-	LibSvcApi size_t* LibSvcGetOffsetData(void* _Obj);
+	LibSvcApi size_t* LibSvcGetOffsetData(UInt64Vector _Obj);
 
-	LibSvcApi size_t LibSvcGetOffsetSize(void* _Obj);
+	LibSvcApi size_t LibSvcGetOffsetSize(UInt64Vector _Obj);
 
 	//Mel - pair<vector<float>, int64_t>
 
-	LibSvcApi void* LibSvcAllocateMel();
+	LibSvcApi MelType LibSvcAllocateMel();
 
-	LibSvcApi void LibSvcReleaseMel(void* _Obj);
+	LibSvcApi void LibSvcReleaseMel(MelType _Obj);
 
-	LibSvcApi void* LibSvcGetMelData(void* _Obj);
+	LibSvcApi FloatVector LibSvcGetMelData(MelType _Obj);
 
-	LibSvcApi INT64 LibSvcGetMelSize(void* _Obj);
+	LibSvcApi INT64 LibSvcGetMelSize(MelType _Obj);
 
 	//Slice - MoeVoiceStudioSvcSlice
 
-	LibSvcApi void* LibSvcGetAudio(void* _Obj);
+	LibSvcApi Int16Vector LibSvcGetAudio(SliceType _Obj);
 
-	LibSvcApi void* LibSvcGetF0(void* _Obj);
+	LibSvcApi FloatVector LibSvcGetF0(SliceType _Obj);
 
-	LibSvcApi void* LibSvcGetVolume(void* _Obj);
+	LibSvcApi FloatVector LibSvcGetVolume(SliceType _Obj);
 
-	LibSvcApi void* LibSvcGetSpeaker(void* _Obj);
+	LibSvcApi DoubleDimsFloatVector LibSvcGetSpeaker(SliceType _Obj);
 
-	LibSvcApi INT32 LibSvcGetSrcLength(void* _Obj);
+	LibSvcApi INT32 LibSvcGetSrcLength(SliceType _Obj);
 
-	LibSvcApi INT32 LibSvcGetIsNotMute(void* _Obj);
+	LibSvcApi INT32 LibSvcGetIsNotMute(SliceType _Obj);
 
-	LibSvcApi void LibSvcSetSpeakerMixDataSize(void* _Obj, size_t _NSpeaker);
+	LibSvcApi void LibSvcSetSpeakerMixDataSize(SliceType _Obj, size_t _NSpeaker);
 
 	//Slices - MoeVoiceStudioSvcData
 
-	LibSvcApi void* LibSvcAllocateSliceData();
+	LibSvcApi SlicesType LibSvcAllocateSliceData();
 
-	LibSvcApi void LibSvcReleaseSliceData(void* _Obj);
+	LibSvcApi void LibSvcReleaseSliceData(SlicesType _Obj);
 
-	LibSvcApi BSTR LibSvcGetAudioPath(void* _Obj);
+	LibSvcApi BSTR LibSvcGetAudioPath(SlicesType _Obj);
 
-	LibSvcApi void* LibSvcGetSlice(void* _Obj, size_t _Index);
+	LibSvcApi SliceType LibSvcGetSlice(SlicesType _Obj, size_t _Index);
 
-	LibSvcApi size_t LibSvcGetSliceCount(void* _Obj);
+	LibSvcApi size_t LibSvcGetSliceCount(SlicesType _Obj);
 
 	/******************************************Fun**********************************************/
 
 	LibSvcApi void LibSvcInit();
+
+	LibSvcApi void LibSvcFreeString(BSTR _String);
 
 	LibSvcApi INT32 LibSvcSetGlobalEnv(UINT32 ThreadCount, UINT32 DeviceID, UINT32 Provider);
 
@@ -200,62 +204,62 @@ extern "C" {
 	LibSvcApi BSTR LibSvcGetError(size_t Index);
 
 	LibSvcApi INT32 LibSvcSliceAudio(
-		const void* _Audio, //std::vector<int16_t> By "LibSvcAllocateAudio()"
-		const void* _Setting, //LibSvcSlicerSettings
-		void* _Output //std::vector<size_t> By "LibSvcAllocateOffset()"
+		CInt16Vector _Audio, //std::vector<int16_t> By "LibSvcAllocateAudio()"
+		const void* _Setting, //Ptr Of LibSvcSlicerSettings
+		UInt64Vector _Output //std::vector<size_t> By "LibSvcAllocateOffset()"
 	);
 
 	LibSvcApi INT32 LibSvcPreprocess(
-		const void* _Audio, //std::vector<int16_t> By "LibSvcAllocateAudio()"
-		const void* _SlicePos, //std::vector<size_t> By "LibSvcAllocateOffset()"
+		CInt16Vector _Audio, //std::vector<int16_t> By "LibSvcAllocateAudio()"
+		CUInt64Vector _SlicePos, //std::vector<size_t> By "LibSvcAllocateOffset()"
 		INT32 _SamplingRate,
 		INT32 _HopSize,
 		double _Threshold,
-		const wchar_t* _F0Method,
-		void* _Output // Slices By "LibSvcAllocateSliceData()"
+		const wchar_t* _F0Method, //"Dio" "Harvest" "RMVPE" "FCPE"
+		SlicesType _Output // Slices By "LibSvcAllocateSliceData()"
 	);
 
 	LibSvcApi INT32 LibSvcStft(
-		const void* _Audio,
+		CInt16Vector _Audio, //std::vector<int16_t> By "LibSvcAllocateAudio()"
 		INT32 _SamplingRate,
 		INT32 _Hopsize,
 		INT32 _MelBins,
-		void* _Output
+		MelType _Output // Mel By "LibSvcAllocateMel()"
 	);
 
 	LibSvcApi INT32 LibSvcInferSlice(
-		void* _Model,
+		SvcModel _Model, //SingingVoiceConversion Model
 		UINT32 _T,
-		const void* _Slice,
-		const void* _InferParams,
-		size_t* _Process,
-		void* _Output
+		CSliceType _Slice, // Slices By "LibSvcAllocateSliceData()"
+		const void* _InferParams, //Ptr Of LibSvcParams
+		size_t* _Process, 
+		Int16Vector _Output //std::vector<int16_t> By "LibSvcAllocateAudio()"
 	);
 
 	LibSvcApi INT32 LibSvcShallowDiffusionInference(
-		void* _Model,
-		void* _16KAudioHubert,
-		void* _Mel,
-		const void* _SrcF0,
-		const void* _SrcVolume,
-		const void* _SrcSpeakerMap,
+		SvcModel _Model, //SingingVoiceConversion Model
+		FloatVector _16KAudioHubert, 
+		MelType _Mel, //Mel By "LibSvcAllocateMel()"
+		CFloatVector _SrcF0, 
+		CFloatVector _SrcVolume, 
+		CDoubleDimsFloatVector _SrcSpeakerMap, 
 		INT64 _SrcSize,
-		const void* _InferParams,
+		const void* _InferParams, //Ptr Of LibSvcParams
 		size_t* _Process,
-		void* _Output
+		Int16Vector _Output //std::vector<int16_t> By "LibSvcAllocateAudio()"
 	);
 
 	LibSvcApi INT32 LibSvcVocoderEnhance(
-		void* _Model,
-		void* _Mel,
-		void* _F0,
+		VocoderModel _Model, //Vocoder Model
+		MelType _Mel, //Mel By "LibSvcAllocateMel()"
+		FloatVector _F0,
 		INT32 _VocoderMelBins,
-		void* _Output
+		Int16Vector _Output //std::vector<int16_t> By "LibSvcAllocateAudio()"
 	);
 
-	LibSvcApi void* LibSvcLoadModel(
+	LibSvcApi SvcModel LibSvcLoadModel(
 		UINT32 _T,
-		const void* _Config,
+		const void* _Config, //Ptr Of LibSvcParams
 		ProgCallback _ProgressCallback,
 		UINT32 _ExecutionProvider = CPU,
 		UINT32 _DeviceID = 0,
@@ -264,18 +268,18 @@ extern "C" {
 
 	LibSvcApi INT32 LibSvcUnloadModel(
 		UINT32 _T,
-		void* _Model
+		SvcModel _Model
 	);
 
-	LibSvcApi void* LibSvcLoadVocoder(LPWSTR VocoderPath);
+	LibSvcApi VocoderModel LibSvcLoadVocoder(LPWSTR VocoderPath);
 
-	LibSvcApi INT32 LibSvcUnloadVocoder(void* _Model);
+	LibSvcApi INT32 LibSvcUnloadVocoder(VocoderModel _Model);
 
-	LibSvcApi INT32 LibSvcReadAudio(LPWSTR _AudioPath, INT32 _SamplingRate, void* _Output);
+	LibSvcApi INT32 LibSvcReadAudio(LPWSTR _AudioPath, INT32 _SamplingRate, Int16Vector _Output);
 
 	LibSvcApi void LibSvcEnableFileLogger(bool _Cond);
 
-	LibSvcApi void LibSvcWriteAudioFile(void* _PCMData, LPWSTR _OutputPath, INT32 _SamplingRate);
+	LibSvcApi void LibSvcWriteAudioFile(Int16Vector _PCMData, LPWSTR _OutputPath, INT32 _SamplingRate);
 
 #ifdef __cplusplus
 }

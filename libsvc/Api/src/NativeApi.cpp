@@ -223,6 +223,11 @@ void LibSvcInit()
 
 std::mutex ErrorMx;
 
+void LibSvcFreeString(BSTR _String)
+{
+	SysFreeString(_String);
+}
+
 BSTR LibSvcGetError(size_t Index)
 {
 	const auto& Ref = ErrorQueue.at(Index);
