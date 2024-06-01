@@ -67,6 +67,9 @@ public:
 		bool _Inplace = false
 		);
 
+	bool training = false;
+
+private:
 	ggml_tensor* apply_rotary_emb(
 		ggml_tensor* x,
 		ggml_tensor* freqs_cis,
@@ -74,8 +77,28 @@ public:
 		bool _Inplace = false
 	);
 
-private:
+	static ggml_tensor* scaled_dot_product_attention(
+		ggml_tensor* query,
+		ggml_tensor* key,
+		ggml_tensor* value,
+		ggml_context* _Ctx,
+		ggml_tensor* attn_mask = nullptr,
+		float dropout_p = 0.0,
+		bool _Inplace = false
+	);
+
+	static ggml_tensor* eq_scaled_dot_product_attention(
+		ggml_tensor* query,
+		ggml_tensor* key,
+		ggml_tensor* value,
+		ggml_context* _Ctx,
+		ggml_tensor* attn_mask = nullptr,
+		float dropout_p = 0.0,
+		bool _Inplace = false
+	);
+
 	void DumpCurrentLayerInfo(std::wstring& _Tmp) override;
+
 	int total_head_dim;
 	Linear wqkv, wo;
 	float dropout;

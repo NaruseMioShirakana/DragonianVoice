@@ -1,5 +1,6 @@
 <div align="center">
 
+![image](logo/logo256(AIGen).png)
 # DragonianVoice
 [中文](README.md) | [English](README_en.md)
 

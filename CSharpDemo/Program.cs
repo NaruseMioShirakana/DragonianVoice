@@ -1,6 +1,5 @@
 ﻿using LibSvcApi;
 
-
 LibSvc.LibSvcHparams Config = new();
 Config.TensorExtractor = "DiffusionSvc";
 Config.SamplingRate = 44100;

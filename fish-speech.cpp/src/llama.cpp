@@ -1,6 +1,7 @@
 #include "llama.h"
 
 LibTTSBegin
+inline void UnUsedPtr(void*) {}
 
 RMSNorm::RMSNorm(Module* _Parent, const std::wstring& _Name, SizeType dim, float eps) :
 	Module(_Parent, _Name),
@@ -136,19 +137,78 @@ ggml_tensor* Attention::operator()(
 	int Scale = n_head / n_local_heads;
 	if(Scale > 1)
 	{
-		K = ggml_repeat(_Ctx, K, ggml_new_tensor_4d(_Ctx, K->type, K->ne[0], K->ne[1], K->ne[2] * Scale, K->ne[3]));
-		V = ggml_repeat(_Ctx, V, ggml_new_tensor_4d(_Ctx, V->type, V->ne[0], V->ne[1], V->ne[2] * Scale, V->ne[3]));
+		K = ggml_repeat(_Ctx, K, ggml_new_tensor_4d(_Ctx, K->type, K->ne[0], K->ne[1] * Scale, K->ne[2], K->ne[3]));
+		V = ggml_repeat(_Ctx, V, ggml_new_tensor_4d(_Ctx, V->type, V->ne[0], V->ne[1] * Scale, V->ne[2], V->ne[3]));
 	}
 
-	//TODO
+	ggml_tensor* y;
+	if(use_sdpa)
+		y = scaled_dot_product_attention(
+			Q,
+			K,
+			V,
+			_Ctx,
+			mask,
+			training ? dropout : 0.f
+		);
+	else
+		y = eq_scaled_dot_product_attention(
+			Q,
+			K,
+			V,
+			_Ctx,
+			mask,
+			training ? dropout : 0.f
+		);
 
-	return nullptr;
+	y = ggml_reshape_3d(_Ctx, ggml_cont(_Ctx, ggml_permute(_Ctx, y, 0, 2, 1, 3)), dim, seqlen, bsz);
+
+	return wo(y, _Ctx, _Inplace);
 }
 
 ggml_tensor* Attention::apply_rotary_emb(ggml_tensor* x, ggml_tensor* freqs_cis, ggml_context* _Ctx, bool _Inplace)
 {
-	//TODO
+	int ndim = int(x->ne[0]) / 2;
+	int64_t n_tokens = x->ne[0] / 2;
+	for (size_t i = 1; i < 4; ++i)
+		n_tokens *= x->ne[i];
+	auto xshape = ggml_reshape_2d(_Ctx, x, 2, n_tokens);
+	auto xshape0 = ggml_view_4d(_Ctx, xshape, ndim, x->ne[1], x->ne[2], x->ne[3], x->nb[1], x->nb[2], x->nb[3], 0);
+	auto xshape1 = ggml_view_4d(_Ctx, xshape, ndim, x->ne[1], x->ne[2], x->ne[3], x->nb[1], x->nb[2], x->nb[3], sizeof(float));
+
 	return nullptr;
+}
+
+ggml_tensor* Attention::scaled_dot_product_attention(
+	ggml_tensor* query,
+	ggml_tensor* key,
+	ggml_tensor* value,
+	ggml_context* _Ctx,
+	ggml_tensor* attn_mask,
+	float dropout_p,
+	bool _Inplace
+)
+{
+	UnUsedPtr(attn_mask);
+	UNUSED(dropout_p);
+	UNUSED(_Inplace);
+	return ggml_flash_attn(_Ctx, query, key, value, false);
+}
+
+ggml_tensor* Attention::eq_scaled_dot_product_attention(
+	ggml_tensor* query,
+	ggml_tensor* key,
+	ggml_tensor* value,
+	ggml_context* _Ctx,
+	ggml_tensor* attn_mask,
+	float dropout_p,
+	bool _Inplace
+)
+{
+	UnUsedPtr(attn_mask);
+	UNUSED(dropout_p);
+	UNUSED(_Inplace);
+	return ggml_flash_attn(_Ctx, query, key, value, false);
 }
 
 void Attention::DumpCurrentLayerInfo(std::wstring& _Tmp)
