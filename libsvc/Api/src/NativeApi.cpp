@@ -115,8 +115,14 @@ void InitLibSvcParams(LibSvcParams* _Input)
 	_Input->Sampler = nullptr;							//Diffusion采样器
 	_Input->ReflowSampler = nullptr;						//Reflow采样器
 	_Input->F0Method = nullptr;							//F0提取算法
-	_Input->UseShallowDiffusion = false;                  //使用浅扩散
+	_Input->UseShallowDiffusionOrEnhancer = false;                  //使用浅扩散
 	_Input->_VocoderModel = nullptr;
+	_Input->_ShallowDiffusionModel = nullptr;
+	_Input->ShallowDiffusionUseSrcAudio = 1;
+	_Input->VocoderHopSize = 512;
+	_Input->VocoderMelBins = 128;
+	_Input->VocoderSamplingRate = 44100;
+	_Input->ShallowDiffuisonSpeaker = 0;
 }
 
 void InitLibSvcSlicerSettings(LibSvcSlicerSettings* _Input)
@@ -564,8 +570,14 @@ INT32 LibSvcInferSlice(
 		LibSvcNullStrCheck(InpParam.Sampler),
 		LibSvcNullStrCheck(InpParam.ReflowSampler),
 		LibSvcNullStrCheck(InpParam.F0Method),
-		(bool)InpParam.UseShallowDiffusion,
-		InpParam._VocoderModel
+		(bool)InpParam.UseShallowDiffusionOrEnhancer,
+		InpParam._VocoderModel,
+		InpParam._ShallowDiffusionModel,
+		(bool)InpParam.ShallowDiffusionUseSrcAudio,
+		InpParam.VocoderHopSize,
+		InpParam.VocoderMelBins,
+		InpParam.VocoderSamplingRate,
+		InpParam.ShallowDiffuisonSpeaker
 	};
 
 	try
@@ -574,6 +586,98 @@ INT32 LibSvcInferSlice(
 			*(AudioContainer*)(_Output) = ((VitsSvc*)(_Model))->SliceInference(*(const SingleSlice*)(_Slice), Param, *_Process);
 		else if (_T == 1)
 			*(AudioContainer*)(_Output) = ((UnionSvc*)(_Model))->SliceInference(*(const SingleSlice*)(_Slice), Param, *_Process);
+		else
+		{
+			RaiseError(L"UnSupported Model Type!");
+			return 1;
+		}
+	}
+	catch (std::exception& e)
+	{
+		RaiseError(to_wide_string(e.what()));
+		return 1;
+	}
+
+	return 0;
+}
+
+INT32 LibSvcInferPCMData(
+	SvcModel _Model,							//SingingVoiceConversion Model
+	UINT32 _T,
+	CInt16Vector _PCMData,
+	const void* _InferParams,					//Ptr Of LibSvcParams
+	Int16Vector _Output							//std::vector<int16_t> By "LibSvcAllocateAudio()"
+)
+{
+	if (!_Model)
+	{
+		RaiseError(L"_Model Could Not Be Null!");
+		return 1;
+	}
+
+	if (!_PCMData)
+	{
+		RaiseError(L"_PCMData Could Not Be Null!");
+		return 1;
+	}
+
+	if (!_InferParams)
+	{
+		RaiseError(L"_InferParams Could Not Be Null!");
+		return 1;
+	}
+
+	if (!_Output)
+	{
+		RaiseError(L"_Output Could Not Be Null!");
+		return 1;
+	}
+
+	const auto& InpParam = *(const LibSvcParams*)(_InferParams);
+
+	if (!InpParam._VocoderModel && _T == 1)
+	{
+		RaiseError(L"_VocoderModel Could Not Be Null!");
+		return 1;
+	}
+
+	const Params Param
+	{
+		InpParam.NoiseScale,
+		InpParam.Seed,
+		InpParam.SpeakerId,
+		InpParam.SrcSamplingRate,
+		InpParam.SpkCount,
+		InpParam.IndexRate,
+		InpParam.ClusterRate,
+		InpParam.DDSPNoiseScale,
+		InpParam.Keys,
+		InpParam.MeanWindowLength,
+		InpParam.Pndm,
+		InpParam.Step,
+		InpParam.TBegin,
+		InpParam.TEnd,
+		LibSvcNullStrCheck(InpParam.Sampler),
+		LibSvcNullStrCheck(InpParam.ReflowSampler),
+		LibSvcNullStrCheck(InpParam.F0Method),
+		(bool)InpParam.UseShallowDiffusionOrEnhancer,
+		InpParam._VocoderModel,
+		InpParam._ShallowDiffusionModel,
+		(bool)InpParam.ShallowDiffusionUseSrcAudio,
+		InpParam.VocoderHopSize,
+		InpParam.VocoderMelBins,
+		InpParam.VocoderSamplingRate,
+		InpParam.ShallowDiffuisonSpeaker
+	};
+
+	auto& InputData = *(const AudioContainer*)(_PCMData);
+
+	try
+	{
+		if (_T == 0)
+			*(AudioContainer*)(_Output) = ((VitsSvc*)(_Model))->InferPCMData(InputData, (long)InputData.size(), Param);
+		else if (_T == 1)
+			*(AudioContainer*)(_Output) = ((UnionSvc*)(_Model))->InferPCMData(InputData, (long)InputData.size(), Param);
 		else
 		{
 			RaiseError(L"UnSupported Model Type!");
@@ -683,8 +787,14 @@ INT32 LibSvcShallowDiffusionInference(
 		LibSvcNullStrCheck(InpParam.Sampler),
 		LibSvcNullStrCheck(InpParam.ReflowSampler),
 		LibSvcNullStrCheck(InpParam.F0Method),
-		(bool)InpParam.UseShallowDiffusion,
-		InpParam._VocoderModel
+		(bool)InpParam.UseShallowDiffusionOrEnhancer,
+		InpParam._VocoderModel,
+		InpParam._ShallowDiffusionModel,
+		(bool)InpParam.ShallowDiffusionUseSrcAudio,
+		InpParam.VocoderHopSize,
+		InpParam.VocoderMelBins,
+		InpParam.VocoderSamplingRate,
+		InpParam.ShallowDiffuisonSpeaker
 	};
 
 	auto _NormalizedAudio = InferTools::InterpResample(

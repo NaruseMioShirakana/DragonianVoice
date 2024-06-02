@@ -1,5 +1,12 @@
 #pragma once
 #include "../../framework.h"
+#ifdef __GNUC__
+#define LibSvcDeprecated __attribute__((deprecated))
+#else
+#ifdef _MSC_VER
+#define LibSvcDeprecated __declspec(deprecated)
+#endif
+#endif
 #ifdef _WIN32
 #include "windows.h"
 #endif
@@ -72,8 +79,14 @@ extern "C" {
 		LPWSTR Sampler;									//Diffusion采样器			["Pndm" "DDim"]
 		LPWSTR ReflowSampler;							//Reflow采样器				["Eular" "Rk4" "Heun" "Pecece"]
 		LPWSTR F0Method;								//F0提取算法					["Dio" "Harvest" "RMVPE" "FCPE"]
-		INT32 UseShallowDiffusion;						//是否使用浅扩散				[0(false)/1(true)]
+		INT32 UseShallowDiffusionOrEnhancer;			//是否使用浅扩散/声码器增强		[0(false)/1(true)]
 		void* _VocoderModel;							//声码器模型					Diffusion模型必须设定该项目
+		void* _ShallowDiffusionModel;                   //扩散模型					浅扩散必需设置为扩散模型地址
+		INT32 ShallowDiffusionUseSrcAudio;              //浅扩散模型是否使用原始音频		[0(false)/1(true)]
+		INT32 VocoderHopSize;							//声码器HopSize				[    Hop     ]
+		INT32 VocoderMelBins;							//声码器MelBins				[    Bins    ]
+		INT32 VocoderSamplingRate;						//声码器采样率				[     SR     ]
+		INT64 ShallowDiffuisonSpeaker;					//浅扩散中Vits模型输入的角色ID	[   0 ~ NS   ]
 	};
 
 	struct DiffusionSvcPaths
@@ -276,7 +289,15 @@ extern "C" {
 		Int16Vector _Output							//std::vector<int16_t> By "LibSvcAllocateAudio()"
 	);
 
-	LibSvcApi INT32 LibSvcShallowDiffusionInference(
+	LibSvcApi INT32 LibSvcInferPCMData(
+		SvcModel _Model,							//SingingVoiceConversion Model
+		UINT32 _T,
+		CInt16Vector _PCMData,
+		const void* _InferParams,					//Ptr Of LibSvcParams
+		Int16Vector _Output							//std::vector<int16_t> By "LibSvcAllocateAudio()"
+	);
+
+	LibSvcApi LibSvcDeprecated INT32 LibSvcShallowDiffusionInference(
 		SvcModel _Model,							//SingingVoiceConversion Model
 		CInt16Vector _16KAudioHubert,				//SamplingRate Must Be 16000
 		MelType _Mel,								//Mel By "LibSvcAllocateMel()"
@@ -289,7 +310,7 @@ extern "C" {
 		Int16Vector _Output							//std::vector<int16_t> By "LibSvcAllocateAudio()"
 	);
 
-	LibSvcApi INT32 LibSvcVocoderEnhance(
+	LibSvcApi LibSvcDeprecated INT32 LibSvcVocoderEnhance(
 		VocoderModel _Model,						//Vocoder Model
 		MelType _Mel,								//Mel By "LibSvcAllocateMel()"
 		CFloatVector _F0,

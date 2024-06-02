@@ -24,6 +24,7 @@
 #include "Models/DiffSvc.hpp"
 #include "Models/ReflowSvc.hpp"
 #include "../framework.h"
+#include "InferTools/Stft/stft.hpp"
 
 namespace MoeVSModuleManager
 {
@@ -179,6 +180,12 @@ namespace MoeVSModuleManager
 	 * \return 音频
 	 */
 	LibSvcApi std::vector<int16_t> SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcSlice& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, size_t& _Process);
+
+	LibSvcApi std::vector<int16_t> Enhancer(std::vector<float>& Mel, const std::vector<float>& F0, size_t MelSize);
+
+	LibSvcApi void ReloadMelOps(int SamplingRate_I64, int Hopsize_I64, int MelBins_I64);
+
+	LibSvcApi DlCodecStft::Mel& GetMelOperator();
 
 	LibSvcApi bool ShallowDiffusionEnabled();
 }

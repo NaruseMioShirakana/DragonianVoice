@@ -433,6 +433,11 @@ namespace LibSvcApi
             throw new Exception(GetError(0));
         }
 
+        public void* GetModel()
+        {
+            return Model_;
+        }
+
         public Int16Vector Inference(
             Slice _Slice,
             ref Params _InferParams,
@@ -592,10 +597,20 @@ namespace LibSvcApi
 
             public int UseShallowDiffusion = 0;                       //使用浅扩散
             public void* _VocoderModel = null;
+            public void* _ShallowDiffusionModel = null;
+            public int ShallowDiffusionUseSrcAudio = 1;
+            public int VocoderHopSize = 512;
+            public int VocoderMelBins = 128;
+            public int VocoderSamplingRate = 44100;
+            public long ShallowDiffuisonSpeaker = 0;
 
             public void SetVocoder(ref VocoderModel Vocoder)
             {
                 _VocoderModel = Vocoder.GetModel();
+            }
+            public void SetShallowDiffusion(ref UnionModel UnionMod)
+            {
+                _ShallowDiffusionModel = UnionMod.GetModel();
             }
         };
 

@@ -8,7 +8,6 @@
 #include "../header/InferTools/Sampler/MoeVSSamplerManager.hpp"
 #include "../header/InferTools/Sampler/MoeVSSamplers.hpp"
 #include "../header/InferTools/F0Extractor/NetF0Predictors.hpp"
-#include "../header/InferTools/Stft/stft.hpp"
 #ifdef MoeVoiceStudioIndexCluster
 #ifdef max
 #undef max
@@ -431,6 +430,11 @@ namespace MoeVSModuleManager
 		}
 	}
 
+	DlCodecStft::Mel& GetMelOperator()
+	{
+		return *MelOperator;
+	}
+
 	std::vector<int16_t> Enhancer(std::vector<float>& Mel, const std::vector<float>& F0, size_t MelSize)
 	{
 		auto Rf0 = F0;
@@ -463,43 +467,28 @@ namespace MoeVSModuleManager
 		if (GlobalVitsSvcModel)
 		{
 			auto BgnTime = clock();
-			RtnAudio = GlobalVitsSvcModel->SliceInference(_Slice, _InferParams, _Process);
-			logger.log(("[Inference] Slice Vits Use Time " + std::to_string(clock() - BgnTime) + "ms").c_str());
 			if(_InferParams.UseShallowDiffusion && DiffusionModelEnabled && !GetUnionSvcModel()->OldVersion() && GetUnionSvcModel()->GetDiffSvcVer() == L"DiffusionSvc")
 			{
-				ReloadMelOps(
-					(int)SamplingRate_I64,
-					GetUnionSvcModel()->GetHopSize(),
-					(int)GetUnionSvcModel()->GetMelBins()
-				);
-				const auto TempAudio = InferTools::InterpResample(RtnAudio, (long)VitsSamplingRate, CurStftSr, 32767.);
-				auto Mel = MelOperator->operator()(TempAudio);
-				auto& ShallData = MoeVoiceStudioCore::GetDataForShallowDiffusion();
-				BgnTime = clock();
-				RtnAudio = GetUnionSvcModel()->ShallowDiffusionInference(
-					ShallData._16KAudio, _InferParams, Mel,
-					ShallData.NeedPadding ? ShallData.CUDAF0 : _Slice.F0,
-					ShallData.NeedPadding ? ShallData.CUDAVolume : _Slice.Volume,
-					ShallData.NeedPadding ? ShallData.CUDASpeaker : _Slice.Speaker,
-					_Process,
-					(int64_t)TempAudio.size()
-				);
-				logger.log(("[Inference] Slice Diffusion Use Time " + std::to_string(clock() - BgnTime) + "ms").c_str());
+				auto SpcParams = _InferParams;
+				SpcParams._ShallowDiffusionModel = GetUnionSvcModel();
+				SpcParams.VocoderSamplingRate = (int)SamplingRate_I64;
+				SpcParams.VocoderHopSize = GetUnionSvcModel()->GetHopSize();
+				SpcParams.VocoderMelBins = (int)GetUnionSvcModel()->GetMelBins();
+				std::swap(SpcParams.SpeakerId, SpcParams.ShallowDiffuisonSpeaker);
+				RtnAudio = GlobalVitsSvcModel->SliceInference(_Slice, SpcParams, _Process);
 			}
-			if(_InferParams.UseShallowDiffusion && VocoderEnabled() && !GetUnionSvcModel())
+			else if(_InferParams.UseShallowDiffusion && VocoderEnabled() && !GetUnionSvcModel())
 			{
-				ReloadMelOps(
-					(int)SamplingRate_I64,
-					VocoderHopSize,
-					VocoderMelBins
-				);
-				const auto TempAudio = InferTools::InterpResample(RtnAudio, (long)SamplingRate_I64, (long)SamplingRate_I64, 32767.);
-				auto Mel = MelOperator->operator()(TempAudio);
-				const auto& ShallData = MoeVoiceStudioCore::GetDataForShallowDiffusion();
-				const auto SrcSize = RtnAudio.size();
-				RtnAudio = Enhancer(Mel.first, ShallData.NeedPadding ? ShallData.CUDAF0 : _Slice.F0, (size_t)Mel.second);
-				RtnAudio.resize(SrcSize, 0);
+				auto SpcParams = _InferParams;
+				SpcParams.VocoderSamplingRate = (int)SamplingRate_I64;
+				SpcParams.VocoderHopSize = VocoderHopSize;
+				SpcParams.VocoderMelBins = VocoderMelBins;
+				SpcParams._VocoderModel = MoeVoiceStudioCore::GetCurrentVocoder();
+				RtnAudio = GlobalVitsSvcModel->SliceInference(_Slice, SpcParams, _Process);
 			}
+			else
+				RtnAudio = GlobalVitsSvcModel->SliceInference(_Slice, _InferParams, _Process);
+			logger.log(("[Inference] Slice Vits Use Time " + std::to_string(clock() - BgnTime) + "ms").c_str());
 		}
 		else if (DiffusionModelEnabled)
 		{

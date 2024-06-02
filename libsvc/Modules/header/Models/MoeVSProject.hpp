@@ -97,40 +97,6 @@ namespace MoeVSProjectSpace
         }
     };
 
-    struct MoeVSAudioSliceRef
-    {
-        const std::vector<int16_t>& Audio;
-        const std::vector<float>& F0;
-        const std::vector<float>& Volume;
-        const std::vector<std::vector<float>>& Speaker;
-        bool IsNotMute;
-        long OrgLen;
-        const std::wstring& Path;
-        size_t Slice = 0;
-        void* Mel = nullptr;
-        MoeVSAudioSliceRef(
-            const std::vector<int16_t>& audio,
-            const std::vector<float>& f0,
-            const std::vector<float>& volume,
-            const std::vector<std::vector<float>>& speaker,
-            bool isnotmute,
-            long orglen,
-            const std::wstring& path,
-            size_t sli,
-            void* mel_tensor_ptr = nullptr
-        ) :
-            Audio(audio),
-            F0(f0),
-            Volume(volume),
-            Speaker(speaker),
-            IsNotMute(isnotmute),
-            OrgLen(orglen),
-            Path(path),
-            Slice(sli),
-            Mel(mel_tensor_ptr)
-        {}
-    };
-
 	struct MoeVSParams
 	{
         //通用
@@ -146,8 +112,8 @@ namespace MoeVSProjectSpace
 		float DDSPNoiseScale = 0.8f;                       //DDSP噪声修正因子      0-10
 		float Keys = 0.f;                                  //升降调               -64-64
 		size_t MeanWindowLength = 2;                       //均值滤波器窗口大小     1-20
-		size_t Pndm = 100;                                 //Diffusion加速倍数    1-200
-		size_t Step = 1000;                                //Diffusion总步数      1-1000
+		size_t Pndm = 1;                                 //Diffusion加速倍数    1-200
+		size_t Step = 100;                                //Diffusion总步数      1-1000
         float TBegin = 0.f;
         float TEnd = 1.f;
 		std::wstring Sampler = L"Pndm";                    //Diffusion采样器
@@ -155,6 +121,12 @@ namespace MoeVSProjectSpace
 		std::wstring F0Method = L"Dio";                    //F0提取算法
         bool UseShallowDiffusion = false;                  //使用浅扩散
         void* _VocoderModel = nullptr;
+        void* _ShallowDiffusionModel = nullptr;
+        bool ShallowDiffusionUseSrcAudio = true;
+        int VocoderHopSize = 512;
+        int VocoderMelBins = 128;
+        int VocoderSamplingRate = 44100;
+        int64_t ShallowDiffuisonSpeaker = 0;
 
         //SVCRTInfer
         int64_t RTSampleSize = 44100;

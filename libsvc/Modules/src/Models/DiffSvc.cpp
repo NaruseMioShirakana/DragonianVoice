@@ -329,6 +329,7 @@ void DiffusionSvc::load(const std::map<std::string, std::wstring>& _PathDict, co
 
 std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcData& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const
 {
+	_TensorExtractor->SetSrcSamplingRates(_InferParams.SrcSamplingRate);
 	logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Start!");
 	std::vector<int16_t> _data;
 	size_t total_audio_size = 0;
@@ -354,7 +355,7 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVo
 		const auto CurRtn = SliceInference(CurSlice, _InferParams, process);
 		_data.insert(_data.end(), CurRtn.data(), CurRtn.data() + CurRtn.size());
 		if (CurSlice.IsNotMute)
-			logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Segment[" + std::to_wstring(process) + L"] Finished! Segment Use Time: " + std::to_wstring(clock() - InferDurTime) + L"ms, Segment Duration: " + std::to_wstring((size_t)CurSlice.OrgLen * 1000ull / 48000ull) + L"ms");
+			logger.log(L"[Inferring] Inferring \"" + _Slice.Path + L"\", Segment[" + std::to_wstring(process) + L"] Finished! Segment Use Time: " + std::to_wstring(clock() - InferDurTime) + L"ms, Segment Duration: " + std::to_wstring((size_t)CurSlice.OrgLen * 1000ull / _InferParams.SrcSamplingRate) + L"ms");
 		else
 		{
 			if (!diffSvc)
@@ -374,6 +375,7 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVo
 
 std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVoiceStudioSvcSlice& _Slice, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams, size_t& _Process) const
 {
+	_TensorExtractor->SetSrcSamplingRates(_InferParams.SrcSamplingRate);
 	std::mt19937 gen(int(_InferParams.Seed));
 	std::normal_distribution<float> normal(0, 1);
 	auto speedup = (int64_t)_InferParams.Pndm;
@@ -384,7 +386,7 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVo
 
 	if (_Slice.IsNotMute)
 	{
-		auto RawWav = InferTools::InterpResample(_Slice.Audio, 48000, 16000, 32768.0f);
+		auto RawWav = InferTools::InterpResample(_Slice.Audio, (int)(_InferParams.SrcSamplingRate), 16000, 32768.0f);
 		const auto src_audio_length = RawWav.size();
 		bool NeedPadding = false;
 		if (_cur_execution_provider == ExecutionProviders::CUDA && !diffSvc)
@@ -436,7 +438,7 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVo
 		if (diffSvc)
 		{
 			const auto HubertLen = int64_t(HubertSize) / HiddenUnitKDims;
-			const int64_t F0Shape[] = { 1, int64_t(_Slice.Audio.size() * _samplingRate / 48000 / HopSize) };
+			const int64_t F0Shape[] = { 1, int64_t(_Slice.Audio.size() * _samplingRate / (int)(_InferParams.SrcSamplingRate) / HopSize) };
 			const int64_t HiddenUnitShape[] = { 1, HubertLen, HiddenUnitKDims };
 			constexpr int64_t CharaEmbShape[] = { 1 };
 			int64_t speedData[] = { Pndms };
@@ -514,7 +516,7 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVo
 				auto CUDAVolume = _Slice.Volume;
 				auto CUDASpeaker = _Slice.Speaker;
 				const auto src_src_audio_length = _Slice.Audio.size();
-				const size_t WavPaddedSize = ((src_src_audio_length / 48000) + 1) * 48000;
+				const size_t WavPaddedSize = ((src_src_audio_length / (int)(_InferParams.SrcSamplingRate)) + 1) * (int)(_InferParams.SrcSamplingRate);
 				const size_t AudioPadSize = WavPaddedSize - src_src_audio_length;
 				const size_t PaddedF0Size = CUDAF0.size() + (CUDAF0.size() * AudioPadSize / src_src_audio_length);
 
@@ -611,18 +613,21 @@ std::vector<int16_t> DiffusionSvc::SliceInference(const MoeVSProjectSpace::MoeVo
 				LibDLVoiceCodecThrow((std::string("Locate: Nsf\n") + e3.what()))
 			}
 		}
-		const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();
-		const auto dstWavLen = (_Slice.OrgLen * int64_t(_samplingRate)) / 48000;
-		std::vector<int16_t> TempVecWav(dstWavLen, 0);
-		if (shapeOut[2] < dstWavLen)
-			for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
-				TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.f);
-		else
-			for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
-				TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.f);
-		return TempVecWav;
+
+		auto DiffOutputAudioSize = finaOut[0].GetTensorTypeAndShapeInfo().GetElementCount();
+		std::vector<int16_t> DiffPCMOutput(DiffOutputAudioSize);
+		{
+			auto DiffOutputAudioData = finaOut[0].GetTensorData<float>();
+			auto OutputAudioData = DiffPCMOutput.data();
+			const auto OutputAudioEnd = OutputAudioData + DiffPCMOutput.size();
+			while (OutputAudioData != OutputAudioEnd)
+				*(OutputAudioData++) = (int16_t)(Clamp(*(DiffOutputAudioData++)) * 32766.f);
+		}
+		const auto dstWavLen = (_Slice.OrgLen * int64_t(_samplingRate)) / (int)(_InferParams.SrcSamplingRate);
+		DiffPCMOutput.resize(dstWavLen);
+		return DiffPCMOutput;
 	}
-	const auto len = size_t(_Slice.OrgLen * int64_t(_samplingRate) / 48000);
+	const auto len = size_t(_Slice.OrgLen * int64_t(_samplingRate) / (int)(_InferParams.SrcSamplingRate));
 	return { len, 0i16, std::allocator<int16_t>() };
 }
 
@@ -630,12 +635,13 @@ std::vector<std::wstring> DiffusionSvc::Inference(std::wstring& _Paths,
 	const MoeVSProjectSpace::MoeVSSvcParams& _InferParams,
 	const InferTools::SlicerSettings& _SlicerSettings) const
 {
+	_TensorExtractor->SetSrcSamplingRates(_InferParams.SrcSamplingRate);
 	std::vector<std::wstring> _Lens = GetOpenFileNameMoeVS();
 	std::vector<std::wstring> AudioFolders;
 	for (auto& path : _Lens)
 	{
 		path = std::regex_replace(path, std::wregex(L"\\\\"), L"/");
-		auto PCMData = AudioPreprocess().codec(path, 48000);
+		auto PCMData = AudioPreprocess().codec(path, (int)(_InferParams.SrcSamplingRate));
 		auto SlicePos = SliceAudio(PCMData, _SlicerSettings);
 		auto Audio = GetAudioSlice(PCMData, SlicePos, _SlicerSettings);
 		Audio.Path = path;
@@ -677,6 +683,7 @@ std::vector<std::wstring> DiffusionSvc::Inference(std::wstring& _Paths,
 
 std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMData, long srcSr, const MoeVSProjectSpace::MoeVSSvcParams& _InferParams) const
 {
+	_TensorExtractor->SetSrcSamplingRates(_InferParams.SrcSamplingRate);
 	if (diffSvc || DiffSvcVersion != L"DiffusionSvc")
 		return PCMData;
 
@@ -902,11 +909,16 @@ std::vector<int16_t> DiffusionSvc::InferPCMData(const std::vector<int16_t>& PCMD
 		LibDLVoiceCodecThrow((std::string("Locate: Nsf\n") + e3.what()))
 	}
 
-	const auto dstWavLen = finaOut[0].GetTensorTypeAndShapeInfo().GetShape()[2];
-	std::vector<int16_t> TempVecWav(dstWavLen, 0);
-	for (int64_t bbb = 0; bbb < dstWavLen; bbb++)
-		TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.0f);
-	return TempVecWav;
+	auto DiffOutputAudioSize = finaOut[0].GetTensorTypeAndShapeInfo().GetElementCount();
+	std::vector<int16_t> DiffPCMOutput(DiffOutputAudioSize);
+	{
+		auto DiffOutputAudioData = finaOut[0].GetTensorData<float>();
+		auto OutputAudioData = DiffPCMOutput.data();
+		const auto OutputAudioEnd = OutputAudioData + DiffPCMOutput.size();
+		while (OutputAudioData != OutputAudioEnd)
+			*(OutputAudioData++) = (int16_t)(Clamp(*(DiffOutputAudioData++)) * 32766.f);
+	}
+	return DiffPCMOutput;
 }
 
 void DiffusionSvc::NormMel(std::vector<float>& MelSpec) const
@@ -926,6 +938,7 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 	int64_t SrcSize
 ) const
 {
+	_TensorExtractor->SetSrcSamplingRates(_InferParams.SrcSamplingRate);
 	if (diffSvc || DiffSvcVersion != L"DiffusionSvc")
 		LibDLVoiceCodecThrow("ShallowDiffusion Only Support DiffusionSvc Model")
 
@@ -1092,15 +1105,18 @@ std::vector<int16_t> DiffusionSvc::ShallowDiffusionInference(
 		LibDLVoiceCodecThrow((std::string("Locate: Nsf\n") + e3.what()))
 	}
 
-	const auto shapeOut = finaOut[0].GetTensorTypeAndShapeInfo().GetShape();
-	std::vector<int16_t> TempVecWav(SrcSize, 0);
-	if (shapeOut[2] < SrcSize)
-		for (int64_t bbb = 0; bbb < shapeOut[2]; bbb++)
-			TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.f);
-	else
-		for (int64_t bbb = 0; bbb < SrcSize; bbb++)
-			TempVecWav[bbb] = static_cast<int16_t>(Clamp(finaOut[0].GetTensorData<float>()[bbb]) * 32766.f);
-	return TempVecWav;
+	auto DiffOutputAudioSize = finaOut[0].GetTensorTypeAndShapeInfo().GetElementCount();
+	std::vector<int16_t> DiffPCMOutput(DiffOutputAudioSize);
+	{
+		auto DiffOutputAudioData = finaOut[0].GetTensorData<float>();
+		auto OutputAudioData = DiffPCMOutput.data();
+		const auto OutputAudioEnd = OutputAudioData + DiffPCMOutput.size();
+		while (OutputAudioData != OutputAudioEnd)
+			*(OutputAudioData++) = (int16_t)(Clamp(*(DiffOutputAudioData++)) * 32766.f);
+	}
+	const auto dstWavLen = (SrcSize * int64_t(_samplingRate)) / (int)(_InferParams.SrcSamplingRate);
+	DiffPCMOutput.resize(dstWavLen);
+	return DiffPCMOutput;
 }
 
 void StaticNormMel(std::vector<float>& MelSpec, float SpecMin = -12, float SpecMax = 2)

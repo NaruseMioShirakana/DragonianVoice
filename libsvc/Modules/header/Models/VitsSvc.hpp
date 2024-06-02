@@ -25,15 +25,6 @@
 
 MoeVoiceStudioCoreHeader
 
-struct ShallowDiffusionData
-{
-    std::vector<float> _16KAudio, CUDAF0, CUDAVolume;
-    std::vector<std::vector<float>> CUDASpeaker;
-    bool NeedPadding = false;
-};
-
-LibSvcApi ShallowDiffusionData& GetDataForShallowDiffusion();
-
 class VitsSvc : public SingingVoiceConversion
 {
 public:

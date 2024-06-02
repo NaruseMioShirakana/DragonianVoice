@@ -199,41 +199,27 @@ void func(){
 
     //声码器增强
     {
-        //推理出一个基础结果
+        _Params.VocoderHopSize = 512;
+        _Params.VocoderMelBins = 128;
+        _Params.VocoderSamplingRate = 44100;
+        _Params._VocoderModel = _Vocoder;
         LibSvcInferSlice(
             _Model, //模型
             0, //模型类型
             _SingleSlice, //切片
             &_Params, //参数
             &_Process, //当前进度
-            _OutPutAudio //输出
-        );
-
-        /*
-			此处自行将_OutPutAudio重采样至声码器的采样率，或是保证满足以下函数的要求
-        */
-
-        //短时傅里叶变换，并将其变换到Mel空间。注意：至少要保证该函数参数中(_SamplingRate / _HopSize)与声码器参数的(_SamplingRate / _HopSize)相等
-        LibSvcStft(
-            _OutPutAudio, //输入音频
-            44100, //声码器采样率
-            512, //STFT HopSize（声码器的HopSize）
-            128, //Mel Bins（必须为声码器的MelBins）
-            _Mel //输出的Mel
-        );
-
-        LibSvcVocoderEnhance(
-            _Vocoder, //声码器模型
-            _Mel, //上一步输出的Mel
-            _F0, //该切片的F0数据（必须为同一切片的数据）
-            128, //Mel Bins（必须为声码器的MelBins）
             _OutPutAudio //输出
         );
     }
 
     //浅扩散推理
     {
-        //用Vits推理出一个基础结果
+        _Params.VocoderHopSize = 512;
+        _Params.VocoderMelBins = 128;
+        _Params.VocoderSamplingRate = 44100;
+        _Params._VocoderModel = _Vocoder;
+        _Params._ShallowDiffusionModel = nullptr; //改为你的Diffusion模型
         LibSvcInferSlice(
             _Model, //模型
             0, //模型类型
@@ -241,36 +227,6 @@ void func(){
             &_Params, //参数
             &_Process, //当前进度
             _OutPutAudio //输出
-        );
-
-        /*
-            此处自行将_OutPutAudio重采样至Diffusion模型的采样率，或是保证满足以下函数的要求
-        */
-
-        //短时傅里叶变换，并将其变换到Mel空间。注意：至少要保证该函数参数中(_SamplingRate / _HopSize)与Diffusion模型的(_SamplingRate / _HopSize)相等
-        LibSvcStft(
-            _OutPutAudio, //输入音频
-            44100, //Diffusion模型采样率
-            512, //STFT HopSize（Diffusion模型的HopSize）
-            128, //Mel Bins（必须为Diffusion模型的MelBins）
-            _Mel //输出的Mel
-        );
-
-        /*
-            此处自行将_OutPutAudio重采样至16000采样率
-        */
-
-        LibSvcShallowDiffusionInference(
-            _Model, //此处的模型必须为Diffusion模型，写教程的时候为了方便我写成了同一个
-            _OutPutAudio, //16K采样率的输入音频
-            _Mel, //上一步得到的Mel
-            _F0, //该切片的F0
-            _Volume, //该切片的音量
-            _Speaker, //该切片的的角色
-            LibSvcGetSrcLength(_SingleSlice), //该切片的原始数据大小
-            &_Params, //推理参数
-            &_Process, //当前进度
-            &_OutPutAudio //输出
         );
     }
 
