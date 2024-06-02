@@ -1,5 +1,14 @@
 #pragma once
-#include "../../framework.h"
+#ifdef LIBSVC_EXPORTS
+#define LibSvcApi __declspec(dllexport)
+#else
+#ifndef LibSvcStaticLib
+#define LibSvcApi __declspec(dllimport)
+#else
+#define LibSvcApi
+#endif
+#endif
+
 #ifdef __GNUC__
 #define LibSvcDeprecated __attribute__((deprecated))
 #else

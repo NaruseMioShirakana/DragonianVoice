@@ -240,7 +240,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;LIBSVC_EXPORTS;_WINDOWS;_USRDLL;MOEVSDMLPROVIDER;MoeVoiceStudioIndexCluster;LibSvcDll;YYJSON_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_WINDOWS;_USRDLL;MOEVSDMLPROVIDER;MoeVoiceStudioIndexCluster;LibSvcStaticLib;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -286,7 +286,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;LIBSVC_EXPORTS;_WINDOWS;_USRDLL;MOEVSDMLPROVIDER;MoeVoiceStudioIndexCluster;LibSvcDll;YYJSON_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_WINDOWS;_USRDLL;MOEVSDMLPROVIDER;MoeVoiceStudioIndexCluster;LibSvcStaticLib;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
