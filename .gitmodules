@@ -1,3 +1,4 @@
 [submodule "libsvc-tensorlib"]
     path = libsvc-tensorlib
     url = https://github.com/NaruseMioShirakana/libsvc.git libsvc-tensorlib
+    branch = master
