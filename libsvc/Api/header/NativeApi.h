@@ -1,15 +1,39 @@
 #pragma once
 #include "../../framework.h"
+#ifdef _WIN32
 #include "windows.h"
+#endif
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+#ifndef _WIN32
+	typedef signed char         INT8, * PINT8;
+	typedef signed short        INT16, * PINT16;
+	typedef signed int          INT32, * PINT32;
+	typedef signed long long      INT64, * PINT64;
+	typedef unsigned char       UINT8, * PUINT8;
+	typedef unsigned short      UINT16, * PUINT16;
+	typedef unsigned int        UINT32, * PUINT32;
+	typedef unsigned long long    UINT64, * PUINT64;
+	typedef wchar_t* NWPSTR, * LPWSTR, * PWSTR, * BSTR;
+#endif
+
 	typedef void(*ProgCallback)(size_t, size_t);
 
-	enum LibSvcExecutionProviders { CPU = 0, CUDA = 1, DML = 2 };
+	enum LibSvcExecutionProviders
+	{
+		CPU = 0,
+		CUDA = 1,
+		DML = 2
+	};
 
-	enum LibSvcModelType { Vits, Diffusion, Reflow };
+	enum LibSvcModelType
+	{
+		Vits,
+		Diffusion,
+		Reflow
+	};
 
 #ifdef _MSC_VER
 #pragma pack(push, 4)
@@ -19,94 +43,94 @@ extern "C" {
 
 	struct LibSvcSlicerSettings
 	{
-		INT32 SamplingRate = 48000;
-		double Threshold = 30.;
-		double MinLength = 3.;
-		INT32 WindowLength = 2048;
-		INT32 HopSize = 512;
+		INT32 SamplingRate;
+		double Threshold;
+		double MinLength;
+		INT32 WindowLength;
+		INT32 HopSize;
 	};
 
 	struct LibSvcParams
 	{
 		//通用
-		float NoiseScale = 0.3f;                           //噪声修正因子          0-10
-		INT64 Seed = 52468;                            //种子
-		INT64 SpeakerId = 0;                           //角色ID
-		size_t SrcSamplingRate = 48000;                    //源采样率
-		INT64 SpkCount = 2;                            //模型角色数
+		float NoiseScale;								//噪声修正因子				[   0 ~ 10   ]
+		INT64 Seed;										//种子						[   INT64    ]
+		INT64 SpeakerId;								//默认角色ID					[   0 ~ NS   ]
+		size_t SrcSamplingRate;							//源采样率					[     SR     ]
+		INT64 SpkCount;									//模型角色数					[	  NS     ]
 
 		//SVC
-		float IndexRate = 0.f;                             //索引比               0-1
-		float ClusterRate = 0.f;                           //聚类比               0-1
-		float DDSPNoiseScale = 0.8f;                       //DDSP噪声修正因子      0-10
-		float Keys = 0.f;                                  //升降调               -64-64
-		size_t MeanWindowLength = 2;                       //均值滤波器窗口大小     1-20
-		size_t Pndm = 100;                                 //Diffusion加速倍数    1-200
-		size_t Step = 1000;                                //Diffusion总步数      1-1000
-		float TBegin = 0.f;
-		float TEnd = 1.f;
-		LPWSTR Sampler = nullptr;                  //Diffusion采样器
-		LPWSTR ReflowSampler = nullptr;           //Reflow采样器
-		LPWSTR F0Method = nullptr;                  //F0提取算法
-		INT32 UseShallowDiffusion = false;                  //使用浅扩散
-		void* _VocoderModel = nullptr;
+		float IndexRate;								//索引比						[   0 ~ 1    ]
+		float ClusterRate;								//聚类比						[   0 ~ 1    ]
+		float DDSPNoiseScale;							//DDSP噪声修正因子			[   0 ~ 10   ]
+		float Keys;										//升降调						[ -64 ~ 64   ]
+		size_t MeanWindowLength;						//均值滤波器窗口大小			[   1 ~ 20   ]
+		size_t Pndm;									//Diffusion加速倍数			[   1 ~ 200  ]
+		size_t Step;									//Diffusion总步数			[   1 ~ 1000 ]
+		float TBegin;									//Reflow起始点
+		float TEnd;										//Reflow终止点
+		LPWSTR Sampler;									//Diffusion采样器			["Pndm" "DDim"]
+		LPWSTR ReflowSampler;							//Reflow采样器				["Eular" "Rk4" "Heun" "Pecece"]
+		LPWSTR F0Method;								//F0提取算法					["Dio" "Harvest" "RMVPE" "FCPE"]
+		INT32 UseShallowDiffusion;						//是否使用浅扩散				[0(false)/1(true)]
+		void* _VocoderModel;							//声码器模型					Diffusion模型必须设定该项目
 	};
 
 	struct DiffusionSvcPaths
 	{
-		LPWSTR Encoder = nullptr;
-		LPWSTR Denoise = nullptr;
-		LPWSTR Pred = nullptr;
-		LPWSTR After = nullptr;
-		LPWSTR Alpha = nullptr;
-		LPWSTR Naive = nullptr;
+		LPWSTR Encoder;
+		LPWSTR Denoise;
+		LPWSTR Pred;
+		LPWSTR After;
+		LPWSTR Alpha;
+		LPWSTR Naive;
 
-		LPWSTR DiffSvc = nullptr;
+		LPWSTR DiffSvc;
 	};
 
 	struct ReflowSvcPaths
 	{
-		LPWSTR Encoder = nullptr;
-		LPWSTR VelocityFn = nullptr;
-		LPWSTR After = nullptr;
+		LPWSTR Encoder;
+		LPWSTR VelocityFn;
+		LPWSTR After;
 	};
 
 	struct VitsSvcPaths
 	{
-		LPWSTR VitsSvc = nullptr;
+		LPWSTR VitsSvc;
 	};
 
 	struct LibSvcClusterConfig
 	{
-		INT64 ClusterCenterSize = 10000;
-		LPWSTR Path = nullptr;
-		LPWSTR Type = nullptr;
+		INT64 ClusterCenterSize;
+		LPWSTR Path;
+		LPWSTR Type; //"KMeans" "Index"
 	};
 
 	struct LibSvcHparams
 	{
-		LPWSTR TensorExtractor = nullptr;
-		LPWSTR HubertPath = nullptr;
+		LPWSTR TensorExtractor;
+		LPWSTR HubertPath;
 		DiffusionSvcPaths DiffusionSvc;
 		VitsSvcPaths VitsSvc;
 		ReflowSvcPaths ReflowSvc;
 		LibSvcClusterConfig Cluster;
 
-		INT32 SamplingRate = 22050;
+		INT32 SamplingRate;
 
-		INT32 HopSize = 320;
-		INT64 HiddenUnitKDims = 256;
-		INT64 SpeakerCount = 1;
-		INT32 EnableCharaMix = false;
-		INT32 EnableVolume = false;
-		INT32 VaeMode = true;
+		INT32 HopSize;
+		INT64 HiddenUnitKDims;
+		INT64 SpeakerCount;
+		INT32 EnableCharaMix;
+		INT32 EnableVolume;
+		INT32 VaeMode;
 
-		INT64 MelBins = 128;
-		INT64 Pndms = 100;
-		INT64 MaxStep = 1000;
-		float SpecMin = -12;
-		float SpecMax = 2;
-		float Scale = 1000.f;
+		INT64 MelBins;
+		INT64 Pndms;
+		INT64 MaxStep;
+		float SpecMin;
+		float SpecMax;
+		float Scale;
 	};
 
 #ifdef _MSC_VER
@@ -116,6 +140,12 @@ extern "C" {
 #endif
 	typedef void* FloatVector, * DoubleDimsFloatVector, * Int16Vector, * UInt64Vector, * MelType, * SliceType, * SlicesType, * SvcModel, * VocoderModel;
 	typedef const void* CFloatVector, * CDoubleDimsFloatVector, * CInt16Vector, * CUInt64Vector, * CMelType, * CSliceType, * CSlicesType;
+
+	LibSvcApi void InitLibSvcHparams(LibSvcHparams* _Input);
+
+	LibSvcApi void InitLibSvcParams(LibSvcParams* _Input);
+
+	LibSvcApi void InitLibSvcSlicerSettings(LibSvcSlicerSettings* _Input);
 
 	LibSvcApi float* LibSvcGetFloatVectorData(FloatVector _Obj);
 
@@ -195,71 +225,81 @@ extern "C" {
 
 	LibSvcApi void LibSvcInit();
 
-	LibSvcApi void LibSvcFreeString(BSTR _String);
+	LibSvcApi void LibSvcFreeString(
+		BSTR _String
+	);
 
-	LibSvcApi INT32 LibSvcSetGlobalEnv(UINT32 ThreadCount, UINT32 DeviceID, UINT32 Provider);
+	LibSvcApi INT32 LibSvcSetGlobalEnv(
+		UINT32 ThreadCount,
+		UINT32 DeviceID,
+		UINT32 Provider
+	);
 
-	LibSvcApi void LibSvcSetMaxErrorCount(size_t Count);
+	LibSvcApi void LibSvcSetMaxErrorCount(
+		size_t Count
+	);
 
-	LibSvcApi BSTR LibSvcGetError(size_t Index);
+	LibSvcApi BSTR LibSvcGetError(
+		size_t Index
+	);
 
 	LibSvcApi INT32 LibSvcSliceAudio(
-		CInt16Vector _Audio, //std::vector<int16_t> By "LibSvcAllocateAudio()"
-		const void* _Setting, //Ptr Of LibSvcSlicerSettings
-		UInt64Vector _Output //std::vector<size_t> By "LibSvcAllocateOffset()"
+		CInt16Vector _Audio,						//std::vector<int16_t> By "LibSvcAllocateAudio()"
+		const void* _Setting,						//Ptr Of LibSvcSlicerSettings
+		UInt64Vector _Output						//std::vector<size_t> By "LibSvcAllocateOffset()"
 	);
 
 	LibSvcApi INT32 LibSvcPreprocess(
-		CInt16Vector _Audio, //std::vector<int16_t> By "LibSvcAllocateAudio()"
-		CUInt64Vector _SlicePos, //std::vector<size_t> By "LibSvcAllocateOffset()"
+		CInt16Vector _Audio,						//std::vector<int16_t> By "LibSvcAllocateAudio()"
+		CUInt64Vector _SlicePos,					//std::vector<size_t> By "LibSvcAllocateOffset()"
 		INT32 _SamplingRate,
 		INT32 _HopSize,
 		double _Threshold,
-		const wchar_t* _F0Method, //"Dio" "Harvest" "RMVPE" "FCPE"
-		SlicesType _Output // Slices By "LibSvcAllocateSliceData()"
+		const wchar_t* _F0Method,					//"Dio" "Harvest" "RMVPE" "FCPE"
+		SlicesType _Output							//Slices By "LibSvcAllocateSliceData()"
 	);
 
 	LibSvcApi INT32 LibSvcStft(
-		CInt16Vector _Audio, //std::vector<int16_t> By "LibSvcAllocateAudio()"
+		CInt16Vector _Audio,						//std::vector<int16_t> By "LibSvcAllocateAudio()"
 		INT32 _SamplingRate,
 		INT32 _Hopsize,
 		INT32 _MelBins,
-		MelType _Output // Mel By "LibSvcAllocateMel()"
+		MelType _Output								//Mel By "LibSvcAllocateMel()"
 	);
 
 	LibSvcApi INT32 LibSvcInferSlice(
-		SvcModel _Model, //SingingVoiceConversion Model
+		SvcModel _Model,							//SingingVoiceConversion Model
 		UINT32 _T,
-		CSliceType _Slice, // Slices By "LibSvcAllocateSliceData()"
-		const void* _InferParams, //Ptr Of LibSvcParams
+		CSliceType _Slice,							//Slices By "LibSvcAllocateSliceData()"
+		const void* _InferParams,					//Ptr Of LibSvcParams
 		size_t* _Process, 
-		Int16Vector _Output //std::vector<int16_t> By "LibSvcAllocateAudio()"
+		Int16Vector _Output							//std::vector<int16_t> By "LibSvcAllocateAudio()"
 	);
 
 	LibSvcApi INT32 LibSvcShallowDiffusionInference(
-		SvcModel _Model, //SingingVoiceConversion Model
-		FloatVector _16KAudioHubert, 
-		MelType _Mel, //Mel By "LibSvcAllocateMel()"
+		SvcModel _Model,							//SingingVoiceConversion Model
+		CInt16Vector _16KAudioHubert,				//SamplingRate Must Be 16000
+		MelType _Mel,								//Mel By "LibSvcAllocateMel()"
 		CFloatVector _SrcF0, 
 		CFloatVector _SrcVolume, 
 		CDoubleDimsFloatVector _SrcSpeakerMap, 
 		INT64 _SrcSize,
-		const void* _InferParams, //Ptr Of LibSvcParams
+		const void* _InferParams,					//Ptr Of LibSvcParams
 		size_t* _Process,
-		Int16Vector _Output //std::vector<int16_t> By "LibSvcAllocateAudio()"
+		Int16Vector _Output							//std::vector<int16_t> By "LibSvcAllocateAudio()"
 	);
 
 	LibSvcApi INT32 LibSvcVocoderEnhance(
-		VocoderModel _Model, //Vocoder Model
-		MelType _Mel, //Mel By "LibSvcAllocateMel()"
-		FloatVector _F0,
+		VocoderModel _Model,						//Vocoder Model
+		MelType _Mel,								//Mel By "LibSvcAllocateMel()"
+		CFloatVector _F0,
 		INT32 _VocoderMelBins,
-		Int16Vector _Output //std::vector<int16_t> By "LibSvcAllocateAudio()"
+		Int16Vector _Output							//std::vector<int16_t> By "LibSvcAllocateAudio()"
 	);
 
 	LibSvcApi SvcModel LibSvcLoadModel(
 		UINT32 _T,
-		const void* _Config, //Ptr Of LibSvcParams
+		const void* _Config,						//Ptr Of LibSvcParams
 		ProgCallback _ProgressCallback,
 		UINT32 _ExecutionProvider = CPU,
 		UINT32 _DeviceID = 0,
@@ -271,15 +311,29 @@ extern "C" {
 		SvcModel _Model
 	);
 
-	LibSvcApi VocoderModel LibSvcLoadVocoder(LPWSTR VocoderPath);
+	LibSvcApi VocoderModel LibSvcLoadVocoder(
+		LPWSTR VocoderPath
+	);
 
-	LibSvcApi INT32 LibSvcUnloadVocoder(VocoderModel _Model);
+	LibSvcApi INT32 LibSvcUnloadVocoder(
+		VocoderModel _Model
+	);
 
-	LibSvcApi INT32 LibSvcReadAudio(LPWSTR _AudioPath, INT32 _SamplingRate, Int16Vector _Output);
+	LibSvcApi INT32 LibSvcReadAudio(
+		LPWSTR _AudioPath, 
+		INT32 _SamplingRate, 
+		Int16Vector _Output
+	);
 
-	LibSvcApi void LibSvcEnableFileLogger(bool _Cond);
+	LibSvcApi void LibSvcEnableFileLogger(
+		bool _Cond
+	);
 
-	LibSvcApi void LibSvcWriteAudioFile(Int16Vector _PCMData, LPWSTR _OutputPath, INT32 _SamplingRate);
+	LibSvcApi void LibSvcWriteAudioFile(
+		Int16Vector _PCMData, 
+		LPWSTR _OutputPath, 
+		INT32 _SamplingRate
+	);
 
 #ifdef __cplusplus
 }

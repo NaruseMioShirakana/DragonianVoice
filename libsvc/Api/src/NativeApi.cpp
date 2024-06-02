@@ -5,9 +5,27 @@
 #include "../../header/InferTools/Stft/stft.hpp"
 #include "../../Modules/header/InferTools/AvCodec/AvCodeResample.h"
 
+#ifdef _MSC_VER
+#pragma warning(disable:4996)
+#endif
+
 const wchar_t* LibSvcNullString = L"";
 
 #define LibSvcNullStrCheck(Str) ((Str)?(Str):(LibSvcNullString))
+
+#ifndef _WIN32
+BSTR SysAllocString(const wchar_t* _String)
+{
+	wchar_t* ret = new wchar_t[wcslen(_String)];
+	wcscpy(ret, _String);
+	return ret;
+}
+
+void SysFreeString(BSTR _String)
+{
+	delete[] _String;
+}
+#endif
 
 std::deque<std::wstring> ErrorQueue;
 size_t MaxErrorCount = 20;
@@ -30,6 +48,85 @@ using MelContainer = std::pair<std::vector<float>, int64_t>;
 using DataContainer = Slices;
 
 std::unordered_map<std::wstring, DlCodecStft::Mel*> MelOperators;
+
+void InitLibSvcHparams(LibSvcHparams* _Input)
+{
+	_Input->TensorExtractor = nullptr;
+	_Input->HubertPath = nullptr;
+	_Input->DiffusionSvc = {
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr
+	};
+	_Input->VitsSvc = {
+		nullptr
+	};
+	_Input->ReflowSvc = {
+		nullptr,
+		nullptr,
+		nullptr
+	};
+	_Input->Cluster = {
+		10000,
+		nullptr,
+		nullptr
+	};
+
+	_Input->SamplingRate = 22050;
+
+	_Input->HopSize = 320;
+	_Input->HiddenUnitKDims = 256;
+	_Input->SpeakerCount = 1;
+	_Input->EnableCharaMix = false;
+	_Input->EnableVolume = false;
+	_Input->VaeMode = true;
+
+	_Input->MelBins = 128;
+	_Input->Pndms = 100;
+	_Input->MaxStep = 1000;
+	_Input->SpecMin = -12;
+	_Input->SpecMax = 2;
+	_Input->Scale = 1000.f;
+}
+
+void InitLibSvcParams(LibSvcParams* _Input)
+{
+	//通用
+	_Input->NoiseScale = 0.3f;							//噪声修正因子          0-10
+	_Input->Seed = 52468;									//种子
+	_Input->SpeakerId = 0;								//角色ID
+	_Input->SrcSamplingRate = 48000;						//源采样率
+	_Input->SpkCount = 2;									//模型角色数
+
+	//SVC
+	_Input->IndexRate = 0.f;								//索引比               0-1
+	_Input->ClusterRate = 0.f;							//聚类比               0-1
+	_Input->DDSPNoiseScale = 0.8f;						//DDSP噪声修正因子      0-10
+	_Input->Keys = 0.f;									//升降调               -64-64
+	_Input->MeanWindowLength = 2;						//均值滤波器窗口大小     1-20
+	_Input->Pndm = 100;									//Diffusion加速倍数    1-200
+	_Input->Step = 1000;									//Diffusion总步数      1-1000
+	_Input->TBegin = 0.f;
+	_Input->TEnd = 1.f;
+	_Input->Sampler = nullptr;							//Diffusion采样器
+	_Input->ReflowSampler = nullptr;						//Reflow采样器
+	_Input->F0Method = nullptr;							//F0提取算法
+	_Input->UseShallowDiffusion = false;                  //使用浅扩散
+	_Input->_VocoderModel = nullptr;
+}
+
+void InitLibSvcSlicerSettings(LibSvcSlicerSettings* _Input)
+{
+	_Input->SamplingRate = 48000;
+	_Input->Threshold = 30.;
+	_Input->MinLength = 3.;
+	_Input->WindowLength = 2048;
+	_Input->HopSize = 512;
+}
 
 float* LibSvcGetFloatVectorData(void* _Obj)
 {
@@ -494,7 +591,7 @@ INT32 LibSvcInferSlice(
 
 INT32 LibSvcShallowDiffusionInference(
 	void* _Model,
-	void* _16KAudioHubert,
+	const void* _16KAudioHubert,
 	void* _Mel,
 	const void* _SrcF0,
 	const void* _SrcVolume,
@@ -590,10 +687,17 @@ INT32 LibSvcShallowDiffusionInference(
 		InpParam._VocoderModel
 	};
 
+	auto _NormalizedAudio = InferTools::InterpResample(
+		*(const AudioContainer*)_16KAudioHubert,
+		16000,
+		16000,
+		32768.f
+	);
+
 	try
 	{
 		*(AudioContainer*)(_Output) = ((UnionSvc*)(_Model))->ShallowDiffusionInference(
-			*(std::vector<float>*)(_16KAudioHubert),
+			_NormalizedAudio,
 			Param,
 			*(MelContainer*)(_Mel),
 			*(const std::vector<float>*)(_SrcF0),
@@ -615,7 +719,7 @@ INT32 LibSvcShallowDiffusionInference(
 INT32 LibSvcVocoderEnhance(
 	void* _Model,
 	void* _Mel,
-	void* _F0,
+	const void* _F0,
 	INT32 _VocoderMelBins,
 	void* _Output
 )
@@ -644,9 +748,10 @@ INT32 LibSvcVocoderEnhance(
 		return 1;
 	}
 
-	auto& Rf0 = *(std::vector<float>*)(_F0);
+	auto Rf0 = *(const std::vector<float>*)(_F0);
 	auto& MelTemp = *(MelContainer*)(_Mel);
-
+	if (Rf0.size() != (size_t)MelTemp.second)
+		Rf0 = InferTools::InterpFunc(Rf0, (long)Rf0.size(), (long)MelTemp.second);
 	try
 	{
 		*(AudioContainer*)(_Output) = MoeVoiceStudioCore::VocoderInfer(
